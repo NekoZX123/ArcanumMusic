@@ -1,0 +1,732 @@
+/* 全局样式 */
+* {
+    box-sizing: border-box;
+    user-select: none;
+
+    --default-black: rgb(36, 36, 36);
+    --default-white: rgb(245, 245, 245);
+    --default-grey: rgb(128, 128, 128);
+    --transparent-grey: rgba(168, 168, 168, 0.4);
+    --transparent-lightgrey: rgba(200, 200, 200, 0.4);
+
+    --color-red-default: rgb(232, 66, 66);
+    --color-red-light: rgb(255, 171, 171);
+    --color-red-deep: rgb(202, 25, 25);
+
+    --color-orange-default: rgb(235, 118, 46);
+    --color-orange-light: rgb(255, 187, 144);
+    --color-orange-deep: rgb(191, 84, 17);
+
+    --color-yellow-default: rgb(255, 245, 63);
+    --color-yellow-light: rgb(255, 251, 172);
+    --color-yellow-deep: rgb(211, 200, 0);
+
+    --color-green-default: rgb(50, 224, 104);
+    --color-green-light: rgb(152, 242, 181);
+    --color-green-deep: rgb(27, 141, 36);
+
+    --color-blue-default: rgb(19, 120, 236);
+    --color-blue-light: rgb(190, 214, 243);
+    --color-blue-deep: rgb(36, 92, 234);
+
+    --color-purple-default: rgb(156, 76, 235);
+    --color-purple-light: rgb(216, 176, 255);
+    --color-purple-dark: rgb(84, 22, 146);
+
+    --gradient-background1: linear-gradient(120deg, var(--color-blue-default), var(--color-purple-default));
+    --gradient-background2: linear-gradient(120deg, var(--color-green-default), var(--color-green-light));
+}
+
+/* 元素样式 */
+body {
+    margin: 0;
+    overflow: hidden;
+    background: transparent;
+}
+
+button {
+    outline: none;
+    -webkit-app-region: nodrag;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+    background: transparent;
+    width: 0.5rem;
+    height: 0.5rem;
+}
+
+::-webkit-scrollbar-track-piece {
+    background: rgba(160, 163, 168, 0.3);
+    border-radius: 0.25rem;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(139, 158, 181, 0.6);
+    border-radius: 0.25rem;
+}
+
+/* 文本 */
+.text {
+    color: var(--default-black);
+    font-family: 'Consolas', 'Microsoft YaHei UI', sans-serif;
+}
+/* 粗体 */
+.text.bold {
+    font-weight: bold;
+}
+/* 细体 */
+.text.light {
+    font-weight: 200;
+}
+/* 大小 */
+.text.extraLarge {
+    font-size: 30pt;
+}
+.text.large {
+    font-size: 24pt;
+}
+.text.medium {
+    font-size: 18pt;
+}
+.text.small {
+    font-size: 14pt;
+}
+.text.ultraSmall {
+    font-size: 12pt;
+}
+/* 灰色 */
+.text.grey {
+    color: var(--default-grey);
+}
+
+/* flex */
+.flex {
+    display: flex;
+}
+.flex.row {
+    flex-direction: row;
+}
+.flex.column {
+    flex-direction: column;
+}
+
+.textInput {
+    appearance: none;
+
+    background: var(--default-white);
+    border: none;
+    border-radius: 6px;
+}
+
+
+#app {
+    width: 100%;
+    height: 100vh;
+
+    background: var(--default-white);
+}
+
+/* 窗口标题栏 */
+#windowControlBar {
+    position: fixed;
+    width: 100%;
+    height: 2rem;
+    top: 0;
+
+    background: var(--default-white);
+    /* border-radius: 1rem 1rem 0 0; */
+}
+
+#windowDrag {
+    position: relative;
+    height: 2rem;
+    float: left;
+
+    align-items: center;
+    padding-left: 0.5rem;
+
+    -webkit-app-region: drag;
+    flex: 1 0;
+}
+
+#appIcon {
+    width: 1.5rem;
+    height: 1.5rem;
+
+    margin-right: 0.5rem;
+}
+
+#windowOptions {
+    position: relative;
+    height: 2rem;
+
+    float: right;
+
+    -webkit-app-region: no-drag;
+}
+
+.windowControl {
+    position: relative;
+    width: 3rem;
+    height: 100%;
+
+    background: transparent;
+    border: none;
+
+    margin: auto 0;
+
+    transition: all 200ms ease-in-out;
+}
+.windowControl.default:hover {
+    background: var(--transparent-grey);
+}
+.windowControl.close:hover {
+    background: var(--color-red-default);
+}
+.windowControl > img {
+    position: relative;
+    top: 0.1rem;
+    
+    width: 1rem;
+    height: 1rem;
+}
+
+/* 主界面 */
+#appMain {
+    position: relative;
+    width: 100%;
+    height: calc(100vh - 2rem);
+    top: 2rem;
+}
+
+/* 页面切换 */
+
+#windowTop {
+    position: relative;
+    width: 100%;
+    height: 2rem;
+
+    padding: 0 5rem;
+}
+
+#windowTabs {
+    position: relative;
+    height: 2rem;
+
+    justify-content: center;
+    align-items: center;
+    flex: 1 0;
+}
+
+/* 页面内容 */
+#pageContent {
+    height: calc(100% - 2rem);
+
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
+
+/* 标签页组件 */
+.tabWidget {
+    position: relative;
+
+    background: transparent;
+    color: var(--default-black);
+    font-weight: bold;
+
+    border: none;
+    border-radius: 6px;
+
+    margin: 0 0.5rem;
+
+    transition: all 200ms ease-in-out;
+}
+.tabWidget.current {
+    color: var(--color-blue-deep);
+}
+.tabWidget:hover {
+    background: var(--transparent-grey);
+}
+
+.tabWidget.pageTab {
+    width: 5rem;
+    height: 2rem;
+}
+.tabWidget.sourceTab {
+    width: 10rem;
+    height: 2.5rem;
+
+    justify-content: center;
+    align-items: center;
+}
+.tabWidget.typeTab {
+    width: 4rem;
+    height: 2rem;
+}
+.tabWidget.sourceTab > * {
+    margin: 0 3px;
+}
+.tabWidget.sourceTab > img {
+    width: 2rem;
+    height: 2rem;
+}
+.sourceTab > label {
+    transition: all 200ms ease-in-out;
+}
+.sourceTab.current > label {
+    color: var(--color-blue-deep);
+}
+
+#searchContainer {
+    margin: 0 1rem;
+}
+#search {
+    appearance: none;
+    position: relative;
+    width: 12rem;
+    height: 2rem;
+
+    background: var(--transparent-lightgrey);
+    color: var(--default-black);
+    text-indent: 2rem;
+    font-weight: bold;
+
+    transition: all 200ms ease-in-out;
+}
+#search.current {
+    background: var(--color-blue-light);
+}
+#search:focus {
+    outline: none;
+    background: var(--color-blue-light);
+    border-style: solid;
+    border-color: var(--color-blue-deep);
+    border-width: 0;
+    border-bottom-width: 2px;
+}
+
+#searchPrev {
+    appearance: none;
+    position: absolute;
+    width: 2rem;
+    height: 2rem;
+    top: 2px;
+    left: calc(100% - 20rem + 4px);
+
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+
+    color: var(--default-black);
+
+    transition: all 200ms ease-in-out;
+
+    z-index: 2;
+}
+#searchBar:focus + #searchPrev {
+    color: var(--color-blue-deep);
+}
+
+#clearButton {
+    appearance: none;
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    top: calc(0.25rem + 1px);
+    left: calc(100% - 10rem);
+
+    background: transparent;
+    border: none;
+
+    display: none;
+}
+#clearButton > img {
+    width: 1rem;
+    height: 1rem;
+}
+
+#settings {
+    appearance: none;
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+
+    transition: all 200ms ease-in-out;
+}
+#settings:hover {
+    background: var(--transparent-grey);
+}
+#settings > img {
+    position: relative;
+    top: -1px;
+    left: calc(-0.25rem - 1px);
+
+    width: 2rem;
+    height: 2rem;
+}
+
+
+/* 歌单卡片 */
+.songlistCard {
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+
+    align-items: center;
+
+    margin: auto 3px;
+    padding: 6px;
+
+    transition: all 200ms ease-in-out;
+}
+.songlistCard.exlarge {
+    width: 40rem;
+    height: 15rem;
+}
+.songlistCard.large {
+    width: 16rem;
+    height: 15rem;
+}
+.songlistCard.midlarge {
+    width: 20rem;
+    height: 8rem;
+}
+.songlistCard.medium {
+    width: 10rem;
+    height: 12rem;
+}
+.songlistCard:hover {
+    background: var(--transparent-lightgrey);
+}
+
+.songlistCard.midlarge > img {
+    width: calc(8rem - 12px);
+    height: calc(8rem - 12px);
+
+    border-radius: 8px;
+}
+.songlistCard.medium img {
+    width: calc(10rem - 12px);
+    height: calc(10rem - 12px);
+
+    border-radius: 8px;
+}
+
+/* 歌单标题区域 */
+.cardHeader {
+    border: none;
+    border-radius: 10px;
+
+    margin-right: calc(1rem - 6px);
+}
+.songlistCard.exlarge > .cardHeader {
+    width: calc(24rem - 12px);
+    height: 100%;
+
+    background: var(--color-blue-light);
+    box-shadow: 0 4px 4px 2px var(--transparent-grey);
+
+    padding: 0 6px;
+    padding-bottom: 6px;
+}
+.songlistCard.large > .cardHeader {
+    width: 100%;
+    height: auto;
+    
+    padding-left: 6px;
+    margin-bottom: 4px;
+
+    background: transparent;
+}
+.songlistCard.midlarge > .cardHeader {
+    width: calc(12rem - 6px);
+    height: 100%;
+
+    padding-left: 6px;
+    padding-top: 6px;
+
+    justify-content: space-between;
+}
+
+.songlistCard.exlarge .cardInfo {
+    color:var(--color-blue-deep);
+
+    margin-left: 6px;
+    margin-bottom: 6px;
+
+    align-items: flex-start;
+    justify-content: flex-end;
+    flex: 1 0;
+}
+
+/* 歌单末尾信息 */
+.cardFooter {
+    position: relative;
+    width: 100%;
+
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+
+    padding: 0 6px;
+}
+.songlistCard.large .cardFooter {
+    height: 3rem;
+    align-items: center;
+    justify-content: space-between;
+}
+.songlistCard.medium .cardFooter {
+    height: 2rem;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* 歌单播放按钮 */
+.songlistPlay {
+    position: relative;
+
+    border: none;
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 4px var(--transparent-grey);
+
+    margin: 6px;
+
+    transition: all 150ms ease-in-out;
+}
+
+.songlistCard.exlarge .songlistPlay {
+    width: 3rem;
+    height: 3rem;
+    top: calc(100% - 3rem - 12px);
+
+    background: var(--color-blue-deep);
+    border-radius: 1.5rem;
+}
+.songlistCard.exlarge .songlistPlay:hover {
+    transform: scale(1.1);
+}
+
+.songlistCard.large .songlistPlay {
+    width: 3rem;
+    height: 3rem;
+    top: calc(100% - 3rem);
+
+    background: var(--color-blue-deep);
+    border-radius: 1.5rem;
+}
+.songlistCard.large .songlistPlay:hover {
+    transform: scale(1.1);
+}
+
+.songlistCard.midlarge .songlistPlay {
+    width: 2rem;
+    height: 2rem;
+
+    background: transparent;
+    border-radius: 1rem;
+
+    box-shadow: none;
+}
+.songlistCard.midlarge .songlistPlay:hover {
+    background: var(--transparent-grey);
+}
+
+.songlistCard.medium .songlistPlay {
+    width: 2rem;
+    height: 2rem;
+    top: calc(-4rem - 12px);
+    left: calc(7rem - 6px);
+
+    background: transparent;
+    backdrop-filter: blur(4px);
+    border-radius: 1rem;
+
+    box-shadow: 0 0 4px 1px var(--transparent-grey);
+}
+.songlistCard.medium .songlistPlay:hover {
+    background: var(--transparent-grey);
+}
+
+.songlistPlay > img {
+    position: relative;
+
+    left: 1px;
+    top: 1px;
+}
+.songlistCard.exlarge .songlistPlay > img {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+.songlistCard.large .songlistPlay > img {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+.songlistCard.midlarge .songlistPlay > img {
+    width: 1.5rem;
+    height: 1.5rem;
+    left: -1px;
+}
+.songlistCard.medium .songlistPlay > img {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* 歌单来源 */
+.musicSource {
+    align-items: center;
+}
+.playlistSource {
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+    top: 2px;
+
+    background: transparent;
+    border: none;
+    border-radius: 1rem;
+}
+
+
+/* 歌曲卡片 */
+.songCard {
+    position: relative;
+    width: 15rem;
+    height: 3.5rem;
+
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+
+    align-items: center;
+
+    padding: 6px;
+    margin: 1px 0;
+
+    transition: all 200ms ease-in-out;
+}
+.songlistCard.exlarge .songCard {
+    left: 6px;
+}
+.songCard:hover {
+    background: var(--transparent-lightgrey);
+}
+.songCard .songCover {
+    width: 2.5rem;
+    height: 2.5rem;
+    
+    border: none;
+    border-radius: 8px;
+
+    margin-right: 6px;
+}
+.songCard > .songInfo {
+    align-items: flex-start;
+}
+
+.songPlay {
+    position: relative;
+    width: 1.5rem;
+    height: 1.5rem;
+
+    background: transparent;
+    border: none;
+    border-radius: 0.75rem;
+
+    transition: all 100ms ease-in-out;
+
+    margin-left: auto;
+    margin-right: 3px;
+
+    display: none;
+}
+.songCard:hover .songPlay {
+    display: block;
+}
+.songPlay:hover {
+    background: var(--transparent-grey);
+}
+.songPlay > img {
+    position: relative;
+    width: 1rem;
+    height: 1rem;
+    left: -2px;
+}
+
+
+/* 歌手卡片 */
+.artistCard {
+    position: relative;
+    width: 10rem;
+    height: 11rem;
+
+    background: transparent;
+    border: none;
+
+    align-items: center;
+
+    margin: 0 1.5rem;
+
+    transition: all 200ms ease-in-out;
+}
+.artistCard > img {
+    width: 10rem;
+    height: 10rem;
+
+    border: none;
+    border-radius: 5rem;
+}
+.artistCard > label {
+    margin: 3px 0;
+}
+.artistCard:hover > label {
+    text-decoration: underline;
+}
+
+/* 播放列表区域 */
+.musicContainer {
+    width: 100%;
+    height: auto;
+
+    background: transparent;
+    border: none;
+    align-items: flex-start;
+
+    margin-top: 1rem;
+}
+.musicContainer#userPlaylists {
+    min-height: calc(100vh - 13rem);
+}
+
+.musicBox {
+    position: relative;
+    width: 100%;
+
+    display: none;
+}
+.musicBox.current {
+    display: grid;
+}
+/* 类型选择器 */
+.musicBox.types {
+    align-items: center;
+}
+.musicBox.types.current {
+    display: block;
+}
+/* 单曲 */
+.musicBox.singles {
+    grid-template-columns: repeat(3, 1fr);
+}
+/* 歌单 / 专辑 */
+.musicBox.songlists {
+    grid-template-columns: repeat(5, 1fr);
+}

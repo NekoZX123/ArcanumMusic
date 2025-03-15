@@ -1,0 +1,16 @@
+{
+    "appId": "moe.nekozx.arcanummusic",
+    "productName": "ArcanumMusic",
+    "files": [
+        "./dist/**/*",
+        "./app/**/*"
+    ],
+    "directories": {
+        "output": "./build"
+    },
+    "nsis": {
+        "artifactName": "${productName}_${version}_Setup.${ext}",
+        "shortcutName": "${productName}",
+        "uninstallDisplayName": "${productName}"
+    }
+}

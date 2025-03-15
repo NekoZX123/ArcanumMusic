@@ -1,0 +1,38 @@
+#musicLibrary {
+    height: 100%;
+
+    align-items: center;
+
+    padding: 0 2rem;
+}
+#musicLibrary > div {
+    margin: 1rem 0;
+}
+
+#userInfo {
+    position: relative;
+    width: 100%;
+
+    align-items: center;
+    margin-top: 1rem;
+}
+#avatar {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+
+    margin: 0 1rem;
+}
+
+#userPlaylistContainer {
+    width: 100%;
+
+    padding-bottom: 5rem;
+}
+#playlistSourceTabs {
+    width: 100%;
+    
+    align-items: flex-start;
+
+    padding: 0 1rem;
+}

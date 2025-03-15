@@ -1,0 +1,42 @@
+{
+    "name": "arcanummusic",
+    "author": {
+        "name": "NekoZX",
+        "email": "nothing@nothing.com",
+        "url": "https://github.com/NekoZX123"
+    },
+    "description": "Arcanum Music - a multi-platform music application made by NekoZX",
+    "private": true,
+    "version": "0.1.0",
+    "type": "module",
+    "main": "app/app.js",
+    "devtron": true,
+    "scripts": {
+        "dev": "vite",
+        "build": "vue-tsc -b && vite build",
+        "preview": "vite preview",
+        "electron:dev": "concurrently vite \"electron .\"",
+        "electron:build": "npm run build && electron-builder build --config electron-builder.json"
+    },
+    "dependencies": {
+        "vue": "^3.5.13"
+    },
+    "devDependencies": {
+        "@types/node": "^22.13.4",
+        "@vitejs/plugin-vue": "^5.2.1",
+        "@vitejs/plugin-vue-jsx": "^4.1.1",
+        "@vue/tsconfig": "^0.7.0",
+        "axios": "^1.7.9",
+        "concurrently": "^9.1.2",
+        "cookie": "^1.0.2",
+        "cors": "^2.8.5",
+        "crypto": "^1.0.1",
+        "cryptojs": "^2.5.3",
+        "electron": "^34.1.1",
+        "electron-builder": "^25.1.8",
+        "express": "^4.21.2",
+        "typescript": "~5.7.2",
+        "vite": "^6.1.0",
+        "vue-tsc": "^2.2.0"
+    }
+}

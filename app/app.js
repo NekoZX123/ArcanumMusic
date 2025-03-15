@@ -1,0 +1,121 @@
+import { app, BrowserWindow, ipcMain, Menu, Tray } from 'electron';
+import { fileURLToPath } from 'url';
+
+import { startService, stopService } from './service.js';
+import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
+
+const __dirname = fileURLToPath(import.meta.url);
+
+const environment = 'dev';
+var tray;
+var mainWindow = null;
+
+// 创建主窗口
+function createWindow() {
+    mainWindow = new BrowserWindow({
+        width: 1000,
+        height: 650,
+        minWidth: 900,
+        minHeight: 500,
+        frame: false,
+        resizable: true,
+        focusable: true,
+        skipTaskbar: false,
+        alwaysOnTop: false,
+        title: 'Arcanum Music',
+        icon: `${environment === 'dev' ? './public' : 'dist'}/images/appIcon/appIcon.png`,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: true,
+            preload: __dirname.replace('app.js', 'preload.mjs')
+        }
+    });
+
+    if (environment === 'dev') {
+        mainWindow.loadURL('http://localhost:5173');
+        mainWindow.webContents.openDevTools();
+    }
+    else {
+        mainWindow.loadFile('dist/index.html');
+    }
+}
+
+// 窗口操作
+function minimizeWindow(_) {
+    if (mainWindow) {
+        mainWindow.minimize();
+    }
+}
+
+function toggleMaximize(_) {
+    if (mainWindow) {
+        if (mainWindow.isMaximized()) mainWindow.unmaximize();
+        else mainWindow.maximize();
+
+        return mainWindow.isMaximized();
+    }
+}
+
+function closeWindow(_) {
+    if (mainWindow) {
+        mainWindow.close();
+    }
+}
+
+function getWindowRect(_) {
+    if (mainWindow) {
+        return mainWindow.getBounds();
+    }
+    else return undefined;
+}
+
+function moveWindow(_, x, y) {
+    if (mainWindow) {
+        mainWindow.setPosition(x, y);
+    }
+}
+
+// 获取 %AppData%
+function getAppDataLocal() {
+    let roamingPath = app.getPath('appData')
+    return roamingPath.replace('Roaming', 'Local');
+}
+
+app.whenReady().then(() => {
+    ipcMain.handle('minimizeWindow', minimizeWindow);
+    ipcMain.handle('maximizeWindow', toggleMaximize);
+    ipcMain.handle('closeWindow', closeWindow);
+    ipcMain.handle('getWindowRect', getWindowRect);
+    ipcMain.handle('moveWindow', moveWindow);
+
+    ipcMain.handle('isFileExist', isFileExist);
+    ipcMain.handle('readLocalFile', readLocalFile);
+    ipcMain.handle('writeLocalFile', writeLocalFile);
+
+    ipcMain.handle('getAppDataLocal', getAppDataLocal);
+
+    startService();
+    createWindow();
+
+    // 托盘图标
+    tray = new Tray(`${environment === 'dev' ? './public' : 'dist'}/images/appIcon/appIcon.png`);
+    const menu = Menu.buildFromTemplate([
+        {
+            label: 'Exit',
+            type: 'normal',
+            click: () => {
+                stopService();
+                app.quit();
+            }
+        }
+    ]);
+    tray.setToolTip('Arcanum Music');
+    tray.setContextMenu(menu);
+})
+
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+        stopService();
+        app.quit();
+    }
+});

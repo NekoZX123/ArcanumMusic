@@ -1,0 +1,32 @@
+#musicSearch {
+    height: 100%;
+
+    align-items: center;
+
+    padding: 0 2rem;
+}
+#musicSearch > div {
+    margin: 1rem 0;
+}
+
+#searchTitle {
+    width: calc(100% - 2rem);
+
+    margin-top: 2rem;
+}
+
+#searchSourceContainer {
+    width: 100%;
+
+    align-items: center;
+}
+
+#searchTypeTabs {
+    width: 100%;
+
+    align-items: center;
+}
+
+#typeTabs {
+    justify-content: center;
+}

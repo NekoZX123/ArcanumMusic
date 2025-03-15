@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 500">
+  <!-- Generator: Adobe Illustrator 28.7.1, SVG Export Plug-In . SVG Version: 1.2.0 Build 142)  -->
+  <g>
+    <g id="_图层_1" data-name="图层_1">
+      <circle cx="250" cy="250" r="250" fill="#b6cbff"/>
+      <circle cx="250" cy="150" r="75" fill="#5fa0ff"/>
+      <path d="M250,264c-89.61,0-168.2,47.16-212.33,118,44.13,70.84,122.72,118,212.33,118s168.2-47.16,212.33-118c-44.13-70.84-122.72-118-212.33-118Z" fill="#5fa0ff"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,76 @@
+#musicHome {
+    height: 100%;
+
+    align-items: center;
+
+    padding: 0 2rem;
+    padding-top: 1rem;
+}
+
+.text.sectionTitle {
+    width: calc(100% - 2rem);
+    margin: 1rem 0;
+}
+
+.titleWithMore {
+    width: calc(100% - 2rem);
+    margin: 1rem 0;
+
+    justify-content: space-between;
+    align-items: center;
+}
+
+.viewMore {
+    cursor: pointer;
+}
+.viewMore:hover {
+    text-decoration: underline;
+}
+
+#dailyRecommends {
+    background: var(--gradient-background1);
+
+    margin: 0 2rem;
+}
+#dailyRecommends:hover label {
+    text-decoration: underline;
+}
+
+#musicRadio {
+    background: var(--gradient-background2);
+
+    margin: 0 2rem;
+}
+
+#songlistRecommends {
+    display: grid;
+
+    grid-template-columns: repeat(5, 1fr);
+}
+
+#singleRecommends {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+}
+#singleRecommends > .songCard {
+    margin: 3px 1rem;
+}
+
+#newSingles {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+}
+
+#pageFooter {
+    width: 100%;
+
+    margin: 2rem 0;
+
+    align-items: center;
+    justify-content: center;
+}
+#footerText {
+    margin: 1rem 0;
+}
