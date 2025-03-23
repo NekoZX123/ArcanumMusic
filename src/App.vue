@@ -5,6 +5,26 @@ import Library from './components/library/Library.vue';
 import Search from './components/search/Search.vue';
 import Settings from './components/settings/Settings.vue';
 
+// 设置文件位置
+const configLocation = '\\ArcanumMusic\\settings.json';
+var appConfig = '';
+
+// 获取应用配置存放位置
+async function getConfigPath() {
+    let prefix = await window.electron.getAppDataLocal();
+    return prefix + configLocation;
+}
+// 设置文件判断 & 创建 / 读取
+function prepareSettings() {
+    return new Promise<string>(async (resolve) => {
+        let configPath = await getConfigPath();
+
+        let configData = await window.electron.readLocalFile(configPath);
+
+        resolve(configData);
+    });
+}
+
 // 应用各页面
 const appPageNames = ['home', 'library', 'search', 'settings'];
 var pageComponents: { [key: string]: any } = {
@@ -130,7 +150,12 @@ function clearSearchBar() {
     }
 }
 
-onMounted(() => {
+onMounted(async () => {
+    // 设置文件准备
+    let configData = await prepareSettings();
+    appConfig = JSON.parse(configData);
+    console.log(appConfig);
+
     pageApp.mount('#pageContent');
 });
 </script>

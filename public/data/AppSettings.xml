@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+    <!-- page node checkbox colorpicker slider dropbox textinput -->
+    <pagebox id="generic" name="通用">
+        <page id="system" name="系统">
+            <node id="start" title="启动">
+                <checkbox id="startOnBoot" text="开机自动启动"/>
+                <checkbox id="startMinimized" text="启动时最小化"/>
+            </node>
+        </page>
+        <page id="appearance" name="外观">
+            <node id="window" title="窗口">
+                <checkbox id="rememberSize" text="记住上次窗口大小"/>
+                <checkbox id="useSystemFrame" text="使用系统窗口边框"/>
+            </node>
+            <node id="colors" title="应用配色">
+                <dropbox id="darkMode" text="深色模式">
+                    <item id="0">禁用</item>
+                    <item id="1">启用</item>
+                    <item id="2">跟随系统</item>
+                </dropbox>
+                <dropbox id="themeColor" text="应用主题色">
+                    <item id="0">红色</item>
+                    <item id="1">橙色</item>
+                    <item id="2">黄色</item>
+                    <item id="3">绿色</item>
+                    <item id="4">蓝色</item>
+                    <item id="5">紫色</item>
+                </dropbox>
+                <checkbox id="showColorInBorders" text="在窗口标题栏显示主题色"/>
+                <dropbox id="backgroundColor" text="主界面背景色">
+                    <item id="0">跟随主题色</item>
+                    <item id="1">跟随播放的歌曲封面</item>
+                    <item id="2">跟随应用深色模式</item>
+                </dropbox>
+            </node>
+            <node id="lyrics" title="歌词界面">
+                <dropbox id="lyricsBackground" text="歌词界面背景">
+                    <item id="0">跟随主题色</item>
+                    <item id="1">跟随播放的歌曲封面</item>
+                    <item id="2">跟随应用深色模式</item>
+                </dropbox>
+                <dropbox id="lyricsStyle" text="歌词样式">
+                    <item id="0">应用内置样式</item>
+                    <item id="1">仿Apple Music样式</item>
+                    <item id="2">简约样式</item>
+                </dropbox>
+                <checkbox id="smoothScroll" text="启用平滑效果"/>
+                <checkbox id="lyricsGlow" text="启用歌词光效"/>
+            </node>
+        </page>
+    </pagebox>
+
+    <pagebox id="user" name="用户">
+        <page id="localInfo" name="信息">
+            <node id="user" title="用户信息">
+                <textinput id="avatarLink" text="用户头像 (图片链接)" unit=""/>
+                <textinput id="userName" text="用户名称" unit=""/>
+            </node>
+            <node id="greetings" title="问候语">
+                <checkbox id="useGreetings" text="使用问候语"/>
+                <dropbox id="greetingsText" text="问候语语言">
+                    <item id="0">随机</item>
+                    <item id="1">中文 (简体)</item>
+                    <item id="2">English</item>
+                    <item id="3">日本語</item>
+                </dropbox>
+            </node>
+        </page>
+        <page id="accounts" name="音乐平台">
+            <info type="normal">
+                部分平台需要登录账号以使用相关功能, 请在下面选择合适的平台登录
+            </info>
+            <info type="stressed">
+                Arcanum Music不会向除登录的平台外的任何第三方发送您的数据, 
+                我们获取到的所有用户数据均在本地加密储存
+            </info>
+
+            <warning type="normal">
+                警告: 不要尝试开启 '开发者模式' 中的 '使用调试账户信息' 选项, 
+                开发者不会对由此造成的任何后果负责
+            </warning>
+
+            <node id="platforms" title="平台账号">
+                <account id="netease" name="网易云音乐"/>
+                <account id="qqmusic" name="QQ音乐"/>
+                <account id="kuwo" name="酷我音乐"/>
+                <account id="kugou" name="酷狗音乐"/>
+            </node>
+        </page>
+    </pagebox>
+
+    <page id="developerOptions" name="开发者选项">
+        <warning type="critical">
+            警告: 开发者选项可能导致应用不稳定甚至崩溃, 
+            也可能在操作不当的情况下存在隐含的其他风险。
+            开发者不推荐您更改这些选项中的任何内容, 
+            也不会对任何使用开发者选项不当而造成的损失负责。
+            如果您要继续, 请点击 '确定'
+        </warning>
+        <warning type="normal">
+            警告: 不要在您不知道自己在做什么的情况下更改这些选项
+        </warning>
+
+        <node id="account" title="账号">
+            <checkbox id="useDebugAccounts" name="使用调试账户信息"/>
+        </node>
+    </page>
+
+    <page id="about" name="关于此应用">
+        <node id="iconContainer" title="">
+            <image id="appIcon"/>
+            <label id="appName" text="Arcanum Music"/>
+            <label id="appVersion" text="version 0.1.0"/>
+            <label id="appAuthor" text="made by NekoZX"/>
+        </node>
+        <node id="links" title="">
+            <link id="nekozxHomepage" text="开发者主页" href="https://nekozx123.github.io/"/>
+            <label id="" text="•"/>
+            <link id="nekozxGitHub" text="开发者的GitHub" href="https://github.com/NekoZX123/"/>
+            <label id="" text="•"/>
+            <link id="projectSourceCode" text="项目源代码" href="https://github.com/NekoZX123/ArcanumMusic/"/>
+        </node>
+    </page>
+</settings>

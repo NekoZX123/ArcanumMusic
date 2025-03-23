@@ -14,6 +14,10 @@ contextBridge.exposeInMainWorld(
         isFileExist: (path) => ipcRenderer.invoke('isFileExist', path), // 检查文件是否存在
         readLocalFile: (path) => ipcRenderer.invoke('readLocalFile', path), // 读取本地文件
         writeLocalFile: (path, content) => ipcRenderer.invoke('writeLocalFile', path, content), // 写入本地文件
-        getAppDataLocal: () => ipcRenderer.invoke('getAppDataLocal') // 获取 %AppData%
+        
+        getAppConfig: () => ipcRenderer.invoke('getAppConfig'), // 获取应用配置
+        getAppEnvironment: () => ipcRenderer.invoke('getAppEnvironment'), // 获取应用环境
+        getAppDataLocal: () => ipcRenderer.invoke('getAppDataLocal'), // 获取 %AppData%
+        getAsarLocation: () => ipcRenderer.invoke('getAsarLocation') // 获取 asar 文件位置
     }
 );

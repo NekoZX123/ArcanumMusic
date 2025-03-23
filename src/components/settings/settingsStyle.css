@@ -1,0 +1,439 @@
+#musicSettings {
+    height: 100%;
+
+    align-items: center;
+
+    padding: 0 1rem;
+}
+
+#settingsTabs {
+    width: 16rem;
+    height: 100%;
+
+    padding-right: 1rem;
+}
+#settingsContent {
+    width: calc(100% - 18rem);
+    height: 100%;
+}
+
+/* 设置页面 */
+.contentPage {
+    width: 100%;
+
+    padding: 1rem;
+}
+
+.infoText {
+    width: 100%;
+
+    font-weight: 400;
+    margin: 3px 0;
+
+    display: block;
+}
+.infoText.stressed {
+    color: var(--color-blue-default);
+}
+.warningText {
+    width: 100%;
+
+    color: var(--color-warning) !important;
+    font-weight: 400;
+    margin: 3px 0;
+
+    display: block;
+}
+
+.paragraphTitle {
+    width: 100%;
+
+    display: block;
+}
+.paragraphSubtitle {
+    width: 100%;
+    margin: 0.5rem 0 0.5rem 1rem;
+
+    display: block;
+}
+
+.optionBox {
+    position: relative;
+    width: calc(100% - 1rem);
+
+    margin: 1rem 0 1rem 2rem;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    font-size: 12pt;
+}
+.optionBox > .optionName {
+    flex: 2 1;
+}
+
+/* 树形结构组件 */
+.treeNode {
+    position: relative;
+
+    width: 100%;
+    margin: 0.25rem 0;
+
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+
+    transition: all 200ms ease-in-out;
+}
+.nodeContent:hover {
+    background: var(--transparent-grey);
+}
+.treeNode.current > .nodeContent {
+    background: var(--transparent-lightgrey);
+}
+
+.treeNode::before {
+    content: '';
+
+    position: absolute;
+    width: 4px;
+    height: 0;
+    top: calc(1rem + 2px);
+
+    background: var(--color-blue-default);
+    border-radius: 2px;
+
+    transition: all 200ms ease-in-out;
+}
+.treeNode.current::before {
+    height: calc(2rem - 4px);
+    top: 2px;
+}
+
+.nodeContent {
+    height: 2rem;
+
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+
+    display: flex;
+    flex-direction: row;
+
+    transition: all 200ms ease-in-out;
+}
+
+.nodeContent > .nodeExpandButton {
+    position: relative;
+    width: 1rem;
+    height: 1rem;
+    margin: 0.25rem;
+
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+
+    cursor: default;
+    
+    opacity: 0;
+}
+.treeNode.expandable > .nodeContent > .nodeExpandButton {
+    cursor: pointer;
+    opacity: 1;
+}
+.nodeExpandButton > .nodeExpandImage {
+    position: relative;
+    width: 1rem;
+    height: 1rem;
+    top: 0.125rem;
+    left: 0.125rem;
+
+    transition: all 200ms ease-in-out;
+}
+.nodeExpandButton.expanded > .nodeExpandImage {
+    transform: rotateZ(90deg);
+}
+.nodeContent > .nodeLabel {
+    color: #000000;
+
+    padding-top: 0.25rem;
+    padding-left: 0.25rem;
+
+    cursor: default;
+
+    flex: 1 2;
+}
+
+.treeNode > .nodeChildren {
+    max-height: 0;
+
+    margin-left: 1.5rem;
+
+    transition: all 200ms ease-in-out;
+
+    overflow: hidden;
+    opacity: 0;
+}
+.treeNode.expanded > .nodeChildren {
+    max-height: 1000px;
+    opacity: 1;
+}
+
+/* checkbox - 多选框 */
+.switchbox {
+    appearance: none;
+
+    position: relative;
+    width: calc(3rem + 6px);
+    height: calc(1.5rem + 6px);
+    background: #FFFFFF;
+
+    border-style: solid;
+    border-color: rgba(126, 126, 126, 0.3);
+    border-width: 1px;
+    border-radius: 8px;
+
+    transition: all 200ms ease-in-out;
+}
+.switchbox:checked {
+    background: #0088FF;
+}
+.switchbox::before {
+    content: '';
+    position: absolute;
+    width: 1.2rem;
+    height: 1.2rem;
+
+    top: calc(0.15rem + 2px);
+    left: calc(0.15rem + 3px);
+
+    background: #FCFCFC;
+    border-radius: 6px;
+    box-shadow: 0 0 2px 0 #888888;
+
+    transition: all 300ms cubic-bezier(0.5, 0, 0.75, 1.5);
+}
+.switchbox:checked::before {
+    left: calc(1.5rem + 3px);
+}
+
+/* colorpicker - 颜色选择器 */
+.colorpicker {
+    appearance: none;
+
+    position: relative;
+    width: calc(3rem + 6px);
+    height: calc(1.5rem + 6px);
+    background: #FFFFFF;
+    left: -3px;
+
+    border-style: solid;
+    border-color: rgba(126, 126, 126, 0.3);
+    border-width: 1px;
+    border-radius: 8px;
+
+    transition: all 200ms ease-in-out;
+}
+.colorpicker::-webkit-color-swatch {
+    position: absolute;
+    width: 2.6rem;
+    height: 1.2rem;
+
+    top: calc(0.15rem + 2px);
+    left: calc(0.15rem + 3px);
+
+    border: none;
+    border-radius: 6px;
+}
+
+/* slider - 滑动条 */
+.slider {
+    appearance: none;
+
+    position: relative;
+    width: 10rem;
+    height: calc(1.5rem + 6px);
+    top: -6px;
+
+    background: transparent;
+    border-radius: 8px;
+
+    transition: all 200ms ease-in-out;
+}
+.slider::-webkit-slider-thumb {
+    appearance: none;
+
+    width: 1.2rem;
+    height: 1.2rem;
+    margin-top: calc(5px - 0.75rem);
+
+    background: #0088FF;
+    border-radius: 0.6rem;
+}
+.slider::-webkit-slider-runnable-track {
+    --fill-percentage: 0%;
+    appearance: none;
+
+    position: absolute;
+    width: 10rem;
+    height: 6px;
+
+    background: linear-gradient(to right, #0088FF 0%, #0088FF var(--fill-percentage), #FFFFFF var(--fill-percentage));
+    border-style: solid;
+    border-color: rgba(126, 126, 126, 0.3);
+    border-width: 1px;
+    border-radius: 3px;
+
+    transform: translateY(calc(0.75rem - 6px));
+}
+
+/* textinput - 文字输入 */
+.textinput {
+    appearance: none;
+
+    position: relative;
+    width: calc(10rem + 6px);
+    height: calc(1.5rem + 6px);
+    background: #FFFFFF;
+    left: -3px;
+
+    border-style: solid;
+    border-color: rgba(126, 126, 126, 0.3);
+    border-width: 1px;
+    border-radius: 8px;
+
+    transition: all 200ms ease-in-out;
+    padding: 0 3px;
+    margin: auto 3px;
+}
+.textinput.affiliated { /* 附属输入框 */
+    width: calc(5rem + 6px);
+}
+.textinput:focus {
+    outline-color: #0088FF;
+    outline-width: 2px;
+}
+.textinput::-webkit-inner-spin-button {
+    appearance: none;
+}
+
+/* dropbox - 下拉选择 */
+.dropbox {
+    appearance: none;
+
+    position: relative;
+    width: calc(10rem + 6px);
+    height: calc(1.5rem + 6px);
+    background: #FFFFFF;
+    left: -3px;
+
+    border-style: solid;
+    border-color: rgba(126, 126, 126, 0.3);
+    border-width: 1px;
+    border-radius: 8px;
+
+    transition: all 200ms ease-in-out;
+    padding: 0 3px;
+}
+.dropbox:focus {
+    outline-color: #0088FF;
+    outline-width: 2px;
+}
+.dropbox::after {
+    content: '▼';
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    top: calc(50% - 5px);
+    left: calc(100% - 12px);
+    color: #000000;
+}
+.dropbox > option {
+    background: #FFFFFF;
+
+    padding: 3px;
+}
+
+/* link - 链接 */
+.link {
+    position: relative;
+
+    background: transparent;
+    color: #0077FF;
+
+    font-family: 'Source Code Pro', sans-serif;
+    font-size: 12pt;
+
+    text-decoration: underline;
+}
+
+/* label - 文字 */
+.label {
+    position: relative;
+
+    background: transparent;
+    color: black;
+
+    font-family: 'Source Code Pro', sans-serif;
+    font-size: 12pt;
+}
+
+/* AccountCard - 账号管理卡片 */
+.accountElement {
+    width: calc(100% - 2rem);
+    height: 6rem;
+
+    background: var(--transparent-lightgrey);
+    border: none;
+    border-radius: 8px;
+
+    padding: 0 2rem;
+}
+
+.accountImageContainer {
+    width: 6rem;
+    height: 5rem;
+}
+.accountAvatar {
+    position: relative;
+    width: 4.5rem;
+    height: 4.5rem;
+
+    border-radius: 2.5rem;
+}
+.accountPlatform {
+    position: absolute;
+    width: 2.5rem;
+    height: 2.5rem;
+    top: 3.2rem;
+    left: 4.5rem;
+
+    border-style: solid;
+    border-color: var(--default-white);
+    border-width: 3px;
+    border-radius: 1.5rem;
+}
+
+.accountInfo {
+    align-items: flex-start;
+
+    flex: 1 0;
+}
+
+.accountManage {
+    appearance: none;
+
+    width: 5rem;
+    height: 2rem;
+
+    background: var(--transparent-grey);
+    border: none;
+    border-radius: 8px;
+
+    transition: all 200ms ease-in-out;
+}
+.accountManage:hover {
+    background: var(--color-blue-light);
+    color: var(--color-blue-deep);
+}

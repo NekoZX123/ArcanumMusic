@@ -33,6 +33,8 @@
     --color-purple-light: rgb(216, 176, 255);
     --color-purple-dark: rgb(84, 22, 146);
 
+    --color-warning: rgb(230, 208, 18);
+
     --gradient-background1: linear-gradient(120deg, var(--color-blue-default), var(--color-purple-default));
     --gradient-background2: linear-gradient(120deg, var(--color-green-default), var(--color-green-light));
 }
@@ -702,6 +704,9 @@ a {
 
     margin-top: 1rem;
 }
+.musicBox.types > .musicContainer {
+    width: max-content;
+}
 .musicContainer#userPlaylists {
     min-height: calc(100vh - 13rem);
 }
@@ -718,9 +723,10 @@ a {
 /* 类型选择器 */
 .musicBox.types {
     align-items: center;
+    justify-content: center;
 }
 .musicBox.types.current {
-    display: block;
+    display: flex;
 }
 /* 单曲 */
 .musicBox.singles {

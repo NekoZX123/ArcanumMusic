@@ -1,0 +1,65 @@
+{
+    "generic": {
+        "system": {
+            "start": {
+                "startOnBoot": false,
+                "startMinimized": false
+            }
+        },
+        "appearance": {
+            "window": {
+                "rememberSize": true,
+                "useSystemFrame": false
+            },
+            "colors": {
+                "darkMode": 0,
+                "themeColor": 4,
+                "showColorInBorders": false,
+                "backgroundColor": 2
+            },
+            "lyrics": {
+                "lyricsBackground": 1,
+                "lyricsStyle": 0,
+                "smoothScroll": true,
+                "lyricsGlow": true
+            }
+        }
+    },
+    "user": {
+        "localInfo": {
+            "user": {
+                "avatarLink": "/public/images/library/defaultAvatar.png",
+                "userName": "User"
+            },
+            "greetings": {
+                "useGreetings": true,
+                "greetingsText": 0
+            }
+        },
+        "accounts": {
+            "platforms": {
+                "netease": {
+                    "name": "",
+                    "cookies": ""
+                },
+                "qqmusic": {
+                    "name": "",
+                    "cookies": ""
+                },
+                "kuwo": {
+                    "name": "",
+                    "cookies": ""
+                },
+                "kugou": {
+                    "name": "",
+                    "cookies": ""
+                }
+            }
+        }
+    },
+    "developerOptions": {
+        "account": {
+            "useDebugAccounts": false
+        }
+    }
+}

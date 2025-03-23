@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, Menu, Tray } from 'electron';
 import { fileURLToPath } from 'url';
+import { mkdir, copyFileSync } from 'fs';
 
 import { startService, stopService } from './service.js';
 import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
@@ -10,8 +11,38 @@ const environment = 'dev';
 var tray;
 var mainWindow = null;
 
+// 获取应用配置
+async function getAppConfig() {
+    let prefix = getAppDataLocal();
+    let confPath = prefix + '\\ArcanumMusic\\settings.json';
+
+    let fileExist = await isFileExist(null, confPath);
+    // console.log(fileExist);
+    if (!fileExist) {
+        let asarFolder = (environment === 'dev' ? 'public' : 'dist');
+        let defaultPath = __dirname.replace('app\\app.js', `${asarFolder}/data/settings.json`);
+
+        let configDir = confPath.substring(0, confPath.lastIndexOf('\\'));
+        await new Promise((resolve, reject) => {
+            mkdir(configDir, { recursive: true }, (err) => {
+                if (err) {
+                    console.error('[Error] Directory creation failed: ', err);
+                    reject(err);
+                } else {
+                    copyFileSync(defaultPath, confPath);
+                    resolve();
+                }
+            });
+        });
+    }
+
+    return await readLocalFile(null, confPath);
+}
+
 // 创建主窗口
 function createWindow() {
+    getAppConfig();
+
     mainWindow = new BrowserWindow({
         width: 1000,
         height: 650,
@@ -75,6 +106,7 @@ function moveWindow(_, x, y) {
     }
 }
 
+
 // 获取 %AppData%
 function getAppDataLocal() {
     let roamingPath = app.getPath('appData')
@@ -92,7 +124,10 @@ app.whenReady().then(() => {
     ipcMain.handle('readLocalFile', readLocalFile);
     ipcMain.handle('writeLocalFile', writeLocalFile);
 
+    ipcMain.handle('getAppConfig', getAppConfig);
+    ipcMain.handle('getAppEnvironment', () => environment);
     ipcMain.handle('getAppDataLocal', getAppDataLocal);
+    ipcMain.handle('getAsarLocation', () => app.getAppPath());
 
     startService();
     createWindow();

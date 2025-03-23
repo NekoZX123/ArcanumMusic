@@ -90,7 +90,7 @@ const TypesTabs = defineComponent({
     setup(props: { parentId: string }) {
         const handleTypeTabClick = (event: any) => onTypeTabClick(event);
         return () => (
-            <div class="musicBox types" id={props.parentId}>
+            <div class="musicBox types flex column" id={props.parentId}>
                 <span class="flex row" id="typeTabs">
                     <button class="tabWidget typeTab text small current" id="singles" onClick={handleTypeTabClick}>单曲</button>
                     <button class="tabWidget typeTab text small" id="songlists" onClick={handleTypeTabClick}>歌单</button>
