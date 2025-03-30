@@ -3,14 +3,15 @@ import { defineComponent } from "vue";
 // 页首提示文字
 const HeadersText = defineComponent({
     props: {
+        id: String,
         type: String,
         level: String,
         content: String
     },
-    setup(props: { type: string, level: String, content: string }) {
-        const className = `${props.type}Text ${props.type} text small`;
+    setup(props: { id: string, type: string, level: String, content: string }) {
+        const className = `${props.type}Text ${props.level} text small`;
         return () => (
-            <span class={className}>{props.content}</span>
+            <span class={className} id={props.id}>{props.content}</span>
         );
     }
 });
@@ -48,7 +49,7 @@ const CheckBox = defineComponent({
     },
     setup(props: { name: string, id: string, checked: boolean }) {
         return () =>(
-            <span class="checkboxElement optionBox">
+            <span class="checkboxElement optionBox" id={`${props.id}_container`}>
                 <label class="optionName" for={props.id}>{props.name}</label>
                 <input name="checkbox" class="switchbox" type="checkbox" id={props.id} value={props.checked}/>
             </span>
@@ -66,7 +67,7 @@ const ColorPicker = defineComponent({
     setup(props: { name: string, id: string, color: string }) {
         let afInputId = `${props.id}_text`;
         return () => (
-            <span class="colorpickerElement optionBox">
+            <span class="colorpickerElement optionBox" id={`${props.id}_container`}>
                 <label class="optionName" for={props.id}>{props.name}</label>
                 <input name="colorpicker" class="colorpicker" type="color" id={props.id} value={props.color}/>
                 <input name="colorpicker_text" class="textinput affiliated" type="text"
@@ -89,7 +90,7 @@ const Slider = defineComponent({
     setup(props: { name: string, id: string, min: number, max: number, unit: string, value: number }) {
         let afInputId = `${props.id}_text`;
         return () => (
-            <span class="sliderElement optionBox">
+            <span class="sliderElement optionBox" id={`${props.id}_container`}>
                 <label class="optionName" for={props.id}>{props.name}</label>
                 <input name="slider" class="slider" type="range" id={props.id} 
                     min={props.min} max={props.max} step="1" value={props.value}/>
@@ -110,7 +111,7 @@ const TextInput = defineComponent({
     },
     setup(props: { name: string, id: string, value: string }) {
         return () => (
-            <span class="textinputElement optionBox">
+            <span class="textinputElement optionBox" id={`${props.id}_container`}>
                 <label class="optionName" for={props.id}>{props.name}</label>
                 <input name="textinput" class="textinput" type="text" id={props.id} value={props.value}/>
             </span>
@@ -127,7 +128,7 @@ const Dropbox = defineComponent({
     },
     setup(props: { name: string, id: string, options: Array<any> }) {
         return () => (
-            <span class="dropboxElement optionBox">
+            <span class="dropboxElement optionBox" id={`${props.id}_container`}>
                 <label class="optionName" for={props.id}>{props.name}</label>
                 <select name="dropbox" class="dropbox" id={props.id}>
                     {props.options.map((option: { id: string, text: string }) => (

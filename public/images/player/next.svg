@@ -1,14 +1,10 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- Generator: Adobe Illustrator 27.9.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.1" id="&#x56FE;&#x5C42;_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-	 y="0px" viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
-<g>
-	<path style="fill:#F5F5F5;" d="M364.75,239.51l-255-147.224c-10-5.773-22.5,1.443-22.5,12.99l0,294.449
-		c0,11.547,12.5,18.764,22.5,12.99l255-147.224C374.75,259.717,374.75,245.283,364.75,239.51z"/>
-</g>
-<g>
-	<path style="fill:#F5F5F5;" d="M372.75,406.292l0-312.583c0-10.332,8.376-18.708,18.708-18.708h2.583
-		c10.332,0,18.708,8.376,18.708,18.708l0,312.583c0,10.332-8.376,18.708-18.708,18.708h-2.583
-		C381.126,425,372.75,416.624,372.75,406.292z"/>
-</g>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 500">
+  <!-- Generator: Adobe Illustrator 28.7.1, SVG Export Plug-In . SVG Version: 1.2.0 Build 142)  -->
+  <g>
+    <g id="_图层_1" data-name="图层_1">
+      <path d="M359.4,223.98L100.7,74.62c-20-11.55-45,2.89-45,25.98v298.72c0,23.09,25,37.53,45,25.98l258.7-149.36c20-11.55,20-40.41,0-51.96Z"/>
+      <rect x="394.3" y="65" width="50" height="370" rx="25" ry="25"/>
+    </g>
+  </g>
 </svg>

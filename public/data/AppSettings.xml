@@ -69,10 +69,10 @@
         </page>
         <page id="accounts" name="音乐平台">
             <info type="normal">
-                部分平台需要登录账号以使用相关功能, 请在下面选择合适的平台登录
+                提示: 部分平台需要登录账号以使用相关功能, 请在下面选择合适的平台登录
             </info>
             <info type="stressed">
-                Arcanum Music不会向除登录的平台外的任何第三方发送您的数据, 
+                注意: Arcanum Music不会向除登录的平台外的任何第三方发送您的数据, 
                 我们获取到的所有用户数据均在本地加密储存
             </info>
 
@@ -81,7 +81,7 @@
                 开发者不会对由此造成的任何后果负责
             </warning>
 
-            <node id="platforms" title="平台账号">
+            <node id="platforms" title="音乐平台账号">
                 <account id="netease" name="网易云音乐"/>
                 <account id="qqmusic" name="QQ音乐"/>
                 <account id="kuwo" name="酷我音乐"/>
@@ -103,13 +103,13 @@
         </warning>
 
         <node id="account" title="账号">
-            <checkbox id="useDebugAccounts" name="使用调试账户信息"/>
+            <checkbox id="useDebugAccounts" text="使用调试账户信息"/>
         </node>
     </page>
 
     <page id="about" name="关于此应用">
         <node id="iconContainer" title="">
-            <image id="appIcon"/>
+            <image id="appIconLarge"/>
             <label id="appName" text="Arcanum Music"/>
             <label id="appVersion" text="version 0.1.0"/>
             <label id="appAuthor" text="made by NekoZX"/>

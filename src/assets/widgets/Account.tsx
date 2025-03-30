@@ -26,7 +26,7 @@ const AccountCard = defineComponent({
         let platform = platformIcons[props.platform];
         let type = platformNames[props.platform];
         return () => (
-            <span class="accountElement optionBox flex row" id={props.id}>
+            <span class="accountElement optionBox flex row" id={`${props.id}_container`}>
                 <span class="accountImageContainer">
                     <img class="accountAvatar" src={props.avatar}/>
                     <img class="accountPlatform" src={platform}></img>
@@ -35,7 +35,7 @@ const AccountCard = defineComponent({
                     <label class="text medium bold">{type}</label>
                     <label class="text small">{props.user}</label>
                 </span>
-                <button class="accountManage text small bold">登入</button>
+                <button class="accountManage text small bold" id={props.id}>登入</button>
             </span>
         );
     }

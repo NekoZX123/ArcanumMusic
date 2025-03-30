@@ -6,10 +6,43 @@ import { HeadersText, NodeTitle, NodeSubTitle, CheckBox, ColorPicker, Slider, Te
 
 import './settingsStyle.css';
 
+// 平台图标信息
+const platformIcons: { [type: string]: string } = {
+    "netease": "/images/platforms/netease.png",
+    "qqmusic": "/images/platforms/qqmusic.png",
+    "kuwo": "/images/platforms/kuwo.png",
+    "kugou": "/images/platforms/kugou.png"
+}
+// 平台名称
+const platformNames: { [type: string]: string } = {
+    "netease": "网易云音乐",
+    "qqmusic": "QQ音乐",
+    "kuwo": "酷我音乐",
+    "kugou": "酷狗音乐"
+}
+// 测试用户数据
+var userData: { [type: string]: any } = {
+    'netease': {
+        'avatar': '/images/library/defaultAvatar.svg',
+        'user': '未登录'
+    },
+    'qqmusic': {
+        'avatar': '/images/library/defaultAvatar.svg',
+        'user': '未登录'
+    },
+    'kuwo': {
+        'avatar': '/images/library/defaultAvatar.svg',
+        'user': '未登录'
+    },
+    'kugou': {
+        'avatar': '/images/library/defaultAvatar.svg',
+        'user': '未登录'
+    }
+}
+
 /* 树形结构组件点击 */
 // 当前选中节点
 var currentPageId = '';
-var firstPageId = '';
 
 function setCurrentPage(pageId: string) {
     // console.log(`${currentPageId}; ${pageId}`);
@@ -65,8 +98,8 @@ function toggleExpand(event: any) {
 // 创建页面
 var paraTitle: HTMLElement; // 标题 & 子标题
 var settingsContent: any; // 设置内容区域
-const optionTypes = ['checkbox', 'colorpicker', 'slider', 'textinput', 'dropbox']; // 设置项目类型
-const decorationTypes = ['image', 'link', 'label']; // 装饰元素类型
+const optionTypes = ['checkbox', 'colorpicker', 'slider', 'textinput', 'dropbox', 'account']; // 设置项目类型
+const decorationTypes = ['info', 'warning', 'image', 'link', 'label']; // 装饰元素类型
 var optionElements: any = {
     'checkbox': null,
     'colorpicker': null,
@@ -75,6 +108,8 @@ var optionElements: any = {
     'dropbox': null
 }; // 设置元素模板
 var decorationElements: any = {
+    'info': null,
+    'warning': null,
     'image': null,
     'link': null,
     'label': null
@@ -151,12 +186,36 @@ function getNodeStructure(depth: string[], node: any) {
         // 选择设置项目类型
         let optionElem, optionId, subItems;
         
+        // console.log(node.nodeName);
         optionElem = optionElements[node.nodeName].cloneNode(true); // 创建新设置元素
         optionElem.id = '';
         depth.push(node.getAttribute('id'));
         optionId = depth.join('.');
         // console.log(optionId);
         subItems = optionElem.childNodes;
+
+        // 账户登录框
+        if (node.nodeName === 'account') {
+            let platform = node.getAttribute('id');
+            // console.log(platform);
+            let accountData = userData[platform];
+            let avatarLink = accountData.avatar;
+            let userName = accountData.user;
+
+            let imageContainer = optionElem.querySelector('.accountImageContainer');
+            let infoContainer = optionElem.querySelector('.accountInfo');
+            let loginButton = optionElem.querySelector('.accountManage');
+
+            imageContainer.childNodes[0].src = avatarLink;
+            imageContainer.childNodes[1].src = platformIcons[platform];
+
+            infoContainer.childNodes[0].innerText = userName;
+            infoContainer.childNodes[1].innerText = platformNames[platform];
+
+            loginButton.id = `login.${platform}`;
+
+            return optionElem;
+        }
 
         // 设置输入控件参数
         subItems[0].setAttribute('for', optionId);
@@ -186,6 +245,7 @@ function getNodeStructure(depth: string[], node: any) {
         }
         if (node.nodeName === 'dropbox') { // 下拉选择框 - 添加选项
             let dropOptions = node.childNodes;
+            // console.log(dropOptions);
             let dropboxMain = subItems[1];
             for (let i = 0; i < dropOptions.length; i++) { // 添加下拉选项
                 let dropOpt = dropOptions[i];
@@ -194,7 +254,7 @@ function getNodeStructure(depth: string[], node: any) {
 
                 let optionNode = document.createElement('option');
                 optionNode.value = dropOpt.getAttribute('id');
-                optionNode.innerText = dropOpt.getAttribute('text');
+                optionNode.innerText = dropOpt.innerHTML;
 
                 dropboxMain.appendChild(optionNode);
             }
@@ -208,6 +268,32 @@ function getNodeStructure(depth: string[], node: any) {
         let optionElem = decorationElements[node.nodeName].cloneNode(true); // 创建新设置元素
         optionElem.id = node.getAttribute('id');
 
+        // 页首提示文字
+        if (node.nodeName === 'info' || node.nodeName === 'warning') {
+            optionElem.id = '';
+            optionElem.classList.add(node.getAttribute('type'));
+            optionElem.innerText = node.innerHTML;
+
+            // 警告提示框
+            if (node.getAttribute('type') === 'critical') {
+                setTimeout(() => {
+                    let targetId = `selector.${node.parentNode.getAttribute('id')}`;
+                    let targetNode = document.getElementById(targetId);
+
+                    if (targetNode) {
+                        targetNode.onclick = (event) => {
+                            // 前期开发使用，后续删除
+                            alert(node.innerHTML);
+
+                            onNodeClick(event);
+                        }
+                    }
+                }, 500);
+
+                return document.createElement('span');
+            }
+        }
+
         // 链接
         if (node.nodeName === 'link') {
             optionElem.href = node.getAttribute('href');
@@ -215,8 +301,8 @@ function getNodeStructure(depth: string[], node: any) {
         }
 
         // 应用图标
-        if (node.getAttribute('id') === 'appIcon') {
-            optionElem.src = '/AppIcon/Icon_transparent.png';
+        if (node.getAttribute('id') === 'appIconLarge') {
+            optionElem.src = '/images/appIcon/appIcon.png';
         }
 
         // 文字
@@ -256,7 +342,7 @@ function getNodeStructure(depth: string[], node: any) {
 // 绘制页面内容
 function createPage(prefix: string[], pageXml: any) {
     if (pageXml.nodeName !== 'page') {
-        console.error('[Cube Widgets - Error] Unrecognized page xml structure type: ' + pageXml.nodeName);
+        console.error('[Error] Unrecognized page xml structure type: ' + pageXml.nodeName);
         return;
     }
 
@@ -270,7 +356,7 @@ function createPage(prefix: string[], pageXml: any) {
     for (let i = 0; i < parts.length; i++) {
         let node = parts[i];
 
-        if (node.nodeName !== 'node') continue; // 跳过换行符
+        if (node.nodeName === '#text') continue; // 跳过换行符
 
         // 设置段落标题
         depthList.push(node.getAttribute('id'));
@@ -296,7 +382,7 @@ function loadPageTree(pageData: any) {
 
     let initNode = document.getElementById('initialNode') as HTMLElement;
     let pageboxes = pageData.childNodes[0].childNodes;
-    let loadedPages = 0;
+    let loadedPages: string[] = [];
 
     for (let i = 0; i < pageboxes.length; i++) {
         const elem = pageboxes[i];
@@ -336,31 +422,46 @@ function loadPageTree(pageData: any) {
                 node.childNodes[1].appendChild(pageNode);
 
                 createPage([elem.getAttribute('id')], pageElem);
-                loadedPages++;
+                loadedPages.push(pageElem.getAttribute('id'));
             }
         }
         else if (elem.nodeName === 'page') { // 页面
+            // 移除展开按钮
+            let expandButton = nodeContent.childNodes[0];
+            expandButton.removeChild(expandButton.childNodes[0]);
+
             // 添加点击触发器 (整个元素)
             node.addEventListener('click', onNodeClick);
             node.removeChild(node.childNodes[1]);
 
             createPage([], elem);
 
-            loadedPages++;
+            loadedPages.push(elem.getAttribute('id'));
         }
 
         tabs.appendChild(node);
 
-        if (loadedPages === 1) {
-            firstPageId = elem.getAttribute('id');
-            setCurrentPage(firstPageId);
-        }
+        setCurrentPage(loadedPages[0]);
     }
 }
 
 onMounted(async () => {
-    let settingsPage;
+    let settingsPage, settings;
 
+    // 获取初始元素
+    settingsContent = document.getElementById('settingsContent') as HTMLElement;
+    paraTitle = document.getElementById('sampleTitle') as HTMLElement;
+    
+    optionTypes.forEach((type) => {
+        optionElements[type] = document.getElementById(`sample${type.charAt(0).toUpperCase() + type.slice(1)}_container`);
+    });
+    // console.log(optionElements);
+    decorationTypes.forEach((type) => {
+        decorationElements[type] = document.getElementById(`sample${type.charAt(0).toUpperCase() + type.slice(1)}`);
+    });
+    // console.log(decorationElements);
+
+    // 获取设置页面
     const pageReader = new XMLHttpRequest();
     let appEnv = await window.electron.getAppEnvironment(), asarPath = '';
     if (appEnv !== 'dev') {
@@ -374,8 +475,12 @@ onMounted(async () => {
 
     console.log(settingsPage);
 
+    // 读取设置内容
+    const settingsText = await window.electron.getAppConfig();
+    settings = JSON.parse(settingsText);
+
     loadPageTree(settingsPage);
-    setupPage([], window.electron.getAppConfig());
+    setupPage([], settings);
 
     console.log('Settings.vue loaded');
 });
@@ -398,20 +503,19 @@ onMounted(async () => {
         <!-- 设置内容区域 -->
         <div id="settingsContent">
             <div class="contentPage" id="samplePage">
-                <HeadersText type="info" level="normal" content="提示信息"></HeadersText>
-                <HeadersText type="info" level="stressed" content="提示信息 (强调)"></HeadersText>
-                <HeadersText type="warning" level="normal" content="警告信息"></HeadersText>
+                <HeadersText id="sampleInfo" type="info" level="" content="提示信息"></HeadersText>
+                <HeadersText id="sampleWarning" type="warning" level="" content="提示信息"></HeadersText>
 
                 <NodeTitle id="sampleTitle" title="标题"></NodeTitle>
                 <NodeSubTitle id="sampleSubTitle" title="子标题"></NodeSubTitle>
 
                 <CheckBox id="sampleCheckbox" name="复选框" :checked="true"></CheckBox>
 
-                <ColorPicker id="sampleColorPicker" name="颜色选择器" color="#0088FF"></ColorPicker>
+                <ColorPicker id="sampleColorpicker" name="颜色选择器" color="#0088FF"></ColorPicker>
 
                 <Slider id="sampleSlider" name="滑动条" :min="0" :max="100" unit="%" :value="50"></Slider>
 
-                <TextInput id="sampleTextInput" name="文本输入框" value="114514"></TextInput>
+                <TextInput id="sampleTextinput" name="文本输入框" value="114514"></TextInput>
 
                 <Dropbox id="sampleDropbox" name="下拉选择框" :options="[]"></Dropbox>
 

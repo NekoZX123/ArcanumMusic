@@ -1,5 +1,5 @@
 #musicSettings {
-    height: 100%;
+    height: 100vh;
 
     align-items: center;
 
@@ -7,14 +7,17 @@
 }
 
 #settingsTabs {
+    position: fixed;
     width: 16rem;
     height: 100%;
 
     padding-right: 1rem;
 }
 #settingsContent {
+    position: relative;
     width: calc(100% - 18rem);
-    height: 100%;
+    height: calc(100% - 2rem);
+    left: 16rem;
 }
 
 /* 设置页面 */
@@ -22,6 +25,11 @@
     width: 100%;
 
     padding: 1rem;
+
+    display: none;
+}
+.contentPage.current {
+    display: block;
 }
 
 .infoText {
@@ -33,7 +41,7 @@
     display: block;
 }
 .infoText.stressed {
-    color: var(--color-blue-default);
+    color: var(--color-blue-default) !important;
 }
 .warningText {
     width: 100%;
@@ -178,6 +186,16 @@
 .treeNode.expanded > .nodeChildren {
     max-height: 1000px;
     opacity: 1;
+}
+
+/* 隐藏初始树组件 */
+#initialNode {
+    display: none;
+}
+
+/* 隐藏初始页面 */
+#samplePage {
+    display: none;
 }
 
 /* checkbox - 多选框 */
@@ -436,4 +454,44 @@
 .accountManage:hover {
     background: var(--color-blue-light);
     color: var(--color-blue-deep);
+}
+
+
+/* '关于' 页面 */
+#about.current {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+[id='about.iconContainer'] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#appIconLarge {
+    width: 10rem;
+    height: 10rem;
+    margin: 1rem 0;
+}
+#appName {
+    font-size: 24pt;
+    font-weight: bold;
+}
+#appVersion {
+    font-family: 'Source Code Pro', sans-serif;
+    font-size: 14pt;
+    font-weight: 400;
+}
+#appAuthor {
+    font-family: 'Source Code Pro', sans-serif;
+    font-size: 16pt;
+    font-weight: 400;
+}
+
+#about .link {
+    font-size: 12pt;
+    
+    margin: 3rem 1rem;
 }

@@ -6,6 +6,7 @@
     --default-black: rgb(36, 36, 36);
     --default-white: rgb(245, 245, 245);
     --default-grey: rgb(128, 128, 128);
+    --transparent-white: rgba(245, 245, 245, 0.6);
     --transparent-grey: rgba(168, 168, 168, 0.4);
     --transparent-lightgrey: rgba(200, 200, 200, 0.4);
 
@@ -230,7 +231,7 @@ a {
     height: calc(100% - 2rem);
 
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 /* 标签页组件 */
@@ -735,4 +736,42 @@ a {
 /* 歌单 / 专辑 */
 .musicBox.songlists {
     grid-template-columns: repeat(5, 1fr);
+}
+
+/* 播放控制 */
+#playProgress {
+    position: fixed;
+    width: 100%;
+    height: 3px;
+    bottom: 4rem;
+    left: 0;
+
+    background: var(--color-blue-default);
+}
+
+#playControlBar {
+    position: fixed;
+    width: 100%;
+    height: 4rem;
+    bottom: 0;
+    left: 0;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 2rem;
+    background: var(--transparent-white);
+    backdrop-filter: blur(4px);
+
+    z-index: 100;
+}
+
+.currentSongCover {
+    width: 3rem;
+    height: 3rem;
+
+    border: none;
+    border-radius: 6px;
+
+    margin-right: 6px;
 }

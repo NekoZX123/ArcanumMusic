@@ -207,5 +207,46 @@ onMounted(async () => {
 
             <div id="pageContent"></div>
         </div>
+
+        <!-- 播放器控制栏 -->
+        <div class="flex row" id="playProgress"></div>
+
+        <div class="flex row" id="playControlBar">
+            <!-- 当前歌曲信息 -->
+            <div class="flex row" id="currentSong">
+                <img class="currentSongCover" src="/images/player/testAlbum.png"/>
+                <span class="flex column">
+                    <label class="text small bold">歌曲名称</label>
+                    <label class="text ultraSmall">歌曲作者1, 歌曲作者2</label>
+                </span>
+            </div>
+
+            <!-- 播放控制 -->
+            <div class="flex row" id="playControl">
+                <button class="playControlButton" id="previousButton">
+                    <img src="/images/player/previous.svg" alt="Previous song"/>
+                </button>
+                <button class="playControlButton" id="playButton">
+                    <img src="/images/player/play.svg" alt="Play / Pause"/>
+                </button>
+                <button class="playControlButton" id="nextButton">
+                    <img src="/images/player/next.svg" alt="Next song"/>
+                </button>
+            </div>
+
+            <!-- 其他控制 / 歌词 -->
+            <div class="flex row" id="controlRightBar">
+                <button class="playControl small" id="repeat">
+                    <img src="/images/player/repeat.svg" alt="Toggle repeat"/>
+                </button>
+                <button class="playControl small" id="shuffle">
+                    <img src="/images/player/shuffle.svg" alt="Toggle shuffle"/>
+                </button>
+                <input type="range" id="volumeControl" min="0" max="100" value="50" step="1"/>
+                <button class="playControl small" id="lyrics">
+                    <img src="/images/player/expand.svg" alt="Expand lyrics"/>
+                </button>
+            </div>
+        </div>
     </div>
 </template>

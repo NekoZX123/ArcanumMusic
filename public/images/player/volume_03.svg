@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_1" data-name="图层_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <defs>
+    <style>
+      .cls-1 {
+        stroke: #ececec;
+      }
+
+      .cls-1, .cls-2 {
+        fill: none;
+        stroke-miterlimit: 10;
+        stroke-width: 20px;
+      }
+
+      .cls-2 {
+        stroke: #000;
+      }
+
+      .cls-3 {
+        fill: #ececec;
+      }
+    </style>
+  </defs>
+  <rect x="63.03" y="190" width="100" height="120" rx="20" ry="20"/>
+  <path d="M212.03,362.02l-71.11-49.78c-5.14-3.6-8.89-10.24-8.89-15.18v-94.09c0-4.95,3.75-11.59,8.89-15.18l71.11-49.78c19.87-13.91,40-17.97,40-5.6v235.23c0,12.37-20.13,8.31-40-5.6Z"/>
+  <path class="cls-2" d="M305.03,221.04c17.67,17.67,17.8,46.13.29,63.64"/>
+  <circle cx="305" cy="221" r="10"/>
+  <circle cx="305" cy="285" r="10"/>
+  <path class="cls-2" d="M347.74,186.25c36.62,36.62,36.62,95.87,0,132.49"/>
+  <circle cx="347" cy="186" r="10"/>
+  <circle cx="347" cy="320" r="10"/>
+  <path class="cls-1" d="M393,143.93c58.63,58.63,58.63,153.51,0,212.13"/>
+  <circle class="cls-3" cx="393" cy="144" r="10"/>
+  <circle class="cls-3" cx="393" cy="356" r="10"/>
+</svg>

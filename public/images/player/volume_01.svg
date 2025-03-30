@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_1" data-name="图层_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <rect x="62.5" y="190" width="100" height="120" rx="20" ry="20"/>
+  <path d="M211.5,362.02l-71.11-49.78c-5.14-3.6-8.89-10.24-8.89-15.18v-94.09c0-4.95,3.75-11.59,8.89-15.18l71.11-49.78c19.87-13.91,40-17.97,40-5.6v235.23c0,12.37-20.13,8.31-40-5.6Z"/>
+  <rect x="279.5" y="237.5" width="150" height="30" rx="15" ry="15" transform="translate(-74.71 324.62) rotate(-45)"/>
+  <rect x="278.88" y="238.03" width="150" height="30" rx="15" ry="15" transform="translate(282.57 -176.12) rotate(45)"/>
+</svg>
