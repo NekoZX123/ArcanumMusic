@@ -35,7 +35,7 @@ onMounted(() => {
                             <img src="/images/player/previous.svg" alt="Previous"/>
                         </button>
                         <button class="songlistPlay" id="musicRadio_play">
-                            <img src="/images/player/play.svg" alt="Play"/>
+                            <img src="/images/player/play.dark.svg" alt="Play"/>
                         </button>
                         <button class="songlistPlay" id="musicRadio_next">
                             <img src="/images/player/next.svg" alt="Next"/>

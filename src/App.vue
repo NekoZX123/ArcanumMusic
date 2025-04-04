@@ -5,6 +5,8 @@ import Library from './components/library/Library.vue';
 import Search from './components/search/Search.vue';
 import Settings from './components/settings/Settings.vue';
 
+import { showNotify } from './assets/widgets/Notification';
+
 // 设置文件位置
 const configLocation = '\\ArcanumMusic\\settings.json';
 var appConfig = '';
@@ -157,6 +159,11 @@ onMounted(async () => {
     console.log(appConfig);
 
     pageApp.mount('#pageContent');
+
+    showNotify('note000', 'success', 'Success', '这是一个测试通知', 1500);
+    showNotify('note001', 'info', 'Info', '这是一个测试通知', 2000);
+    showNotify('note002', 'warning', 'Warning', '这是一个测试通知', 2500);
+    showNotify('note003', 'critical', 'Error', '这是一个测试通知', 3000);
 });
 </script>
 
@@ -223,13 +230,13 @@ onMounted(async () => {
 
             <!-- 播放控制 -->
             <div class="flex row" id="playControl">
-                <button class="playControlButton" id="previousButton">
+                <button class="playControl" id="previousButton">
                     <img src="/images/player/previous.svg" alt="Previous song"/>
                 </button>
-                <button class="playControlButton" id="playButton">
-                    <img src="/images/player/play.svg" alt="Play / Pause"/>
+                <button class="playControl large" id="playButton">
+                    <img src="/images/player/play.dark.svg" alt="Play / Pause"/>
                 </button>
-                <button class="playControlButton" id="nextButton">
+                <button class="playControl" id="nextButton">
                     <img src="/images/player/next.svg" alt="Next song"/>
                 </button>
             </div>
@@ -248,5 +255,8 @@ onMounted(async () => {
                 </button>
             </div>
         </div>
+
+        <!-- 通知区域 -->
+        <div class="notifyArea flex column" id="notifyArea"></div>
     </div>
 </template>
