@@ -5,6 +5,7 @@ import { AccountCard } from '../../assets/widgets/Account.tsx';
 import { HeadersText, NodeTitle, NodeSubTitle, CheckBox, ColorPicker, Slider, TextInput, Dropbox } from '../../assets/widgets/Settings.tsx';
 
 import './settingsStyle.css';
+import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
 
 // 平台图标信息
 const platformIcons: { [type: string]: string } = {
@@ -281,12 +282,18 @@ function getNodeStructure(depth: string[], node: any) {
                     let targetNode = document.getElementById(targetId);
 
                     if (targetNode) {
-                        targetNode.onclick = (event) => {
-                            // 前期开发使用，后续删除
-                            alert(node.innerHTML);
+                        targetNode.removeEventListener('click', onNodeClick);
 
-                            onNodeClick(event);
-                        }
+                        targetNode.addEventListener('click', (event) => {
+                            // 显示警告弹窗
+                            showPopup('warning', 'yesno', '警告', node.innerHTML, ['', 'red'], (code: number) => {
+                                if (code === buttonTypes.BUTTON_YES) {
+                                    onNodeClick(event);
+                                } else {
+                                    console.log('[Arcanum Music - Debug] Page change cancelled');
+                                }
+                            });
+                        });
                     }
                 }, 500);
 

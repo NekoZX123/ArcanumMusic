@@ -1,5 +1,5 @@
 <script setup lang="ts" name="Notification">
-import { defineProps, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 const props = defineProps({
     type: {

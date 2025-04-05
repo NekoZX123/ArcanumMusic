@@ -5,7 +5,8 @@ import Library from './components/library/Library.vue';
 import Search from './components/search/Search.vue';
 import Settings from './components/settings/Settings.vue';
 
-import { showNotify } from './assets/widgets/Notification';
+import { showNotify } from './assets/notifications/Notification.ts';
+import { showPopup } from './assets/notifications/popup.tsx';
 
 // 设置文件位置
 const configLocation = '\\ArcanumMusic\\settings.json';
@@ -134,6 +135,7 @@ function onTabChange(event: any) {
     }
 }
 
+// 搜索框焦点事件 & 清除
 function searchInFocus() {
     let clearButton = document.getElementById('clearButton');
     if (clearButton) clearButton.style.display = 'block';
@@ -152,6 +154,11 @@ function clearSearchBar() {
     }
 }
 
+// 弹窗回调
+function popupCallback(code: number) {
+    console.log(code);
+}
+
 onMounted(async () => {
     // 设置文件准备
     let configData = await prepareSettings();
@@ -160,10 +167,13 @@ onMounted(async () => {
 
     pageApp.mount('#pageContent');
 
-    showNotify('note000', 'success', 'Success', '这是一个测试通知', 1500);
-    showNotify('note001', 'info', 'Info', '这是一个测试通知', 2000);
-    showNotify('note002', 'warning', 'Warning', '这是一个测试通知', 2500);
-    showNotify('note003', 'critical', 'Error', '这是一个测试通知', 3000);
+    // 测试通知
+    showNotify('Notifyyyyyy', 'success', 'Welcome!', 'Welcome to Arcanum Music!', 3000);
+
+    // 测试弹窗
+    showPopup('warning', 'notice', 
+        'Welcome', '欢迎使用 Arcanum Music! \n (此应用仍在开发中)', 
+        [], popupCallback);
 });
 </script>
 
@@ -258,5 +268,8 @@ onMounted(async () => {
 
         <!-- 通知区域 -->
         <div class="notifyArea flex column" id="notifyArea"></div>
+
+        <!-- 弹出窗口 -->
+        <div class="flex column" id="popupArea"></div>
     </div>
 </template>
