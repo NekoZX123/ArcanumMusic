@@ -6,6 +6,7 @@
     --default-black: rgb(36, 36, 36);
     --default-white: rgb(245, 245, 245);
     --default-grey: rgb(128, 128, 128);
+    --default-lightgrey: rgb(225, 225, 225);
     --transparent-white: rgba(245, 245, 245, 0.6);
     --transparent-darkgrey: rgba(114, 114, 114, 0.4);
     --transparent-grey: rgba(168, 168, 168, 0.4);
@@ -745,31 +746,108 @@ a {
 }
 
 /* 播放控制 */
-#playProgress {
+#playControlContainer {
     position: fixed;
-    width: 100%;
-    height: 3px;
-    bottom: 4rem;
-    left: 0;
+    width: calc(100% - 1.6rem);
+    height: calc(4rem + 3px);
+    bottom: 6px;
+    left: 0.8rem;
 
-    background: var(--color-blue-default);
+    background: var(--transparent-white);
+    backdrop-filter: blur(4px);
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 0 6px var(--transparent-grey);
+
+    z-index: 100;
+}
+
+/* 播放进度条 */
+/* 进度条动画 */
+@keyframes progressBarHover {
+    0% {
+        height: 6px;
+        border-radius: 3px;
+    }
+    20% { 
+        height: 4px;
+        border-radius: 2px;
+    }
+    80% {
+        height: 16px;
+        border-radius: 8px;
+    }
+    100% {
+        height: 12px;
+        border-radius: 6px;
+    }
+}
+#playProgress {
+    position: absolute;
+    width: calc(100% - 6px);
+    height: 6px;
+    bottom: 4rem;
+    left: 3px;
+
+    background: var(--default-lightgrey);
+    border: none;
+    border-radius: 3px;
+
+    transition: all 300ms cubic-bezier(0.1, -0.25, 0.6, 1.5);
+}
+#playProgress:hover {
+    height: 12px;
+
+    border-radius: 6px;
+}
+#playedCover {
+    width: 50%;
+    
+    background: var(--color-blue-deep);
+    border-radius: 3px;
+
+    transition: border-radius 300ms ease;
+}
+#playProgress:hover #playedCover {
+    border-radius: 6px;
+}
+
+/* 播放进度标签 */
+#progressTooltip {
+    position: absolute;
+
+    width: 8rem;
+    height: 2rem;
+    top: calc(100% - 7.5rem);
+
+    background: var(--transparent-white);
+    backdrop-filter: blur(4px);
+    border-style: solid;
+    border-color: var(--default-lightgrey);
+    border-width: 2px;
+    border-radius: 4px;
+
+    align-items: center;
+    justify-content: center;
+
+    z-index: 110;
+
+    transform: translateY(100%) scale(0.0);
+    transition: transform 200ms ease-in-out;
+}
+#progressTooltip.show {
+    transform: translateY(0%) scale(1.0);
 }
 
 #playControlBar {
-    position: fixed;
-    width: 100%;
-    height: 4rem;
-    bottom: 0;
-    left: 0;
-
     align-items: center;
     justify-content: space-between;
 
-    padding: 0 2rem;
-    background: var(--transparent-white);
-    backdrop-filter: blur(4px);
+    background: transparent;
 
-    z-index: 100;
+    padding: 0 2rem;
+
+    flex: 1 0;
 }
 
 .currentSongCover {
@@ -851,7 +929,6 @@ a {
     transform: translateY(calc(0.75rem - 6px));
 }
 
-
 /* 通知 */
 .notifyArea {
     position: fixed;
@@ -883,9 +960,11 @@ a {
     align-items: center;
 
     transform: translateX(100%);
-    transition: all 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transition: all 500ms cubic-bezier(0.6, -0.28, 0.735, 0.045);
 }
 .notification.show {
+    transition: all 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
     transform: translateX(0);
 }
 
@@ -990,9 +1069,11 @@ a {
     justify-content: space-between;
 
     transform: scale(0.0);
-    transition: all 500ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transition: all 500ms cubic-bezier(0.6, -0.28, 0.735, 0.045);
 }
 .popup.show {
+    transition: all 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
     transform: scale(1.0);
 }
 

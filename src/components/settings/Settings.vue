@@ -286,7 +286,7 @@ function getNodeStructure(depth: string[], node: any) {
 
                         targetNode.addEventListener('click', (event) => {
                             // 显示警告弹窗
-                            showPopup('warning', 'yesno', '警告', node.innerHTML, ['', 'red'], (code: number) => {
+                            showPopup('warning', 'yesno', '警告: 是否继续?', node.innerHTML, ['', 'red'], (code: number) => {
                                 if (code === buttonTypes.BUTTON_YES) {
                                     onNodeClick(event);
                                 } else {

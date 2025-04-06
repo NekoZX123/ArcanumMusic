@@ -8,6 +8,29 @@ import Settings from './components/settings/Settings.vue';
 import { showNotify } from './assets/notifications/Notification.ts';
 import { showPopup } from './assets/notifications/popup.tsx';
 
+// 时间格式化
+function timeFormat(timeSeconds: number) {
+    let secondNum = timeSeconds % 60;
+    if (secondNum < 0) secondNum = 0;
+    let minTemp = Math.floor(timeSeconds / 60);
+    let minuteNum = minTemp % 60;
+    let hourNum = Math.floor(minTemp / 60);
+
+    let second = secondNum < 10 ? `0${secondNum}` : `${secondNum}`;
+    let minute = minuteNum < 10 ? `0${minuteNum}` : `${minuteNum}`;
+    let hour = hourNum < 10 ? `0${hourNum}` : `${hourNum}`;
+
+    var result = '';
+    if (hourNum > 0) {
+        result = `${hour}:${minute}:${second}`;
+    }
+    else {
+        result = `${minute}:${second}`;
+    }
+
+    return result;
+}
+
 // 设置文件位置
 const configLocation = '\\ArcanumMusic\\settings.json';
 var appConfig = '';
@@ -159,6 +182,68 @@ function popupCallback(code: number) {
     console.log(code);
 }
 
+// 当前音乐信息
+const musicMetaInfo = ref({
+    name: 'Name',
+    authors: 'Author1, Author2',
+    coverUrl: '/images/player/testAlbum.png',
+    duration: 114,
+    url: 'https://example.com/example.flac'
+});
+var playProgress = 0;
+const progressText = ref('00:00');
+const playedCover = ref('width: 0%;');
+const progressTooltipOffset = ref('left: 0');
+
+// 播放进度调整
+function startProgressAdjust(event: MouseEvent) {
+    if (event.buttons === 1) {
+        // 添加全局事件监听器
+        showProgressTooltip();
+        document.addEventListener('mousemove', adjustPlayProgress);
+
+        document.addEventListener('mouseup', () => {
+            hideProgressTooltip();
+            document.removeEventListener('mousemove', adjustPlayProgress);
+        });
+    }
+}
+function adjustPlayProgress(event: MouseEvent) {
+    const progressBar = document.getElementById('playProgress');
+    if (!progressBar) return;
+
+    if (event.buttons === 1) {
+        // 移动播放进度提示
+        let tooltipX = event.clientX;
+        if (tooltipX < 80) tooltipX = 80;
+        if (tooltipX > document.body.clientWidth - 80) tooltipX = document.body.clientWidth - 80;
+
+        progressTooltipOffset.value = `left: calc(${tooltipX}px - 4rem)`;
+
+        // 设置进度条宽度
+        let deltaX = event.clientX - progressBar.getBoundingClientRect().left;
+        let progress = deltaX / progressBar.clientWidth;
+        playedCover.value = `width: ${progress * 100}%;`;
+
+        // 设置播放进度文字
+        playProgress = Math.round(musicMetaInfo.value.duration * progress);
+        progressText.value = timeFormat(playProgress);
+    }
+}
+
+function showProgressTooltip(_: any = undefined) {
+    let tooltip = document.getElementById('progressTooltip');
+    if (tooltip) {
+        tooltip.classList.add('show');
+    }
+}
+function hideProgressTooltip(_: any = undefined) {
+    let tooltip = document.getElementById('progressTooltip');
+    if (tooltip) {
+        tooltip.classList.remove('show');
+    }
+}
+
 onMounted(async () => {
     // 设置文件准备
     let configData = await prepareSettings();
@@ -226,50 +311,59 @@ onMounted(async () => {
         </div>
 
         <!-- 播放器控制栏 -->
-        <div class="flex row" id="playProgress"></div>
-
-        <div class="flex row" id="playControlBar">
-            <!-- 当前歌曲信息 -->
-            <div class="flex row" id="currentSong">
-                <img class="currentSongCover" src="/images/player/testAlbum.png"/>
-                <span class="flex column">
-                    <label class="text small bold">歌曲名称</label>
-                    <label class="text ultraSmall">歌曲作者1, 歌曲作者2</label>
-                </span>
+        <div class="flex column" id="playControlContainer">
+            <div class="flex row" id="playProgress" @mousedown="startProgressAdjust" @mousemove="adjustPlayProgress">
+                <div id="playedCover" :style="playedCover"></div>
             </div>
+            <div class="flex row" id="playControlBar">
+                <!-- 当前歌曲信息 -->
+                <div class="flex row" id="currentSong">
+                    <img class="currentSongCover" :src="musicMetaInfo.coverUrl"/>
+                    <span class="flex column">
+                        <label class="text small bold">{{ musicMetaInfo.name }}</label>
+                        <label class="text ultraSmall">{{ musicMetaInfo.authors }}</label>
+                    </span>
+                </div>
 
-            <!-- 播放控制 -->
-            <div class="flex row" id="playControl">
-                <button class="playControl" id="previousButton">
-                    <img src="/images/player/previous.svg" alt="Previous song"/>
-                </button>
-                <button class="playControl large" id="playButton">
-                    <img src="/images/player/play.dark.svg" alt="Play / Pause"/>
-                </button>
-                <button class="playControl" id="nextButton">
-                    <img src="/images/player/next.svg" alt="Next song"/>
-                </button>
-            </div>
+                <!-- 播放控制 -->
+                <div class="flex row" id="playControl">
+                    <button class="playControl" id="previousButton">
+                        <img src="/images/player/previous.svg" alt="Previous song"/>
+                    </button>
+                    <button class="playControl large" id="playButton">
+                        <img src="/images/player/play.dark.svg" alt="Play / Pause"/>
+                    </button>
+                    <button class="playControl" id="nextButton">
+                        <img src="/images/player/next.svg" alt="Next song"/>
+                    </button>
+                </div>
 
-            <!-- 其他控制 / 歌词 -->
-            <div class="flex row" id="controlRightBar">
-                <button class="playControl small" id="repeat">
-                    <img src="/images/player/repeat.svg" alt="Toggle repeat"/>
-                </button>
-                <button class="playControl small" id="shuffle">
-                    <img src="/images/player/shuffle.svg" alt="Toggle shuffle"/>
-                </button>
-                <input type="range" id="volumeControl" min="0" max="100" value="50" step="1"/>
-                <button class="playControl small" id="lyrics">
-                    <img src="/images/player/expand.svg" alt="Expand lyrics"/>
-                </button>
+                <!-- 其他控制 / 歌词 -->
+                <div class="flex row" id="controlRightBar">
+                    <button class="playControl small" id="repeat">
+                        <img src="/images/player/repeat.svg" alt="Toggle repeat"/>
+                    </button>
+                    <button class="playControl small" id="shuffle">
+                        <img src="/images/player/shuffle.svg" alt="Toggle shuffle"/>
+                    </button>
+                    <input type="range" id="volumeControl" min="0" max="100" value="50" step="1"/>
+                    <button class="playControl small" id="lyrics">
+                        <img src="/images/player/expand.svg" alt="Expand lyrics"/>
+                    </button>
+                </div>
             </div>
         </div>
+        
 
         <!-- 通知区域 -->
         <div class="notifyArea flex column" id="notifyArea"></div>
 
         <!-- 弹出窗口 -->
         <div class="flex column" id="popupArea"></div>
+
+        <!-- 播放进度标签 -->
+        <div class="text ultraSmall flex column" id="progressTooltip" :style="progressTooltipOffset">
+            {{ `${progressText} / ${timeFormat(musicMetaInfo.duration)}` }}
+        </div>
     </div>
 </template>
