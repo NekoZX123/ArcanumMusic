@@ -20,6 +20,7 @@ const options: { [key: string]: number[] } = {
     'confirm': [buttonTypes.BUTTON_CANCEL, buttonTypes.BUTTON_CONFIRM],
     'yesno': [buttonTypes.BUTTON_NO, buttonTypes.BUTTON_YES],
     'yesnoCancel': [buttonTypes.BUTTON_CANCEL, buttonTypes.BUTTON_NO, buttonTypes.BUTTON_YES],
+    'cancel': [buttonTypes.BUTTON_CANCEL]
 }
 const PopupOptions = defineComponent({
     props: {
@@ -80,21 +81,30 @@ function showPopup(type: string, optionsType: string, title: string, content: st
 
 /**
  * 弹窗组件
- * @param type 弹窗类型 (info | error | warning | success)
- * @param optionsType 弹窗类型 (notice | confirm | yesno | yesnoCancel)
+ * 
+ * @param type 弹窗类型
+ * - `info`: 信息提示
+ * - `error`: 错误提示
+ * - `warning`: 警告提示
+ * - `success`: 成功提示
+ * 
+ * @param optionsType 弹窗按钮类型
+ * - `notice`: ['OK']
+ * - `confirm`: ['取消', '确认']
+ * - `yesno`: ['否', '是']
+ * - `yesnoCancel`: ['取消', '否', '是']
+ * - `cancel`: ['取消']
+ * 
  * @param title 弹窗标题
  * @param content 弹窗内容
  * @param highlights 弹窗按钮高亮
  * `highlights` 参数:
- * - 传入的数组长度必须和optionsType对应的按钮数量一致
+ * - 传入的数组长度必须和 `optionsType` 对应的按钮数量一致
  * - 列表中的第 `i` 项对应第 `i` 个按钮的高亮颜色 (若为默认则留空)
- * - 支持的值: 'red' | 'green' | ''
- * 
- * 各弹窗类型对应按钮组合:
- * - notice: ['OK']
- * - confirm: ['取消', '确认']
- * - yesno: ['否', '是']
- * - yesnoCancel: ['取消', '否', '是']
+ * - 支持的值: 
+ *   - `red`: 红色高亮
+ *   - `green`: 绿色高亮
+ *   - `''`: 默认无高亮
  */
 const PopupWindow = defineComponent({
     props: {

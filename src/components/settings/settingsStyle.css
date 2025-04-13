@@ -1,5 +1,5 @@
 #musicSettings {
-    height: 100vh;
+    height: calc(100vh - 4rem);
 
     align-items: center;
 
@@ -10,6 +10,7 @@
     position: fixed;
     width: 16rem;
     height: 100%;
+    top: 4rem;
 
     padding-right: 1rem;
 }
@@ -494,4 +495,9 @@
     font-size: 12pt;
     
     margin: 3rem 1rem;
+}
+
+#settingsBlock {
+    width: 100%;
+    height: 4rem;
 }

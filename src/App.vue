@@ -4,32 +4,11 @@ import Home from './components/home/Home.vue';
 import Library from './components/library/Library.vue';
 import Search from './components/search/Search.vue';
 import Settings from './components/settings/Settings.vue';
+import Lyrics from './components/lyrics/Lyrics.vue';
 
 import { showNotify } from './assets/notifications/Notification.ts';
 import { showPopup } from './assets/notifications/popup.tsx';
-
-// 时间格式化
-function timeFormat(timeSeconds: number) {
-    let secondNum = timeSeconds % 60;
-    if (secondNum < 0) secondNum = 0;
-    let minTemp = Math.floor(timeSeconds / 60);
-    let minuteNum = minTemp % 60;
-    let hourNum = Math.floor(minTemp / 60);
-
-    let second = secondNum < 10 ? `0${secondNum}` : `${secondNum}`;
-    let minute = minuteNum < 10 ? `0${minuteNum}` : `${minuteNum}`;
-    let hour = hourNum < 10 ? `0${hourNum}` : `${hourNum}`;
-
-    var result = '';
-    if (hourNum > 0) {
-        result = `${hour}:${minute}:${second}`;
-    }
-    else {
-        result = `${minute}:${second}`;
-    }
-
-    return result;
-}
+import { createPlayer } from './assets/player/player.ts';
 
 // 设置文件位置
 const configLocation = '\\ArcanumMusic\\settings.json';
@@ -183,16 +162,7 @@ function popupCallback(code: number) {
 }
 
 // 当前音乐信息
-const musicMetaInfo = ref({
-    name: 'Name',
-    authors: 'Author1, Author2',
-    coverUrl: '/images/player/testAlbum.png',
-    duration: 114,
-    url: 'https://example.com/example.flac'
-});
-var playProgress = 0;
-const progressText = ref('00:00');
-const playedCover = ref('width: 0%;');
+const musicMetaInfo = ref(createPlayer(['volumeControl', 'lyricsVolume']));
 const progressTooltipOffset = ref('left: 0');
 
 // 播放进度调整
@@ -223,11 +193,14 @@ function adjustPlayProgress(event: MouseEvent) {
         // 设置进度条宽度
         let deltaX = event.clientX - progressBar.getBoundingClientRect().left;
         let progress = deltaX / progressBar.clientWidth;
-        playedCover.value = `width: ${progress * 100}%;`;
+
+        // 防止范围溢出
+        if (progress < 0) progress = 0;
+        if (progress > 1) progress = 1;
 
         // 设置播放进度文字
-        playProgress = Math.round(musicMetaInfo.value.duration * progress);
-        progressText.value = timeFormat(playProgress);
+        let playProgress = Math.round(musicMetaInfo.value.duration * progress);
+        musicMetaInfo.value.updateProgress(playProgress);
     }
 }
 
@@ -244,6 +217,27 @@ function hideProgressTooltip(_: any = undefined) {
     }
 }
 
+// 音量调整
+function adjustVolume(event: MouseEvent) {
+    if (event.buttons !== 1) return;
+
+    let volumeBar = document.getElementById('volumeControl') as HTMLInputElement;
+    if (!volumeBar) return;
+    
+    musicMetaInfo.value.setVolume(Number(volumeBar.value));
+}
+
+// 切换歌词面板
+function showLyrics(_: MouseEvent) {
+    const lyricsPanel = document.getElementById('lyricsArea');
+    if (!lyricsPanel) return;
+
+    lyricsPanel.style = 'display: block';
+    setTimeout(() => {
+        lyricsPanel.classList.add('show');
+    }, 50);
+}
+
 onMounted(async () => {
     // 设置文件准备
     let configData = await prepareSettings();
@@ -256,14 +250,26 @@ onMounted(async () => {
     showNotify('Notifyyyyyy', 'success', 'Welcome!', 'Welcome to Arcanum Music!', 3000);
 
     // 测试弹窗
-    showPopup('warning', 'notice', 
+    showPopup('success', 'notice', 
         'Welcome', '欢迎使用 Arcanum Music! \n (此应用仍在开发中)', 
         [], popupCallback);
+
+    // 歌词面板挂载
+    const lyrics = createApp(Lyrics);
+    lyrics.mount('#lyricsArea');
+
+    const lyricsArea = document.getElementById('lyricsArea');
+    if (lyricsArea) lyricsArea.style = 'display: none;';
+
+    // 初始化播放器
+    const player = musicMetaInfo.value;
+    player?.updateDuration(114);
+    player?.updateProgress(0);
 });
 </script>
 
 <template>
-    <div>
+    <div id="windowMain">
         <!-- 窗口标题栏 -->
         <div class="flex row" id="windowControlBar"  
             @mousedown="titlebarMouseDown" @mousemove="titlebarMouseMove" @mouseup="titlebarMouseUp">
@@ -307,13 +313,17 @@ onMounted(async () => {
                 </button>
             </div>
 
-            <div id="pageContent"></div>
+            <!-- 页面内容 -->
+            <div id="pageContainer">
+                <div id="pageContent"></div>
+                <div id="bottomBlock"></div>
+            </div>
         </div>
 
         <!-- 播放器控制栏 -->
         <div class="flex column" id="playControlContainer">
-            <div class="flex row" id="playProgress" @mousedown="startProgressAdjust" @mousemove="adjustPlayProgress">
-                <div id="playedCover" :style="playedCover"></div>
+            <div class="fluentProgress flex row" id="playProgress" @mousedown="startProgressAdjust" @mousemove="adjustPlayProgress">
+                <div class="fluentFilled" id="playedCover" :style="`width: ${musicMetaInfo.progressPercentage}%`"></div>
             </div>
             <div class="flex row" id="playControlBar">
                 <!-- 当前歌曲信息 -->
@@ -346,8 +356,11 @@ onMounted(async () => {
                     <button class="playControl small" id="shuffle">
                         <img src="/images/player/shuffle.svg" alt="Toggle shuffle"/>
                     </button>
-                    <input type="range" id="volumeControl" min="0" max="100" value="50" step="1"/>
-                    <button class="playControl small" id="lyrics">
+                    <span class="flex row">
+                        <img class="playControl small" :src="musicMetaInfo.volumeLevel"/>
+                        <input type="range" id="volumeControl" min="0" max="100" value="100" step="1" @mousemove="adjustVolume"/>
+                    </span>
+                    <button class="playControl small" id="lyrics" @click="showLyrics">
                         <img src="/images/player/expand.svg" alt="Expand lyrics"/>
                     </button>
                 </div>
@@ -363,7 +376,10 @@ onMounted(async () => {
 
         <!-- 播放进度标签 -->
         <div class="text ultraSmall flex column" id="progressTooltip" :style="progressTooltipOffset">
-            {{ `${progressText} / ${timeFormat(musicMetaInfo.duration)}` }}
+            {{ `${musicMetaInfo.playedTimeText} / ${musicMetaInfo.durationText}` }}
         </div>
+
+        <!-- 歌词面板 -->
+        <div id="lyricsArea"></div>
     </div>
 </template>

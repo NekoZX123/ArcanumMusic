@@ -5,6 +5,7 @@ console.log('preload.mjs loaded');
 contextBridge.exposeInMainWorld(
     'electron', 
     {
+        createWindow: (title, url) => ipcRenderer.invoke('newAppWindow', title, url),
         minimizeWindow: () => ipcRenderer.invoke('minimizeWindow'), // 最小化窗口
         toggleMaximize: () => ipcRenderer.invoke('maximizeWindow'), // 最大化 / 还原窗口
         closeWindow: () => ipcRenderer.invoke('closeWindow'), // 关闭窗口

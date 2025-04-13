@@ -8,8 +8,8 @@ import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 const __dirname = fileURLToPath(import.meta.url);
 
 const environment = 'dev';
-var tray;
-var mainWindow = null;
+let tray;
+let mainWindow = null;
 
 // 获取应用配置
 async function getAppConfig() {
@@ -71,6 +71,27 @@ function createWindow() {
     }
 }
 
+// 新建窗口
+function newWindow(_, title, url) {
+    let newAppWindow = new BrowserWindow({
+        width: 1000,
+        height: 600,
+        minWidth: 600,
+        minHeight: 400,
+        frame: true,
+        resizable: true,
+        focusable: true,
+        title: title,
+        icon: `${environment === 'dev' ? './public' : 'dist'}/images/appIcon/appIcon.png`,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: true
+        }
+    });
+
+    newAppWindow.loadURL(url);
+}
+
 // 窗口操作
 function minimizeWindow(_) {
     if (mainWindow) {
@@ -114,6 +135,7 @@ function getAppDataLocal() {
 }
 
 app.whenReady().then(() => {
+    ipcMain.handle('newAppWindow', newWindow);
     ipcMain.handle('minimizeWindow', minimizeWindow);
     ipcMain.handle('maximizeWindow', toggleMaximize);
     ipcMain.handle('closeWindow', closeWindow);

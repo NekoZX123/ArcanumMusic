@@ -1,6 +1,7 @@
 // Electron API 声明
 
 export interface IElectronAPI {
+    createWindow: (title: String, url: String) => Promise,
     minimizeWindow: () => Promise,
     toggleMaximize: () => Promise,
     closeWindow: () => Promise,

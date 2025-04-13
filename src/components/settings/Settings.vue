@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 
-import { AccountCard } from '../../assets/widgets/Account.tsx';
+import { AccountCard, platformLogin } from '../../assets/widgets/Account.tsx';
 import { HeadersText, NodeTitle, NodeSubTitle, CheckBox, ColorPicker, Slider, TextInput, Dropbox } from '../../assets/widgets/Settings.tsx';
 
 import './settingsStyle.css';
@@ -205,7 +205,7 @@ function getNodeStructure(depth: string[], node: any) {
 
             let imageContainer = optionElem.querySelector('.accountImageContainer');
             let infoContainer = optionElem.querySelector('.accountInfo');
-            let loginButton = optionElem.querySelector('.accountManage');
+            let loginButton = optionElem.querySelector('.accountManage') as HTMLButtonElement;
 
             imageContainer.childNodes[0].src = avatarLink;
             imageContainer.childNodes[1].src = platformIcons[platform];
@@ -214,6 +214,10 @@ function getNodeStructure(depth: string[], node: any) {
             infoContainer.childNodes[1].innerText = platformNames[platform];
 
             loginButton.id = `login.${platform}`;
+            // 绑定登录按钮触发事件
+            loginButton.addEventListener('click', () => {
+                platformLogin(platform);
+            });
 
             return optionElem;
         }
@@ -494,44 +498,48 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="flex row" id="musicSettings">
-        <!-- 设置标签页区域 -->
-        <div id="settingsTabs" class="tree">
-            <div class="treeNode expandable" id="initialNode">
-                <div class="nodeContent">
-                    <i class="nodeExpandButton">
-                        <img src="/images/windowControl/treeExpand.svg" class="nodeExpandImage" alt="">
-                    </i>
-                    <label class="nodeLabel">NodeLabel</label>
+    <div id="musicSettings">
+        <div class="flex row">
+            <!-- 设置标签页区域 -->
+            <div id="settingsTabs" class="tree">
+                <div class="treeNode expandable" id="initialNode">
+                    <div class="nodeContent">
+                        <i class="nodeExpandButton">
+                            <img src="/images/windowControl/treeExpand.svg" class="nodeExpandImage" alt="">
+                        </i>
+                        <label class="nodeLabel">NodeLabel</label>
+                    </div>
+                    <div class="nodeChildren"></div>
                 </div>
-                <div class="nodeChildren"></div>
+            </div>
+            <!-- 设置内容区域 -->
+            <div id="settingsContent">
+                <div class="contentPage" id="samplePage">
+                    <HeadersText id="sampleInfo" type="info" level="" content="提示信息"></HeadersText>
+                    <HeadersText id="sampleWarning" type="warning" level="" content="提示信息"></HeadersText>
+
+                    <NodeTitle id="sampleTitle" title="标题"></NodeTitle>
+                    <NodeSubTitle id="sampleSubTitle" title="子标题"></NodeSubTitle>
+
+                    <CheckBox id="sampleCheckbox" name="复选框" :checked="true"></CheckBox>
+
+                    <ColorPicker id="sampleColorpicker" name="颜色选择器" color="#0088FF"></ColorPicker>
+
+                    <Slider id="sampleSlider" name="滑动条" :min="0" :max="100" unit="%" :value="50"></Slider>
+
+                    <TextInput id="sampleTextinput" name="文本输入框" value="114514"></TextInput>
+
+                    <Dropbox id="sampleDropbox" name="下拉选择框" :options="[]"></Dropbox>
+
+                    <AccountCard id="sampleAccount" platform="netease" avatar="/images/library/defaultAvatar.svg" user="未登录"></AccountCard>
+
+                    <img class="image" id="sampleImage">
+                    <a class="link" id="sampleLink" target="_blank">11111</a>
+                    <label class="label" id="sampleLabel">114514</label>
+                </div>
             </div>
         </div>
-        <!-- 设置内容区域 -->
-        <div id="settingsContent">
-            <div class="contentPage" id="samplePage">
-                <HeadersText id="sampleInfo" type="info" level="" content="提示信息"></HeadersText>
-                <HeadersText id="sampleWarning" type="warning" level="" content="提示信息"></HeadersText>
-
-                <NodeTitle id="sampleTitle" title="标题"></NodeTitle>
-                <NodeSubTitle id="sampleSubTitle" title="子标题"></NodeSubTitle>
-
-                <CheckBox id="sampleCheckbox" name="复选框" :checked="true"></CheckBox>
-
-                <ColorPicker id="sampleColorpicker" name="颜色选择器" color="#0088FF"></ColorPicker>
-
-                <Slider id="sampleSlider" name="滑动条" :min="0" :max="100" unit="%" :value="50"></Slider>
-
-                <TextInput id="sampleTextinput" name="文本输入框" value="114514"></TextInput>
-
-                <Dropbox id="sampleDropbox" name="下拉选择框" :options="[]"></Dropbox>
-
-                <AccountCard id="sampleAccount" platform="netease" avatar="/images/library/defaultAvatar.svg" user="未登录"></AccountCard>
-
-                <img class="image" id="sampleImage">
-                <a class="link" id="sampleLink" target="_blank">11111</a>
-                <label class="label" id="sampleLabel">114514</label>
-            </div>
-        </div>
+        <!-- 页面底部占位 -->
+        <div id="settingsBlock"></div>
     </div>
 </template>

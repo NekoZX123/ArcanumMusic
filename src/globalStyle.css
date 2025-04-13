@@ -113,6 +113,14 @@ a {
 .text.grey {
     color: var(--default-grey);
 }
+/* 白色 */
+.text.white {
+    color: var(--default-white);
+}
+/* 发光 */
+.text.glow {
+    text-shadow: 0 0 2px var(--default-white);
+}
 
 /* flex */
 .flex {
@@ -234,7 +242,7 @@ a {
 }
 
 /* 页面内容 */
-#pageContent {
+#pageContainer {
     height: calc(100% - 2rem);
 
     overflow-x: hidden;
@@ -782,12 +790,8 @@ a {
         border-radius: 6px;
     }
 }
-#playProgress {
-    position: absolute;
-    width: calc(100% - 6px);
+.fluentProgress {
     height: 6px;
-    bottom: 4rem;
-    left: 3px;
 
     background: var(--default-lightgrey);
     border: none;
@@ -795,20 +799,26 @@ a {
 
     transition: all 300ms cubic-bezier(0.1, -0.25, 0.6, 1.5);
 }
-#playProgress:hover {
+#playProgress {
+    position: absolute;
+    width: calc(100% - 6px);
+    bottom: 4rem;
+    left: 3px;
+}
+.fluentProgress:hover {
     height: 12px;
 
     border-radius: 6px;
 }
-#playedCover {
+.fluentFilled {
     width: 50%;
-    
+
     background: var(--color-blue-deep);
     border-radius: 3px;
 
     transition: border-radius 300ms ease;
 }
-#playProgress:hover #playedCover {
+.fluentProgress:hover .fluentFilled {
     border-radius: 6px;
 }
 
@@ -872,6 +882,15 @@ a {
 
     background: transparent;
     border: none;
+    border-radius: 12px;
+
+    transition: all 200ms ease-in-out;
+}
+.playControl > img {
+    margin-top: 4px;
+}
+.playControl:hover {
+    background: var(--transparent-grey);
 }
 .playControl.large {
     width: 3rem;
@@ -880,6 +899,8 @@ a {
 .playControl.small {
     width: 2rem;
     height: 2rem;
+
+    border-radius: 8px;
 }
 
 #volumeControl {
@@ -902,7 +923,7 @@ a {
     height: 1rem;
     margin-top: calc(5px - 0.75rem);
 
-    background: #0088FF;
+    background: var(--color-blue-default);
     border-radius: 0.5rem;
 
     opacity: 0;
@@ -913,14 +934,15 @@ a {
     opacity: 1;
 }
 #volumeControl::-webkit-slider-runnable-track {
-    --fill-percentage: 50%;
+    --fill-percentage: 100%;
     appearance: none;
 
     position: absolute;
     width: 8rem;
     height: 6px;
 
-    background: linear-gradient(to right, #0088FF 0%, #0088FF var(--fill-percentage), #FFFFFF var(--fill-percentage));
+    background: linear-gradient(to right, var(--color-blue-default) 0%, 
+        var(--color-blue-default) var(--fill-percentage), #FFFFFF var(--fill-percentage));
     border-style: solid;
     border-color: rgba(126, 126, 126, 0.3);
     border-width: 1px;
@@ -1163,4 +1185,25 @@ a {
 }
 .popupButton.yellow:hover {
     background: var(--color-yellow-light);
+}
+
+/* 页脚占位 */
+#bottomBlock {
+    width: 100%;
+    height: 4rem;
+}
+
+#lyricsArea {
+    position: absolute;
+    width: 100%;
+    height: 100vh;
+    top: 0;
+
+    transform: translateY(100%);
+    transition: all 500ms ease-in-out;
+
+    z-index: 1000;
+}
+#lyricsArea.show {
+    transform: translateY(0);
 }
