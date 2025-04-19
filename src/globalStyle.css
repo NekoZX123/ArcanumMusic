@@ -252,8 +252,13 @@ a {
     transition: all 200ms ease-in-out;
 }
 .pageControl > img {
+    position: relative;
     width: 1.5rem;
     height: 1.5rem;
+    top: 1px;
+}
+#pageBack > img {
+    left: -3px;
 }
 .pageControl:hover {
     background: var(--transparent-grey);
@@ -444,10 +449,14 @@ a {
 .songlistCard.midlarge {
     width: 20rem;
     height: 8rem;
+
+    cursor: pointer;
 }
 .songlistCard.medium {
     width: 10rem;
     height: 12rem;
+
+    cursor: pointer;
 }
 .songlistCard:hover {
     background: var(--transparent-lightgrey);
@@ -657,6 +666,7 @@ a {
     margin: 1px 0;
 
     transition: all 200ms ease-in-out;
+    cursor: pointer;
 }
 .songlistCard.exlarge .songCard {
     left: 6px;
@@ -672,6 +682,8 @@ a {
     border-radius: 8px;
 
     margin-right: 6px;
+
+    cursor: pointer;
 }
 .songCard > .songInfo {
     align-items: flex-start;
@@ -703,7 +715,8 @@ a {
     position: relative;
     width: 1rem;
     height: 1rem;
-    left: -2px;
+    left: -1px;
+    top: 1px;
 }
 .songLine > .songPlay {
     display: block;
@@ -759,6 +772,7 @@ a {
     margin: 0 1.5rem;
 
     transition: all 200ms ease-in-out;
+    cursor: pointer;
 }
 .artistCard > img {
     width: 10rem;

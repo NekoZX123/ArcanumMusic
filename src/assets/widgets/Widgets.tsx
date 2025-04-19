@@ -53,14 +53,15 @@ const SonglistCard = defineComponent({
 // 歌曲卡片
 const SongCard = defineComponent({
     props: {
+        id: String,
         coverUrl: String,
         name: String,
         authors: String
     },
-    setup(props: { coverUrl: string, name: string, authors: string }) {
+    setup(props: { id: string, coverUrl: string, name: string, authors: string }) {
         return () => (
             <span class="songCard flex row">
-                <img class="songCover" src={props.coverUrl}></img>
+                <img class="songCover" src={props.coverUrl} onClick={() => changePage('single', true, props.id)}></img>
                 <span class="songInfo flex column">
                     <label class="text small bold">{props.name}</label>
                     <label class="text ultraSmall grey">{props.authors}</label>
@@ -101,12 +102,13 @@ const SongInfoLine = defineComponent({
 // 歌手卡片
 const ArtistCard = defineComponent({
     props: {
+        id: String,
         coverUrl: String,
         name: String
     },
-    setup(props: { coverUrl: string, name: string }) {
+    setup(props: { id: string, coverUrl: string, name: string }) {
         return () => (
-            <span class="artistCard flex column">
+            <span class="artistCard flex column" onClick={() => changePage('artist', true, props.id)}>
                 <img class="artistCover" src={props.coverUrl}></img>
                 <label class="text small">{props.name}</label>
             </span>

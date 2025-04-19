@@ -1,4 +1,4 @@
-#songlistPage {
+#singlePage {
     width: 100%;
 
     padding: 1rem 2rem;
@@ -6,7 +6,7 @@
     align-items: center;
 }
 
-#songlistInfo {
+#singleInfo {
     width: 100%;
 
     padding: 2rem;
@@ -14,14 +14,14 @@
     align-items: flex-end;
 }
 
-#songlistDetails {
+#songDetails {
     align-items: flex-start;
 }
-#songlistDetails > label {
+#songDetails > label {
     margin: 2px 0;
 }
 
-#songlistCover {
+#singleCover {
     width: 15rem;
     height: 15rem;
 
@@ -32,7 +32,7 @@
     margin-right: 12px;
 }
 
-#songlistContent {
+#content {
     width: 100%;
 
     padding-left: 2rem;

@@ -1,4 +1,4 @@
-#songlistPage {
+#artistPage {
     width: 100%;
 
     padding: 1rem 2rem;
@@ -6,7 +6,7 @@
     align-items: center;
 }
 
-#songlistInfo {
+#artistInfo {
     width: 100%;
 
     padding: 2rem;
@@ -14,26 +14,38 @@
     align-items: flex-end;
 }
 
-#songlistDetails {
+#artistDetails {
     align-items: flex-start;
 }
-#songlistDetails > label {
+#artistDetails > label {
     margin: 2px 0;
 }
 
-#songlistCover {
+#artistAvatar {
     width: 15rem;
     height: 15rem;
 
     border: none;
-    border-radius: 8px;
+    border-radius: 7.5rem;
     box-shadow: 0 0 5px var(--transparent-grey);
 
     margin-right: 12px;
 }
 
-#songlistContent {
+#artistCreations {
     width: 100%;
 
-    padding-left: 2rem;
+    align-items: center;
+}
+#artistCreations > div {
+    width: 100%;
+
+    align-items: center;
+}
+
+.partTitle {
+    width: 100%;
+
+    padding: 0 1rem;
+    margin-bottom: 6px;
 }

@@ -7,6 +7,13 @@
     padding-top: 1rem;
 }
 
+#dailyRecommends {
+    cursor: pointer;
+}
+#musicRadio {
+    cursor: default;
+}
+
 .text.sectionTitle {
     width: calc(100% - 2rem);
     margin: 1rem 0;
@@ -22,9 +29,29 @@
 
 .viewMore {
     cursor: pointer;
+
+    width: 8rem;
+
+    padding-left: 6px;
+
+    transition: all 200ms ease-out;
+}
+.viewMore::after {
+    content: ">";
+
+    top: -1px;
+
+    margin-left: 6px;
+
+    display: inline-block;
+
+    transition: all 200ms ease-out;
 }
 .viewMore:hover {
-    text-decoration: underline;
+    padding: 0;
+}
+.viewMore:hover::after {
+    margin-left: 18px;
 }
 
 #dailyRecommends {

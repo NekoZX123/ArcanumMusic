@@ -10,16 +10,31 @@ import Settings from '../../components/settings/Settings.vue';
 import Playlist from '../../components/playlist/Playlist.vue';
 
 import Songlist from "../../components/songlist/Songlist.vue";
+import Single from "../../components/single/Single.vue";
+import Artist from "../../components/artist/Artist.vue";
+import ArtistCollections from "../../components/collections/ArtistCollections.vue";
+import SonglistCollections from "../../components/collections/SonglistCollections.vue";
+import SingleCollections from "../../components/collections/SingleCollections.vue";
 
 // 应用各页面
-const appPageNames = ['home', 'library', 'search', 'settings', 'playlist', 'songlist'];
+const appPageNames = [
+    'home', 'library', 'search', 'settings', 
+    'playlist', 
+    'songlist', 'single', 'artist',
+    'artistCollections', 'songlistCollections', 'singleCollections'
+];
 var pageComponents: { [key: string]: any } = {
     'home': Home,
     'library': Library,
     'search': Search,
     'settings': Settings,
     'playlist': Playlist,
-    'songlist': Songlist
+    'songlist': Songlist,
+    'single': Single,
+    'artist': Artist,
+    'artistCollections': ArtistCollections,
+    'songlistCollections': SonglistCollections,
+    'singleCollections': SingleCollections
 };
 
 let currentPage = 'home';
@@ -53,9 +68,13 @@ function changePage(pageId: string, pushStack: boolean = true, idParam?: string)
                 pageApp = createApp(pageComponents[pageId], { query: searchBar.value });
             }
         }
-        else if (pageId === 'songlist') { // 传递歌单 ID
+        else if (pageId === 'songlist' || pageId === 'single' || pageId === 'artist') { // 传递详细信息 ID
             pageComponents[pageId].props = { id: idParam };
             pageApp = createApp(pageComponents[pageId], { id: idParam });
+        }
+        else if (pageId === 'artistCollections' || pageId === 'songlistCollections' || pageId === 'singleCollections') { // 传递集锦标题
+            pageComponents[pageId].props = { title: idParam, type: pageId.replace('Collections', '') };
+            pageApp = createApp(pageComponents[pageId], { title: idParam, type: pageId.replace('Collections', '') });
         }
         else {
             pageApp = createApp(pageComponents[pageId]);

@@ -270,10 +270,10 @@ onMounted(async () => {
                 <!-- 前进 / 后退 -->
                 <div class="flex row" id="backForward">
                     <button class="pageControl" id="pageBack" @click="pageBack">
-                        <img src="/images/windowControl/arrow.svg" style="transform: rotate(180deg);" alt="Back"/>
+                        <img src="/images/topbar/arrowLeft.svg" alt="Back"/>
                     </button>
                     <button class="pageControl" id="pageForawrd" @click="pageForward">
-                        <img src="/images/windowControl/arrow.svg" alt="Forward"/>
+                        <img src="/images/topbar/arrowRight.svg" alt="Forward"/>
                     </button>
                 </div>
 

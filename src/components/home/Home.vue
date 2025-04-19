@@ -3,6 +3,7 @@ import { onMounted } from 'vue';
 import './homeStyle.css';
 
 import { SonglistCard, SongCard, ArtistCard } from '../../assets/widgets/Widgets.tsx';
+import { changePage } from '../../assets/utilities/pageSwitcher.ts';
 
 onMounted(() => {
     console.log('Home.vue loaded');
@@ -15,7 +16,7 @@ onMounted(() => {
         <label class="text large bold sectionTitle">今日定制</label>
         <div class="flex row" id="homeRecommends">
             <!-- 今日推荐 -->
-            <div class="flex row songlistCard midlarge" id="dailyRecommends">
+            <div class="flex row songlistCard midlarge" id="dailyRecommends" @click="changePage('songlist', true, 'songlist@netease.recommends')">
                 <span class="cardHeader flex row">
                     <span class="cardInfo flex column">
                         <label class="text medium bold">今日推荐</label>
@@ -49,7 +50,7 @@ onMounted(() => {
         <!-- 推荐歌单 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">推荐歌单</label>
-            <a class="text small viewMore">查看更多 ></a>
+            <a class="text small viewMore" @click="changePage('songlistCollections', true, '推荐歌单')">查看更多</a>
         </div>
         <div id="songlistRecommends">
             <SonglistCard id="songlist@netease.114514" coverUrl="/images/player/testAlbum.png" name="List 01"></SonglistCard>
@@ -62,77 +63,77 @@ onMounted(() => {
         <!-- 推荐单曲 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">推荐单曲</label>
-            <a class="text small viewMore">查看更多 ></a>
+            <a class="text small viewMore" @click="changePage('singleCollections', true, '推荐单曲')">查看更多</a>
         </div>
         <div id="singleRecommends">
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 01" authors="Sample Text"></SongCard>
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 02" authors="Sample Text"></SongCard>
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 03" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 01" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 02" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 03" authors="Sample Text"></SongCard>
             
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 04" authors="Sample Text"></SongCard>
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 05" authors="Sample Text"></SongCard>
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 06" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 04" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 05" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 06" authors="Sample Text"></SongCard>
             
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 07" authors="Sample Text"></SongCard>
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 08" authors="Sample Text"></SongCard>
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 09" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 07" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 08" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 09" authors="Sample Text"></SongCard>
         </div>
 
         <!-- 推荐歌手 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">推荐歌手</label>
-            <a class="text small viewMore">查看更多 ></a>
+            <a class="text small viewMore" @click="changePage('artistCollections', true, '推荐歌手')">查看更多</a>
         </div>
         <div class="flex row" id="artistRecommends">
-            <ArtistCard coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
-            <ArtistCard coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
-            <ArtistCard coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
-            <ArtistCard coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
+            <ArtistCard id="artist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
+            <ArtistCard id="artist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
+            <ArtistCard id="artist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
+            <ArtistCard id="artist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
         </div>
 
         <!-- 排行榜 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">排行榜</label>
-            <a class="text small viewMore">查看更多 ></a>
+            <a class="text small viewMore" @click="changePage('songlistCollections', true, '排行榜')">查看更多</a>
         </div>
         <div class="flex row" id="rankings">
-            <SonglistCard id="netease.21854151" coverUrl="/images/player/testAlbum.png" name="Ranking 01"></SonglistCard>
-            <SonglistCard id="netease.21854152" coverUrl="/images/player/testAlbum.png" name="Ranking 02"></SonglistCard>
-            <SonglistCard id="netease.21854153" coverUrl="/images/player/testAlbum.png" name="Ranking 03"></SonglistCard>
-            <SonglistCard id="netease.21854154" coverUrl="/images/player/testAlbum.png" name="Ranking 04"></SonglistCard>
-            <SonglistCard id="netease.21854155" coverUrl="/images/player/testAlbum.png" name="Ranking 05"></SonglistCard>
+            <SonglistCard id="songlist@netease.21854151" coverUrl="/images/player/testAlbum.png" name="Ranking 01"></SonglistCard>
+            <SonglistCard id="songlist@netease.21854152" coverUrl="/images/player/testAlbum.png" name="Ranking 02"></SonglistCard>
+            <SonglistCard id="songlist@netease.21854153" coverUrl="/images/player/testAlbum.png" name="Ranking 03"></SonglistCard>
+            <SonglistCard id="songlist@netease.21854154" coverUrl="/images/player/testAlbum.png" name="Ranking 04"></SonglistCard>
+            <SonglistCard id="songlist@netease.21854155" coverUrl="/images/player/testAlbum.png" name="Ranking 05"></SonglistCard>
         </div>
 
         <!-- 新专辑 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">新专辑</label>
-            <a class="text small viewMore">查看更多 ></a>
+            <a class="text small viewMore" @click="changePage('songlistCollections', true, '新专辑')">查看更多</a>
         </div>
         <div class="flex row" id="newAlbums">
-            <SonglistCard id="netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 01"></SonglistCard>
-            <SonglistCard id="netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 02"></SonglistCard>
-            <SonglistCard id="netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 03"></SonglistCard>
-            <SonglistCard id="netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 04"></SonglistCard>
-            <SonglistCard id="netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 05"></SonglistCard>
+            <SonglistCard id="album@netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 01"></SonglistCard>
+            <SonglistCard id="album@netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 02"></SonglistCard>
+            <SonglistCard id="album@netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 03"></SonglistCard>
+            <SonglistCard id="album@netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 04"></SonglistCard>
+            <SonglistCard id="album@netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 05"></SonglistCard>
         </div>
 
         <!-- 新单曲 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">新歌速递</label>
-            <a class="text small viewMore">查看更多 ></a>
+            <a class="text small viewMore" @click="changePage('singleCollections', true, '新歌速递')">查看更多</a>
         </div>
         <div id="newSingles">
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 01" authors="Sample Text"></SongCard>
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 02" authors="Sample Text"></SongCard>
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 03" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 01" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 02" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 03" authors="Sample Text"></SongCard>
             
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 04" authors="Sample Text"></SongCard>
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 05" authors="Sample Text"></SongCard>
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 06" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 04" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 05" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 06" authors="Sample Text"></SongCard>
             
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 07" authors="Sample Text"></SongCard>
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 08" authors="Sample Text"></SongCard>
-            <SongCard coverUrl="/images/player/testAlbum.png" name="Song 09" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 07" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 08" authors="Sample Text"></SongCard>
+            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 09" authors="Sample Text"></SongCard>
         </div>
 
         <!-- 页面底部 -->

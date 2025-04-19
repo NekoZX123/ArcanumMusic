@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// Songlist.vue
+// 歌单 / 专辑详情页面
+
 import { onMounted, ref } from 'vue';
 
 import './songlistStyle.css';
@@ -21,7 +24,11 @@ const props = defineProps(
     }
 );
 
+const listType = ref('');
+
 onMounted(() => {
+    listType.value = props.id.includes('album') ? 'Album' : 'Songlist';
+
     console.log(`Songlist.vue loaded with songlist id ${props.id}`);
 });
 </script>
@@ -31,7 +38,8 @@ onMounted(() => {
             <img src="/images/player/testAlbum.png" id="songlistCover"/>
             <div class="flex column" id="songlistDetails">
                 <label class="text xxlarge bold">{{ listMetaData.name }}</label>
-                <label class="text medium">Songlist by {{ listMetaData.author }}</label>
+                <label class="text ultraSmall grey">{{ listType === 'Album' ? '专辑' : '歌单' }}</label>
+                <label class="text medium">{{ listType }} by {{ listMetaData.author }}</label>
                 <label class="text small">{{ listMetaData.description }}</label>
             </div>
         </div>

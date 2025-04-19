@@ -1,0 +1,29 @@
+#collectionsPage {
+    width: 100%;
+
+    padding: 1rem 2rem;
+
+    align-items: center;
+}
+
+#collectionsTitle {
+    width: 100%;
+
+    margin-bottom: 1rem;
+}
+
+.collectionsContent {
+    flex-wrap: wrap;
+
+    justify-content: center;
+    gap: 1.5rem;
+}
+.collectionsContent.artist {
+    gap: 1.5rem;
+}
+.collectionsContent.songlist {
+    gap: 1rem;
+}
+.collectionsContent.single {
+    gap: 6px;
+}
