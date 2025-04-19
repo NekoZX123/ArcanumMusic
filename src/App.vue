@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { createApp, onMounted, ref } from 'vue';
-import Home from './components/home/Home.vue';
-import Library from './components/library/Library.vue';
-import Search from './components/search/Search.vue';
-import Settings from './components/settings/Settings.vue';
 import Lyrics from './components/lyrics/Lyrics.vue';
 
 import { showNotify } from './assets/notifications/Notification.ts';
 import { showPopup } from './assets/notifications/popup.tsx';
 import { createPlayer } from './assets/player/player.ts';
+import { changePage, getCurrentPage, initialize, pageBack, pageForward } from './assets/utilities/pageSwitcher.ts';
 
 // 设置文件位置
 const configLocation = '\\ArcanumMusic\\settings.json';
@@ -29,15 +26,6 @@ function prepareSettings() {
         resolve(configData);
     });
 }
-
-// 应用各页面
-const appPageNames = ['home', 'library', 'search', 'settings'];
-var pageComponents: { [key: string]: any } = {
-    'home': Home,
-    'library': Library,
-    'search': Search,
-    'settings': Settings
-};
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -101,39 +89,24 @@ function titlebarMouseUp() {
 }
 
 // 页面挂载切换器
-var currentPage = 'home';
-var pageApp = createApp(Home);
+let latestPage = 'home';
 function onTabChange(event: any) {
     let target = event.target;
+    let currentPage = getCurrentPage();
     if (event.target.tagName === 'IMG') target = event.target.parentElement;
     if (target.id !== currentPage) {
-        let pageId = target.id;
+        changePage(target.id);
+    }
+}
+function togglePlaylist(_: MouseEvent) {
+    let currentPage = getCurrentPage();
 
-        let currentTab = document.getElementById(currentPage) as HTMLButtonElement;
-        let newTab = document.getElementById(pageId) as HTMLButtonElement;
-        if (currentTab) {
-            currentTab.classList.remove('current');
-            if (pageId !== 'settings') newTab.classList.add('current');
-        }
-
-        if (appPageNames.includes(pageId)) {
-            pageApp.unmount();
-
-            if (pageId === 'search') { // 传递搜索关键词
-                let searchBar = document.getElementById('search') as HTMLInputElement;
-                if (searchBar) {
-                    // console.log(searchBar.value);
-                    pageComponents[pageId].props = { query: searchBar.value };
-                    pageApp = createApp(pageComponents[pageId], { query: searchBar.value });
-                }
-            }
-            else {
-                pageApp = createApp(pageComponents[pageId]);
-            }
-
-            pageApp.mount('#pageContent');
-        }
-        currentPage = pageId;
+    if (currentPage === 'playlist') {
+        changePage(latestPage);
+    }
+    else {
+        latestPage = currentPage;
+        changePage('playlist');
     }
 }
 
@@ -162,7 +135,7 @@ function popupCallback(code: number) {
 }
 
 // 当前音乐信息
-const musicMetaInfo = ref(createPlayer(['volumeControl', 'lyricsVolume']));
+const playerMetaInfo = ref(createPlayer(['volumeControl', 'lyricsVolume']));
 const progressTooltipOffset = ref('left: 0');
 
 // 播放进度调整
@@ -199,8 +172,8 @@ function adjustPlayProgress(event: MouseEvent) {
         if (progress > 1) progress = 1;
 
         // 设置播放进度文字
-        let playProgress = Math.round(musicMetaInfo.value.duration * progress);
-        musicMetaInfo.value.updateProgress(playProgress);
+        let playProgress = Math.round(playerMetaInfo.value.duration * progress);
+        playerMetaInfo.value.updateProgress(playProgress);
     }
 }
 
@@ -224,7 +197,7 @@ function adjustVolume(event: MouseEvent) {
     let volumeBar = document.getElementById('volumeControl') as HTMLInputElement;
     if (!volumeBar) return;
     
-    musicMetaInfo.value.setVolume(Number(volumeBar.value));
+    playerMetaInfo.value.setVolume(Number(volumeBar.value));
 }
 
 // 切换歌词面板
@@ -244,7 +217,7 @@ onMounted(async () => {
     appConfig = JSON.parse(configData);
     console.log(appConfig);
 
-    pageApp.mount('#pageContent');
+    initialize();
 
     // 测试通知
     showNotify('Notifyyyyyy', 'success', 'Welcome!', 'Welcome to Arcanum Music!', 3000);
@@ -262,7 +235,8 @@ onMounted(async () => {
     if (lyricsArea) lyricsArea.style = 'display: none;';
 
     // 初始化播放器
-    const player = musicMetaInfo.value;
+    const player = playerMetaInfo.value;
+    // [For Debug]
     player?.updateDuration(114);
     player?.updateProgress(0);
 });
@@ -293,6 +267,17 @@ onMounted(async () => {
 
         <div id="appMain">
             <div class="flex row" id="windowTop">
+                <!-- 前进 / 后退 -->
+                <div class="flex row" id="backForward">
+                    <button class="pageControl" id="pageBack" @click="pageBack">
+                        <img src="/images/windowControl/arrow.svg" style="transform: rotate(180deg);" alt="Back"/>
+                    </button>
+                    <button class="pageControl" id="pageForawrd" @click="pageForward">
+                        <img src="/images/windowControl/arrow.svg" alt="Forward"/>
+                    </button>
+                </div>
+
+                <!-- 窗口标签页 -->
                 <div class="flex row" id="windowTabs">
                     <button class="text small tabWidget pageTab current" id="home" @click="onTabChange">首页</button>
                     <button class="text small tabWidget pageTab" id="library" @click="onTabChange">音乐库</button>
@@ -308,6 +293,7 @@ onMounted(async () => {
                     </button>
                 </span>
 
+                <!-- 设置 -->
                 <button id="settings" @click="onTabChange">
                     <img src="/images/topbar/settings.svg" alt="Application settings"/>
                 </button>
@@ -323,15 +309,15 @@ onMounted(async () => {
         <!-- 播放器控制栏 -->
         <div class="flex column" id="playControlContainer">
             <div class="fluentProgress flex row" id="playProgress" @mousedown="startProgressAdjust" @mousemove="adjustPlayProgress">
-                <div class="fluentFilled" id="playedCover" :style="`width: ${musicMetaInfo.progressPercentage}%`"></div>
+                <div class="fluentFilled" id="playedCover" :style="`width: ${playerMetaInfo.progressPercentage}%`"></div>
             </div>
             <div class="flex row" id="playControlBar">
                 <!-- 当前歌曲信息 -->
                 <div class="flex row" id="currentSong">
-                    <img class="currentSongCover" :src="musicMetaInfo.coverUrl"/>
+                    <img class="currentSongCover" :src="playerMetaInfo.coverUrl"/>
                     <span class="flex column">
-                        <label class="text small bold">{{ musicMetaInfo.name }}</label>
-                        <label class="text ultraSmall">{{ musicMetaInfo.authors }}</label>
+                        <label class="text small bold">{{ playerMetaInfo.name }}</label>
+                        <label class="text ultraSmall">{{ playerMetaInfo.authors }}</label>
                     </span>
                 </div>
 
@@ -350,14 +336,17 @@ onMounted(async () => {
 
                 <!-- 其他控制 / 歌词 -->
                 <div class="flex row" id="controlRightBar">
-                    <button class="playControl small" id="repeat">
-                        <img src="/images/player/repeat.svg" alt="Toggle repeat"/>
+                    <button class="playControl small" id="playlist" @click="togglePlaylist">
+                        <img src="/images/player/playlist.svg" alt="Toggle playlist"/>
                     </button>
-                    <button class="playControl small" id="shuffle">
-                        <img src="/images/player/shuffle.svg" alt="Toggle shuffle"/>
+                    <button class="playControl small" id="repeat" @click="playerMetaInfo.toggleRepeat">
+                        <img :src="playerMetaInfo.repeatStateImage" alt="Toggle repeat"/>
+                    </button>
+                    <button class="playControl small" id="shuffle" @click="playerMetaInfo.toggleShuffle">
+                        <img :src="playerMetaInfo.shuffleStateImage" alt="Toggle shuffle"/>
                     </button>
                     <span class="flex row">
-                        <img class="playControl small" :src="musicMetaInfo.volumeLevel"/>
+                        <img class="playControl small" :src="playerMetaInfo.volumeLevel" @click="playerMetaInfo.toggleMute"/>
                         <input type="range" id="volumeControl" min="0" max="100" value="100" step="1" @mousemove="adjustVolume"/>
                     </span>
                     <button class="playControl small" id="lyrics" @click="showLyrics">
@@ -376,7 +365,7 @@ onMounted(async () => {
 
         <!-- 播放进度标签 -->
         <div class="text ultraSmall flex column" id="progressTooltip" :style="progressTooltipOffset">
-            {{ `${musicMetaInfo.playedTimeText} / ${musicMetaInfo.durationText}` }}
+            {{ `${playerMetaInfo.playedTimeText} / ${playerMetaInfo.durationText}` }}
         </div>
 
         <!-- 歌词面板 -->

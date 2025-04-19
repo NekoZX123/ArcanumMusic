@@ -1,0 +1,36 @@
+#songlistPage {
+    width: 100%;
+
+    padding: 1rem 2rem;
+
+    align-items: center;
+}
+
+#songlistInfo {
+    width: 100%;
+
+    padding: 2rem;
+
+    align-items: flex-end;
+}
+
+#songlistDetails {
+    align-items: flex-start;
+}
+
+#songlistCover {
+    width: 15rem;
+    height: 15rem;
+
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 0 5px var(--transparent-grey);
+
+    margin-right: 12px;
+}
+
+#songlistContent {
+    width: 100%;
+
+    padding-left: 2rem;
+}

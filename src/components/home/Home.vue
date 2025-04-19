@@ -52,23 +52,11 @@ onMounted(() => {
             <a class="text small viewMore">查看更多 ></a>
         </div>
         <div id="songlistRecommends">
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 01"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 02"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 03"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 04"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 05"></SonglistCard>
-            
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 06"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 07"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 08"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 09"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 10"></SonglistCard>
-            
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 11"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 12"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 13"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 14"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 15"></SonglistCard>
+            <SonglistCard id="songlist@netease.114514" coverUrl="/images/player/testAlbum.png" name="List 01"></SonglistCard>
+            <SonglistCard id="songlist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="List 02"></SonglistCard>
+            <SonglistCard id="songlist@netease.123456" coverUrl="/images/player/testAlbum.png" name="List 03"></SonglistCard>
+            <SonglistCard id="songlist@netease.789000" coverUrl="/images/player/testAlbum.png" name="List 04"></SonglistCard>
+            <SonglistCard id="songlist@netease.123475891" coverUrl="/images/player/testAlbum.png" name="List 05"></SonglistCard>
         </div>
 
         <!-- 推荐单曲 -->
@@ -108,11 +96,11 @@ onMounted(() => {
             <a class="text small viewMore">查看更多 ></a>
         </div>
         <div class="flex row" id="rankings">
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="Ranking 01"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="Ranking 02"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="Ranking 03"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="Ranking 04"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="Ranking 05"></SonglistCard>
+            <SonglistCard id="netease.21854151" coverUrl="/images/player/testAlbum.png" name="Ranking 01"></SonglistCard>
+            <SonglistCard id="netease.21854152" coverUrl="/images/player/testAlbum.png" name="Ranking 02"></SonglistCard>
+            <SonglistCard id="netease.21854153" coverUrl="/images/player/testAlbum.png" name="Ranking 03"></SonglistCard>
+            <SonglistCard id="netease.21854154" coverUrl="/images/player/testAlbum.png" name="Ranking 04"></SonglistCard>
+            <SonglistCard id="netease.21854155" coverUrl="/images/player/testAlbum.png" name="Ranking 05"></SonglistCard>
         </div>
 
         <!-- 新专辑 -->
@@ -121,11 +109,11 @@ onMounted(() => {
             <a class="text small viewMore">查看更多 ></a>
         </div>
         <div class="flex row" id="newAlbums">
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="Album 01"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="Album 02"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="Album 03"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="Album 04"></SonglistCard>
-            <SonglistCard coverUrl="/images/player/testAlbum.png" name="Album 05"></SonglistCard>
+            <SonglistCard id="netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 01"></SonglistCard>
+            <SonglistCard id="netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 02"></SonglistCard>
+            <SonglistCard id="netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 03"></SonglistCard>
+            <SonglistCard id="netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 04"></SonglistCard>
+            <SonglistCard id="netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 05"></SonglistCard>
         </div>
 
         <!-- 新单曲 -->

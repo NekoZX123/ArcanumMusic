@@ -94,6 +94,9 @@ a {
     font-weight: 200;
 }
 /* 大小 */
+.text.xxlarge {
+    font-size: 35pt;
+}
 .text.extraLarge {
     font-size: 30pt;
 }
@@ -230,6 +233,30 @@ a {
     height: 2rem;
 
     padding: 0 5rem;
+}
+
+/* 前进 / 后退按钮 */
+.pageControl {
+    appearance: none;
+
+    width: 2rem;
+    height: 2rem;
+    left: -3px;
+
+    background: transparent;
+    border: none;
+    border-radius: 1rem;
+
+    margin: 0 3px;
+
+    transition: all 200ms ease-in-out;
+}
+.pageControl > img {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+.pageControl:hover {
+    background: var(--transparent-grey);
 }
 
 #windowTabs {
@@ -678,7 +705,45 @@ a {
     height: 1rem;
     left: -2px;
 }
+.songLine > .songPlay {
+    display: block;
+}
+.songLine > .songPlay > img {
+    top: 1px;
+    left: -1px;
+}
 
+/* 整行歌曲卡片 */
+.songLine {
+    width: calc(100% - 2rem);
+    height: 3rem;
+
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+
+    align-items: center;
+
+    margin: 3px 0;
+    padding: 6px;
+
+    transition: all 200ms ease-in-out;
+}
+.songLine:hover {
+    background: var(--color-blue-light);
+}
+.songLine > .songCover {
+    width: calc(3rem - 12px);
+    height: calc(3rem - 12px);
+
+    border: none;
+    border-radius: 6px;
+
+    margin: 0 3px;
+}
+.songLine > .songInfo {
+    flex: 1 0;
+}
 
 /* 歌手卡片 */
 .artistCard {
@@ -901,6 +966,10 @@ a {
     height: 2rem;
 
     border-radius: 8px;
+}
+
+#controlRightBar > * {
+    margin: 0 3px;
 }
 
 #volumeControl {

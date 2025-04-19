@@ -1,0 +1,15 @@
+#playlistPage {
+    width: 100%;
+
+    padding: 2rem;
+}
+
+/* 播放列表分块 */
+.playlistPart {
+    align-items: center;
+}
+.playlistSubtitle {
+    width: 100%;
+    
+    margin-bottom: 0.5rem;
+}

@@ -21,26 +21,53 @@ function timeFormat(timeSeconds: number) {
     return result;
 }
 
+// 循环 / 随机播放图片链接常量池
+const IMAGES_REPEAT = ['/images/player/repeat.svg', '/images/player/repeat.svg', '/images/player/repeatSingle.svg'];
+const IMAGES_SHUFFLE = ['/images/player/shuffle.svg', '/images/player/shuffle.svg'];
+
 class Player {
+    // 播放列表信息
+    playlist: object;
+
+    // 当前歌曲信息
     name: string;
     authors: string;
     coverUrl: string;
 
+    // 时间信息
     duration: number;
     durationText: string;
     playedTime: number;
     playedTimeText: string;
     progressPercentage: number;
 
+    // 音量信息
     volume: number;
     volumeLevel: string;
     volumeBarIds: string[];
+    isMuted: boolean;
+    latestVolume: number;
 
+    // 循环 / 随机信息
+    // 循环播放: 0 => 不循环; 1 => 列表循环; 2 => 单曲循环
+    repeatState: number;
+    repeatStateImage: string;
+    // 随机播放: 0 => 不随机; 1 => 随机;
+    shuffleState: number;
+    shuffleStateImage: string;
+
+    // 播放链接
     url: string;
 
     constructor(volumeBarIds: string[] = []) {
-        this.name = 'Arcanum';
-        this.authors = 'NekoZX123';
+        this.playlist = {
+            current: '',
+            breakIn: [],
+            waitList: []
+        };
+
+        this.name = '未在播放';
+        this.authors = 'undefined';
         this.coverUrl = '/images/player/testAlbum.png';
 
         this.playedTime = 0;
@@ -52,6 +79,8 @@ class Player {
         this.volume = 100;
         this.volumeLevel = '/images/player/volume_04.svg';
         this.volumeBarIds = volumeBarIds;
+        this.isMuted = false;
+        this.latestVolume = 100;
 
         let volumeBarStyle = document.createElement('style');
         volumeBarStyle.id = 'globalVolumeFill';
@@ -66,8 +95,14 @@ class Player {
         });
         volumeBarStyle.innerHTML = volumeFill;
 
+        this.repeatState = 0;
+        this.repeatStateImage = IMAGES_REPEAT[0];
+        this.shuffleState = 0;
+        this.shuffleStateImage = IMAGES_SHUFFLE[0];
+
         this.url = 'https://example.com/example.flac';
     }
+
     // 更新歌曲长度
     updateDuration(time: number) {
         this.duration = time;
@@ -93,6 +128,8 @@ class Player {
         else if (value > 33 && value <= 67) level = 3;
         else level = 4;
 
+        if (this.isMuted) this.isMuted = false;
+
         this.volume = value;
         this.volumeLevel = `/images/player/volume_0${level}.svg`;
 
@@ -112,6 +149,58 @@ class Player {
 
             volumeBarStyle.innerHTML = fillStyle;
         }
+    }
+    // 切换静音
+    toggleMute() {
+        if (this.isMuted) {
+            this.setVolume(this.latestVolume);
+        }
+        else {
+            this.latestVolume = this.volume;
+            this.setVolume(0);
+            this.isMuted = true;
+        }
+    }
+
+    // 切换循环 / 随机状态
+    toggleRepeat() {
+        let state = this.repeatState + 1
+        if (state > 2) state = 0;
+
+        if (this.shuffleState === 1) {
+            this.setShuffleState(0);
+        }
+
+        this.setRepeatState(state);
+    }
+    toggleShuffle() {
+        let state = this.shuffleState === 1 ? 0 : 1;
+
+        if (this.repeatState) {
+            this.setRepeatState(0);
+        }
+
+        this.setShuffleState(state);
+    }
+    setRepeatState(state: number) {
+        // console.log(`[Debug] Repeat state: ${state}`);
+        if (state < 0 || state > 2) {
+            console.error(`[Error] player.ts error: unknown repeat state: ${state}`);
+            return;
+        }
+
+        this.repeatState = state;
+        this.repeatStateImage = IMAGES_REPEAT[state];
+    }
+    setShuffleState (state: number) {
+        // console.log(`[Debug] Shuffle state: ${state}`);
+        if (state !== 0 && state !== 1) {
+            console.error(`[Error] player.ts error: unknown shuffle state: ${state}`);
+            return;
+        }
+
+        this.shuffleState = state;
+        this.shuffleStateImage = IMAGES_SHUFFLE[state];
     }
 }
 

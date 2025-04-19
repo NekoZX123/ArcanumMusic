@@ -103,7 +103,7 @@ onMounted(() => {
                             <label class="text medium white bold" id="songAuthors">{{ songData?.authors }}</label>
                         </div>
                         <div id="volumeInLyrics">
-                            <button id="toggleMute">
+                            <button id="toggleMute" @click="songData?.toggleMute">
                                 <img :src="songData?.volumeLevel"/>
                             </button>
                             <input type="range" id="lyricsVolume" min="0" max="100" value="100" step="1" @mousemove="adjustVolume"/>
@@ -119,8 +119,8 @@ onMounted(() => {
                         <label class="text ultraSmall bold white">{{ songData?.durationText }}</label>
                     </span>
                     <span class="flex row" id="controlBar">
-                        <button class="playControl small" id="toggleRepeat">
-                            <img src="/images/player/repeat.svg" alt="Toggle repeat"/>
+                        <button class="playControl small" id="toggleRepeat" @click="songData?.toggleRepeat">
+                            <img :src="songData?.repeatStateImage" alt="Toggle repeat"/>
                         </button>
                         <button class="playControl" id="previous">
                             <img src="/images/player/previous.svg" alt="Previous song"/>
@@ -131,8 +131,8 @@ onMounted(() => {
                         <button class="playControl" id="next">
                             <img src="/images/player/next.svg" alt="Next song"/>
                         </button>
-                        <button class="playControl small" id="toggleShuffle">
-                            <img src="/images/player/shuffle.svg" alt="Toggle shuffle"/>
+                        <button class="playControl small" id="toggleShuffle" @click="songData?.toggleShuffle">
+                            <img :src="songData?.shuffleStateImage" alt="Toggle shuffle"/>
                         </button>
                     </span>
                 </div>
