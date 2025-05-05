@@ -5,6 +5,7 @@ export interface IElectronAPI {
     minimizeWindow: () => Promise,
     toggleMaximize: () => Promise,
     closeWindow: () => Promise,
+    closeWindowById: (windowId: Number) => Promise,
     
     getWindowRect: () => Promise,
     moveWindow: (x: Number, y: Number) => Promise,
@@ -17,6 +18,8 @@ export interface IElectronAPI {
     getAppDataLocal: () => Promise,
     getAppEnvironment: () => Promise,
     getAsarLocation: () => Promise
+
+    listenCookie: (windowId: Number, targetCookies: String[]) => Promise
 }
 
 declare global {

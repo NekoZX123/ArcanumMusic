@@ -1,7 +1,43 @@
 import { defineComponent } from "vue";
 
-import { showPopup } from "../notifications/popup";
+import { closePopup, showPopup } from "../notifications/popup";
 import { showNotify } from "../notifications/Notification";
+
+import { storeAccountInfo, readAccountInfo, cleanAccountInfo, setAccountInfo } from "../utilities/accountManager.ts";
+
+// 各平台登录信息
+const initialTokens: { [type: string]: any } = {
+    "netease": {
+        "MUSIC_U": ""
+    },
+    "qqmusic": {
+        "uin": "",
+        "qm_keyst": "",
+        "qqmusic_key": ""
+    },
+    "kuwo": {
+        "userid": ""
+    },
+    "kugou": {
+        "KuGoo": ""
+    }
+}
+let platformTokens: { [type: string]: any } = {
+    "netease": {
+        "MUSIC_U": ""
+    },
+    "qqmusic": {
+        "uin": "",
+        "qm_keyst": "",
+        "qqmusic_key": ""
+    },
+    "kuwo": {
+        "userid": "",
+    },
+    "kugou": {
+        "KuGoo": ""
+    }
+}
 
 // 各平台信息常量池
 
@@ -29,13 +65,57 @@ const platformLinks: { [type: string]: string } = {
     "kugou": "https://www.kugou.com/"
 }
 
+// 平台 cookie 监听目标
+const platformCookieTargets: { [type: string]: string[] } = {
+    "netease": ["MUSIC_U"],
+    "qqmusic": ["uin", "qqmusic_key", "qm_keyst"],
+    "kuwo": ["userid", "uname3", "pic3"],
+    "kugou": ["KuGoo"]
+}
+
+// 用户头像 / 昵称获取 / 设置
+function displayAccount(platform: string, nickname: string, avatar: string) {
+    const accountButton = document.getElementById(`login.${platform}`);
+    if (!accountButton || !accountButton.parentElement) return;
+
+    const accountWidget = accountButton.parentElement;
+
+    const accountAvatar = accountWidget.querySelector('.accountAvatar') as HTMLImageElement;
+    const accountNickname = accountWidget.querySelector('.accountInfo .text.small') as HTMLLabelElement;
+
+    console.log(accountAvatar, accountNickname);
+    accountAvatar.src = avatar;
+    accountNickname.innerHTML = nickname;
+}
+
 // 账户登录功能
 
+// 登录取消
 function loginCancelled() {
     showNotify('arcanummusic.accounts.logincancelled', 'critical', '登录失败', '登录请求已被用户取消', 3000);
 }
 
-function platformLogin(platform: string) {
+// 登出指定平台
+function platformLogout(platform: string) {
+    platformTokens[platform] = initialTokens[platform];
+
+    cleanAccountInfo(platform);
+    displayAccount(platform, '未登录', '/images/library/defaultAvatar.svg');
+
+    showNotify('arcanummusic.accounts.logout', 'success', '登出成功!', `${platformNames[platform]} 已登出`, 3000);
+
+    let loginButton = document.getElementById(`login.${platform}`) as HTMLButtonElement;
+    if (loginButton) {
+        loginButton.innerHTML = '登入';
+
+        loginButton.onclick = () => {
+            platformLogin(platform);
+        }
+    }
+}
+
+// 登录指定平台
+async function platformLogin(platform: string) {
     const targetLink = platformLinks[platform];
     if (!targetLink) {
         console.error(`[Error] Unknown music platform: ${platform}`);
@@ -44,7 +124,51 @@ function platformLogin(platform: string) {
 
     showPopup('info', 'cancel', '请登录', '应用将打开一个新窗口, 请在此窗口中登录对应平台', [''], loginCancelled);
 
-    window.electron.createWindow(`Arcanum Music - ${platformNames[platform]} 账号登录`, targetLink);
+    const loginWindowId = await window.electron.createWindow(`Arcanum Music - ${platformNames[platform]} 账号登录`, targetLink);
+
+    // 监听 cookie 变化
+    let cookiePromise = window.electron.listenCookie(loginWindowId, platformCookieTargets[platform]);
+
+    // 获取到指定 cookie 后关闭提示弹窗与登录窗口
+    cookiePromise.then(async (userData: { userData?: { avatarUrl?: string, nickname?: string }, cookies: object }) => {
+        console.log(`[Debug] User info received: ${JSON.stringify(userData)}`);
+
+        // 设置用户信息
+        setAccountInfo(platform, userData);
+        storeAccountInfo(platform);
+
+        // 获取用户信息
+        if (platform === 'netease' && userData.userData) { // 网易云音乐 - 获取 `localStorage` 中的用户信息
+            const avatarUrl = userData.userData.avatarUrl || '/images/library/defaultAvatar.svg';
+            const nickname = userData.userData.nickname || '未知用户';
+            displayAccount(platform, nickname, avatarUrl);
+        }
+        else if (platform === 'qqmusic' && userData.cookies) { // QQ 音乐 - 网络请求用户信息
+        }
+        else if (platform === 'kuwo' && userData.userData) {
+            console.log(userData);
+            const avatarUrl = userData.userData.avatarUrl || '/images/library/defaultAvatar.svg';
+            const nickname = userData.userData.nickname || '未知用户';
+            displayAccount(platform, nickname, avatarUrl);
+        }
+
+        closePopup(0, () => {
+            showNotify('arcanummusic.accounts.loginsuccess', 'success', 
+                '登录成功!', `${platformNames[platform]} 登录成功`, 3000);
+        });
+
+        window.electron.closeWindowById(loginWindowId);
+
+        // 更改按钮绑定事件
+        let loginButton = document.getElementById(`login.${platform}`) as HTMLButtonElement;
+        if (loginButton) {
+            loginButton.innerHTML = '登出';
+
+            loginButton.onclick = () => {
+                platformLogout(platform);
+            }
+        }
+    });
 }
 
 // 账号登录组件
@@ -74,4 +198,4 @@ const AccountCard = defineComponent({
     }
 });
 
-export { AccountCard, platformLogin };
+export { AccountCard, readAccountInfo, platformLogin, platformLogout };

@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
 
-import { AccountCard, platformLogin } from '../../assets/widgets/Account.tsx';
+import { AccountCard, platformLogin, platformLogout, readAccountInfo } from '../../assets/widgets/Account.tsx';
 import { HeadersText, NodeTitle, NodeSubTitle, CheckBox, ColorPicker, Slider, TextInput, Dropbox } from '../../assets/widgets/Settings.tsx';
 
 import './settingsStyle.css';
 import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
+import { setAccountInfo } from '../../assets/utilities/accountManager.ts';
 
 // 平台图标信息
 const platformIcons: { [type: string]: string } = {
@@ -20,25 +21,6 @@ const platformNames: { [type: string]: string } = {
     "qqmusic": "QQ音乐",
     "kuwo": "酷我音乐",
     "kugou": "酷狗音乐"
-}
-// 测试用户数据
-var userData: { [type: string]: any } = {
-    'netease': {
-        'avatar': '/images/library/defaultAvatar.svg',
-        'user': '未登录'
-    },
-    'qqmusic': {
-        'avatar': '/images/library/defaultAvatar.svg',
-        'user': '未登录'
-    },
-    'kuwo': {
-        'avatar': '/images/library/defaultAvatar.svg',
-        'user': '未登录'
-    },
-    'kugou': {
-        'avatar': '/images/library/defaultAvatar.svg',
-        'user': '未登录'
-    }
 }
 
 /* 树形结构组件点击 */
@@ -177,7 +159,7 @@ function setupPage(depth: string[], settingsObject: any) {
 }
 
 // 获取节点结构
-function getNodeStructure(depth: string[], node: any) {
+async function getNodeStructure(depth: string[], node: any) {
     // 换行符 - 跳过
     if (!node.nodeName) return;
 
@@ -198,26 +180,50 @@ function getNodeStructure(depth: string[], node: any) {
         // 账户登录框
         if (node.nodeName === 'account') {
             let platform = node.getAttribute('id');
-            // console.log(platform);
-            let accountData = userData[platform];
-            let avatarLink = accountData.avatar;
-            let userName = accountData.user;
 
-            let imageContainer = optionElem.querySelector('.accountImageContainer');
-            let infoContainer = optionElem.querySelector('.accountInfo');
-            let loginButton = optionElem.querySelector('.accountManage') as HTMLButtonElement;
+            const imageContainer = optionElem.querySelector('.accountImageContainer');
+            const infoContainer = optionElem.querySelector('.accountInfo');
+            const loginButton = optionElem.querySelector('.accountManage') as HTMLButtonElement;
 
-            imageContainer.childNodes[0].src = avatarLink;
             imageContainer.childNodes[1].src = platformIcons[platform];
 
-            infoContainer.childNodes[0].innerText = userName;
-            infoContainer.childNodes[1].innerText = platformNames[platform];
+            infoContainer.childNodes[0].innerText = platformNames[platform];
 
             loginButton.id = `login.${platform}`;
-            // 绑定登录按钮触发事件
-            loginButton.addEventListener('click', () => {
-                platformLogin(platform);
-            });
+
+            // 检测是否登录
+            const user = await readAccountInfo(platform);
+            // console.log(user);
+            if (user && user.userData) {
+                const userData = user.userData;
+                const avatarUrl = userData.avatarUrl || '/images/library/defaultAvatar.svg';
+                const nickname = userData.nickname || '未知用户';
+
+                setAccountInfo(platform, user);
+                imageContainer.childNodes[0].src = avatarUrl;
+                infoContainer.childNodes[1].innerText = nickname;
+
+                // 更改按钮绑定事件
+                if (loginButton) {
+                    loginButton.innerHTML = '登出';
+
+                    loginButton.onclick = () => {
+                        platformLogout(platform);
+                    }
+                }
+            }
+            else {
+                let avatarLink = '/images/library/defaultAvatar.svg';
+                let userName = '未登录';
+
+                imageContainer.childNodes[0].src = avatarLink;
+                infoContainer.childNodes[1].innerText = userName;
+
+                // 绑定登录按钮触发事件
+                loginButton.onclick = () => {
+                    platformLogin(platform);
+                }
+            }
 
             return optionElem;
         }
@@ -340,7 +346,7 @@ function getNodeStructure(depth: string[], node: any) {
             optionBlock.appendChild(subtitleNode);
         }
 
-        let children = getNodeStructure([...depth], subnode); // 递归创建子节点
+        let children = await getNodeStructure([...depth], subnode); // 递归创建子节点
         if (children) {
             optionBlock.appendChild(children);
         }
@@ -351,7 +357,7 @@ function getNodeStructure(depth: string[], node: any) {
 }
 
 // 绘制页面内容
-function createPage(prefix: string[], pageXml: any) {
+async function createPage(prefix: string[], pageXml: any) {
     if (pageXml.nodeName !== 'page') {
         console.error('[Error] Unrecognized page xml structure type: ' + pageXml.nodeName);
         return;
@@ -377,7 +383,7 @@ function createPage(prefix: string[], pageXml: any) {
         partTitle.innerText = node.getAttribute('title');
 
         partNode.appendChild(partTitle);
-        partNode.appendChild(getNodeStructure(depthList.slice(0, depthList.length - 1), node));
+        partNode.appendChild(await getNodeStructure(depthList.slice(0, depthList.length - 1), node));
 
         pageNode.appendChild(partNode);
 

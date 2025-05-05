@@ -22,7 +22,8 @@
         "vue": "^3.5.13"
     },
     "devDependencies": {
-        "@types/node": "^22.13.4",
+        "@types/crypto-js": "^4.2.2",
+        "@types/node": "^22.15.3",
         "@vitejs/plugin-vue": "^5.2.1",
         "@vitejs/plugin-vue-jsx": "^4.1.1",
         "@vue/tsconfig": "^0.7.0",
@@ -31,6 +32,7 @@
         "cookie": "^1.0.2",
         "cors": "^2.8.5",
         "crypto": "^1.0.1",
+        "crypto-js": "^4.2.0",
         "cryptojs": "^2.5.3",
         "electron": "^34.1.1",
         "electron-builder": "^25.1.8",

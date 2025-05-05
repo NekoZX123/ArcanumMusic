@@ -799,9 +799,6 @@ a {
 
     margin-top: 1rem;
 }
-.musicBox.types > .musicContainer {
-    width: max-content;
-}
 .musicContainer#userPlaylists {
     min-height: calc(100vh - 13rem);
 }
@@ -810,10 +807,13 @@ a {
     position: relative;
     width: 100%;
 
+    flex-wrap: wrap;
+    gap: 1.5rem;
+
     display: none;
 }
 .musicBox.current {
-    display: grid;
+    display: flex;
 }
 /* 类型选择器 */
 .musicBox.types {
@@ -825,11 +825,11 @@ a {
 }
 /* 单曲 */
 .musicBox.singles {
-    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
 }
 /* 歌单 / 专辑 */
 .musicBox.songlists {
-    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
 }
 
 /* 播放控制 */

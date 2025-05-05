@@ -1,0 +1,27 @@
+{
+    "comm": {
+        "cv": 4747474,
+        "ct": 24,
+        "format": "json",
+        "inCharset": "utf-8",
+        "outCharset": "utf-8",
+        "notice": 0,
+        "platform": "yqq.json",
+        "needNewCode": 1,
+        "uin": "<uin>",
+        "g_tk_new_20200303": 1201561931,
+        "g_tk": 1201561931
+    },
+    "req_1": {
+        "method": "DoSearchForQQMusicDesktop",
+        "module": "music.search.SearchCgiService",
+        "param": {
+            "remoteplace": "txt.yqq.top",
+            "searchid": "<searchid>",
+            "search_type": 0,
+            "query": "<query>",
+            "page_num": 1,
+            "num_per_page": 10
+        }
+    }
+}

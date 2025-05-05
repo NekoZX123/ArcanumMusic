@@ -4,7 +4,7 @@ import { mkdir, copyFileSync } from 'fs';
 
 import { startService, stopService } from './service.js';
 import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
-
+import { resolve } from 'path';
 const __dirname = fileURLToPath(import.meta.url);
 
 const environment = 'dev';
@@ -39,8 +39,32 @@ async function getAppConfig() {
     return await readLocalFile(null, confPath);
 }
 
+// 创建 / 获取账号数据存放目录
+async function prepareAccountStorage() {
+    let prefix = getAppDataLocal();
+    let accountPath = prefix + '\\ArcanumMusic\\accounts\\accounts.json';
+
+    let fileExist = await isFileExist(null, accountPath);
+    if (!fileExist) {
+        let configDir = accountPath.substring(0, accountPath.lastIndexOf('\\'));
+        await new Promise((resolve, reject) => {
+            mkdir(configDir, { recursive: true }, (err) => {
+                if (err) {
+                    console.error('[Error] Directory creation failed: ', err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
+    return accountPath;
+}
+
 // 创建主窗口
 function createWindow() {
+    prepareAccountStorage();
     getAppConfig();
 
     mainWindow = new BrowserWindow({
@@ -90,9 +114,111 @@ function newWindow(_, title, url) {
     });
 
     newAppWindow.loadURL(url);
+
+    return newAppWindow.id;
 }
 
-// 窗口操作
+// 用户账户相关操作
+
+// 获取网易云用户信息
+function getNeteaseUser(id) {
+    return new Promise((resolve) => {
+        const appWindow = BrowserWindow.fromId(id);
+        if (appWindow) {
+            // 获取用户头像昵称
+            appWindow.webContents.executeJavaScript('window.localStorage.G_USER', true)
+                .then((result) => {
+                    let data = JSON.parse(result);
+
+                    let userData = {
+                        avatarUrl: data['avatarUrl'],
+                        nickname: data['nickname']
+                    };
+
+                    resolve(userData);
+                });
+        }
+    });
+}
+// 获取酷狗音乐头像
+function getKugouAvatar(id) {
+    return new Promise((resolve) => {
+        const appWindow = BrowserWindow.fromId(id);
+        if (appWindow) {
+            // 获取头像
+            appWindow.webContents.executeJavaScript('document.querySelector(".cmhead1_i2").src', true)
+                .then((result) => {
+                    let element = result;
+                    resolve(element.src);
+                })
+        }
+    });
+}
+
+// cookie 监听功能
+function listenForCookie(_, id, targets) {
+    return new Promise((resolve) => {
+        const appWindow = BrowserWindow.fromId(id);
+        if (appWindow) {
+            const cookiesMap = {};
+            const checkCompletion = () => {
+                if (targets.every(target => target in cookiesMap)) {
+                    if (targets.includes('MUSIC_U')) { // 网易云音乐
+                        getNeteaseUser(id).then((userData) => {
+                            console.log(`[Debug] User data (netease) received: ${JSON.stringify(userData)}`);
+                            let result = {
+                                cookies: cookiesMap,
+                                userData: userData
+                            };
+                            resolve(result);
+                        });
+                    }
+                    else if (targets.includes('uname3')) { // 酷我音乐
+                        let avatarUrl = cookiesMap['pic3'];
+                        let nickname = cookiesMap['uname3'];
+                        let result = {
+                            userData: {
+                                avatarUrl: avatarUrl.replace(/"/g, ''),
+                                nickname: decodeURIComponent(nickname.replace(/%u([\dA-F]{4})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))),
+                            },
+                            cookies: {
+                                userid: cookiesMap['userid']
+                            }
+                        }
+                        console.log(`[Debug] User data (kuwo) received: ${JSON.stringify(result)}`);
+                        resolve(result);
+                    }
+                    else {
+                        resolve({ 'cookies': cookiesMap });
+                    }
+                }
+            };
+
+            appWindow.webContents.session.cookies.on('changed', (_, cookie) => {
+                if (targets.includes(cookie.name)) {
+                    cookiesMap[cookie.name] = cookie.value;
+                    console.log(`[Debug] ${cookie.name} = ${cookie.value}`);
+                    checkCompletion();
+                }
+            });
+
+            // 起始检查
+            appWindow.webContents.session.cookies.get({})
+                .then((cookies) => {
+                    cookies.forEach(cookie => {
+                        if (targets.includes(cookie.name)) {
+                            cookiesMap[cookie.name] = cookie.value;
+                            console.log(`[Debug] ${cookie.name} = ${cookie.value}`);
+                        }
+                    });
+                    checkCompletion();
+                });
+        } else {
+            resolve({});
+        }
+    });
+}
+
 function minimizeWindow(_) {
     if (mainWindow) {
         mainWindow.minimize();
@@ -111,6 +237,14 @@ function toggleMaximize(_) {
 function closeWindow(_) {
     if (mainWindow) {
         mainWindow.close();
+    }
+}
+
+// 根据 ID 关闭窗口
+function closeWindowById(_, id) {
+    let targetWindow = BrowserWindow.fromId(id);
+    if (targetWindow) {
+        targetWindow.close();
     }
 }
 
@@ -141,6 +275,7 @@ app.whenReady().then(() => {
     ipcMain.handle('closeWindow', closeWindow);
     ipcMain.handle('getWindowRect', getWindowRect);
     ipcMain.handle('moveWindow', moveWindow);
+    ipcMain.handle('closeWindowById', closeWindowById);
 
     ipcMain.handle('isFileExist', isFileExist);
     ipcMain.handle('readLocalFile', readLocalFile);
@@ -150,6 +285,8 @@ app.whenReady().then(() => {
     ipcMain.handle('getAppEnvironment', () => environment);
     ipcMain.handle('getAppDataLocal', getAppDataLocal);
     ipcMain.handle('getAsarLocation', () => app.getAppPath());
+
+    ipcMain.handle('listenCookie', listenForCookie);
 
     startService();
     createWindow();

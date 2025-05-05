@@ -37,25 +37,33 @@ function onSourceTabClick(event: any) {
     if (event.target.tagName === 'IMG' || event.target.tagName === 'LABEL') {
         target = event.target.parentElement;
     }
+    // console.log(target);
     if (target.tagName === 'BUTTON') {
         changeCurrentSource(target.id);
     }
 }
 
 // 搜索类型列表
-var currentTypeId = 'singles';
+var currentTypeIds: { [type: string]: string} = {
+    'netease': 'singles',
+    'qqmusic': 'singles',
+    'kuwo': 'singles',
+    'kugou': 'singles'
+};
 // 搜索类型切换
 function changeCurrentType(type: string) {
-    if (type === currentTypeId) return;
+    if (currentTypeIds[currentContainerId] === type) return;
 
     let sourceContainer = document.getElementById('search_' + currentContainerId);
 
     if (sourceContainer) {
-        const prevTypeElement = sourceContainer.querySelector(`#${currentTypeId}`);
+        const prevTypeElement = sourceContainer.querySelector(`#${currentTypeIds[currentContainerId]}`);
         const nextTypeElement = sourceContainer.querySelector(`#${type}`);
 
-        let prevContainer = sourceContainer.querySelector('#type_' + currentTypeId);
+        let prevContainer = sourceContainer.querySelector('#type_' + currentTypeIds[currentContainerId]);
         let nextContainer = sourceContainer.querySelector('#type_' + type);
+
+        // console.log(prevTypeElement, nextTypeElement, prevContainer, nextContainer);
 
         if (prevTypeElement) {
             prevTypeElement.classList.remove('current');
@@ -69,7 +77,7 @@ function changeCurrentType(type: string) {
             nextContainer.classList.add('current');
         }
 
-        currentTypeId = type;
+        currentTypeIds[currentContainerId] = type;
     }
 }
 function onTypeTabClick(event: any) {
@@ -99,28 +107,28 @@ const TypesTabs = defineComponent({
                 </span>
                 <div class="musicContainer">
                     <div class="musicBox singles current" id="type_singles">
-                        <SongCard coverUrl="/images/player/testAlbum.png" name="Sample Text" authors="示例文字"></SongCard>
-                        <SongCard coverUrl="/images/player/testAlbum.png" name="Sample Text" authors="示例文字"></SongCard>
-                        <SongCard coverUrl="/images/player/testAlbum.png" name="Sample Text" authors="示例文字"></SongCard>
-                        <SongCard coverUrl="/images/player/testAlbum.png" name="Sample Text" authors="示例文字"></SongCard>
-                        <SongCard coverUrl="/images/player/testAlbum.png" name="Sample Text" authors="示例文字"></SongCard>
+                        <SongCard id="single@netease.114514" coverUrl="/images/player/testAlbum.png" name="Sample Text" authors="示例文字"></SongCard>
+                        <SongCard id="single@netease.114514" coverUrl="/images/player/testAlbum.png" name="Sample Text" authors="示例文字"></SongCard>
+                        <SongCard id="single@netease.114514" coverUrl="/images/player/testAlbum.png" name="Sample Text" authors="示例文字"></SongCard>
+                        <SongCard id="single@netease.114514" coverUrl="/images/player/testAlbum.png" name="Sample Text" authors="示例文字"></SongCard>
+                        <SongCard id="single@netease.114514" coverUrl="/images/player/testAlbum.png" name="Sample Text" authors="示例文字"></SongCard>
                     </div>
                     <div class="musicBox songlists" id="type_songlists">
-                        <SonglistCard coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
-                        <SonglistCard coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
-                        <SonglistCard coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
-                        <SonglistCard coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
-                        <SonglistCard coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
-                        <SonglistCard coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
+                        <SonglistCard id="songlist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
+                        <SonglistCard id="songlist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
+                        <SonglistCard id="songlist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
+                        <SonglistCard id="songlist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
+                        <SonglistCard id="songlist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
+                        <SonglistCard id="songlist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
                     </div>
                     <div class="musicBox songlists" id="type_albums">
-                        <SonglistCard coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
-                        <SonglistCard coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
-                        <SonglistCard coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
-                        <SonglistCard coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
+                        <SonglistCard id="songlist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
+                        <SonglistCard id="songlist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
+                        <SonglistCard id="songlist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
+                        <SonglistCard id="songlist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample.text"></SonglistCard>
                     </div>
                     <div class="musicBox artists" id="type_artists">
-                        <ArtistCard coverUrl="/images/player/testAlbum.png" name="Sample.text"></ArtistCard>
+                        <ArtistCard id="artist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample.text"></ArtistCard>
                     </div>
                 </div> 
             </div>

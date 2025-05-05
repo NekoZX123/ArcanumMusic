@@ -18,7 +18,7 @@ async function isFileExist(event, path) {
 async function readLocalFile(event, path) {
     return new Promise((resolve) => {
         readFile(path, 'utf-8', (err, data) => {
-            if (err) {
+            if (err) {                
                 console.error(`[Error (code ${err.code})] ${err.message}`);
                 resolve(null);
             }
