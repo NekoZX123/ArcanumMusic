@@ -90,6 +90,7 @@ async function readAccountInfo(platform: string) {
     const decryptedString = decrypt(decrypted, password);
 
     const accountData = JSON.parse(decryptedString);
+    console.log(accountData);
     setAccountInfo(platform, accountData);
 
     return accountData;

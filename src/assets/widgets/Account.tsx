@@ -4,6 +4,7 @@ import { closePopup, showPopup } from "../notifications/popup";
 import { showNotify } from "../notifications/Notification";
 
 import { storeAccountInfo, readAccountInfo, cleanAccountInfo, setAccountInfo } from "../utilities/accountManager.ts";
+import axios from "axios";
 
 // 各平台登录信息
 const initialTokens: { [type: string]: any } = {
@@ -130,7 +131,7 @@ async function platformLogin(platform: string) {
     let cookiePromise = window.electron.listenCookie(loginWindowId, platformCookieTargets[platform]);
 
     // 获取到指定 cookie 后关闭提示弹窗与登录窗口
-    cookiePromise.then(async (userData: { userData?: { avatarUrl?: string, nickname?: string }, cookies: object }) => {
+    cookiePromise.then(async (userData: { userData?: { avatarUrl?: string, nickname?: string }, cookies: any }) => {
         console.log(`[Debug] User info received: ${JSON.stringify(userData)}`);
 
         // 设置用户信息
@@ -138,14 +139,55 @@ async function platformLogin(platform: string) {
         storeAccountInfo(platform);
 
         // 获取用户信息
-        if (platform === 'netease' && userData.userData) { // 网易云音乐 - 获取 `localStorage` 中的用户信息
-            const avatarUrl = userData.userData.avatarUrl || '/images/library/defaultAvatar.svg';
-            const nickname = userData.userData.nickname || '未知用户';
-            displayAccount(platform, nickname, avatarUrl);
+        if (platform === 'qqmusic' && userData.cookies) { // QQ 音乐 - 网络请求用户信息
+            const qm_keyst = userData.cookies['qm_keyst'];
+            const uin = userData.cookies['uin'];
+            const cookies = `uin=${uin};qm_keyst=${qm_keyst}`;
+
+            const data = {
+                "comm": {
+                    "cv": 4747474,
+                    "ct": 24,
+                    "format": "json",
+                    "inCharset": "utf-8",
+                    "outCharset": "utf-8",
+                    "notice": 0,
+                    "platform": "yqq.json",
+                    "needNewCode": 1,
+                    "uin": uin,
+                    "g_tk_new_20200303": 1696903369,
+                    "g_tk": 1696903369
+                },
+                "req_1": {
+                    "module": "userInfo.BaseUserInfoServer",
+                    "method": "get_user_baseinfo_v2",
+                    "param": {
+                        "vec_uin": [
+                            `${uin}`
+                        ]
+                    }
+                }
+            }
+
+            // const sign = await getSignViaIframe(JSON.stringify(data));
+            const requestUrl = `https://u6.y.qq.com/cgi-bin/musics.fcg?_=${Date.now()}&sign=${0}`;
+
+            const requestParams = {
+                url: requestUrl,
+                method: 'POST',
+                headers: {
+                    'Cookie': cookies
+                },
+                body: JSON.stringify(data)
+            }
+
+            axios.post('http://127.0.0.1:3000/proxy', requestParams)
+                .then((response) => {
+                    console.log(response.status);
+                    console.log(response.data);
+                });
         }
-        else if (platform === 'qqmusic' && userData.cookies) { // QQ 音乐 - 网络请求用户信息
-        }
-        else if (platform === 'kuwo' && userData.userData) {
+        else if (userData.userData) { // 其他平台 - 从 localStorage (网易云) / cookie (酷我 / 酷狗) 获取用户信息
             console.log(userData);
             const avatarUrl = userData.userData.avatarUrl || '/images/library/defaultAvatar.svg';
             const nickname = userData.userData.nickname || '未知用户';
@@ -153,7 +195,7 @@ async function platformLogin(platform: string) {
         }
 
         closePopup(0, () => {
-            showNotify('arcanummusic.accounts.loginsuccess', 'success', 
+            showNotify('arcanummusic.accounts.loginsuccess', 'success',
                 '登录成功!', `${platformNames[platform]} 登录成功`, 3000);
         });
 
@@ -175,7 +217,7 @@ async function platformLogin(platform: string) {
 const AccountCard = defineComponent({
     props: {
         id: String,
-        platform: String, 
+        platform: String,
         avatar: String,
         user: String
     },
@@ -185,7 +227,7 @@ const AccountCard = defineComponent({
         return () => (
             <span class="accountElement optionBox flex row" id={`${props.id}_container`}>
                 <span class="accountImageContainer">
-                    <img class="accountAvatar" src={props.avatar}/>
+                    <img class="accountAvatar" src={props.avatar} />
                     <img class="accountPlatform" src={platform}></img>
                 </span>
                 <span class="accountInfo flex column">

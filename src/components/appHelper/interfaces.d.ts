@@ -17,9 +17,9 @@ export interface IElectronAPI {
     getAppConfig: () => Promise,
     getAppDataLocal: () => Promise,
     getAppEnvironment: () => Promise,
-    getAsarLocation: () => Promise
+    getAsarLocation: () => Promise,
 
-    listenCookie: (windowId: Number, targetCookies: String[]) => Promise
+    listenCookie: (windowId: Number, targetCookies: String[]) => Promise,
 }
 
 declare global {

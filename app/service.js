@@ -13,21 +13,20 @@ server.use(express.json());
 server.use(cors());
 
 function proxyRequest(link, method, headers = {}, body = null) {
-    return new Promise((response, reject) => {
+    // console.log(`[Arcanum Music - Server] ${method} ${link}, headers: ${JSON.stringify(headers)}, body: ${JSON.stringify(body)}`);
+    return new Promise((resolve, reject) => {
         axios({
             url: link,
             method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                ...headers
-            },
-            data: body ? JSON.stringify(body) : null
+            headers: headers,
+            data: body
         })
-            .then((proxyResponse) => {
-                response({
-                    statusCode: proxyResponse.status,
-                    headers: proxyResponse.headers,
-                    body: proxyResponse.data
+            .then((response) => {
+                // console.log(`[Arcanum Music - Server] Proxy request to ${link} completed with status ${response.status}, data: ${response.data}`);
+                resolve({
+                    statusCode: response.status,
+                    headers: response.headers,
+                    body: response.data
                 });
             })
             .catch((error) => {
@@ -46,7 +45,6 @@ function startService() {
 
         proxyRequest(url, method, headers, body).then((result) => {
             // console.log(`${url} => cookies: ${data.cookies}`);
-            console.log(result.body);
             res.status(result.statusCode).set(result.headers).send(result.body);
         }).catch((error) => {
             console.error('[Arcanum Music - Server] Web request error: ', error);

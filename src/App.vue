@@ -7,14 +7,19 @@ import { showPopup } from './assets/notifications/popup.tsx';
 import { createPlayer } from './assets/player/player.ts';
 import { changePage, getCurrentPage, initialize, pageBack, pageForward } from './assets/utilities/pageSwitcher.ts';
 
+import { getNeteaseLyrics, getNeteaseSearchResult, getNeteaseSonglink } from './assets/scripts/netease/neteaseRequest.ts';
+import { getKuwoLyrics, getKuwoSearchResult, getKuwoSonglink } from './assets/scripts/kuwo/kuwoRequest.ts';
+import { getKugouLyrics, getKugouSearchResult, getKugouSonglink } from './assets/scripts/kugou/kugouRequest.ts';
+import { getQQmusicSonglink } from './assets/scripts/qqmusic/qqmusicRequest.ts';
+
 // 设置文件位置
-const configLocation = '\\ArcanumMusic\\settings.json';
+const configLocation = '/ArcanumMusic/settings.json';
 var appConfig = '';
 
 // 获取应用配置存放位置
 async function getConfigPath() {
     let prefix = await window.electron.getAppDataLocal();
-    return prefix + configLocation;
+    return `${prefix}${configLocation}`;
 }
 // 设置文件判断 & 创建 / 读取
 function prepareSettings() {
@@ -217,6 +222,7 @@ onMounted(async () => {
     appConfig = JSON.parse(configData);
     console.log(appConfig);
 
+    // 加载初始页面
     initialize();
 
     // 测试通知
@@ -239,6 +245,56 @@ onMounted(async () => {
     // [For Debug]
     player?.updateDuration(114);
     player?.updateProgress(0);
+
+    // 测试请求 (网易云音乐)
+    const udebug = 'NETEASE_MUSIC_U';
+    getNeteaseSonglink('2064724623', 'jymaster', { 'MUSIC_U': udebug })
+        .then((response) =>{
+            console.log(response.data);
+        });
+    getNeteaseSearchResult('Memories of kindness', { 'MUSIC_U': udebug })
+        .then((response) => {
+            console.log(response.data);
+        });
+    getNeteaseLyrics('2064724623', { 'MUSIC_U': udebug })
+        .then((response) => {
+            console.log(response.data);
+        });
+
+    // 测试请求 (酷我音乐)
+    getKuwoSonglink('287928307')
+        .then((response) => {
+            console.log(response.data);
+        });
+    getKuwoSearchResult('Blue Canvas')
+        .then((response) => {
+            console.log(response.data);
+        });
+    getKuwoLyrics('287928307')
+        .then((response) => {
+            console.log(response.data);
+        });
+    
+    // 测试请求 (酷狗音乐)
+    const kugouUser = 'KUGOO';
+    getKugouSonglink('9xlu7513', { KuGoo: kugouUser })
+        .then((response) => {
+            console.log(response.data);
+        });
+    getKugouSearchResult('Shooting Athletes')
+        .then((response) => {
+            console.log(response.data);
+        });
+    getKugouLyrics('8y83yg8c', { KuGoo: kugouUser })
+        .then((response) => {
+            console.log(response.data);
+        });
+    // 测试请求 (QQ音乐)
+    const qqmusicToken = 'QQMUSIC_TOKEN';
+    getQQmusicSonglink('003UlmlI0hkj8t', { uin: 2168979907, qm_keyst: qqmusicToken })
+        .then((response) => {
+            console.log(response.data);
+        });
 });
 </script>
 

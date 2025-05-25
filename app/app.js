@@ -4,7 +4,7 @@ import { mkdir, copyFileSync } from 'fs';
 
 import { startService, stopService } from './service.js';
 import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
-import { resolve } from 'path';
+
 const __dirname = fileURLToPath(import.meta.url);
 
 const environment = 'dev';
@@ -140,20 +140,6 @@ function getNeteaseUser(id) {
         }
     });
 }
-// 获取酷狗音乐头像
-function getKugouAvatar(id) {
-    return new Promise((resolve) => {
-        const appWindow = BrowserWindow.fromId(id);
-        if (appWindow) {
-            // 获取头像
-            appWindow.webContents.executeJavaScript('document.querySelector(".cmhead1_i2").src', true)
-                .then((result) => {
-                    let element = result;
-                    resolve(element.src);
-                })
-        }
-    });
-}
 
 // cookie 监听功能
 function listenForCookie(_, id, targets) {
@@ -166,17 +152,19 @@ function listenForCookie(_, id, targets) {
                     if (targets.includes('MUSIC_U')) { // 网易云音乐
                         getNeteaseUser(id).then((userData) => {
                             console.log(`[Debug] User data (netease) received: ${JSON.stringify(userData)}`);
-                            let result = {
+                            
+                            const result = {
                                 cookies: cookiesMap,
                                 userData: userData
                             };
+                            
                             resolve(result);
                         });
                     }
                     else if (targets.includes('uname3')) { // 酷我音乐
-                        let avatarUrl = cookiesMap['pic3'];
-                        let nickname = cookiesMap['uname3'];
-                        let result = {
+                        const avatarUrl = cookiesMap['pic3'];
+                        const nickname = cookiesMap['uname3'];
+                        const result = {
                             userData: {
                                 avatarUrl: avatarUrl.replace(/"/g, ''),
                                 nickname: decodeURIComponent(nickname.replace(/%u([\dA-F]{4})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))),
@@ -185,7 +173,36 @@ function listenForCookie(_, id, targets) {
                                 userid: cookiesMap['userid']
                             }
                         }
+
                         console.log(`[Debug] User data (kuwo) received: ${JSON.stringify(result)}`);
+
+                        resolve(result);
+                    }
+                    else if (targets.includes('KuGoo')) { // 酷狗音乐
+                        const kugouUser = cookiesMap['KuGoo'];
+                        const userData = kugouUser.split('&');
+                        const formattedUser = {};
+
+                        userData.forEach((data) => {
+                            // 错误处理
+                            if (!data.includes('=')) throw new Error('[Arcanum Music - Error] Invalid data format');
+
+                            const [ key, value ] = data.split('=');
+                            formattedUser[key] = value;
+                        });
+
+                        const nickname = formattedUser['NickName'];
+                        const avatarUrl = formattedUser['Pic'];
+                        const result = {
+                            userData: {
+                                avatarUrl: avatarUrl.replace(/"/g, ''),
+                                nickname: decodeURIComponent(nickname.replace(/%u([\dA-F]{4})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)))),
+                            },
+                            cookies: cookiesMap
+                        }
+
+                        console.log(`[Debug] User data (kugou) received: ${JSON.stringify(result)}`);
+
                         resolve(result);
                     }
                     else {
@@ -264,8 +281,10 @@ function moveWindow(_, x, y) {
 
 // 获取 %AppData%
 function getAppDataLocal() {
-    let roamingPath = app.getPath('appData')
-    return roamingPath.replace('Roaming', 'Local');
+    const roamingPath = app.getPath('appData');
+    const result = roamingPath.replace('Roaming', 'Local');
+    // console.log(result);
+    return result;
 }
 
 app.whenReady().then(() => {

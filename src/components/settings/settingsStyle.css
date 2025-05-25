@@ -455,6 +455,8 @@
 .accountManage:hover {
     background: var(--color-blue-light);
     color: var(--color-blue-deep);
+
+    transform: scale(1.1);
 }
 
 

@@ -22,6 +22,6 @@ contextBridge.exposeInMainWorld(
         getAppDataLocal: () => ipcRenderer.invoke('getAppDataLocal'), // 获取 %AppData%
         getAsarLocation: () => ipcRenderer.invoke('getAsarLocation'), // 获取 asar 文件位置
         
-        listenCookie: (windowId, targetCookies) => ipcRenderer.invoke('listenCookie', windowId, targetCookies), // 监听 cookie
+        listenCookie: (windowId, targetCookies) => ipcRenderer.invoke('listenCookie', windowId, targetCookies) // 监听 cookie
     }
 );

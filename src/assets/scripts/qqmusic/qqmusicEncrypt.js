@@ -1,20 +1,20 @@
 // File creation date: 2024.05.04
 
-const window = {
-    location: {
-        host: 'https://y.qq.com',
-        href: 'https://y.qq.com/n/ryqq/'
-    },
-    navigator: {
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
-    },
-    document: {}
-};
+// const window = {
+//     location: {
+//         host: 'https://y.qq.com',
+//         href: 'https://y.qq.com/n/ryqq/'
+//     },
+//     navigator: {
+//         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+//     },
+//     document: {}
+// };
 
-global.window = window;
-global.document = window.document;
-global.location = window.location;
-global.navigator = window.navigator;
+// global.window = window;
+// global.document = window.document;
+// global.location = window.location;
+// global.navigator = window.navigator;
 
 let calcSign;
 
@@ -1137,6 +1137,43 @@ function getSign(data) {
     return result;
 }
 
+// 获取搜索 'searchId' 参数
+var a = function(e, t) {
+    for (var n = "".concat(e).split("").reverse(), a = "".concat(t).split("").reverse(), r = [], i = n.length, o = a.length, c = 0, s = i + o - 1; c <= s; c++)
+        r[c] = 0;
+    for (var l = 0; l < o; l++)
+        for (var u = 0; u < i; u++)
+            r[u + l] += parseInt(n[u], 10) * parseInt(a[l], 10),
+            r[u + 1 + l] += Math.floor(r[u + l] / 10),
+            r[u + l] = r[u + l] % 10;
+    return r.reverse(),
+    0 == r[0] && r.shift(),
+    r.join("")
+}
+  , r = function(e, t) {
+    for (var n = "".concat(e).split("").reverse(), a = "".concat(t).split("").reverse(), r = n.length, i = a.length, o = 0, c = 0, s = 0, l = 0, u = 0, m = Math.max(r, i); u < m; u++)
+        c = u < r ? parseInt(n[u], 10) : 0,
+        s = u < i ? parseInt(a[u], 10) : 0,
+        l = Math.round(c) + Math.round(s) + o,
+        n[u] = "".concat(l % 10),
+        o = l >= 10 ? 1 : 0;
+    return 1 == o && n.push("1"),
+    n.reverse().join("")
+}
+  , i = function(e) {
+    var t = a(e, "18014398509481984")
+      , n = a(Math.round(Math.random() * parseInt("4194304", 10)), "4294967296")
+      , i = new Date
+      , o = 1e3 * (3600 * i.getHours() + 60 * i.getMinutes() + i.getSeconds()) + i.getMilliseconds();
+    return r(r(t, n), o)
+}
+
+function getSearchId() {
+    return i(3);
+}
+
+export { getSign, getSearchId };
+
 // 调试时使用
 // const TEST_DATA = '{"comm":{"cv":4747474,"ct":24,"format":"json","inCharset":"utf-8","outCharset":"utf-8","notice":0,"platform":"yqq.json","needNewCode":1,"uin":2168979907,"g_tk_new_20200303":240514324,"g_tk":240514324},"req_1":{"module":"userInfo.VipQueryServer","method":"SRFVipQuery_V2","param":{"uin_list":["2168979907"]}},"req_2":{"module":"userInfo.BaseUserInfoServer","method":"get_user_baseinfo_v2","param":{"vec_uin":["2168979907"]}},"req_3":{"module":"music.lvz.VipIconUiShowSvr","method":"GetVipIconUiV2","param":{"PID":3}},"req_4":{"module":"music.musicasset.SongFavRead","method":"IsSongFanByMid","param":{"v_songMid":["002p9bv72ydmlK","0038gCuw2PSkvm","003UlmlI0hkj8t"]}},"req_5":{"module":"music.musichallSong.PlayLyricInfo","method":"GetPlayLyricInfo","param":{"songMID":"002p9bv72ydmlK","songID":467111407}},"req_6":{"method":"GetCommentCount","module":"music.globalComment.GlobalCommentRead","param":{"request_list":[{"biz_type":1,"biz_id":"467111407","biz_sub_type":0}]}},"req_7":{"module":"music.musichallAlbum.AlbumInfoServer","method":"GetAlbumDetail","param":{"albumMid":"002ALg9c0ePhUe"}},"req_8":{"module":"music.vkey.GetEVkey","method":"GetUrl","param":{"guid":"4826849620","songmid":["002p9bv72ydmlK"],"songtype":[0],"uin":"2168979907","loginflag":1,"platform":"20","xcdn":1,"qdesc":"lq96kOgg"}}}';
 // const TEST_DATA2 = '{"comm":{"cv":4747474,"ct":24,"format":"json","inCharset":"utf-8","outCharset":"utf-8","notice":0,"platform":"yqq.json","needNewCode":1,"uin":2168979907,"g_tk_new_20200303":240514324,"g_tk":240514324},"req_1":{"module":"music.musicsearch.HotkeyService","method":"GetHotkeyForQQMusicMobile","param":{"searchid":"21081778325530410","remoteplace":"txt.yqq.top","from":"yqqweb"}},"req_2":{"method":"GetRecommendFeed","module":"music.playlist.PlaylistSquare","param":{"From":0,"Size":25}},"req_3":{"method":"get_hot_category","module":"music.web_category_svr","param":{"location":0}},"req_4":{"module":"newsong.NewSongServer","method":"get_new_song_info","param":{"type":5}},"req_5":{"method":"GetRecommendFeed","module":"music.playlist.PlaylistSquare","param":{"From":0,"Size":25}},"req_6":{"method":"get_hot_category","module":"music.web_category_svr","param":{"location":0}},"req_7":{"module":"newsong.NewSongServer","method":"get_new_song_info","param":{"type":5}},"req_8":{"module":"music.paycenterapi.LoginStateVerificationApi","method":"GetChargeAccount","param":{"appid":"mlive"}},"req_9":{"module":"userInfo.VipQueryServer","method":"SRFVipQuery_V2","param":{"uin_list":["2168979907"]}},"req_10":{"module":"userInfo.BaseUserInfoServer","method":"get_user_baseinfo_v2","param":{"vec_uin":["2168979907"]}},"req_11":{"module":"music.lvz.VipIconUiShowSvr","method":"GetVipIconUiV2","param":{"PID":3}},"req_12":{"module":"MessageCenter.MessageCenterServer","method":"GetMessage","param":{"uin":"2168979907","red_dot":[{"msg_type":1}]}},"req_13":{"module":"GlobalComment.GlobalCommentMessageReadServer","method":"GetMessage","param":{"uin":"2168979907","page_num":0,"page_size":1,"last_msg_id":"","type":0}}}';
@@ -1144,5 +1181,4 @@ function getSign(data) {
 // const sign = getSign(TEST_DATA2)
 // console.log(sign, sign === TARGET_SIGN);
 
-const DATA = 'com.arcanummusic.qqmusicsigndata';
-console.log(getSign(DATA));
+// console.log(getSign(data));
