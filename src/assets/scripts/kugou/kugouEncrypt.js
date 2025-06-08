@@ -437,13 +437,6 @@ var kgUser, infSign;
                     e.source = "personal",
                     window.parent.postMessage(e, "*")
             },
-            receiveMessage: function (e) {
-                var n = e.data;
-                "KgMobileCall" == n.type && window[n.cbName] && (n.dataJson ? window[n.cbName](n.dataJson) : window[n.cbName](),
-                    window[n.cbName] = null),
-                    "KgWebMobileCall" == n.type && (e = n.funcName.split("."),
-                        KgWebMobileCall[e[1]] && (n.dataJson ? KgWebMobileCall[e[1]](n.dataJson) : KgWebMobileCall[e[1]]()))
-            },
             callCmd: function (t) {
                 var e, n, i = c, r = "kugouurl", r = i.isKugouAndroid ? "kugoujsbridge" : i.isAndroid ? "superCall" : i.isFXAPP || i.isFXQianBanAPP ? "fanxing2" : "kugouurl";
                 if ("kugoujsbridge" == (r = t && t.useMobileCallType ? t.useMobileCallType : r)) {

@@ -3,7 +3,7 @@ const require = createRequire(import.meta.url);
 
 const express = require('express');
 const cors = require('cors');
-import axios, { all } from 'axios';
+import axios from 'axios';
 
 const server = express();
 const port = 3000;
