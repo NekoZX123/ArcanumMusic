@@ -12,11 +12,12 @@ server.use(express.json());
 server.use(cors());
 
 // 允许的请求地址, 防止 SSRF 攻击
-const allowedOrigins = [
+const allowedHosts = [
     'music.163.com',
-    'y.qq.com',
+    'u6.y.qq.com',
     'kuwo.cn',
-    'kugou.com',
+    'wwwapi.kugou.com',
+    'complexsearch.kugou.com'
 ];
 
 function proxyRequest(link, method, headers = {}, body = null, responseType = 'json') {
@@ -24,11 +25,13 @@ function proxyRequest(link, method, headers = {}, body = null, responseType = 'j
     return new Promise((resolve, reject) => {
         // 检查链接是否在允许的范围内
         let allowFlag = false;
-        allowedOrigins.forEach((origin) => {
-            if (link.includes(origin)) {
-                allowFlag = true;
-            }
-        });
+        try {
+            const parsedUrl = new URL(link);
+            if (allowedOrigins.includes(parsedUrl.hostname)) allowFlag = true;
+        }
+        catch (error) {
+            console.error(`[Arcanum Music - Server] Invalid URL: ${link}`, error);
+        }
         if (!allowFlag) {
             console.error(`[Arcanum Music - Server] Proxy request to ${link} is not allowed`);
             reject(new Error(`Proxy request to ${link} is not allowed`));
@@ -65,8 +68,13 @@ function startService() {
 
         proxyRequest(url, method, headers, body, responseType).then((result) => {
             // console.log(`${url} => cookies: ${data.cookies}`);
-            if (url.includes('u6.y.qq.com')) {
-                result.headers['content-type'] = 'application/json';
+            try {
+                const parsedUrl = new URL(url);
+                if (parsedUrl.host === 'u6.y.qq.com') {
+                    result.headers['content-type'] = 'application/json';
+                }
+            } catch (error) {
+                console.error('[Arcanum Music - Server] Invalid URL:', url);
             }
             res.status(result.statusCode).set(result.headers).send(result.body);
         }).catch((error) => {
