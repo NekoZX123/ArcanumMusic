@@ -319,7 +319,7 @@ async function getNodeStructure(depth: string[], node: any) {
 
         // 应用图标
         if (node.getAttribute('id') === 'appIconLarge') {
-            optionElem.src = '/images/appIcon/appIcon.png';
+            optionElem.src = '/images/appIcon/ArcanumMusic.png';
         }
 
         // 文字

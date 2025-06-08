@@ -78,7 +78,7 @@ function createWindow() {
         skipTaskbar: false,
         alwaysOnTop: false,
         title: 'Arcanum Music',
-        icon: `${environment === 'dev' ? './public' : 'dist'}/images/appIcon/appIcon.png`,
+        icon: `${environment === 'dev' ? './public' : 'dist'}/images/appIcon/ArcanumMusic.png`,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,
@@ -106,7 +106,7 @@ function newWindow(_, title, url) {
         resizable: true,
         focusable: true,
         title: title,
-        icon: `${environment === 'dev' ? './public' : 'dist'}/images/appIcon/appIcon.png`,
+        icon: `${environment === 'dev' ? './public' : 'dist'}/images/appIcon/ArcanumMusic_nogrid.png`,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true
@@ -311,7 +311,7 @@ app.whenReady().then(() => {
     createWindow();
 
     // 托盘图标
-    tray = new Tray(`${environment === 'dev' ? './public' : 'dist'}/images/appIcon/appIcon.png`);
+    tray = new Tray(`${environment === 'dev' ? './public' : 'dist'}/images/appIcon/ArcanumMusic_nogrid.png`);
     const menu = Menu.buildFromTemplate([
         {
             label: 'Exit',

@@ -1,6 +1,6 @@
 import { proxyRequest } from "../../utilities/proxyRequest.ts";
 
-import { getSign, getSearchId }from "./qqmusicEncrypt.js";
+import { getSign, getSearchId, validate } from "./qqmusicEncrypt.js";
 
 // 表单数据
 const songlinkData = {
@@ -21,7 +21,7 @@ const songlinkData = {
         "module": "music.vkey.GetEVkey",
         "method": "GetUrl",
         "param": {
-            "guid": 0,
+            "guid": "986724784312345",
             "songmid": [
                 ""
             ],
@@ -66,6 +66,7 @@ const searchData = {
 // 请求链接
 const universalUrl = 'https://u6.y.qq.com/cgi-bin/musics.fcg';
 
+
 /**
  * 获取 QQ 音乐歌曲链接
  * 
@@ -74,24 +75,25 @@ const universalUrl = 'https://u6.y.qq.com/cgi-bin/musics.fcg';
  * @returns Promise - 请求结果
  */
 function getQQmusicSonglink(mid: string, cookies: { uin: number, qm_keyst: string }) {
+    console.log(validate() ? '恭喜! QQ音乐加密结果验证成功, 脚本正常工作中' : '呜哇~ QQ音乐加密结果验证失败, 请及时留意官网参数变更');
     const data = songlinkData;
-    const guid = Math.random() * 1000000000;
     data.comm.uin = cookies.uin;
-    data.req_1.param.uin = `${cookies.uin}`;
-    data.req_1.param.guid = guid;
+    data.req_1.param.uin = cookies.uin.toString();
     data.req_1.param.songmid = [mid];
 
     const sign = getSign(JSON.stringify(data));
-    console.log(`sign = ${sign}`);
-
-    const requestParams = `_=${Date.now()}&sign=${sign}`;
+    const requestParams = `_=${Date.now()}&sign=${sign}`; // 不使用ag-1编码 (不加密数据)
     const cookieHeader = `uin=${cookies.uin};qm_keyst=${cookies.qm_keyst};qqmusic_key=${cookies.qm_keyst}`;
+    console.log(cookieHeader);
 
     return proxyRequest(
         'POST',
         `${universalUrl}?${requestParams}`,
         {
-            'Cookie': cookieHeader
+            'Accept': 'application/octet-stream; text/plain; application/json',
+            'Content-Type': 'text/plain',
+            'Cookie': cookieHeader,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0'
         },
         data
     );
@@ -105,18 +107,17 @@ function getQQmusicSearchResult(query: string, cookies: { uin: number, qm_keyst:
     data.req_1.param.query = query;
 
     const sign = getSign(JSON.stringify(data));
-    console.log(`sign = ${sign}`);
-
-    const requestParams = `_=${Date.now()}&sign=${sign}`;
+    const requestParams = `_=${Date.now()}&sign=${sign}`; // 不使用ag-1编码 (不加密数据)
     const cookieHeader = `uin=${cookies.uin};qm_keyst=${cookies.qm_keyst};qqmusic_key=${cookies.qm_keyst}`;
 
     return proxyRequest(
         'POST',
         `${universalUrl}?${requestParams}`,
         {
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Cookie': cookieHeader
+            'Accept': 'application/octet-stream; text/plain; application/json',
+            'Content-Type': 'text/plain',
+            'Cookie': cookieHeader,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0'
         },
         data
     );
