@@ -27,7 +27,7 @@ function proxyRequest(link, method, headers = {}, body = null, responseType = 'j
         let allowFlag = false;
         try {
             const parsedUrl = new URL(link);
-            if (allowedOrigins.includes(parsedUrl.hostname)) allowFlag = true;
+            if (allowedHosts.includes(parsedUrl.hostname)) allowFlag = true;
         }
         catch (error) {
             reject(error);
