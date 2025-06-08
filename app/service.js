@@ -65,8 +65,13 @@ function startService() {
 
         proxyRequest(url, method, headers, body, responseType).then((result) => {
             // console.log(`${url} => cookies: ${data.cookies}`);
-            if (url.includes('u6.y.qq.com')) {
-                result.headers['content-type'] = 'application/json';
+            try {
+                const parsedUrl = new URL(url);
+                if (parsedUrl.host === 'u6.y.qq.com') {
+                    result.headers['content-type'] = 'application/json';
+                }
+            } catch (error) {
+                console.error('[Arcanum Music - Server] Invalid URL:', url);
             }
             res.status(result.statusCode).set(result.headers).send(result.body);
         }).catch((error) => {
