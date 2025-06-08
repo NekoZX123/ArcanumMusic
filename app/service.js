@@ -30,7 +30,7 @@ function proxyRequest(link, method, headers = {}, body = null, responseType = 'j
             if (allowedOrigins.includes(parsedUrl.hostname)) allowFlag = true;
         }
         catch (error) {
-            console.error(`[Arcanum Music - Server] Invalid URL: ${link}`, error);
+            reject(error);
         }
         if (!allowFlag) {
             console.error(`[Arcanum Music - Server] Proxy request to ${link} is not allowed`);
