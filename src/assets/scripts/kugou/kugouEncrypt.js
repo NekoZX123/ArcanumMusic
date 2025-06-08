@@ -524,31 +524,6 @@ var kgUser, infSign;
                                 "" == n && t.jsonStr && (e = 'kugouurl://start.music/?{"cmd":' + t.cmd + ', "jsonStr":' + t.jsonStr + "}"),
                                 "" != n || t.jsonStr || (e = 'kugouurl://start.music/?{"cmd":' + t.cmd + "}"),
                                 i.isIframePage ? i.mobileCallInIframe(t.cmd, t.jsonStr, n) : i.loadUrl(e))
-            },
-            sendCommandOrder: function (e) {
-                var n = window.location.origin
-                    , t = ~n.indexOf("voo.kugou.com") || ~n.indexOf("http://10.16.4.19:8099") || ~n.indexOf("http://test.kugou.com:8099")
-                    , i = window._VO_ACT_ID_;
-                t && i && e && (e = {
-                    actId: i,
-                    cmd: e
-                },
-                    e = c.json2Str({
-                        url: "".concat(n, "/public/addCommandOrder"),
-                        method: "post",
-                        param: c.json2Str(e),
-                        header: {
-                            "Content-Type": "application/json"
-                        },
-                        AndroidCallback: !0
-                    }),
-                    c.callCmd({
-                        cmd: 186,
-                        jsonStr: e,
-                        callback: function (e) {
-                            ~window.location.href.indexOf("debugCmd") && console.log(e)
-                        }
-                    }))
             }
         },
             e = {
