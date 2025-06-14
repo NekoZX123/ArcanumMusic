@@ -107,16 +107,16 @@
 
     <page id="about" name="关于此应用">
         <node id="iconContainer" title="">
-            <image id="appIconLarge"/>
+            <image id="appIconLarge" src="/images/appIcon/ArcanumMusic.png"/>
             <label id="appName" text="Arcanum Music"/>
             <label id="appVersion" text="version 0.1.0"/>
             <label id="appAuthor" text="made by NekoZX"/>
         </node>
         <node id="links" title="">
             <link id="nekozxHomepage" text="开发者主页" href="https://nekozx123.github.io/"/>
-            <label id="" text="•"/>
+            <label id="decoration1" text="•"/>
             <link id="nekozxGitHub" text="开发者的GitHub" href="https://github.com/NekoZX123/"/>
-            <label id="" text="•"/>
+            <label id="decoration2" text="•"/>
             <link id="projectSourceCode" text="项目源代码" href="https://github.com/NekoZX123/ArcanumMusic/"/>
         </node>
     </page>

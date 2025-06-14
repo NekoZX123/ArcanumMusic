@@ -467,10 +467,19 @@
     align-items: center;
 }
 
-[id='about.iconContainer'] {
+[id='about.iconContainer_children'] {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+[id='about.links_children'] {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+[id='about.links_children'] > * {
+    margin: auto 6px;
 }
 
 #appIconLarge {

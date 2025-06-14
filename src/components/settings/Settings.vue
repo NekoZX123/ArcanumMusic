@@ -1,27 +1,12 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { createApp, onMounted } from 'vue';
 
-import { AccountCard, platformLogin, platformLogout, readAccountInfo } from '../../assets/widgets/Account.tsx';
-import { HeadersText, NodeTitle, NodeSubTitle, CheckBox, ColorPicker, Slider, TextInput, Dropbox } from '../../assets/widgets/Settings.tsx';
+import { AccountCard, readAccountInfo } from '../../assets/widgets/Account.tsx';
+import { HeadersText, NodeBlock, CheckBox, ColorPicker, Slider, TextInput, Dropbox } from '../../assets/widgets/Settings.tsx';
 
 import './settingsStyle.css';
 import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
 import { setAccountInfo } from '../../assets/utilities/accountManager.ts';
-
-// 平台图标信息
-const platformIcons: { [type: string]: string } = {
-    "netease": "/images/platforms/netease.png",
-    "qqmusic": "/images/platforms/qqmusic.png",
-    "kuwo": "/images/platforms/kuwo.png",
-    "kugou": "/images/platforms/kugou.png"
-}
-// 平台名称
-const platformNames: { [type: string]: string } = {
-    "netease": "网易云音乐",
-    "qqmusic": "QQ音乐",
-    "kuwo": "酷我音乐",
-    "kugou": "酷狗音乐"
-}
 
 /* 树形结构组件点击 */
 // 当前选中节点
@@ -79,25 +64,9 @@ function toggleExpand(event: any) {
 }
 
 // 创建页面
-var paraTitle: HTMLElement; // 标题 & 子标题
 var settingsContent: any; // 设置内容区域
 const optionTypes = ['checkbox', 'colorpicker', 'slider', 'textinput', 'dropbox', 'account']; // 设置项目类型
 const decorationTypes = ['info', 'warning', 'image', 'link', 'label']; // 装饰元素类型
-var optionElements: any = {
-    'checkbox': null,
-    'colorpicker': null,
-    'slider': null,
-    'textinput': null,
-    'dropbox': null
-}; // 设置元素模板
-var decorationElements: any = {
-    'info': null,
-    'warning': null,
-    'image': null,
-    'link': null,
-    'label': null
-}; // 装饰元素模板
-
 
 // 设置页面初始化
 function setupPage(depth: string[], settingsObject: any) {
@@ -158,132 +127,139 @@ function setupPage(depth: string[], settingsObject: any) {
     }
 }
 
-// 获取节点结构
-async function getNodeStructure(depth: string[], node: any) {
-    // 换行符 - 跳过
-    if (!node.nodeName) return;
+// 设置页面结构
+async function setPageStructure(depth: string[], node: any) {
+    // 跳过换行符
+    if (!node.nodeName || node.nodeName === '#text') return;
 
     // 末级组件 - 配置后返回
-    // 设置项目
     if (optionTypes.includes(node.nodeName)) {
-        // 选择设置项目类型
-        let optionElem, optionId, subItems;
-        
-        // console.log(node.nodeName);
-        optionElem = optionElements[node.nodeName].cloneNode(true); // 创建新设置元素
-        optionElem.id = '';
-        depth.push(node.getAttribute('id'));
-        optionId = depth.join('.');
-        // console.log(optionId);
-        subItems = optionElem.childNodes;
+        const targetId = `${depth.join('.')}_container`;
+        const widgetId = depth.join('.');
+        const targetElement = document.getElementById(targetId);
+
+        if (!targetElement) {
+            console.error(`[Error] Widget element #${targetId} not found.`);
+            return;
+        }
+
+        targetElement.childNodes.forEach((element) => targetElement.removeChild(element));
+
+        // 开始设置元素
 
         // 账户登录框
         if (node.nodeName === 'account') {
             let platform = node.getAttribute('id');
-
-            const imageContainer = optionElem.querySelector('.accountImageContainer');
-            const infoContainer = optionElem.querySelector('.accountInfo');
-            const loginButton = optionElem.querySelector('.accountManage') as HTMLButtonElement;
-
-            imageContainer.childNodes[1].src = platformIcons[platform];
-
-            infoContainer.childNodes[0].innerText = platformNames[platform];
-
-            loginButton.id = `login.${platform}`;
 
             // 检测是否登录
             const user = await readAccountInfo(platform);
             // console.log(user);
             if (user && user.userData) {
                 const userData = user.userData;
-                const avatarUrl = userData.avatarUrl || '/images/library/defaultAvatar.svg';
-                const nickname = userData.nickname || '未知用户';
 
                 setAccountInfo(platform, user);
-                imageContainer.childNodes[0].src = avatarUrl;
-                infoContainer.childNodes[1].innerText = nickname;
 
-                // 更改按钮绑定事件
-                if (loginButton) {
-                    loginButton.innerHTML = '登出';
-
-                    loginButton.onclick = () => {
-                        platformLogout(platform);
-                    }
-                }
+                const accountProps = {
+                    id: widgetId,
+                    platform: platform,
+                    isLogin: true,
+                    avatar: userData.avatarUrl || '/images/library/defaultAvatar.svg',
+                    user: userData.nickname || '未知用户'
+                };
+                createApp(AccountCard, accountProps).mount(targetElement);
             }
             else {
-                let avatarLink = '/images/library/defaultAvatar.svg';
-                let userName = '未登录';
-
-                imageContainer.childNodes[0].src = avatarLink;
-                infoContainer.childNodes[1].innerText = userName;
-
-                // 绑定登录按钮触发事件
-                loginButton.onclick = () => {
-                    platformLogin(platform);
-                }
-            }
-
-            return optionElem;
-        }
-
-        // 设置输入控件参数
-        subItems[0].setAttribute('for', optionId);
-        subItems[0].innerText = node.getAttribute('text');
-        subItems[1].setAttribute('id', optionId);
-        subItems[1].setAttribute('name', optionId);
-        if (node.nodeName === 'slider' || node.nodeName === 'colorpicker') {
-            subItems[2].setAttribute('id', `${optionId}_text`);
-            subItems[2].setAttribute('name', `${optionId}_text`);
-
-            // 绑定输入框与滑动条
-            subItems[1].addEventListener('input', () => {
-                subItems[2].value = subItems[1].value;
-            });
-            subItems[2].addEventListener('input', () => {
-                subItems[1].value = subItems[2].value;
-            });
-
-            depth.pop();
-        }
-
-        // 特例
-        if (node.nodeName === 'slider') { // 滑动条 - 最值 & 单位 & 绑定文本输入设置
-            subItems[1].min = node.getAttribute('min');
-            subItems[1].max = node.getAttribute('max');
-            subItems[3].innerText = node.getAttribute('unit');
-        }
-        if (node.nodeName === 'dropbox') { // 下拉选择框 - 添加选项
-            let dropOptions = node.childNodes;
-            // console.log(dropOptions);
-            let dropboxMain = subItems[1];
-            for (let i = 0; i < dropOptions.length; i++) { // 添加下拉选项
-                let dropOpt = dropOptions[i];
-                
-                if (dropOpt.nodeName !== 'item') continue; // 跳过换行符
-
-                let optionNode = document.createElement('option');
-                optionNode.value = dropOpt.getAttribute('id');
-                optionNode.innerText = dropOpt.innerHTML;
-
-                dropboxMain.appendChild(optionNode);
+                const accountProps = {
+                    id: platform,
+                    platform: platform,
+                    isLogin: false,
+                    avatar: '/images/library/defaultAvatar.svg',
+                    user: '未知用户'
+                };
+                createApp(AccountCard, accountProps).mount(targetElement);
             }
         }
-        
-        return optionElem;
+        // 候选框
+        else if (node.nodeName === 'checkbox') {
+            const widgetProps = {
+                name: node.getAttribute('text'),
+                id: widgetId,
+                checked: false
+            };
+            createApp(CheckBox, widgetProps).mount(targetElement);
+        }
+        // 颜色选择器
+        else if (node.nodeName === 'colorpicker') {
+            const widgetProps = {
+                name: node.getAttribute('text'),
+                id: widgetId,
+                color: '#0077FF'
+            };
+            createApp(ColorPicker, widgetProps).mount(targetElement);
+        }
+        // 滑动条
+        else if (node.nodeName === 'slider') {
+            const widgetProps = {
+                name: node.getAttribute('text'),
+                id: widgetId,
+                min: node.getAttribute('min'),
+                max: node.getAttribute('max'),
+                unit: node.getAttribute('unit'),
+                value: node.getAttribute('min'),
+            };
+            createApp(Slider, widgetProps).mount(targetElement);
+        }
+        // 文字输入框
+        else if (node.nodeName === 'textinput') {
+            const widgetProps = {
+                name: node.getAttribute('text'),
+                id: widgetId,
+                unit: node.getAttribute('unit'),
+                value: 'test'
+            };
+            createApp(TextInput, widgetProps).mount(targetElement);
+        }
+        // 下拉选择框
+        else if (node.nodeName === 'dropbox') {
+            // 处理子项
+            const items = node.childNodes;
+            let options:  Array<{ id: string, text: string }>= [];
+            items.forEach((item: any) => {
+                if (item.nodeName === '#text') return;
+
+                options.push({
+                    id: item.getAttribute('id'),
+                    text: item.innerHTML
+                });
+            });
+
+            const widgetProps = {
+                name: node.getAttribute('text'),
+                id: widgetId,
+                options: options
+            };
+            createApp(Dropbox, widgetProps).mount(targetElement);
+        }
+
+        return;
     }
-
-    // 装饰项目
     if (decorationTypes.includes(node.nodeName)) {
-        let optionElem = decorationElements[node.nodeName].cloneNode(true); // 创建新设置元素
-        optionElem.id = node.getAttribute('id');
+        if (node.nodeName === 'label' || node.nodeName === 'link') console.log(node);
+        const targetId = `${depth.join('.')}_container`;
+        const widgetId = depth.join('.');
+        const targetElement = document.getElementById(targetId);
 
-        // 页首提示文字
+        if (!targetElement) {
+            console.error(`[Error] Widget element #${targetId} not found.`);
+            return;
+        }
+
+        targetElement.childNodes.forEach((element) => targetElement.removeChild(element));
+
+        // 提示 / 警告信息
         if (node.nodeName === 'info' || node.nodeName === 'warning') {
-            optionElem.id = '';
-            optionElem.classList.add(node.getAttribute('type'));
-            optionElem.innerText = node.innerHTML;
+            const child = document.createElement('div');
+            targetElement.appendChild(child);
 
             // 警告提示框
             if (node.getAttribute('type') === 'critical') {
@@ -307,53 +283,74 @@ async function getNodeStructure(depth: string[], node: any) {
                     }
                 }, 500);
 
-                return document.createElement('span');
+                return;
             }
-        }
 
+            const decorationProps = {
+                id: widgetId,
+                type: node.nodeName,
+                level: node.getAttribute('type') || 'normal',
+                content: node.innerHTML
+            };
+            createApp(HeadersText, decorationProps).mount(child);
+        }
+        // 图片
+        else if (node.nodeName === 'image') {
+            const child = document.createElement('img');
+            child.id = node.getAttribute('id');
+            child.src = node.getAttribute('src');
+            targetElement.appendChild(child);
+        }
         // 链接
-        if (node.nodeName === 'link') {
-            optionElem.href = node.getAttribute('href');
-            optionElem.innerHTML = node.getAttribute('text');
+        else if (node.nodeName === 'link') {
+            const child = document.createElement('a');
+            child.id = node.getAttribute('id');
+            child.innerHTML = node.getAttribute('text');
+            child.href = node.getAttribute('href');
+            targetElement.appendChild(child);
         }
-
-        // 应用图标
-        if (node.getAttribute('id') === 'appIconLarge') {
-            optionElem.src = '/images/appIcon/ArcanumMusic.png';
-        }
-
         // 文字
-        if (node.nodeName === 'label') {
-            optionElem.innerHTML = node.getAttribute('text').replace(/NekoZX/g, '<b>NekoZX</b>');
+        else if (node.nodeName === 'label') {
+            const child = document.createElement('label');
+            child.id = node.getAttribute('id');
+            child.innerHTML = node.getAttribute('text');
+            targetElement.appendChild(child);
         }
 
-        return optionElem;
+        return;
     }
 
-    // 非末级组件 - 递归配置子节点
-    depth.push(node.getAttribute('id'));
-    let optionBlock = document.createElement('div');
-    optionBlock.id = depth.join('.');
-    for (let i = 0; i < node.childNodes.length; i++) {
-        const subnode = node.childNodes[i];
+    // 非末级组件 - 递归创建
+    const children = node.childNodes;
+    for (let i = 0; i < children.length; i++) {
+        const targetChild = children[i];
 
-        if (subnode.nodeName === '#text') continue; // 跳过换行符
+        if (targetChild.nodeName === '#text') continue; // 跳过换行符
 
-        if (subnode.nodeName === 'node') { // 添加段落子标题
-            let subtitleNode = document.createElement('span');
-            subtitleNode.className = 'paragraphSubtitle';
-            subtitleNode.innerText = subnode.getAttribute('title');
-            optionBlock.appendChild(subtitleNode);
+        // console.log(targetChild);
+        // 创建子组件
+        const targetMountId = `${depth.join('.')}_children`;
+        const childrenContainer = document.getElementById(targetMountId);
+        const childrenMountPoint = document.createElement('div');
+        childrenContainer?.appendChild(childrenMountPoint);
+
+        if (!childrenContainer) {
+            console.error(`[Error] Element #${targetMountId} for widgets to mount not found.`);
+            continue;
         }
 
-        let children = await getNodeStructure([...depth], subnode); // 递归创建子节点
-        if (children) {
-            optionBlock.appendChild(children);
-        }
+        depth.push(targetChild.getAttribute('id'));
+
+        const childProps = {
+            id: depth.join('.'),
+            isSubtitle: true,
+            title: targetChild.getAttribute('title')
+        };
+        createApp(NodeBlock, childProps).mount(childrenMountPoint);
+        setPageStructure(depth, targetChild);
+
+        depth.pop();
     }
-    depth.pop();
-
-    return optionBlock;
 }
 
 // 绘制页面内容
@@ -364,33 +361,21 @@ async function createPage(prefix: string[], pageXml: any) {
     }
 
     let depthList = [...prefix, pageXml.getAttribute('id')];
-    let parts = pageXml.childNodes;
     let pageNode = document.createElement('div');
     pageNode.className = 'contentPage';
-    pageNode.id = pageXml.getAttribute('id');
-
-    // 创建页面各部分
-    for (let i = 0; i < parts.length; i++) {
-        let node = parts[i];
-
-        if (node.nodeName === '#text') continue; // 跳过换行符
-
-        // 设置段落标题
-        depthList.push(node.getAttribute('id'));
-        let partNode = document.createElement('div');
-        let partTitle = paraTitle.cloneNode(true) as HTMLElement;
-        partTitle.id = `${depthList.join('.')}_title`;
-        partTitle.innerText = node.getAttribute('title');
-
-        partNode.appendChild(partTitle);
-        partNode.appendChild(await getNodeStructure(depthList.slice(0, depthList.length - 1), node));
-
-        pageNode.appendChild(partNode);
-
-        depthList.pop();
-    }
-
+    pageNode.id = depthList.join('-');
     settingsContent.appendChild(pageNode);
+
+    const targetSelector = `#${depthList.join('-')}`;
+    const pageProps = {
+        id: depthList.join('.'),
+        isSubtitle: false,
+        title: pageXml.getAttribute('name') || ''
+    };
+    createApp(NodeBlock, pageProps).mount(targetSelector);
+
+    // 创建页面结构
+    setPageStructure(depthList, pageXml);
 }
 
 // 加载设置页面树
@@ -426,8 +411,9 @@ function loadPageTree(pageData: any) {
 
                 if (pageElem.nodeName !== 'page') continue;
 
+                const pageNodeId = `${elem.getAttribute('id')}-${pageElem.getAttribute('id')}`;
                 let pageNode = node.cloneNode(true) as HTMLElement;
-                pageNode.id = `selector.${pageElem.getAttribute('id')}`;
+                pageNode.id = `selector.${pageNodeId}`;
                 pageNode.classList.remove('expandable');
                 let pageContent = pageNode.childNodes[0];
 
@@ -439,7 +425,7 @@ function loadPageTree(pageData: any) {
                 node.childNodes[1].appendChild(pageNode);
 
                 createPage([elem.getAttribute('id')], pageElem);
-                loadedPages.push(pageElem.getAttribute('id'));
+                loadedPages.push(pageNodeId);
             }
         }
         else if (elem.nodeName === 'page') { // 页面
@@ -453,11 +439,12 @@ function loadPageTree(pageData: any) {
 
             createPage([], elem);
 
-            loadedPages.push(elem.getAttribute('id'));
+            loadedPages.push(`${elem.getAttribute('id')}`);
         }
 
         tabs.appendChild(node);
 
+        // console.log(loadedPages);
         setCurrentPage(loadedPages[0]);
     }
 }
@@ -465,18 +452,7 @@ function loadPageTree(pageData: any) {
 onMounted(async () => {
     let settingsPage, settings;
 
-    // 获取初始元素
     settingsContent = document.getElementById('settingsContent') as HTMLElement;
-    paraTitle = document.getElementById('sampleTitle') as HTMLElement;
-    
-    optionTypes.forEach((type) => {
-        optionElements[type] = document.getElementById(`sample${type.charAt(0).toUpperCase() + type.slice(1)}_container`);
-    });
-    // console.log(optionElements);
-    decorationTypes.forEach((type) => {
-        decorationElements[type] = document.getElementById(`sample${type.charAt(0).toUpperCase() + type.slice(1)}`);
-    });
-    // console.log(decorationElements);
 
     // 获取设置页面
     const pageReader = new XMLHttpRequest();
@@ -520,29 +496,6 @@ onMounted(async () => {
             </div>
             <!-- 设置内容区域 -->
             <div id="settingsContent">
-                <div class="contentPage" id="samplePage">
-                    <HeadersText id="sampleInfo" type="info" level="" content="提示信息"></HeadersText>
-                    <HeadersText id="sampleWarning" type="warning" level="" content="提示信息"></HeadersText>
-
-                    <NodeTitle id="sampleTitle" title="标题"></NodeTitle>
-                    <NodeSubTitle id="sampleSubTitle" title="子标题"></NodeSubTitle>
-
-                    <CheckBox id="sampleCheckbox" name="复选框" :checked="true"></CheckBox>
-
-                    <ColorPicker id="sampleColorpicker" name="颜色选择器" color="#0088FF"></ColorPicker>
-
-                    <Slider id="sampleSlider" name="滑动条" :min="0" :max="100" unit="%" :value="50"></Slider>
-
-                    <TextInput id="sampleTextinput" name="文本输入框" value="114514"></TextInput>
-
-                    <Dropbox id="sampleDropbox" name="下拉选择框" :options="[]"></Dropbox>
-
-                    <AccountCard id="sampleAccount" platform="netease" avatar="/images/library/defaultAvatar.svg" user="未登录"></AccountCard>
-
-                    <img class="image" id="sampleImage">
-                    <a class="link" id="sampleLink" target="_blank">11111</a>
-                    <label class="label" id="sampleLabel">114514</label>
-                </div>
             </div>
         </div>
         <!-- 页面底部占位 -->

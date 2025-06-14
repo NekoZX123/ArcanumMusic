@@ -218,10 +218,11 @@ const AccountCard = defineComponent({
     props: {
         id: String,
         platform: String,
+        isLogin: Boolean,
         avatar: String,
         user: String
     },
-    setup(props: { id: string, platform: string, avatar: string, user: string }) {
+    setup(props: { id: string, platform: string, isLogin: boolean, avatar: string, user: string }) {
         let platform = platformIcons[props.platform];
         let type = platformNames[props.platform];
         return () => (
@@ -234,7 +235,10 @@ const AccountCard = defineComponent({
                     <label class="text medium bold">{type}</label>
                     <label class="text small">{props.user}</label>
                 </span>
-                <button class="accountManage text small bold" id={props.id}>登入</button>
+                <button class="accountManage text small bold" id={props.id} 
+                    onClick={props.isLogin ? () => platformLogout(props.platform) : () => platformLogin(props.platform)}>
+                    {props.isLogin ? '登出' : '登入'}
+                    </button>
             </span>
         );
     }

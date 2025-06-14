@@ -81,10 +81,10 @@ onMounted(() => {
                     </button>
                 </span>
                 <span class="listContent flex column">
-                    <SongCard coverUrl="/images/player/testAlbum.png" name="Song name 1" authors="Author 1"></SongCard>
-                    <SongCard coverUrl="/images/player/testAlbum.png" name="Song name 02" authors="Author 2"></SongCard>
-                    <SongCard coverUrl="/images/player/testAlbum.png" name="nekozx daisuki" authors="Author 3"></SongCard>
-                    <SongCard coverUrl="/images/player/testAlbum.png" name="Song Name 333" authors="Author 4, 5, 6"></SongCard>
+                    <SongCard id="1" coverUrl="/images/player/testAlbum.png" name="Song name 1" authors="Author 1"></SongCard>
+                    <SongCard id="2" coverUrl="/images/player/testAlbum.png" name="Song name 02" authors="Author 2"></SongCard>
+                    <SongCard id="3" coverUrl="/images/player/testAlbum.png" name="nekozx daisuki" authors="Author 3"></SongCard>
+                    <SongCard id="4" coverUrl="/images/player/testAlbum.png" name="Song Name 333" authors="Author 4, 5, 6"></SongCard>
                 </span>
             </div>
 
@@ -94,8 +94,8 @@ onMounted(() => {
                     <label class="text light ultraSmall">共 30 首</label>
                 </span>
                 <span class="listContent flex column">
-                    <SongCard coverUrl="/images/player/testAlbum.png" name="nekozx daisuki" authors="Author 114"></SongCard>
-                    <SongCard coverUrl="/images/player/testAlbum.png" name="daily recommend" authors="Author 514"></SongCard>
+                    <SongCard id="5" coverUrl="/images/player/testAlbum.png" name="nekozx daisuki" authors="Author 114"></SongCard>
+                    <SongCard id="6" coverUrl="/images/player/testAlbum.png" name="daily recommend" authors="Author 514"></SongCard>
                 </span>
                 <span class="cardFooter flex row">
                     <span class="musicSource flex row">
@@ -131,28 +131,28 @@ onMounted(() => {
             </span>
             <div class="musicContainer" id="userPlaylists">
                 <div class="musicBox songlists current" id="playlists_netease">
-                    <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 01"></SonglistCard>
-                    <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 02"></SonglistCard>
-                    <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 03"></SonglistCard>
-                    <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 04"></SonglistCard>
-                    <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 114514"></SonglistCard>
+                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 01"></SonglistCard>
+                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 02"></SonglistCard>
+                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 03"></SonglistCard>
+                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 04"></SonglistCard>
+                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 114514"></SonglistCard>
                     
-                    <SonglistCard coverUrl="/images/player/testAlbum.png" name="List 1919810"></SonglistCard>
+                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 1919810"></SonglistCard>
                 </div>
 
                 <div class="musicBox songlists" id="playlists_qqmusic">
-                    <SonglistCard coverUrl="/images/player/testAlbum.png" name="QQMusic List"></SonglistCard>
+                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="QQMusic List"></SonglistCard>
                 </div>
 
                 <div class="musicBox songlists" id="playlists_kuwo">
-                    <SonglistCard coverUrl="/images/player/testAlbum.png" name="Kuwo List 01"></SonglistCard>
-                    <SonglistCard coverUrl="/images/player/testAlbum.png" name="Kuwo List 02"></SonglistCard>
+                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="Kuwo List 01"></SonglistCard>
+                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="Kuwo List 02"></SonglistCard>
                 </div>
 
                 <div class="musicBox songlists" id="playlists_kugou">
-                    <SonglistCard coverUrl="/images/player/testAlbum.png" name="Kugou List 01"></SonglistCard>
-                    <SonglistCard coverUrl="/images/player/testAlbum.png" name="Kugou List 02"></SonglistCard>
-                    <SonglistCard coverUrl="/images/player/testAlbum.png" name="Kugou List 03"></SonglistCard>
+                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="Kugou List 01"></SonglistCard>
+                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="Kugou List 02"></SonglistCard>
+                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="Kugou List 03"></SonglistCard>
                 </div>
             </div>
         </div>

@@ -6,11 +6,7 @@ import { showNotify } from './assets/notifications/Notification.ts';
 import { showPopup } from './assets/notifications/popup.tsx';
 import { createPlayer } from './assets/player/player.ts';
 import { changePage, getCurrentPage, initialize, pageBack, pageForward } from './assets/utilities/pageSwitcher.ts';
-
-import { getNeteaseLyrics, getNeteaseSearchResult, getNeteaseSonglink } from './assets/scripts/netease/neteaseRequest.ts';
-import { getKuwoLyrics, getKuwoSearchResult, getKuwoSonglink } from './assets/scripts/kuwo/kuwoRequest.ts';
-import { getKugouLyrics, getKugouSearchResult, getKugouSonglink } from './assets/scripts/kugou/kugouRequest.ts';
-import { getQQmusicSearchResult, getQQmusicSonglink } from './assets/scripts/qqmusic/qqmusicRequest.ts';
+import { testKuwoRequests } from './assets/utilities/requestTests.ts';
 
 // 设置文件位置
 const configLocation = '/ArcanumMusic/settings.json';
@@ -216,66 +212,6 @@ function showLyrics(_: MouseEvent) {
     }, 50);
 }
 
-// 测试请求 (网易云音乐)
-function testNeteaseRequests() {
-    const udebug = '[YOUR_MUSIC_U]';
-    getNeteaseSonglink('2064724623', 'jymaster', { 'MUSIC_U': udebug })
-        .then((response) =>{
-            console.log(response.data);
-        });
-    getNeteaseSearchResult('Memories of kindness', { 'MUSIC_U': udebug })
-        .then((response) => {
-            console.log(response.data);
-        });
-    getNeteaseLyrics('2064724623', { 'MUSIC_U': udebug })
-        .then((response) => {
-            console.log(response.data);
-        });
-}
-// 测试请求 (酷我音乐)
-function testKuwoRequests() {
-    getKuwoSonglink('287928307')
-        .then((response) => {
-            console.log(response.data);
-        });
-    getKuwoSearchResult('Blue Canvas')
-        .then((response) => {
-            console.log(response.data);
-        });
-    getKuwoLyrics('287928307')
-        .then((response) => {
-            console.log(response.data);
-        });
-}
-// 测试请求 (酷狗音乐)
-function testKugouRequests() {
-    const kugouUser = '[YOUR_KUGOO_PARAMS]';
-    getKugouSonglink('9xlu7513', { KuGoo: kugouUser })
-        .then((response) => {
-            console.log(response.data);
-        });
-    getKugouSearchResult('Shooting Athletes')
-        .then((response) => {
-            console.log(response.data);
-        });
-    getKugouLyrics('8y83yg8c', { KuGoo: kugouUser })
-        .then((response) => {
-            console.log(response.data);
-        });
-}
-// 测试请求 (QQ音乐)
-function testQQMusicRequests() {
-    const qqmusicToken = '[YOUR_QQMUSIC_KEY]';
-    getQQmusicSonglink('003UlmlI0hkj8t', { uin: 2168979907, qm_keyst: qqmusicToken })
-        .then((response) => {
-            console.log(response.data);
-        });
-    getQQmusicSearchResult('Memories of kindness', { uin: 2168979907, qm_keyst: qqmusicToken })
-        .then((response) => {
-            console.log(response.data);
-        });
-}
-
 onMounted(async () => {
     // 绕过 QQ 音乐脚本环境监测
     // 参考 / Reference: https://jixun.uk/posts/2024/qqmusic-zzc-sign/
@@ -293,7 +229,7 @@ onMounted(async () => {
     showNotify('Notifyyyyyy', 'success', 'Welcome!', 'Welcome to Arcanum Music!', 3000);
 
     // 测试弹窗
-    //showPopup('success', 'notice', 
+    // showPopup('success', 'notice', 
     //    'Welcome', '欢迎使用 Arcanum Music! \n (此应用仍在开发中)', 
     //    [], popupCallback);
 
@@ -311,7 +247,10 @@ onMounted(async () => {
     player?.updateProgress(0);
 
     // 测试请求
-    testQQMusicRequests();
+    // testNeteaseRequests();
+    testKuwoRequests(1);
+    // testKugouRequests();
+    // testQQMusicRequests();
 
 });
 </script>

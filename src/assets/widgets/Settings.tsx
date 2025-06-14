@@ -1,5 +1,21 @@
 import { defineComponent } from "vue";
 
+const NodeBlock = defineComponent({
+    props: {
+        id: String,
+        isSubtitle: Boolean,
+        title: String
+    },
+    setup(props: { id: string, isSubtitle: boolean, title: string }) {
+        return () => (
+            <div id={`${props.id}_container`}>
+                <span class={`text ${ props.isSubtitle ? 'paragraphSubtitle medium' : 'paragraphTitle large bold' }`}>{props.title}</span>
+                <div id={`${props.id}_children`}></div>
+            </div>
+        );
+    }
+});
+
 // 页首提示文字
 const HeadersText = defineComponent({
     props: {
@@ -141,6 +157,7 @@ const Dropbox = defineComponent({
 });
 
 export {
+    NodeBlock,
     HeadersText, 
     NodeTitle, 
     NodeSubTitle, 

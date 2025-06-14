@@ -185,7 +185,7 @@ class Player {
     setRepeatState(state: number) {
         // console.log(`[Debug] Repeat state: ${state}`);
         if (state < 0 || state > 2) {
-            console.error(`[Error] player.ts error: unknown repeat state: ${state}`);
+            console.error(`[ArcanumMusic - player] Error: unknown repeat state: ${state}`);
             return;
         }
 
@@ -195,7 +195,7 @@ class Player {
     setShuffleState (state: number) {
         // console.log(`[Debug] Shuffle state: ${state}`);
         if (state !== 0 && state !== 1) {
-            console.error(`[Error] player.ts error: unknown shuffle state: ${state}`);
+            console.error(`[ArcanumMusic - player] Error: unknown shuffle state: ${state}`);
             return;
         }
 
@@ -208,7 +208,7 @@ let player: Player | undefined = undefined;
 
 function createPlayer(volumeBarIds?: string[]) {
     if (player) {
-        console.error('[Error] player.ts error: player already initialized, returning existing player');
+        console.error('[ArcanumMusic - player] Error: player already initialized, returning existing player');
 
         return player;
     }
