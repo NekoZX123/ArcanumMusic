@@ -3,8 +3,8 @@ import { proxyRequest } from "../../utilities/proxyRequest.ts";
 import { getSignedParams, getToken, getMobileSign } from './kugouEncrypt.js';
 
 // Note: api 包含:
-// 歌曲 搜索 歌词 音乐信息 歌单 专辑 歌手 推荐歌单 热门单曲 热门歌手 排行榜 新歌 新专辑
-// 酷狗音乐解析使用 devtools `设备仿真` 为移动端
+// 歌曲 搜索 歌词 音乐信息 歌单 专辑 歌手 
+// 推荐歌单 热门单曲 热门歌手 排行榜 新歌 新专辑
 
 function objectToKeyPairs(source: { [key: string]: any }): string {
     let keyValuePairs = Object.keys(source).map((key) => `${key}=${source[key]}`);
@@ -63,16 +63,6 @@ const songInfoData = {
     token: '',
     userid: ''
 };
-const songlistData = {
-    dfid: '-',
-    appid: 1014,
-    mid: '',
-    platid: 4,
-    encode_gcid: '',
-    uuid: '',
-    token: '',
-    userid: ''
-};
 const albumData = {
     type: 1,
     page: 1,
@@ -108,9 +98,15 @@ const artistData = {
 const songlinkUrl = 'https://wwwapi.kugou.com/play/songinfo';
 const searchUrl = 'https://complexsearch.kugou.com/v2/search/song';
 const songInfoUrl = 'https://wwwapi.kugou.com/play/songinfo';
-const songlistUrl = 'https://wwwapi.kugou.com/play/special';
+const songlistUrl = 'https://m.kugou.com/plist/list/[listid]/?json=true';
 const albumUrl = 'https://m3ws.kugou.com/api/v1/album/info';
 const artistUrl = 'https://gateway.kugou.com/openapi/v2/union/author/audios';
+const hotListUrl = 'https://m.kugou.com/plist/index?json=true';
+const recommendSongUrl = 'https://m.kugou.com/?json=true';
+const recommendArtistUrl = 'https://m.kugou.com/singer/list?json=true';
+const rankingsUrl = 'https://m.kugou.com/rank/list?json=true';
+const rankingContentUrl = 'https://m.kugou.com/rank/info/[rankingid]?json=true';
+const newSongUrl = 'https://m.kugou.com/newsong/index?json=true';
 
 /**
  * 获取酷狗音乐歌曲链接
@@ -236,23 +232,15 @@ function getKugouLyrics(mid: string, cookies: { KuGoo: string }) {
  * @returns Promise - 请求结果
  */
 function getKugouSonglist(listid: string, cookies: { KuGoo: string }) {
-    const params = songlistData;
-    params.encode_gcid = listid;
-    params.userid = getUserId(cookies.KuGoo);
-
-    const userToken = getToken(cookies.KuGoo);
-    params.token = userToken;
-
-    const encryptedParams = getSignedParams(params);
-    const urlParams = objectToKeyPairs(encryptedParams);
-
+    const targetUrl = songlistUrl.replace('[listid]', listid)
     const cookieHeader = `KuGoo=${cookies.KuGoo}`;
 
     return proxyRequest(
         'GET',
-        `${songlistUrl}?${urlParams}`,
+        `${targetUrl}`,
         {
-            'Cookie': cookieHeader
+            'Cookie': cookieHeader,
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 EdgA/139.0.2151.58'
         },
         null
     );
@@ -325,6 +313,125 @@ function getKugouArtist(artistid: number, cookies?: { KuGoo: string }) {
     );
 }
 
+/**
+ * 获取酷狗音乐推荐歌单
+ * @param cookies (可选) 用户 Token
+ * @returns Promise - 请求结果
+ */
+function getKugouHotList(cookies?: { KuGoo: string }) {
+    const cookieHeader = `KuGoo=${cookies?.KuGoo || ''}`;
+
+    return proxyRequest(
+        'GET',
+        `${hotListUrl}`,
+        {
+            'Cookie': cookieHeader,
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 EdgA/139.0.2151.58'
+        },
+    );
+}
+
+/**
+ * 获取酷狗音乐推荐单曲
+ * @param cookies (可选) 用户 Token
+ * @returns Promise - 请求结果
+ */
+function getKugouRecommendSong(cookies?: { KuGoo: string }) {
+    const cookieHeader = `KuGoo=${cookies?.KuGoo || ''}`;
+
+    return proxyRequest(
+        'GET',
+        `${recommendSongUrl}`,
+        {
+            'Cookie': cookieHeader,
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 EdgA/139.0.2151.58'
+        },
+    );
+}
+
+/**
+ * 获取酷狗音乐推荐歌手
+ * @param cookies (可选) 用户 Token
+ * @returns Promise - 请求结果
+ */
+function getKugouRecommendArtist(cookies?: { KuGoo: string }) {
+    const cookieHeader = `KuGoo=${cookies?.KuGoo || ''}`;
+
+    return proxyRequest(
+        'GET',
+        `${recommendArtistUrl}`,
+        {
+            'Cookie': cookieHeader,
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 EdgA/139.0.2151.58'
+        },
+    );
+}
+
+/**
+ * 获取酷狗音乐排行列表
+ * @param cookies (可选) 用户 Token
+ * @returns Promise - 请求结果
+ */
+function getKugouRankings(cookies?: { KuGoo: string }) {
+    const cookieHeader = `KuGoo=${cookies?.KuGoo || ''}`;
+
+    return proxyRequest(
+        'GET',
+        `${rankingsUrl}`,
+        {
+            'Cookie': cookieHeader,
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 EdgA/139.0.2151.58'
+        },
+    );
+}
+
+/**
+ * 获取酷狗音乐排行内容
+ * @param rankingId 排行榜 ID
+ * @param cookies (可选) 用户 Token
+ * @returns Promise - 请求结果
+ */
+function getKugouRankinngContent(rankingId: number, cookies?: { KuGoo: string }) {
+    const targetUrl = rankingContentUrl.replace('[rankingid]', rankingId.toString())
+    const cookieHeader = `KuGoo=${cookies?.KuGoo}`;
+
+    return proxyRequest(
+        'GET',
+        `${targetUrl}`,
+        {
+            'Cookie': cookieHeader,
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 EdgA/139.0.2151.58'
+        }
+    );
+}
+
+/**
+ * 获取酷狗音乐新歌
+ * @param cookies (可选) 用户 Token
+ * @returns Promise - 请求结果
+ */
+function getKugouNewSong(cookies?: { KuGoo: string }) {
+    const cookieHeader = `KuGoo=${cookies?.KuGoo}`;
+
+    return proxyRequest(
+        'GET',
+        `${newSongUrl}`,
+        {
+            'Cookie': cookieHeader,
+            'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 EdgA/139.0.2151.58'
+        }
+    );
+}
+
+/**
+ * 获取酷狗音乐新专辑
+ * @param cookies (可选) 用户 Token
+ * @returns Promise - 请求结果
+ */
+function getKugouNewAlbums(cookies?: { KuGoo: string }) {
+    return getKugouRankinngContent(8888, cookies);
+}
+
 export {
     getKugouSonglink,
     getKugouSearchResult,
@@ -332,5 +439,12 @@ export {
     getKugouLyrics,
     getKugouSonglist,
     getKugouAlbum,
-    getKugouArtist
+    getKugouArtist,
+    getKugouHotList,
+    getKugouRecommendSong,
+    getKugouRecommendArtist,
+    getKugouRankings,
+    getKugouRankinngContent,
+    getKugouNewSong,
+    getKugouNewAlbums
 };

@@ -302,6 +302,12 @@ function getNeteaseAlbum(albumId: string, cookies?: { MUSIC_U: string }) {
     );
 }
 
+/**
+ * 获取网易云音乐歌手信息
+ * @param artistId 歌手ID
+ * @param cookies (可选) 含有用户Token (`MUSIC_U`)的 object
+ * @returns 请求结果
+ */
 function getNeteaseArtist(artistId: number, cookies?: { MUSIC_U: string }) {
     const data = artistData;
     data.id = artistId;
@@ -326,6 +332,11 @@ function getNeteaseArtist(artistId: number, cookies?: { MUSIC_U: string }) {
     );
 }
 
+/**
+ * 获取网易云音乐推荐歌单
+ * @param cookies (可选) 含有用户Token (`MUSIC_U`)的 object
+ * @returns 请求结果
+ */
 function getNeteaseHotList(cookies?: { MUSIC_U: string }) {
     const params: neteaseEncryptedData = getNeteaseEncrypt(JSON.stringify(hotListData));
 
@@ -347,6 +358,11 @@ function getNeteaseHotList(cookies?: { MUSIC_U: string }) {
     );
 }
 
+/**
+ * 获取网易云音乐推荐单曲
+ * @param cookies (可选) 含有用户Token (`MUSIC_U`)的 object
+ * @returns 请求结果
+ */
 function getNeteaseRecommendSong(cookies?: { MUSIC_U: string }) {
     const params: neteaseEncryptedData = getNeteaseEncrypt(JSON.stringify(recommendSongData));
 
@@ -368,6 +384,11 @@ function getNeteaseRecommendSong(cookies?: { MUSIC_U: string }) {
     );
 }
 
+/**
+ * 获取网易云音乐推荐歌手
+ * @param cookies (可选) 含有用户Token (`MUSIC_U`)的 object
+ * @returns 请求结果
+ */
 function getNeteaseRecommendArtist(cookies?: { MUSIC_U: string }) {
     const params: neteaseEncryptedData = getNeteaseEncrypt(JSON.stringify(recommendArtistData));
 
@@ -389,6 +410,11 @@ function getNeteaseRecommendArtist(cookies?: { MUSIC_U: string }) {
     );
 }
 
+/**
+ * 获取网易云音乐排行列表
+ * @param cookies (可选) 含有用户Token (`MUSIC_U`)的 object
+ * @returns 请求结果
+ */
 function getNeteaseRankings(cookies?: { MUSIC_U: string }) {
     const params: neteaseEncryptedData = getNeteaseEncrypt(JSON.stringify(rankingsData));
 
@@ -410,10 +436,21 @@ function getNeteaseRankings(cookies?: { MUSIC_U: string }) {
     );
 }
 
+/**
+ * 获取网易云音乐排行榜内容
+ * @param rankingId 排行榜 ID
+ * @param cookies (可选) 含有用户Token (`MUSIC_U`)的 object
+ * @returns 请求结果
+ */
 function getNeteaseRankingContent(rankingId: string, cookies?: { MUSIC_U: string }) {
     return getNeteasePlaylist(rankingId, cookies);
 }
 
+/**
+ * 获取网易云音乐新歌
+ * @param cookies (可选) 含有用户Token (`MUSIC_U`)的 object
+ * @returns 请求结果
+ */
 function getNeteaseNewSong(cookies?: { MUSIC_U: string }) {
     const params: neteaseEncryptedData = getNeteaseEncrypt(JSON.stringify(newSongData));
 
@@ -435,6 +472,11 @@ function getNeteaseNewSong(cookies?: { MUSIC_U: string }) {
     );
 }
 
+/**
+ * 获取网易云音乐新专辑
+ * @param cookies (可选) 含有用户Token (`MUSIC_U`)的 object
+ * @returns 请求结果
+ */
 function getNeteaseNewAlbum(cookies?: { MUSIC_U: string }) {
     const params: neteaseEncryptedData = getNeteaseEncrypt(JSON.stringify(newAlbumData));
 

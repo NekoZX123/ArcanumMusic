@@ -23,7 +23,8 @@ const allowedHosts = [
     'wwwapi.kugou.com',
     'complexsearch.kugou.com',
     'm3ws.kugou.com',
-    'gateway.kugou.com'
+    'gateway.kugou.com',
+    'm.kugou.com'
 ];
 
 function proxyRequest(link, method, headers = {}, body = null, responseType = 'json') {

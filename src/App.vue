@@ -242,9 +242,9 @@ onMounted(async () => {
     player?.updateProgress(0);
 
     // 测试请求
-    testNeteaseRequests(11);
-    // testKuwoRequests(13);
-    // testKugouRequests();
+    testNeteaseRequests(14);
+    testKuwoRequests(14);
+    testKugouRequests(14);
     // testQQMusicRequests();
 
 });
