@@ -271,6 +271,14 @@ async function setPageStructure(depth: string[], node: any) {
                         targetNode.removeEventListener('click', onNodeClick);
 
                         targetNode.addEventListener('click', (event) => {
+                            let selector = event.target as HTMLElement;
+                            if (!selector || !selector.parentNode) return;
+                            if (selector.tagName === 'IMG') selector = selector.parentNode.parentNode as HTMLElement;
+                            if (selector.tagName === 'LABEL') selector = selector.parentNode as HTMLElement;
+                            if (!selector || !selector.parentNode) return;
+
+                            let targetId = (selector.parentNode as HTMLElement).id.replace('selector.', '');
+                            if (targetId === currentPageId) return;
                             // 显示警告弹窗
                             showPopup('warning', 'yesno', '警告: 是否继续?', node.innerHTML, ['', 'red'], (code: number) => {
                                 if (code === buttonTypes.BUTTON_YES) {

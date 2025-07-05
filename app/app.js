@@ -1,9 +1,9 @@
-import { app, BrowserWindow, ipcMain, Menu, Tray } from 'electron';
-import { fileURLToPath } from 'url';
-import { mkdir, copyFileSync } from 'fs';
+import {app, BrowserWindow, ipcMain, Menu, Tray} from 'electron';
+import {fileURLToPath} from 'url';
+import {copyFileSync, mkdir} from 'fs';
 
-import { startService, stopService } from './service.js';
-import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
+import {startService, stopService} from './service.js';
+import {isFileExist, readLocalFile, writeLocalFile} from './fileManager.js';
 
 const __dirname = fileURLToPath(import.meta.url);
 
@@ -282,9 +282,8 @@ function moveWindow(_, x, y) {
 // 获取 %AppData%
 function getAppDataLocal() {
     const roamingPath = app.getPath('appData');
-    const result = roamingPath.replace('Roaming', 'Local');
     // console.log(result);
-    return result;
+    return roamingPath.replace('Roaming', 'Local');
 }
 
 app.whenReady().then(() => {

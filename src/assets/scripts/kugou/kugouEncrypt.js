@@ -1,11 +1,13 @@
 // !Last validated: 2025/05/25
 
+import { MD5 } from "crypto-js";
+
 // const window = {};
 // window.addEventListener = function () { };
 // const document = {};
 // document.cookie = '';
 // const location = {};
-// location.host = 'https://www.kugou.com/';
+// location.host = 'http://localhost:5173/';
 // const navigator = {};
 // navigator.userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 Edg/128.0.0.0';
 // navigator.plugins = {};
@@ -1209,6 +1211,27 @@ var kgUser, infSign;
     return c;
 });
 
+let Param = function() {
+    var t = []
+        , o = {};
+    this.parse = function (e) {
+        for (var n = e.split("&"), t = 0, i = n.length; t < i; t++) {
+            var r = n[t].split("=");
+            o[r[0]] = r[1]
+        }
+        return o
+    }
+    ,
+    this.toString = function (e) {
+        return t.join(e = e || "&")
+    }
+    ,
+    this.add = function (e, n) {
+        return t.push(e + "=" + n),
+            this
+    }
+}
+
 function getSignedParams(params) {
     var mid = kgUser.getKgMid();
 
@@ -1218,8 +1241,35 @@ function getSignedParams(params) {
     return infSign(params, null);
 }
 
-export { getSignedParams };
+function getToken(kugoo) {
+    return new Param().parse(kugoo)['t'];
+}
+
+const kugouKey = 'NVPh5oo715z5DIWAeQlhMDsWXXQV4hwt';
+function getMobileSign(params, data) {
+    var mid = kgUser.getKgMid();
+
+    params.mid = mid;
+    params.uuid = mid;
+
+    let targetList = [kugouKey];
+    Object.keys(params).forEach((value) => {
+        targetList.push(`${value}=${params[value]}`);
+    });
+    targetList.push(JSON.stringify(data));
+    targetList.push(kugouKey);
+    console.log(targetList);
+
+    const signature = MD5(targetList.join('')).toString();
+
+    params.signature = signature;
+
+    return params;
+}
+
+export { getSignedParams, getToken, getMobileSign };
 
 // Debug only
 // console.log(getParams('7q696414', 0))
 // console.log(getParams('青空Magic Day', 1))
+// console.log(getToken(``));

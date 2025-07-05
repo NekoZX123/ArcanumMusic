@@ -6,7 +6,7 @@ import { showNotify } from './assets/notifications/Notification.ts';
 import { showPopup } from './assets/notifications/popup.tsx';
 import { createPlayer } from './assets/player/player.ts';
 import { changePage, getCurrentPage, initialize, pageBack, pageForward } from './assets/utilities/pageSwitcher.ts';
-import { testKuwoRequests } from './assets/utilities/requestTests.ts';
+import { testKugouRequests, testKuwoRequests, testNeteaseRequests, testQQMusicRequests } from './assets/utilities/requestTests.ts';
 
 // 设置文件位置
 const configLocation = '/ArcanumMusic/settings.json';
@@ -130,11 +130,6 @@ function clearSearchBar() {
     }
 }
 
-// 弹窗回调
-function popupCallback(code: number) {
-    console.log(code);
-}
-
 // 当前音乐信息
 const playerMetaInfo = ref(createPlayer(['volumeControl', 'lyricsVolume']));
 const progressTooltipOffset = ref('left: 0');
@@ -247,8 +242,8 @@ onMounted(async () => {
     player?.updateProgress(0);
 
     // 测试请求
-    // testNeteaseRequests();
-    testKuwoRequests(1);
+    testNeteaseRequests(11);
+    // testKuwoRequests(13);
     // testKugouRequests();
     // testQQMusicRequests();
 

@@ -14,13 +14,16 @@ server.use(cors());
 // 允许的请求地址, 防止 SSRF 攻击
 const allowedHosts = [
     'music.163.com',
+    'interface.music.163.com',
     'u6.y.qq.com',
     'kuwo.cn',
     'www.kuwo.cn',
     'searchlist.kuwo.cn',
     'wapi.kuwo.cn',
     'wwwapi.kugou.com',
-    'complexsearch.kugou.com'
+    'complexsearch.kugou.com',
+    'm3ws.kugou.com',
+    'gateway.kugou.com'
 ];
 
 function proxyRequest(link, method, headers = {}, body = null, responseType = 'json') {
