@@ -3,9 +3,11 @@ import { createApp, onMounted, ref } from 'vue';
 import Lyrics from './components/lyrics/Lyrics.vue';
 
 import { showNotify } from './assets/notifications/Notification.ts';
+// @ts-ignore
 import { showPopup } from './assets/notifications/popup.tsx';
 import { createPlayer } from './assets/player/player.ts';
 import { changePage, getCurrentPage, initialize, pageBack, pageForward } from './assets/utilities/pageSwitcher.ts';
+// @ts-ignore
 import { testKugouRequests, testKuwoRequests, testNeteaseRequests, testQQMusicRequests } from './assets/utilities/requestTests.ts';
 
 // 设置文件位置
@@ -242,10 +244,10 @@ onMounted(async () => {
     player?.updateProgress(0);
 
     // 测试请求
-    testNeteaseRequests(14);
-    testKuwoRequests(14);
-    testKugouRequests(14);
-    // testQQMusicRequests();
+    // testNeteaseRequests(14);
+    // testKuwoRequests(14);
+    // testKugouRequests(14);
+    testQQMusicRequests(14);
 
 });
 </script>

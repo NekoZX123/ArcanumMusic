@@ -1,7 +1,7 @@
 import { getNeteaseAlbum, getNeteaseArtist, getNeteaseHotList, getNeteaseLyrics, getNeteaseNewAlbum, getNeteaseNewSong, getNeteasePlaylist, getNeteaseRankingContent, getNeteaseRankings, getNeteaseRecommendArtist, getNeteaseRecommendSong, getNeteaseSearchResult, getNeteaseSongInfo, getNeteaseSonglink } from '../scripts/netease/neteaseRequest.ts';
 import { getKuwoAlbum, getKuwoArtist, getKuwoHotList, getKuwoLyrics, getKuwoNewAlbum, getKuwoNewSong, getKuwoPlaylist, getKuwoRankingContent, getKuwoRankings, getKuwoRecommendArtist, getKuwoRecommendSong, getKuwoSearchResult, getKuwoSongInfo, getKuwoSonglink } from '../scripts/kuwo/kuwoRequest.ts';
 import { getKugouAlbum, getKugouArtist, getKugouHotList, getKugouLyrics, getKugouNewAlbums, getKugouNewSong, getKugouRankings, getKugouRankinngContent, getKugouRecommendArtist, getKugouRecommendSong, getKugouSearchResult, getKugouSongInfo, getKugouSonglink, getKugouSonglist } from '../scripts/kugou/kugouRequest.ts';
-import { getQQmusicSearchResult, getQQmusicSonglink } from '../scripts/qqmusic/qqmusicRequest.ts';
+import { getQQmusicResult } from '../scripts/qqmusic/qqmusicRequest.ts';
 
 // 测试请求 (网易云音乐)
 function testNeteaseRequests(id: number = 1) {
@@ -150,16 +150,68 @@ function testKugouRequests(id: number = 1) {
     }
 }
 // 测试请求 (QQ音乐)
-function testQQMusicRequests() {
-    const qqmusicToken = '[YOUR_QQ_MUSIC_TOKEN]'; // 替换为你的QQ音乐Token
-    getQQmusicSonglink('003UlmlI0hkj8t', { uin: 2168979907, qm_keyst: qqmusicToken })
-        .then((response) => {
-            console.log(response.data);
-        });
-    getQQmusicSearchResult('Memories of kindness', { uin: 2168979907, qm_keyst: qqmusicToken })
-        .then((response) => {
-            console.log(response.data);
-        });
+function testQQMusicRequests(id: number = 1) {
+    const token = {
+        uin: 114514, // 替换为你的QQ音乐用户ID
+        qm_keyst: '[YOUR_QQMUSIC_TOKEN_HERE]' // 替换为你的QQ音乐Token
+    };
+
+    if (id === 1) {
+        getQQmusicResult('songLink', { songMid: '003UlmlI0hkj8t' }, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 2) {
+        getQQmusicResult('search', { keyword: 'Memories of kindness' }, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 3) {
+        getQQmusicResult('songInfo', { songMid: '003UlmlI0hkj8t' }, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 4) {
+        getQQmusicResult('lyrics', { songMid: '000akynZ2Rbro5' }, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 5) {
+        getQQmusicResult('songList', { listId: 8543902164 }, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 6) {
+        getQQmusicResult('album', { albumId: '001c5b9s44NoOd' }, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 7) {
+        getQQmusicResult('artist', { artistId: '0025NhlN2yWrP4' }, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 8) {
+        getQQmusicResult('hotList', {}, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 9) {
+        getQQmusicResult('recommendSong', {}, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 10) {
+        getQQmusicResult('recommendArtist', {}, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 11) {
+        getQQmusicResult('rankings', {}, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 12) {
+        getQQmusicResult('rankingContent', { rankingId: 4 }, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 13) {
+        getQQmusicResult('newSong', {}, token)
+            .then((response) => console.log(response.data));
+    }
+    else if (id === 14) {
+        getQQmusicResult('newAlbum', {}, token)
+            .then((response) => console.log(response.data));
+    }
 }
 
 export { testNeteaseRequests, testKuwoRequests, testKugouRequests, testQQMusicRequests };
