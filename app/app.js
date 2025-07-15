@@ -1,7 +1,7 @@
 import {app, BrowserWindow, ipcMain, Menu, Tray} from 'electron';
 import {fileURLToPath} from 'url';
 import {copyFileSync, mkdir} from 'fs';
-
+import { userInfo } from 'os';
 import {startService, stopService} from './service.js';
 import {isFileExist, readLocalFile, writeLocalFile} from './fileManager.js';
 
@@ -303,6 +303,7 @@ app.whenReady().then(() => {
     ipcMain.handle('getAppEnvironment', () => environment);
     ipcMain.handle('getAppDataLocal', getAppDataLocal);
     ipcMain.handle('getAsarLocation', () => app.getAppPath());
+    ipcMain.handle('getUserName', () => userInfo().username);
 
     ipcMain.handle('listenCookie', listenForCookie);
 

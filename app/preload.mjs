@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld(
         getAppEnvironment: () => ipcRenderer.invoke('getAppEnvironment'), // 获取应用环境
         getAppDataLocal: () => ipcRenderer.invoke('getAppDataLocal'), // 获取 %AppData%
         getAsarLocation: () => ipcRenderer.invoke('getAsarLocation'), // 获取 asar 文件位置
+        getUserName: () => ipcRenderer.invoke('getUserName'), // 获取用户名
         
         listenCookie: (windowId, targetCookies) => ipcRenderer.invoke('listenCookie', windowId, targetCookies) // 监听 cookie
     }

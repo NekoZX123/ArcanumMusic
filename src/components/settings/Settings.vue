@@ -244,7 +244,7 @@ async function setPageStructure(depth: string[], node: any) {
         return;
     }
     if (decorationTypes.includes(node.nodeName)) {
-        if (node.nodeName === 'label' || node.nodeName === 'link') console.log(node);
+        // if (node.nodeName === 'label' || node.nodeName === 'link') console.log(node);
         const targetId = `${depth.join('.')}_container`;
         const widgetId = depth.join('.');
         const targetElement = document.getElementById(targetId);
@@ -474,7 +474,7 @@ onMounted(async () => {
     pageReader.send(null);
     settingsPage = pageReader.responseXML;
 
-    console.log(settingsPage);
+    // console.log(settingsPage);
 
     // 读取设置内容
     const settingsText = await window.electron.getAppConfig();

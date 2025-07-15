@@ -243,7 +243,7 @@ const requestData: any = {
 // 请求链接
 const universalUrl = 'https://u6.y.qq.com/cgi-bin/musics.fcg';
 
-type QQMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
+type MusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
     'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 'newSong' | 'newAlbum';
 
 /**
@@ -275,7 +275,7 @@ type QQMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' 
  * - newSong: {} - 空对象
  * - newAlbum: {} - 空对象
  */
-function getQQmusicResult(moduleName: QQMusicModule, params: { [type: string]: any }, cookies: { uin: number, qm_keyst: string }) {
+function getQQmusicResult(moduleName: MusicModule, params: { [type: string]: any }, cookies: { uin: number, qm_keyst: string }) {
     const common = requestData.common;
     const moduleData = requestData[moduleName];
     if (!moduleData) {

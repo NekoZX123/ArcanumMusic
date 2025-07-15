@@ -8,7 +8,7 @@ import { showPopup } from './assets/notifications/popup.tsx';
 import { createPlayer } from './assets/player/player.ts';
 import { changePage, getCurrentPage, initialize, pageBack, pageForward } from './assets/utilities/pageSwitcher.ts';
 // @ts-ignore
-import { testKugouRequests, testKuwoRequests, testNeteaseRequests, testQQMusicRequests } from './assets/utilities/requestTests.ts';
+import { testKugouRequests, testKuwoRequests, testNeteaseRequests, testQQMusicRequests, testRequest } from './assets/utilities/requestTests.ts';
 
 // 设置文件位置
 const configLocation = '/ArcanumMusic/settings.json';
@@ -247,7 +247,9 @@ onMounted(async () => {
     // testNeteaseRequests(14);
     // testKuwoRequests(14);
     // testKugouRequests(14);
-    testQQMusicRequests(14);
+    // testQQMusicRequests(14);
+    testRequest('netease', 14);
+    testRequest('qqmusic', 13);
 
 });
 </script>
