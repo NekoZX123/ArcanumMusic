@@ -36,9 +36,11 @@ var pageComponents: { [key: string]: any } = {
     'songlistCollections': SonglistCollections,
     'singleCollections': SingleCollections
 };
+const pageHighlights = ['home', 'library', 'search', 'settings'];
 
-let currentPage = 'home';
-let pageStack = ['home']; // 页面堆栈
+let currentPage = '';
+let latestPage = '';
+let pageStack: string[] = []; // 页面堆栈
 let backedPages: string[] = []; // 回退页面堆栈
 let pageApp = createApp(Home);
 
@@ -54,7 +56,9 @@ function changePage(pageId: string, pushStack: boolean = true, idParam?: string)
     let newTab = document.getElementById(pageId) as HTMLButtonElement;
     if (currentTab) {
         currentTab.classList.remove('current');
-        if (pageId === 'home' || pageId === 'library') newTab.classList.add('current');
+    }
+    if (pageHighlights.includes(pageId)) {
+        newTab.classList.add('current');
     }
 
     if (appPageNames.includes(pageId)) {
@@ -86,6 +90,29 @@ function changePage(pageId: string, pushStack: boolean = true, idParam?: string)
     currentPage = pageId;
 }
 
+// 标签页点击切换页面
+function onTabChange(event: any) {
+    let target = event.target;
+    let currentPage = getCurrentPage();
+    if (event.target.tagName === 'IMG') target = event.target.parentElement;
+    if (target.id !== currentPage) {
+        changePage(target.id);
+    }
+}
+
+// 切换播放列表
+function togglePlaylist(_: MouseEvent) {
+    let currentPage = getCurrentPage();
+
+    if (currentPage === 'playlist') {
+        changePage(latestPage);
+    }
+    else {
+        latestPage = currentPage;
+        changePage('playlist');
+    }
+}
+
 // 回退页面
 function pageBack() {
     if (pageStack.length <= 1) return;
@@ -114,12 +141,15 @@ function getCurrentPage() {
 // 初始化
 function initialize() {
     pageApp.mount('#pageContent');
+    changePage('home');
 }
 
 export {
     initialize,
     changePage,
+    onTabChange,
     pageBack,
     pageForward,
-    getCurrentPage
+    getCurrentPage,
+    togglePlaylist
 }

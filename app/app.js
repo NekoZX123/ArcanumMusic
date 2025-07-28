@@ -1,4 +1,4 @@
-import {app, BrowserWindow, ipcMain, Menu, Tray} from 'electron';
+import {app, BrowserWindow, ipcMain, Menu, shell, Tray} from 'electron';
 import {fileURLToPath} from 'url';
 import {copyFileSync, mkdir} from 'fs';
 import { userInfo } from 'os';
@@ -306,6 +306,8 @@ app.whenReady().then(() => {
     ipcMain.handle('getUserName', () => userInfo().username);
 
     ipcMain.handle('listenCookie', listenForCookie);
+
+    ipcMain.handle('openExternal', (_, url) => shell.openExternal(url));
 
     startService();
     createWindow();

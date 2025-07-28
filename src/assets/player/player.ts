@@ -22,8 +22,8 @@ function timeFormat(timeSeconds: number) {
 }
 
 // 循环 / 随机播放图片链接常量池
-const IMAGES_REPEAT = ['/images/player/repeat.svg', '/images/player/repeat.svg', '/images/player/repeatSingle.svg'];
-const IMAGES_SHUFFLE = ['/images/player/shuffle.svg', '/images/player/shuffle.svg'];
+const IMAGES_REPEAT = ['/images/player/repeat.svg', '/images/player/repeat.on.svg', '/images/player/repeatSingle.svg'];
+const IMAGES_SHUFFLE = ['/images/player/shuffle.svg', '/images/player/shuffle.on.svg'];
 
 class Player {
     // 播放列表信息

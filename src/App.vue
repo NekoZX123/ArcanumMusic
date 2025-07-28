@@ -3,12 +3,11 @@ import { createApp, onMounted, ref } from 'vue';
 import Lyrics from './components/lyrics/Lyrics.vue';
 
 import { showNotify } from './assets/notifications/Notification.ts';
-// @ts-ignore
-import { showPopup } from './assets/notifications/popup.tsx';
+// import { showPopup } from './assets/notifications/popup.tsx';
 import { createPlayer } from './assets/player/player.ts';
-import { changePage, getCurrentPage, initialize, pageBack, pageForward } from './assets/utilities/pageSwitcher.ts';
-// @ts-ignore
-import { testKugouRequests, testKuwoRequests, testRequest } from './assets/utilities/requestTests.ts';
+import { initialize, pageBack, pageForward, togglePlaylist, changePage } from './assets/utilities/pageSwitcher.ts';
+// import { testRequest } from './assets/utilities/requestTests.ts';
+import { PageButton } from './assets/widgets/pageSwitcher.tsx';
 
 // 设置文件位置
 const configLocation = '/ArcanumMusic/settings.json';
@@ -91,49 +90,8 @@ function titlebarMouseUp() {
     isMoving = false;
 }
 
-// 页面挂载切换器
-let latestPage = 'home';
-function onTabChange(event: any) {
-    let target = event.target;
-    let currentPage = getCurrentPage();
-    if (event.target.tagName === 'IMG') target = event.target.parentElement;
-    if (target.id !== currentPage) {
-        changePage(target.id);
-    }
-}
-function togglePlaylist(_: MouseEvent) {
-    let currentPage = getCurrentPage();
-
-    if (currentPage === 'playlist') {
-        changePage(latestPage);
-    }
-    else {
-        latestPage = currentPage;
-        changePage('playlist');
-    }
-}
-
-// 搜索框焦点事件 & 清除
-function searchInFocus() {
-    let clearButton = document.getElementById('clearButton');
-    if (clearButton) clearButton.style.display = 'block';
-}
-function searchOutFocus() {
-    let clearButton = document.getElementById('clearButton');
-    if (clearButton) setTimeout(() => {
-        clearButton.style.display = 'none'
-    }, 100);
-}
-function clearSearchBar() {
-    console.log('114514');
-    let bar = document.getElementById('search') as HTMLInputElement;
-    if (bar) {
-        bar.value = '';
-    }
-}
-
 // 当前音乐信息
-const playerMetaInfo = ref(createPlayer(['volumeControl', 'lyricsVolume']));
+const playerMetaInfo = ref(createPlayer(['lyricsVolume']));
 const progressTooltipOffset = ref('left: 0');
 
 // 播放进度调整
@@ -190,12 +148,20 @@ function hideProgressTooltip(_: any = undefined) {
 
 // 音量调整
 function adjustVolume(event: MouseEvent) {
-    if (event.buttons !== 1) return;
-
-    let volumeBar = document.getElementById('volumeControl') as HTMLInputElement;
+    const volumeBar = document.getElementById('volumeBar');
     if (!volumeBar) return;
-    
-    playerMetaInfo.value.setVolume(Number(volumeBar.value));
+
+    if (event.buttons === 1) {
+        // 设置音量条宽度
+        let deltaX = event.clientX - volumeBar.getBoundingClientRect().left;
+        let volume = Math.round(deltaX / volumeBar.clientWidth * 100);
+
+        // 防止范围溢出
+        if (volume < 0) volume = 0;
+        if (volume > 100) volume = 100;
+
+        playerMetaInfo.value.setVolume(volume);
+    }
 }
 
 // 切换歌词面板
@@ -223,7 +189,8 @@ onMounted(async () => {
     initialize();
 
     // 测试通知
-    showNotify('Notifyyyyyy', 'success', 'Welcome!', 'Welcome to Arcanum Music!', 3000);
+    setTimeout(() => showNotify('Notify1', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 500);
+    setTimeout(() => showNotify('Notify2', 'info', 'Test1', 'Test Notify 01'), 1000);
 
     // 测试弹窗
     // showPopup('success', 'notice', 
@@ -256,7 +223,7 @@ onMounted(async () => {
 <template>
     <div id="windowMain">
         <!-- 窗口标题栏 -->
-        <div class="flex row" id="windowControlBar"  
+        <div class="flex row" id="windowControlBar" 
             @mousedown="titlebarMouseDown" @mousemove="titlebarMouseMove" @mouseup="titlebarMouseUp">
             <span class="flex row" id="windowDrag">
                 <img id="appIcon" src="/images/appIcon/ArcanumMusic_nogrid.png"/>
@@ -281,39 +248,32 @@ onMounted(async () => {
                 <!-- 前进 / 后退 -->
                 <div class="flex row" id="backForward">
                     <button class="pageControl" id="pageBack" @click="pageBack">
-                        <img src="/images/topbar/arrowLeft.svg" alt="Back"/>
+                        <img src="/images/pageSwitcher/arrowLeft.svg" alt="Back"/>
                     </button>
                     <button class="pageControl" id="pageForawrd" @click="pageForward">
-                        <img src="/images/topbar/arrowRight.svg" alt="Forward"/>
+                        <img src="/images/pageSwitcher/arrowRight.svg" alt="Forward"/>
                     </button>
                 </div>
 
-                <!-- 窗口标签页 -->
-                <div class="flex row" id="windowTabs">
-                    <button class="text small tabWidget pageTab current" id="home" @click="onTabChange">首页</button>
-                    <button class="text small tabWidget pageTab" id="library" @click="onTabChange">音乐库</button>
-                </div>
-
-                <!-- 搜索框 -->
-                <span id="searchContainer">
-                    <label class="text small" id="searchPrev">🔍</label>
-                    <input class="textInput text ultraSmall" id="search" type="text" placeholder="搜索..."
-                        @focusin="searchInFocus" @focusout="searchOutFocus" @keypress.enter="onTabChange"/>
-                    <button class="text small" id="clearButton" @click="clearSearchBar">
-                        <img src="/images/topbar/clear.svg" alt="Clear search bar"/>
-                    </button>
-                </span>
+                <div id="topBarSpace"></div>
 
                 <!-- 设置 -->
-                <button id="settings" @click="onTabChange">
-                    <img src="/images/topbar/settings.svg" alt="Application settings"/>
+                <button class="pageButton" id="settings" title="设置" @click="(_: any) => {changePage('settings')}">
+                    <img src="/images/pageSwitcher/settings.svg" alt="Application settings"/>
                 </button>
             </div>
 
             <!-- 页面内容 -->
-            <div id="pageContainer">
-                <div id="pageContent"></div>
-                <div id="bottomBlock"></div>
+            <div class="flex row">
+                <div class="flex column" id="pageSelector">
+                    <PageButton id="home" icon="/images/pageSwitcher/home.svg" text="首页"></PageButton>
+                    <PageButton id="library" icon="/images/pageSwitcher/library.svg" text="音乐库"></PageButton>
+                    <PageButton id="search" icon="/images/pageSwitcher/search.svg" text="搜索"></PageButton>
+                </div>
+                <div id="pageContainer">
+                    <div id="pageContent"></div>
+                    <div id="bottomBlock"></div>
+                </div>
             </div>
         </div>
 
@@ -358,7 +318,12 @@ onMounted(async () => {
                     </button>
                     <span class="flex row">
                         <img class="playControl small" :src="playerMetaInfo.volumeLevel" @click="playerMetaInfo.toggleMute"/>
-                        <input type="range" id="volumeControl" min="0" max="100" value="100" step="1" @mousemove="adjustVolume"/>
+                        <div id="volumeAdjust" @mousemove="adjustVolume">
+                            <div id="volumeBar">
+                                <div id="volumeFilled" :style="`width: ${playerMetaInfo.volume}%`"></div>
+                            </div>
+                            <div class="text ultraSmall" id="volumeLabel" :style="`left: calc(${playerMetaInfo.volume}% - 1.5rem)`">{{ playerMetaInfo.volume }}%</div>
+                        </div>
                     </span>
                     <button class="playControl small" id="lyrics" @click="showLyrics">
                         <img src="/images/player/expand.svg" alt="Expand lyrics"/>
@@ -366,7 +331,6 @@ onMounted(async () => {
                 </div>
             </div>
         </div>
-        
 
         <!-- 通知区域 -->
         <div class="notifyArea flex column" id="notifyArea"></div>

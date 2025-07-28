@@ -21,6 +21,8 @@ export interface IElectronAPI {
     getUserName: () => Promise,
 
     listenCookie: (windowId: Number, targetCookies: String[]) => Promise,
+
+    openExternal: (url: String) => Promise,
 }
 
 declare global {

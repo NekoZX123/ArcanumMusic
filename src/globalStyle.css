@@ -223,16 +223,27 @@ a {
 #appMain {
     position: relative;
     width: 100%;
-    height: calc(100vh - 2rem);
+    height: calc(100vh - 3rem);
     top: 2rem;
 }
 
 /* 页面切换 */
+#pageSelector {
+    position: fixed;
 
+    width: 4rem;
+    height: calc(100vh - 14rem);
+
+    justify-content: center;
+
+    z-index: 50;
+}
+
+/* 顶部工具栏 */
 #windowTop {
     position: relative;
     width: 100%;
-    height: 2rem;
+    height: 3rem;
 
     padding: 0 5rem;
 }
@@ -241,23 +252,24 @@ a {
 .pageControl {
     appearance: none;
 
-    width: 2rem;
-    height: 2rem;
-    left: -3px;
+    width: 3rem;
+    height: 3rem;
 
     background: transparent;
     border: none;
-    border-radius: 1rem;
+    border-radius: 1.5rem;
 
     margin: 0 3px;
 
     transition: all 200ms ease-in-out;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .pageControl > img {
-    position: relative;
-    width: 1.5rem;
-    height: 1.5rem;
-    top: 1px;
+    width: 3rem;
+    height: 3rem;
 }
 #pageBack > img {
     left: -3px;
@@ -277,153 +289,147 @@ a {
 
 /* 页面内容 */
 #pageContainer {
-    height: calc(100% - 2rem);
+    position: relative;
+    width: calc(100% - 4rem);
+    height: calc(100vh - 5rem);
+    left: 4rem;
 
     overflow-x: hidden;
     overflow-y: auto;
 }
 
 /* 标签页组件 */
-.tabWidget {
+.tabsContainer {
+    width: 100%;
+}
+.tabSwitcher {
+    margin: 3px 0;
+}
+.tabItem {
     position: relative;
+    width: 9rem;
+    height: 3rem;
 
     background: transparent;
     color: var(--default-black);
     font-weight: bold;
 
-    border: none;
-    border-radius: 6px;
-
-    margin: 0 0.5rem;
-
-    transition: all 200ms ease-in-out;
-}
-.tabWidget.current {
-    color: var(--color-blue-deep);
-}
-.tabWidget:hover {
-    background: var(--transparent-grey);
-}
-
-.tabWidget.pageTab {
-    width: 5rem;
-    height: 2rem;
-}
-.tabWidget.sourceTab {
-    width: 10rem;
-    height: 2.5rem;
-
-    justify-content: center;
-    align-items: center;
-}
-.tabWidget.typeTab {
-    width: 4rem;
-    height: 2rem;
-}
-.tabWidget.sourceTab > * {
-    margin: 0 3px;
-}
-.tabWidget.sourceTab > img {
-    width: 2rem;
-    height: 2rem;
-}
-.sourceTab > label {
-    transition: all 200ms ease-in-out;
-}
-.sourceTab.current > label {
-    color: var(--color-blue-deep);
-}
-
-#searchContainer {
-    margin: 0 1rem;
-}
-#search {
-    appearance: none;
-    position: relative;
-    width: 12rem;
-    height: 2rem;
-
-    background: var(--transparent-lightgrey);
-    color: var(--default-black);
-    text-indent: 2rem;
-    font-weight: bold;
-
-    transition: all 200ms ease-in-out;
-}
-#search.current {
-    background: var(--color-blue-light);
-}
-#search:focus {
-    outline: none;
-    background: var(--color-blue-light);
-    border-style: solid;
-    border-color: var(--color-blue-deep);
-    border-width: 0;
-    border-bottom-width: 2px;
-}
-
-#searchPrev {
-    appearance: none;
-    position: absolute;
-    width: 2rem;
-    height: 2rem;
-    top: 2px;
-    left: calc(100% - 20rem + 4px);
-
-    background: transparent;
     border: none;
     border-radius: 8px;
 
-    color: var(--default-black);
+    margin: 0 0.5rem;
+
+    justify-content: center;
+    align-items: center;
 
     transition: all 200ms ease-in-out;
-
-    z-index: 2;
 }
-#searchBar:focus + #searchPrev {
+.tabItem.smallTab {
+    width: 6rem;
+    height: 2rem;
+}
+.tabItem.current {
+    background: var(--color-blue-light);
+}
+.tabItem:hover {
+    background: var(--transparent-grey);
+}
+.tabItem > img {
+    width: 2rem;
+    height: 2rem;
+
+    margin-right: 6px;
+}
+.tabItem.current > label {
     color: var(--color-blue-deep);
 }
+/* 标签页切换动画 */
+.switchAnimation-enter-active, 
+.switchAnimation-leave-active {
+    transition: all 200ms ease-in-out;
+}
+.switchAnimation-enter-from {
+    opacity: 0;
+    transform: translateX(20px);
+}
+.switchAnimation-leave-to {
+    opacity: 0;
+    transform: translateX(-20px);
+}
 
-#clearButton {
-    appearance: none;
-    position: absolute;
-    width: 1rem;
-    height: 1rem;
-    top: calc(0.25rem + 1px);
-    left: calc(100% - 10rem);
+.pageButton {
+    width: 3rem;
+    height: 3rem;
 
     background: transparent;
     border: none;
+    border-radius: 1.5rem;
 
+    margin: 3px 0.5rem;
+
+    overflow: hidden;
+    transition: 
+        all 200ms ease-in-out,
+        justify-content 0ms ease-in-out 200ms;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+.pageButton:hover {
+    width: 8rem;
+
+    background: var(--color-blue-light);
+
+    justify-content: flex-start;
+}
+.pageButton.current {
+    background: var(--color-blue-default);
+}
+.pageButton > img {
+    width: 3rem;
+    height: 3rem;
+
+    border: none;
+    border-radius: 1.5rem;
+}
+.pageButton > label {
     display: none;
 }
-#clearButton > img {
-    width: 1rem;
-    height: 1rem;
+.pageButton:hover > label {
+    display: inline;
+}
+
+#topBarSpace {
+    flex: 1 0;
 }
 
 #settings {
     appearance: none;
     position: relative;
-    width: 2rem;
-    height: 2rem;
+    width: 3rem;
+    height: 3rem;
 
     background: transparent;
     border: none;
-    border-radius: 8px;
+    border-radius: 1.5rem;
 
     transition: all 200ms ease-in-out;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 #settings:hover {
     background: var(--transparent-grey);
 }
+#settings.current {
+    background: var(--color-blue-default);
+}
 #settings > img {
-    position: relative;
-    top: -1px;
-    left: calc(-0.25rem - 1px);
-
-    width: 2rem;
-    height: 2rem;
+    width: 3rem;
+    height: 3rem;
 }
 
 
@@ -812,9 +818,6 @@ a {
     flex-wrap: wrap;
     gap: 1.5rem;
 
-    display: none;
-}
-.musicBox.current {
     display: flex;
 }
 /* 类型选择器 */
@@ -837,10 +840,10 @@ a {
 /* 播放控制 */
 #playControlContainer {
     position: fixed;
-    width: calc(100% - 1.6rem);
+    width: calc(100% - 5.6rem);
     height: calc(4rem + 3px);
     bottom: 6px;
-    left: 0.8rem;
+    left: 4.3rem;
 
     background: var(--transparent-white);
     backdrop-filter: blur(4px);
@@ -988,52 +991,55 @@ a {
     margin: 0 3px;
 }
 
-#volumeControl {
-    appearance: none;
-
-    position: relative;
+#volumeAdjust {
     width: 8rem;
-    height: calc(1.5rem + 6px);
-    top: -6px;
+    height: 2rem;
 
     background: transparent;
-    border-radius: 8px;
-
-    transition: all 200ms ease-in-out;
 }
-#volumeControl::-webkit-slider-thumb {
-    appearance: none;
+#volumeAdjust > #volumeBar {
+    position: relative;
+    height: 6px;
+    top: calc(50% - 3px);
 
-    width: 1rem;
-    height: 1rem;
-    margin-top: calc(5px - 0.75rem);
+    background: var(--default-lightgrey);
+    border: none;
+    border-radius: 3px;
+}
+#volumeAdjust #volumeFilled {
+    width: 50%;
+    height: 6px;
 
+    background: var(--default-grey);
+    border: none;
+    border-radius: 3px;
+
+    transition: background 200ms ease-in-out;
+}
+#volumeAdjust:hover #volumeFilled {
     background: var(--color-blue-default);
-    border-radius: 0.5rem;
+}
+#volumeAdjust > #volumeLabel {
+    position: relative;
+    width: 3rem;
+    height: 1.5rem;
+    top: -1.2rem;
+    left: calc(100% - 1.5rem);
+
+    background: var(--transparent-white);
+    border-style: solid;
+    border-color: var(--default-lightgrey);
+    border-width: 2px;
+    border-radius: 6px;
+
+    text-align: center;
 
     opacity: 0;
 
-    transition: all 200ms ease-in-out;
+    transition: opacity 200ms ease-in-out;
 }
-#volumeControl:hover::-webkit-slider-thumb {
+#volumeAdjust:hover > #volumeLabel {
     opacity: 1;
-}
-#volumeControl::-webkit-slider-runnable-track {
-    --fill-percentage: 100%;
-    appearance: none;
-
-    position: absolute;
-    width: 8rem;
-    height: 6px;
-
-    background: linear-gradient(to right, var(--color-blue-default) 0%, 
-        var(--color-blue-default) var(--fill-percentage), #FFFFFF var(--fill-percentage));
-    border-style: solid;
-    border-color: rgba(126, 126, 126, 0.3);
-    border-width: 1px;
-    border-radius: 3px;
-
-    transform: translateY(calc(0.75rem - 6px));
 }
 
 /* 通知 */
@@ -1060,14 +1066,16 @@ a {
 
     background: var(--default-white);
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
     box-shadow: 0 0 5px var(--transparent-grey);
 
     margin: 6px 0;
     align-items: center;
 
     transform: translateX(100%);
-    transition: all 500ms cubic-bezier(0.6, -0.28, 0.735, 0.045);
+    transition: all 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    overflow: hidden;
 }
 .notification.show {
     transition: all 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275);

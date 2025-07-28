@@ -67,7 +67,7 @@ const SongCard = defineComponent({
                     <label class="text ultraSmall grey">{props.authors}</label>
                 </span>
                 <button class="songPlay">
-                    <img src="/images/player/play.svg" alt="Play"/>
+                    <img src="/images/player/play.dark.svg" alt="Play"/>
                 </button>
             </span>
         );

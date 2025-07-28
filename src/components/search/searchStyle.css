@@ -9,10 +9,64 @@
     margin: 1rem 0;
 }
 
-#searchTitle {
-    width: calc(100% - 2rem);
+/* 搜索框 */
+#searchBarContainer {
+    width: 100%;
+    height: 3rem;
 
-    margin-top: 2rem;
+    background: var(--default-lightgrey);
+    border: none;
+    border-radius: 1.5rem;
+
+    padding-left: 1rem;
+    padding-right: 3px;
+
+    justify-content: center;
+    align-items: center;
+
+    transition: all 200ms ease-in-out;
+}
+#searchBar {
+    width: calc(100% - 8rem);
+    height: 3rem;
+
+    background: transparent;
+    border: none;
+    color: var(--default-black);
+
+    font-size: 15pt;
+
+    outline: none;
+
+    flex: 1 0;
+}
+#searchClear {
+    opacity: 0;
+
+    transition: all 200ms ease-in-out;
+}
+#searchBar:focus + #searchClear {
+    opacity: 1;
+}
+#searchBarContainer:has(#searchBar:focus) {
+    background: var(--color-blue-light);
+}
+#searchBarContainer > button {
+    width: calc(3rem - 6px);
+    height: calc(3rem - 6px);
+
+    background: transparent;
+    border: none;
+    border-radius: calc(1.5rem - 3px);
+
+    transition: all 200ms ease-in-out;
+}
+#searchBarContainer > button:hover {
+    background: var(--transparent-lightgrey);
+}
+#searchBarContainer > button > img {
+    width: 2rem;
+    height: 2rem;
 }
 
 #searchSourceContainer {
@@ -21,12 +75,10 @@
     align-items: center;
 }
 
-#searchTypeTabs {
-    width: 100%;
-
-    align-items: center;
+#searchPlatform > .tabSwitcher {
+    justify-content: center;
 }
 
-#typeTabs {
+[id^="searchType_"] > .tabSwitcher {
     justify-content: center;
 }

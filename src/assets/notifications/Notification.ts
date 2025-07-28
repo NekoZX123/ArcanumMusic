@@ -3,8 +3,10 @@
 import Notification from './Notification.vue';
 import { createApp } from "vue";
 
+type NotifyType = 'success' | 'info' | 'warning' | 'critical';
+
 // 创建通知
-function showNotify(id: string, type: string, title: string, content: string, duration: number) {
+function showNotify(id: string, type: NotifyType, title: string, content: string, duration: number = 3000) {
     const container = document.createElement('div');
     document.getElementById('notifyArea')?.appendChild(container);
 
@@ -14,8 +16,10 @@ function showNotify(id: string, type: string, title: string, content: string, du
     let notifyBody = container.firstChild as HTMLElement;
     if (!notifyBody) return;
 
-    // 显示通知
-    notifyBody.classList.add('show');
+    requestAnimationFrame(() => {
+        notifyBody.classList.add('show');
+    });
+    
     // 绑定关闭按钮事件
     const closeButton = notifyBody.querySelector('.notifyClose') as HTMLElement;
     closeButton.addEventListener('click', () => closeNotify(id));

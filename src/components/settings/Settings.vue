@@ -473,7 +473,6 @@ onMounted(async () => {
     pageReader.overrideMimeType('text/xml;charset=UTF-8');
     pageReader.send(null);
     settingsPage = pageReader.responseXML;
-
     // console.log(settingsPage);
 
     // 读取设置内容
@@ -482,6 +481,16 @@ onMounted(async () => {
 
     loadPageTree(settingsPage);
     setupPage([], settings);
+
+    // 浏览器打开 <a> 标签
+    document.addEventListener('click', function (event) {
+        const target = event.target as HTMLElement;
+        const url = target.getAttribute('href');
+        if (target.tagName === 'A' && url) {
+            event.preventDefault();
+            window.electron.openExternal(url);
+        }
+    });
 
     console.log('Settings.vue loaded');
 });

@@ -4,38 +4,26 @@ import './libraryStyle.css';
 
 // 导入组件
 import { SonglistCard, SongCard } from '../../assets/widgets/Widgets.tsx';
+import TabWidget from '../../assets/widgets/TabWidget.vue';
 
-// 歌单列表
-var currentContainerId = 'netease';
-// 歌单列表切换功能
-function changeCurrentContainer(id: string) {
-    if (currentContainerId === id) return;
-
-    // 滚动页面
-    document.getElementById('playlistSourceTabs')?.scrollIntoView({ behavior: 'smooth' });
-
-    document.getElementById(currentContainerId)?.classList.remove('current');
-    document.getElementById(id)?.classList.add('current');
-
-    let prevContainer = document.getElementById('playlists_' + currentContainerId);
-    let nextContainer = document.getElementById('playlists_' + id);
-
-    if (prevContainer && nextContainer) {
-        prevContainer.classList.remove('current');
-        nextContainer.classList.add('current');
+const platformTabs = [
+    {
+        title: '网易云音乐',
+        icon: '/images/platforms/netease.png'
+    },
+    {
+        title: 'QQ 音乐',
+        icon: '/images/platforms/qqmusic.png'
+    },
+    {
+        title: '酷我音乐',
+        icon: '/images/platforms/kuwo.png'
+    },
+    {
+        title: '酷狗音乐',
+        icon: '/images/platforms/kugou.png'
     }
-
-    currentContainerId = id;
-}
-function onSourceTabClick(event: any) {
-    let target = event.target;
-    if (event.target.tagName === 'IMG' || event.target.tagName === 'LABEL') {
-        target = event.target.parentElement;
-    }
-    if (target.tagName === 'BUTTON') {
-        changeCurrentContainer(target.id);
-    }
-}
+];
 
 // 问候语
 const userName = ref('NekoZX');
@@ -51,9 +39,6 @@ onMounted(() => {
     const choice = Math.floor(Math.random() * greetList.length);
     greetings.value = greetList[choice];
     greetingsEnd.value = greetSubfix[choice];
-
-    // 获取歌单元素
-    changeCurrentContainer('netease');
 });
 </script>
 
@@ -110,27 +95,9 @@ onMounted(() => {
         </div>
 
         <!-- 用户歌单 -->
-        <div class="flex column" id="userPlaylistContainer">
-            <span class="flex row" id="playlistSourceTabs">
-                <button class="tabWidget sourceTab flex row current" id="netease" @click="onSourceTabClick">
-                    <img src="/images/platforms/netease.png"/>
-                    <label class="text bold small">网易云音乐</label>
-                </button>
-                <button class="tabWidget sourceTab flex row" id="qqmusic" @click="onSourceTabClick">
-                    <img src="/images/platforms/qqmusic.png"/>
-                    <label class="text bold small">QQ音乐</label>
-                </button>
-                <button class="tabWidget sourceTab flex row" id="kuwo" @click="onSourceTabClick">
-                    <img src="/images/platforms/kuwo.png"/>
-                    <label class="text bold small">酷我音乐</label>
-                </button>
-                <button class="tabWidget sourceTab flex row" id="kugou" @click="onSourceTabClick">
-                    <img src="/images/platforms/kugou.png"/>
-                    <label class="text bold small">酷狗音乐</label>
-                </button>
-            </span>
-            <div class="musicContainer" id="userPlaylists">
-                <div class="musicBox songlists current" id="playlists_netease">
+        <TabWidget id="userLists" :tabs="platformTabs" :scrollOnClick="true">
+            <template #default>
+                <div class="musicBox songlists" id="playlists_netease">
                     <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 01"></SonglistCard>
                     <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 02"></SonglistCard>
                     <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 03"></SonglistCard>
@@ -154,7 +121,7 @@ onMounted(() => {
                     <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="Kugou List 02"></SonglistCard>
                     <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="Kugou List 03"></SonglistCard>
                 </div>
-            </div>
-        </div>
+            </template>
+        </TabWidget>
     </div>
 </template>

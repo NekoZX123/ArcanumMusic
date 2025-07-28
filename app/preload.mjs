@@ -23,6 +23,8 @@ contextBridge.exposeInMainWorld(
         getAsarLocation: () => ipcRenderer.invoke('getAsarLocation'), // 获取 asar 文件位置
         getUserName: () => ipcRenderer.invoke('getUserName'), // 获取用户名
         
-        listenCookie: (windowId, targetCookies) => ipcRenderer.invoke('listenCookie', windowId, targetCookies) // 监听 cookie
+        listenCookie: (windowId, targetCookies) => ipcRenderer.invoke('listenCookie', windowId, targetCookies), // 监听 cookie
+
+        openExternal: (url) => ipcRenderer.invoke('openExternal', url) // 打开外部链接
     }
 );
