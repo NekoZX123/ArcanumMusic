@@ -35,26 +35,6 @@
                 "useGreetings": true,
                 "greetingsText": 0
             }
-        },
-        "accounts": {
-            "platforms": {
-                "netease": {
-                    "name": "",
-                    "cookies": ""
-                },
-                "qqmusic": {
-                    "name": "",
-                    "cookies": ""
-                },
-                "kuwo": {
-                    "name": "",
-                    "cookies": ""
-                },
-                "kugou": {
-                    "name": "",
-                    "cookies": ""
-                }
-            }
         }
     },
     "developerOptions": {

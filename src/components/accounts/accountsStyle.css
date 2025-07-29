@@ -1,0 +1,20 @@
+#musicAccounts {
+    width: 100%;
+
+    padding: 1rem 2rem;
+}
+
+#safeNotice {
+    color: rgb(245, 228, 40);
+}
+
+#accountHeaders > label {
+    margin: 3px 0;
+}
+
+#accountCardContainer {
+    align-items: center;
+}
+#accountCards {
+    width: 75%;
+}

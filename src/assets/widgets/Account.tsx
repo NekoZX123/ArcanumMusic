@@ -1,10 +1,10 @@
-import { defineComponent } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 
 import { closePopup, showPopup } from "../notifications/popup";
 import { showNotify } from "../notifications/Notification";
 
 import { storeAccountInfo, readAccountInfo, cleanAccountInfo, setAccountInfo } from "../utilities/accountManager.ts";
-import axios from "axios";
+import { getQQmusicAccount } from "../scripts/qqmusic/qqmusicRequest.ts";
 
 // 各平台登录信息
 const initialTokens: { [type: string]: any } = {
@@ -76,7 +76,7 @@ const platformCookieTargets: { [type: string]: string[] } = {
 
 // 用户头像 / 昵称获取 / 设置
 function displayAccount(platform: string, nickname: string, avatar: string) {
-    const accountButton = document.getElementById(`login.${platform}`);
+    const accountButton = document.getElementById(`${platform}`);
     if (!accountButton || !accountButton.parentElement) return;
 
     const accountWidget = accountButton.parentElement;
@@ -105,7 +105,7 @@ function platformLogout(platform: string) {
 
     showNotify('arcanummusic.accounts.logout', 'success', '登出成功!', `${platformNames[platform]} 已登出`, 3000);
 
-    let loginButton = document.getElementById(`login.${platform}`) as HTMLButtonElement;
+    let loginButton = document.getElementById(`${platform}`) as HTMLButtonElement;
     if (loginButton) {
         loginButton.innerHTML = '登入';
 
@@ -134,63 +134,58 @@ async function platformLogin(platform: string) {
     cookiePromise.then(async (userData: { userData?: { avatarUrl?: string, nickname?: string }, cookies: any }) => {
         console.log(`[Debug] User info received: ${JSON.stringify(userData)}`);
 
-        // 设置用户信息
-        setAccountInfo(platform, userData);
-        storeAccountInfo(platform);
-
         // 获取用户信息
         if (platform === 'qqmusic' && userData.cookies) { // QQ 音乐 - 网络请求用户信息
             const qm_keyst = userData.cookies['qm_keyst'];
             const uin = userData.cookies['uin'];
-            const cookies = `uin=${uin};qm_keyst=${qm_keyst}`;
 
-            const data = {
-                "comm": {
-                    "cv": 4747474,
-                    "ct": 24,
-                    "format": "json",
-                    "inCharset": "utf-8",
-                    "outCharset": "utf-8",
-                    "notice": 0,
-                    "platform": "yqq.json",
-                    "needNewCode": 1,
-                    "uin": uin,
-                    "g_tk_new_20200303": 1696903369,
-                    "g_tk": 1696903369
-                },
-                "req_1": {
-                    "module": "userInfo.BaseUserInfoServer",
-                    "method": "get_user_baseinfo_v2",
-                    "param": {
-                        "vec_uin": [
-                            `${uin}`
-                        ]
+            getQQmusicAccount({ uin: parseInt(uin), qm_keyst }).then((response) => {
+                // console.log(response.data);
+                const result = response.data;
+                // 错误处理
+                if (result.code !== 0) {
+                    console.error(`[Error] Failed to get QQ Music account info, (Code ${result.code})`);
+                    showNotify('arcanummusic.accounts.qqmusiclogin', 'critical', '错误', 'QQ 音乐用户信息获取失败, 用户数据已储存');
+                    return;
+                }
+                const accountResponse = result.req_1;
+                if (accountResponse.code !== 0) {
+                    console.error(`[Error] Failed to get QQ Music account info, (Code ${accountResponse.code})`);
+                    showNotify('arcanummusic.accounts.qqmusiclogin', 'critical', '错误', 'QQ 音乐用户信息获取失败, 用户数据已储存');
+                    return;
+                }
+
+                const infoObject = accountResponse.data.map_userinfo;
+                const userInfo = infoObject[parseInt(uin)];
+                
+                const nickname = userInfo.nick || '未知用户';
+                const avatarUrl = userInfo.headurl || '/images/library/defaultAvatar.svg';
+                // 设置并存储用户信息
+                const completeUserData = {
+                    userData: {
+                        avatarUrl: avatarUrl,
+                        nickname: nickname
+                    },
+                    cookies: {
+                        'uin': uin,
+                        'qm_keyst': qm_keyst,
+                        'qqmusic_key': qm_keyst
                     }
                 }
-            }
-
-            // const sign = await getSignViaIframe(JSON.stringify(data));
-            const requestUrl = `https://u6.y.qq.com/cgi-bin/musics.fcg?_=${Date.now()}&sign=${0}`;
-
-            const requestParams = {
-                url: requestUrl,
-                method: 'POST',
-                headers: {
-                    'Cookie': cookies
-                },
-                body: JSON.stringify(data)
-            }
-
-            axios.post('http://127.0.0.1:3000/proxy', requestParams)
-                .then((response) => {
-                    console.log(response.status);
-                    console.log(response.data);
-                });
+                setAccountInfo(platform, completeUserData);
+                storeAccountInfo(platform);
+                // 展示用户信息
+                displayAccount(platform, nickname, avatarUrl);
+            });
         }
         else if (userData.userData) { // 其他平台 - 从 localStorage (网易云) / cookie (酷我 / 酷狗) 获取用户信息
             console.log(userData);
             const avatarUrl = userData.userData.avatarUrl || '/images/library/defaultAvatar.svg';
             const nickname = userData.userData.nickname || '未知用户';
+            // 设置并存储用户信息
+            setAccountInfo(platform, userData);
+            storeAccountInfo(platform);
+            // 展示用户信息
             displayAccount(platform, nickname, avatarUrl);
         }
 
@@ -202,7 +197,7 @@ async function platformLogin(platform: string) {
         window.electron.closeWindowById(loginWindowId);
 
         // 更改按钮绑定事件
-        let loginButton = document.getElementById(`login.${platform}`) as HTMLButtonElement;
+        let loginButton = document.getElementById(`${platform}`) as HTMLButtonElement;
         if (loginButton) {
             loginButton.innerHTML = '登出';
 
@@ -216,29 +211,41 @@ async function platformLogin(platform: string) {
 // 账号登录组件
 const AccountCard = defineComponent({
     props: {
-        id: String,
-        platform: String,
-        isLogin: Boolean,
-        avatar: String,
-        user: String
+        platform: String
     },
-    setup(props: { id: string, platform: string, isLogin: boolean, avatar: string, user: string }) {
-        let platform = platformIcons[props.platform];
+    setup(props: { platform: string }) {
+        let platformIcon = platformIcons[props.platform];
         let type = platformNames[props.platform];
+
+        const isLogin = ref(false);
+        const avatar = ref('/images/library/defaultAvatar.svg');
+        const userName = ref('未登录');
+
+        onMounted(async () => {
+            const user = await readAccountInfo(props.platform);
+            if (user && user.userData) {
+                const userData = user.userData;
+                isLogin.value = true;
+                avatar.value = userData.avatarUrl || '/images/library/defaultAvatar.svg';
+                userName.value = userData.nickname || '未知用户';
+                console.log(`[Debug] User data detected: Name = ${userName.value}; Avatar = ${avatar.value}`);
+            }
+        });
+
         return () => (
-            <span class="accountElement optionBox flex row" id={`${props.id}_container`}>
+            <span class="accountElement optionBox flex row" id={`${props.platform}_container`}>
                 <span class="accountImageContainer">
-                    <img class="accountAvatar" src={props.avatar} />
-                    <img class="accountPlatform" src={platform}></img>
+                    <img class="accountAvatar" src={avatar.value} />
+                    <img class="accountPlatform" src={platformIcon}></img>
                 </span>
                 <span class="accountInfo flex column">
                     <label class="text medium bold">{type}</label>
-                    <label class="text small">{props.user}</label>
+                    <label class="text small">{userName.value}</label>
                 </span>
-                <button class="accountManage text small bold" id={props.id} 
-                    onClick={props.isLogin ? () => platformLogout(props.platform) : () => platformLogin(props.platform)}>
-                    {props.isLogin ? '登出' : '登入'}
-                    </button>
+                <button class="accountManage text small bold" id={props.platform} 
+                    onClick={isLogin.value ? () => platformLogout(props.platform) : () => platformLogin(props.platform)}>
+                    {isLogin.value ? '登出' : '登入'}
+                </button>
             </span>
         );
     }

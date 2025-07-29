@@ -8,6 +8,7 @@ import { createPlayer } from './assets/player/player.ts';
 import { initialize, pageBack, pageForward, togglePlaylist, changePage } from './assets/utilities/pageSwitcher.ts';
 // import { testRequest } from './assets/utilities/requestTests.ts';
 import { PageButton } from './assets/widgets/pageSwitcher.tsx';
+import { showPopup } from './assets/notifications/popup.tsx';
 
 // 设置文件位置
 const configLocation = '/ArcanumMusic/settings.json';
@@ -189,13 +190,13 @@ onMounted(async () => {
     initialize();
 
     // 测试通知
-    setTimeout(() => showNotify('Notify1', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 500);
-    setTimeout(() => showNotify('Notify2', 'info', 'Test1', 'Test Notify 01'), 1000);
+    setTimeout(() => showNotify('Notify1', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 2000);
 
     // 测试弹窗
-    // showPopup('success', 'notice', 
-    //    'Welcome', '欢迎使用 Arcanum Music! \n (此应用仍在开发中)', 
-    //    [], popupCallback);
+    const testPopup = false;
+    if (testPopup) showPopup('success', 'notice', 
+       'Welcome', '欢迎使用 Arcanum Music! \n (此应用仍在开发中)', 
+       [], (code: number) => {console.log(code)});
 
     // 歌词面板挂载
     const lyrics = createApp(Lyrics);
@@ -260,6 +261,10 @@ onMounted(async () => {
                 <!-- 设置 -->
                 <button class="pageButton" id="settings" title="设置" @click="(_: any) => {changePage('settings')}">
                     <img src="/images/pageSwitcher/settings.svg" alt="Application settings"/>
+                </button>
+                <!-- 账户 -->
+                <button class="pageButton" id="accounts" title="我的账户" @click="(_: any) => {changePage('accounts')}">
+                    <img src="/images/pageSwitcher/accounts.svg" alt="My accounts"/>
                 </button>
             </div>
 

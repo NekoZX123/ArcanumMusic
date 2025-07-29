@@ -405,7 +405,8 @@ a {
     flex: 1 0;
 }
 
-#settings {
+#settings,
+#accounts {
     appearance: none;
     position: relative;
     width: 3rem;
@@ -421,17 +422,18 @@ a {
     justify-content: center;
     align-items: center;
 }
-#settings:hover {
+#settings:hover,
+#accounts:hover {
     background: var(--transparent-grey);
 }
-#settings.current {
+#settings.current,
+#accounts.current {
     background: var(--color-blue-default);
 }
 #settings > img {
     width: 3rem;
     height: 3rem;
 }
-
 
 /* 歌单卡片 */
 .songlistCard {

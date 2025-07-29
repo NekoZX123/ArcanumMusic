@@ -6,6 +6,7 @@ import Home from '../../components/home/Home.vue';
 import Library from '../../components/library/Library.vue';
 import Search from '../../components/search/Search.vue';
 import Settings from '../../components/settings/Settings.vue';
+import Accounts from '../../components/accounts/Accounts.vue';
 
 import Playlist from '../../components/playlist/Playlist.vue';
 
@@ -18,7 +19,7 @@ import SingleCollections from "../../components/collections/SingleCollections.vu
 
 // 应用各页面
 const appPageNames = [
-    'home', 'library', 'search', 'settings', 
+    'home', 'library', 'search', 'settings', 'accounts',
     'playlist', 
     'songlist', 'single', 'artist',
     'artistCollections', 'songlistCollections', 'singleCollections'
@@ -28,6 +29,7 @@ var pageComponents: { [key: string]: any } = {
     'library': Library,
     'search': Search,
     'settings': Settings,
+    'accounts': Accounts,
     'playlist': Playlist,
     'songlist': Songlist,
     'single': Single,
@@ -36,7 +38,7 @@ var pageComponents: { [key: string]: any } = {
     'songlistCollections': SonglistCollections,
     'singleCollections': SingleCollections
 };
-const pageHighlights = ['home', 'library', 'search', 'settings'];
+const pageHighlights = ['home', 'library', 'search', 'settings', 'accounts'];
 
 let currentPage = '';
 let latestPage = '';

@@ -24,10 +24,10 @@
     margin: 0 1rem;
 }
 
-#userPlaylistContainer {
+#userLists {
     width: 100%;
 
-    padding-bottom: 5rem;
+    padding-bottom: 18rem;
 }
 #playlistSourceTabs {
     width: 100%;

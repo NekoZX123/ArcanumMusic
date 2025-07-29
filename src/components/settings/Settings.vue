@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { createApp, onMounted } from 'vue';
 
-import { AccountCard, readAccountInfo } from '../../assets/widgets/Account.tsx';
+import { AccountCard } from '../../assets/widgets/Account.tsx';
 import { HeadersText, NodeBlock, CheckBox, ColorPicker, Slider, TextInput, Dropbox } from '../../assets/widgets/Settings.tsx';
 
 import './settingsStyle.css';
 import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
-import { setAccountInfo } from '../../assets/utilities/accountManager.ts';
 
 /* 树形结构组件点击 */
 // 当前选中节点
@@ -151,33 +150,7 @@ async function setPageStructure(depth: string[], node: any) {
         if (node.nodeName === 'account') {
             let platform = node.getAttribute('id');
 
-            // 检测是否登录
-            const user = await readAccountInfo(platform);
-            // console.log(user);
-            if (user && user.userData) {
-                const userData = user.userData;
-
-                setAccountInfo(platform, user);
-
-                const accountProps = {
-                    id: widgetId,
-                    platform: platform,
-                    isLogin: true,
-                    avatar: userData.avatarUrl || '/images/library/defaultAvatar.svg',
-                    user: userData.nickname || '未知用户'
-                };
-                createApp(AccountCard, accountProps).mount(targetElement);
-            }
-            else {
-                const accountProps = {
-                    id: platform,
-                    platform: platform,
-                    isLogin: false,
-                    avatar: '/images/library/defaultAvatar.svg',
-                    user: '未知用户'
-                };
-                createApp(AccountCard, accountProps).mount(targetElement);
-            }
+            createApp(AccountCard, { platform: platform }).mount(targetElement);
         }
         // 候选框
         else if (node.nodeName === 'checkbox') {

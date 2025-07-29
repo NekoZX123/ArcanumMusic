@@ -240,6 +240,16 @@ const requestData: any = {
         }
     ]
 };
+// 特例 - 用户信息
+const userInfoData = {
+    "module": "userInfo.BaseUserInfoServer",
+    "method": "get_user_baseinfo_v2",
+    "param": {
+        "vec_uin": [
+            "0"
+        ]
+    }
+};
 // 请求链接
 const universalUrl = 'https://u6.y.qq.com/cgi-bin/musics.fcg';
 
@@ -360,4 +370,36 @@ function getQQmusicResult(moduleName: MusicModule, params: { [type: string]: any
     );
 }
 
-export { getQQmusicResult };
+/**
+ * 获取 QQ 音乐用户信息
+ * @param cookies 
+ * @returns (必填, 否则无法获取数据) 用户 Cookie 信息，包括 uin 和 qm_keyst
+ */
+function getQQmusicAccount(cookies: { uin: number, qm_keyst: string }) {
+    const common = requestData.common;
+    const moduleData = userInfoData;
+    common.uin = cookies.uin;
+    moduleData.param.vec_uin = [cookies.uin.toString()];
+    const data: { [type: string]: any } = {
+        'comm': common,
+        'req_1': moduleData
+    };
+
+    const sign = getSign(JSON.stringify(data));
+    const requestParams = `_=${Date.now()}&sign=${sign}`; // 不使用ag-1编码 (不加密数据)
+    const cookieHeader = `uin=${cookies.uin};qm_keyst=${cookies.qm_keyst};qqmusic_key=${cookies.qm_keyst}`;
+
+    return proxyRequest(
+        'POST',
+        `${universalUrl}?${requestParams}`,
+        {
+            'Accept': 'application/octet-stream; text/plain; application/json',
+            'Content-Type': 'text/plain',
+            'Cookie': cookieHeader,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0'
+        },
+        data
+    );
+}
+
+export { getQQmusicResult, getQQmusicAccount };
