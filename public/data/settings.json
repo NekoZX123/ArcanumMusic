@@ -40,6 +40,10 @@
     "developerOptions": {
         "account": {
             "useDebugAccounts": false
+        },
+        "application": {
+            "enableDevtoolsHotkey": false,
+            "devtoolsOnLaunched": false
         }
     }
 }

@@ -43,6 +43,12 @@ let userData: { [type: string]: any } = {
 
 // 登录信息管理
 
+// 获取登录信息
+function getAccountInfo(platform: string) {
+    if (platform === 'all') return userData;
+    else if (userData[platform]) return userData[platform];
+    else return null;
+}
 // 写入登录信息
 function setAccountInfo(platform: string, data: any) {
     if (!userData[platform]) return;
@@ -103,5 +109,6 @@ export {
     storeAccountInfo,
     readAccountInfo,
     cleanAccountInfo,
+    getAccountInfo,
     setAccountInfo
 }

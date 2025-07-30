@@ -54,6 +54,35 @@
     margin-left: 18px;
 }
 
+.horizontalScroll {
+    width: calc(100% - 2rem);
+    
+    align-items: center;
+}
+.scrollerButton {
+    appearance: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    
+    background: var(--transparent-lightgrey);
+    border: none;
+    border-radius: 0.75rem;
+    box-shadow: 0 0 3px var(--default-lightgrey);
+
+    transition: all 200ms ease-in-out;
+}
+.scrollerButton:hover {
+    background: var(--transparent-grey);
+    box-shadow: 0 0 3px var(--default-grey);
+}
+.scrollerButton > img {
+    position: relative;
+    width: 1.5rem;
+    height: 1.5rem;
+    top: -1px;
+    right: 0.35rem;
+}
+
 #dailyRecommends {
     background: var(--gradient-background1);
 
@@ -69,25 +98,38 @@
     margin: 0 2rem;
 }
 
-#songlistRecommends {
-    display: grid;
+.nowrapBox {
+    width: 100%;
 
-    grid-template-columns: repeat(5, 1fr);
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+
+#songlistRecommends {
+    display: flex;
 }
 
 #singleRecommends {
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
 
-    grid-template-columns: repeat(3, 1fr);
+    padding-left: 2rem;
 }
 #singleRecommends > .songCard {
     margin: 3px 1rem;
 }
 
-#newSingles {
-    display: grid;
+#artistRecommends {
+    height: 12rem;
+}
 
-    grid-template-columns: repeat(3, 1fr);
+#newSingles {
+    width: 100%;
+
+    display: flex;
+    flex-wrap: wrap;
+
+    padding-left: 3rem;
 }
 
 #pageFooter {

@@ -82,6 +82,10 @@
         <node id="account" title="账号">
             <checkbox id="useDebugAccounts" text="使用调试账户信息"/>
         </node>
+        <node id="application" title="应用">
+            <checkbox id="enableDevtoolsHotkey" text="启用开发者工具快捷键 Ctrl+Shift+I"/>
+            <checkbox id="devtoolsOnLaunched" text="应用启动时打开开发者工具"/>
+        </node>
     </page>
 
     <page id="about" name="关于此应用">

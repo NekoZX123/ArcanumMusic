@@ -65,7 +65,7 @@ async function prepareAccountStorage() {
 // 创建主窗口
 function createWindow() {
     prepareAccountStorage();
-    getAppConfig();
+    const configLoader = getAppConfig();
 
     mainWindow = new BrowserWindow({
         width: 1000,
@@ -88,11 +88,27 @@ function createWindow() {
 
     if (environment === 'dev') {
         mainWindow.loadURL('http://localhost:5173');
-        mainWindow.webContents.openDevTools();
     }
     else {
         mainWindow.loadFile('dist/index.html');
     }
+    
+    configLoader.then((config) => {
+        const configObject = JSON.parse(config);
+
+        if (configObject.developerOptions.application.devtoolsOnLaunched) { // 启动时打开开发者工具
+            mainWindow.webContents.openDevTools();
+        }
+
+        if (!configObject.developerOptions.application.enableDevtoolsHotkey){ // 根据设置禁用 DevTools 快捷键
+            mainWindow.webContents.on('before-input-event', (event, input) => {
+                if (input.key === 'I' && input.control && input.shift && !input.meta && !input.alt) {
+                    console.log('[Debug] Due to user settings, DevTools launch request rejected');
+                    event.preventDefault();
+                }
+            });
+        }
+    });
 }
 
 // 新建窗口
@@ -287,6 +303,7 @@ function getAppDataLocal() {
 }
 
 app.whenReady().then(() => {
+    // 添加事件触发
     ipcMain.handle('newAppWindow', newWindow);
     ipcMain.handle('minimizeWindow', minimizeWindow);
     ipcMain.handle('maximizeWindow', toggleMaximize);
@@ -309,7 +326,10 @@ app.whenReady().then(() => {
 
     ipcMain.handle('openExternal', (_, url) => shell.openExternal(url));
 
+    // 启动服务
     startService();
+
+    // 创建应用主窗口
     createWindow();
 
     // 托盘图标

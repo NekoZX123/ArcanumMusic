@@ -216,17 +216,12 @@ onMounted(async () => {
 
     // 初始化播放器
     const player = playerMetaInfo.value;
+
+    // 加载首页内容
+
     // [For Debug]
     player?.updateDuration(114);
     player?.updateProgress(0);
-
-    // 测试请求
-    // testKugouRequests(14);
-    // testRequest('netease', 14);
-    // testRequest('qqmusic', 14);
-    // testRequest('kuwo', 14);
-    // testRequest('kugou', 14);
-
 });
 </script>
 
