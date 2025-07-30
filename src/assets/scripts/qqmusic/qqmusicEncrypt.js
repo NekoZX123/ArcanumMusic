@@ -1424,7 +1424,7 @@ function x(e, t, n) {
         // 偷取 `__cgiEncrypt` `__cgiDecrypt` 函数
         cgiEncrypt = L;
         cgiDecrypt = N;
-        console.log(L, N);
+        // console.log(L, N);
         /////////////////////////
 
     }

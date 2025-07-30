@@ -165,6 +165,15 @@ function adjustVolume(event: MouseEvent) {
     }
 }
 
+// 切换播放列表
+let playlistEnabled = false;
+const playlistButtonImg = ref('/images/player/playlist.svg');
+function togglePlaylistPanel(_: MouseEvent) {
+    playlistEnabled = !playlistEnabled;
+    playlistButtonImg.value = `/images/player/playlist${playlistEnabled ? '.on' : ''}.svg`;
+    togglePlaylist(_);
+}
+
 // 切换歌词面板
 function showLyrics(_: MouseEvent) {
     const lyricsPanel = document.getElementById('lyricsArea');
@@ -312,8 +321,8 @@ onMounted(async () => {
 
                 <!-- 其他控制 / 歌词 -->
                 <div class="flex row" id="controlRightBar">
-                    <button class="playControl small" id="playlist" @click="togglePlaylist">
-                        <img src="/images/player/playlist.svg" alt="Toggle playlist"/>
+                    <button class="playControl small" id="playlist" @click="togglePlaylistPanel">
+                        <img :src="playlistButtonImg" alt="Toggle playlist"/>
                     </button>
                     <button class="playControl small" id="repeat" @click="playerMetaInfo.toggleRepeat">
                         <img :src="playerMetaInfo.repeatStateImage" alt="Toggle repeat"/>

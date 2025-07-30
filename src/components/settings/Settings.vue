@@ -6,6 +6,10 @@ import { HeadersText, NodeBlock, CheckBox, ColorPicker, Slider, TextInput, Dropb
 
 import './settingsStyle.css';
 import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
+import { showNotify } from '../../assets/notifications/Notification.ts';
+
+// 设置页面及内容
+let settingsPage, settings: any;
 
 /* 树形结构组件点击 */
 // 当前选中节点
@@ -124,6 +128,49 @@ function setupPage(depth: string[], settingsObject: any) {
         }
         depth.pop();
     }
+}
+
+// 读取当前设置
+function readCurrentSettings(depth: string[], originalSettings: any) {
+    let optionKeys = Object.keys(originalSettings);
+    let modifiedSettings: { [type: string]: any } = {};
+
+    for (let i = 0; i < optionKeys.length; i++) {
+        const optionKey = optionKeys[i];
+        const optionValue = originalSettings[optionKey];
+
+        depth.push(optionKey);
+        if (typeof optionValue !== 'object') {
+            let optionId = depth.join('.');
+            let element = document.getElementById(optionId) as HTMLInputElement;
+
+            if (!element) continue;
+
+            // 复选框 - 选中状态
+            if (element.getAttribute('type') === 'checkbox') {
+                modifiedSettings[optionKey] = element.checked;
+            }
+            // 颜色选择器 - 附加输入框
+            else if (element.classList.contains('colorpicker')) {
+                let colorInputBox = document.getElementById(`${optionId}_text`) as HTMLInputElement;
+                modifiedSettings[optionKey] = colorInputBox.value;
+            }
+            // 滑动条 - 附加输入框类型 & 范围限制
+            else if (element.classList.contains('slider')) {
+                let sliderInputBox = document.getElementById(`${optionId}_text`) as HTMLInputElement;
+                modifiedSettings[optionKey] = sliderInputBox.value;
+            }
+            else {
+                modifiedSettings[optionKey] = element.value;
+            }
+        }
+        else {
+            modifiedSettings[optionKey] = readCurrentSettings(depth, optionValue);
+        }
+        depth.pop();
+    }
+
+    return modifiedSettings;
 }
 
 // 设置页面结构
@@ -430,9 +477,28 @@ function loadPageTree(pageData: any) {
     }
 }
 
-onMounted(async () => {
-    let settingsPage, settings;
+// 丢弃设置更改
+function discardChanges(_: MouseEvent) {
+    setupPage([], settings);
+}
+// 保存设置更改
+function saveChanges(_: MouseEvent) {
+    const modifiedSettings = readCurrentSettings([], settings);
+    settings = modifiedSettings;
+    const settingsText =  JSON.stringify(modifiedSettings);
+    
+    window.electron.getAppDataLocal()
+        .then((appDataPath: string) => {
+            console.log(appDataPath);
+            const targetFile = `${appDataPath}\\ArcanumMusic\\settings.json`;
 
+            window.electron.writeLocalFile(targetFile, settingsText);
+
+            showNotify('arcanummusic.settings.filemodify', 'success', '设置已保存', '设置文件已保存');
+        });
+}
+
+onMounted(async () => {
     settingsContent = document.getElementById('settingsContent') as HTMLElement;
 
     // 获取设置页面
@@ -471,23 +537,38 @@ onMounted(async () => {
 
 <template>
     <div id="musicSettings">
-        <div class="flex row">
-            <!-- 设置标签页区域 -->
-            <div id="settingsTabs" class="tree">
-                <div class="treeNode expandable" id="initialNode">
-                    <div class="nodeContent">
-                        <i class="nodeExpandButton">
-                            <img src="/images/windowControl/treeExpand.svg" class="nodeExpandImage" alt="">
-                        </i>
-                        <label class="nodeLabel">NodeLabel</label>
+        <div class="flex column">
+            <div class="flex row">
+                <!-- 设置标签页区域 -->
+                <div id="settingsTabs" class="tree">
+                    <div class="treeNode expandable" id="initialNode">
+                        <div class="nodeContent">
+                            <i class="nodeExpandButton">
+                                <img src="/images/windowControl/treeExpand.svg" class="nodeExpandImage" alt="">
+                            </i>
+                            <label class="nodeLabel">NodeLabel</label>
+                        </div>
+                        <div class="nodeChildren"></div>
                     </div>
-                    <div class="nodeChildren"></div>
+                </div>
+                <!-- 设置内容区域 -->
+                <div id="settingsContent">
                 </div>
             </div>
-            <!-- 设置内容区域 -->
-            <div id="settingsContent">
-            </div>
         </div>
+
+        <!-- 设置更改保存及丢弃 -->
+        <div class="flex row" id="changesControl">
+            <button class="changesOption" id="discardButton" @click="discardChanges">
+                <img src="/images/fileControl/discard.svg"></img>
+                <label class="text small bold">丢弃</label>
+            </button>
+            <button class="changesOption" id="saveButton" @click="saveChanges">
+                <img src="/images/fileControl/save.svg"></img>
+                <label class="text small bold">保存</label>
+            </button>
+        </div>
+        
         <!-- 页面底部占位 -->
         <div id="settingsBlock"></div>
     </div>
