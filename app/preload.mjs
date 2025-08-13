@@ -24,6 +24,7 @@ contextBridge.exposeInMainWorld(
         getUserName: () => ipcRenderer.invoke('getUserName'), // 获取用户名
         
         listenCookie: (windowId, targetCookies) => ipcRenderer.invoke('listenCookie', windowId, targetCookies), // 监听 cookie
+        validateCookie: (platform) => ipcRenderer.invoke('validateCookieExpiration', platform), // 验证 Cookie 有效期
 
         openExternal: (url) => ipcRenderer.invoke('openExternal', url) // 打开外部链接
     }

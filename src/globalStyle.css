@@ -5,6 +5,7 @@
 
     --default-black: rgb(36, 36, 36);
     --default-white: rgb(245, 245, 245);
+    --default-darkgrey: rgb(114, 114, 114);
     --default-grey: rgb(128, 128, 128);
     --default-lightgrey: rgb(225, 225, 225);
     --transparent-white: rgba(245, 245, 245, 0.6);
@@ -438,15 +439,30 @@ a {
 }
 
 /* 歌单卡片 */
+.songlistContainer.medium {
+    width: 10rem;
+    height: 13rem;
+
+    margin: 0 3px;
+    padding: 0 3px;
+    padding-top: 3px;
+
+    border: none;
+    border-radius: 12px;
+
+    align-items: center;
+
+    transition: all 200ms ease-in-out;
+}
+.songlistContainer:hover {
+    background: var(--transparent-lightgrey);
+}
 .songlistCard {
     background: transparent;
     border: none;
     border-radius: 12px;
 
     align-items: center;
-
-    margin: auto 3px;
-    padding: 6px;
 
     transition: all 200ms ease-in-out;
 }
@@ -465,13 +481,7 @@ a {
     cursor: pointer;
 }
 .songlistCard.medium {
-    width: 10rem;
-    height: 12rem;
-
     cursor: pointer;
-}
-.songlistCard:hover {
-    background: var(--transparent-lightgrey);
 }
 
 .songlistCard.midlarge > img {
@@ -550,9 +560,12 @@ a {
     align-items: center;
     justify-content: space-between;
 }
-.songlistCard.medium .cardFooter {
-    height: 2rem;
-    align-items: center;
+.songlistCard.medium label {
+    width: 9rem;
+    height: 34pt;
+
+    overflow: hidden;
+
     justify-content: flex-start;
 }
 
@@ -606,20 +619,24 @@ a {
     background: var(--transparent-grey);
 }
 
-.songlistCard.medium .songlistPlay {
+/* 歌单来源示意 */
+.songlistCard.medium .songlistPlatform {
+    position: relative;
     width: 2rem;
     height: 2rem;
-    top: calc(-4rem - 12px);
-    left: calc(7rem - 6px);
+    left: calc(7rem - 12px);
+    top: calc(-6rem + 6px);
 
     background: transparent;
-    backdrop-filter: blur(4px);
-    border-radius: 1rem;
+    border: none;
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 4px var(--transparent-grey);
 
-    box-shadow: 0 0 4px 1px var(--transparent-grey);
-}
-.songlistCard.medium .songlistPlay:hover {
-    background: var(--transparent-grey);
+    margin: 6px;
+
+    transition: all 150ms ease-in-out;
+
+    border-radius: 1rem;
 }
 
 .songlistPlay > img {
@@ -641,9 +658,9 @@ a {
     height: 1.5rem;
     left: -1px;
 }
-.songlistCard.medium .songlistPlay > img {
-    width: 1rem;
-    height: 1rem;
+.songlistCard.medium .songlistPlatform > img {
+    width: 2rem;
+    height: 2rem;
 }
 
 /* 歌单来源 */
@@ -699,6 +716,11 @@ a {
 }
 .songCard > .songInfo {
     align-items: flex-start;
+}
+.songInfo > label {
+    width: 10rem;
+    height: 16pt;
+    overflow: hidden;
 }
 
 .songPlay {
@@ -771,17 +793,20 @@ a {
 }
 
 /* 歌手卡片 */
-.artistCard {
+.artistContainer {
     position: relative;
     width: 10rem;
     height: 11rem;
+
+    margin: 0 1rem;
+}
+.artistCard {
+    position: relative;
 
     background: transparent;
     border: none;
 
     align-items: center;
-
-    margin: 0 1.5rem;
 
     transition: all 200ms ease-in-out;
     cursor: pointer;

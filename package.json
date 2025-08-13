@@ -2,12 +2,12 @@
     "name": "arcanummusic",
     "author": {
         "name": "NekoZX",
-        "email": "nothing@nothing.com",
+        "email": "guess@whoiam.qwq",
         "url": "https://github.com/NekoZX123"
     },
     "description": "Arcanum Music - a multi-platform music application made by NekoZX",
     "private": true,
-    "version": "0.1.50",
+    "version": "0.5.14",
     "type": "module",
     "main": "app/app.js",
     "devtron": true,

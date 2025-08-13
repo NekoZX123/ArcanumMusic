@@ -142,7 +142,6 @@ function getCurrentPage() {
 
 // 初始化
 function initialize() {
-    pageApp.mount('#pageContent');
     changePage('home');
 }
 

@@ -32,8 +32,18 @@
     margin-right: 12px;
 }
 
+#listDescription {
+    height: 45pt;
+    overflow-y: auto;
+}
+
 #songlistContent {
     width: 100%;
 
     padding-left: 2rem;
+}
+
+#bottomBanner {
+    display: block;
+    height: 2rem;
 }

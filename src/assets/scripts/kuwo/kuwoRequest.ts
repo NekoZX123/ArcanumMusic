@@ -16,7 +16,9 @@ const requestUrls: { [type: string]: string } = {
     'lyrics': 'https://kuwo.cn/openapi/v1/www/lyric/getlyric',
     'songList': 'https://kuwo.cn/api/www/playlist/playListInfo',
     'album': 'https://searchlist.kuwo.cn/r.s',
-    'artist': 'https://kuwo.cn/api/www/artist/artistMusic',
+    'artist': 'https://wapi.kuwo.cn/api/www/artist/artist',
+    'artistAlbums': 'https://wapi.kuwo.cn/api/www/artist/artistAlbum',
+    'artistSongs': 'https://kuwo.cn/api/www/artist/artistMusic',
     'hotList': 'https://www.kuwo.cn/api/www/classify/playlist/getRcmPlayList',
     'recommendSong': 'https://kuwo.cn/api/www/playlist/playListInfo',
     'recommendArtist': 'https://wapi.kuwo.cn/api/www/artist/artistInfo',
@@ -33,7 +35,9 @@ const requestData: { [type: string]: string } = {
     'lyrics': 'musicId=[songId]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'songList': 'pid=[listId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'album': 'stype=albuminfo&albumid=[albumId]&show_copyright_off=1&alflac=1&vipver=1&sortby=1&newver=1&mobi=1',
-    'artist': 'artistid=[artistId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'artist': 'artistid=[artistId]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'artistSongs': 'artistid=[artistId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'artistAlbums': 'artistid=[artistId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'hotList': 'pn=1&rn=20&order=hot&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'recommendSong': 'pid=1082685104&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'recommendArtist': 'category=0&prefix=&pn=1&rn=60&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
@@ -43,15 +47,17 @@ const requestData: { [type: string]: string } = {
     'newAlbum': 'bangId=17&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from='
 };
 
-type MusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
-    'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 'newSong' | 'newAlbum';
+type KuwoMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
+    'artistAlbums' | 'artistSongs' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 
+    'rankingContent' | 'newSong' | 'newAlbum';
 
 // 无需 UUID 的模块
-const uuidNotRequired: MusicModule[] = ['search', 'album'];
+const uuidNotRequired: KuwoMusicModule[] = ['search', 'album'];
 // 无需 `Hm_Iuvt_cdb524f42f23cer9b268564v7y735ewrq2324` 参数的模块
-const hmNotRequired: MusicModule[] = ['album'];
+const hmNotRequired: KuwoMusicModule[] = ['album', 'artist', 'artistAlbums'];
 // 无需 `Secrets` 参数的模块
-const secretNotRequired: MusicModule[] = ['search', 'lyrics', 'album', 'recommendArtist'];
+const secretNotRequired: KuwoMusicModule[] = ['search', 'lyrics', 'album', 'artist', 
+    'artistAlbums', 'recommendArtist'];
 
 /**
  * 通用酷我音乐 API 请求函数
@@ -82,7 +88,7 @@ const secretNotRequired: MusicModule[] = ['search', 'lyrics', 'album', 'recommen
  * - newSong: {} - 空对象
  * - newAlbum: {} - 空对象
  */
-function getKuwoResult(moduleName: MusicModule, params: { [type: string]: any }, cookies?: { userid: string }) {
+function getKuwoResult(moduleName: KuwoMusicModule, params: { [type: string]: any }, cookies?: { userid: string }) {
     let targetUrl = requestUrls[moduleName];
     let moduleData = requestData[moduleName];
     if (!targetUrl || !moduleData) {

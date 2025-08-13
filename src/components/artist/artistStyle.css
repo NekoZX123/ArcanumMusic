@@ -21,6 +21,13 @@
     margin: 2px 0;
 }
 
+#artistDescription {
+    max-height: 8rem;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
 #artistAvatar {
     width: 15rem;
     height: 15rem;
@@ -48,4 +55,26 @@
 
     padding: 0 1rem;
     margin-bottom: 6px;
+}
+
+.artistWorksBox {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+#hotAlbums {
+    width: 100%;
+}
+
+#hotSongs {
+    width: 100%;
+
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#bottomBanner {
+    width: 100%;
+    height: 2rem;
+    display: block;
 }

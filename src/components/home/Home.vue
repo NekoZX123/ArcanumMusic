@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import './homeStyle.css';
 
-import { SonglistCard, SongCard, ArtistCard } from '../../assets/widgets/Widgets.tsx';
 import { changePage } from '../../assets/utilities/pageSwitcher.ts';
+import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
+import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest.ts';
+import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest.ts';
+import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest.ts';
+import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest.ts';
+import { addSonglistCard, addSongCard, addArtistCard } from '../../assets/utilities/elementControl.ts';
+import type { AxiosResponse } from 'axios';
+import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
 
 // 默认滑动量
 const BOX_SCROLL_DISTANCE = 330;
@@ -28,7 +35,233 @@ function scrollRight(event: MouseEvent) {
     elementToscroll.scrollBy({ left: BOX_SCROLL_DISTANCE, behavior: 'smooth' });
 }
 
+const recommendCover = ref('/images/player/testAlbum.png');
+const radioCover = ref('/images/player/testAlbum.png');
+const neteaseRecommendListId = ref('3136952023');
+
+const requestFunc: Record<string, any> = {
+    'netease': getNeteaseResult,
+    'qqmusic': getQQmusicResult,
+    'kuwo': getKuwoResult,
+    'kugou': getKugouResult
+}
+
 onMounted(() => {
+    const userData = getAccountInfo('all');
+
+    // 获取每日推荐封面
+    getNeteaseResult('songList', { listId: '3136952023' }, userData.netease.cookies)
+        .then((response) => {
+            const data = response.data;
+            if (data.code !== 200) {
+                console.error(`[Error] Failed to request netease api (module 'hotList', code ${data.code})`);
+                return;
+            }
+
+            recommendCover.value = data.playlist.coverImgUrl;
+        });
+    // 获取音乐雷达封面
+    getNeteaseResult('dailyRecommends', {}, userData.netease.cookies)
+        .then((response) => {
+            const data = response.data;
+            // console.log(data);
+            if (data.code !== 200) {
+                console.error(`[Error] Failed to request netease api (module 'dailyRecommends', code ${data.code})`);
+                return;
+            }
+
+            radioCover.value = data.recommend[0].album.picUrl;
+        });
+    // 获取推荐歌单
+    let hotListContainer = null;
+    if (!hotListContainer) {
+        hotListContainer = document.getElementById('songlistRecommends') as HTMLElement;
+    }
+    Object.keys(requestFunc).forEach((platform: string) => {
+        const sendRequest = requestFunc[platform];
+        sendRequest('hotList', {}, userData[platform].cookies)
+            .then((response: AxiosResponse)=> {
+                // 解析数据
+                const recommendations = parseMusicData(response, platform, 'hotList');
+                // 展示数据
+                const songLists = recommendations.lists;
+                for (let i = 0; i < 2; i++) {
+                    const listDetail = songLists[i];
+
+                    const listId = `songlist-${platform}-${listDetail.listId}`;
+                    const listName = listDetail.listName;
+                    const listCover = listDetail.listCover;
+
+                    addSonglistCard(hotListContainer, listId, listName, listCover);
+                }
+            });
+    })
+
+    // 获取推荐歌曲
+    let recommendSongContainer = null;
+    if (!recommendSongContainer) {
+        recommendSongContainer = document.getElementById('singleRecommends') as HTMLElement;
+    }
+    const loadedRecommendSongs: string[] = [];
+    Object.keys(requestFunc).forEach((platform: string) => {
+        const sendRequest = requestFunc[platform];
+        sendRequest('recommendSong', {}, userData[platform].cookies)
+            .then((response: AxiosResponse) => {
+                // 解析数据
+                const recommendations = parseMusicData(response, platform, 'recommendSong');
+                // 展示数据
+                const songs = recommendations.songList;
+                for (let i = 0; i < 3; i++) {
+                    let skips = 1;
+                    let songDetail = songs[i];
+
+                    if (loadedRecommendSongs.includes(songDetail.songName)) {
+                        while (loadedRecommendSongs.includes(songDetail.songName)) {
+                            songDetail = songs[skips+1];
+                            skips++;
+                        }
+                    }
+
+                    const songId = `songlist-${platform}-${songDetail.songId}`;
+                    const songName = songDetail.songName;
+                    const songCover = songDetail.songCover;
+                    const songAuthors = songDetail.songAuthors
+                    loadedRecommendSongs.push(songName);
+
+                    addSongCard(recommendSongContainer, songId, songName, songCover, songAuthors);
+                }
+            });
+    })
+
+    // 获取推荐歌手
+    let recommendArtistContainer = null;
+    if (!recommendArtistContainer) {
+        recommendArtistContainer = document.getElementById('artistRecommends') as HTMLElement;
+    }
+    const loadedArtists: string[] = [];
+    Object.keys(requestFunc).forEach((platform: string) => {
+        const sendRequest = requestFunc[platform];
+        sendRequest('recommendArtist', {}, userData[platform].cookies)
+            .then((response: AxiosResponse) => {
+                // 解析数据
+                const recommendations = parseMusicData(response, platform, 'recommendArtist');
+                // console.log(recommendations);
+                // 展示数据
+                const artistList = recommendations.artistList;
+
+                for (let i = 0; i < 2; i++) {
+                    let artistInfo = artistList[i];
+                    let skips = 1;
+
+                    if (loadedArtists.includes(artistInfo.artistName)) {
+                        while (loadedArtists.includes(artistInfo.artistName)) {
+                            artistInfo = artistList[skips+1];
+                            skips++;
+                        }
+                    }
+
+                    const artistId = `artist-${platform}-${artistInfo.artistId}`;
+                    const artistName = artistInfo.artistName;
+                    const artistCover = artistInfo.artistCover;
+                    loadedArtists.push(artistName);
+
+                    addArtistCard(recommendArtistContainer, artistId, artistName, artistCover);
+                }
+            });
+    });
+
+    // 获取排行榜
+    let rankingsContainer = null;
+    if (!rankingsContainer) {
+        rankingsContainer = document.getElementById('rankings') as HTMLElement;
+    }
+    getNeteaseResult('rankings', {}, userData.netease.cookies)
+        .then((response) => {
+            const data = response.data;
+            if (data.code !== 200) {
+                console.error(`[Error] Failed to request netease api (module 'rankings', code ${data.code})`);
+                return;
+            }
+
+            const rankings = data.list;
+            for (let i = 0; i < 6; i++) {
+                const rankingInfo = rankings[i];
+
+                const rankingId = `ranking-netease-${rankingInfo.id.toString()}`;
+                const rankingName = rankingInfo.name;
+                const rankingCover = rankingInfo.coverImgUrl;
+
+                addSonglistCard(rankingsContainer, rankingId, rankingName, rankingCover);
+            }
+        });
+
+    // 获取新专辑
+    let newAlbumContainer = null;
+    if (!newAlbumContainer) {
+        newAlbumContainer = document.getElementById('newAlbums') as HTMLElement;
+    }
+    ['netease', 'qqmusic'].forEach((platform: string) => {
+        const sendRequest = requestFunc[platform];
+        sendRequest('newAlbum', {}, userData[platform].cookies)
+            .then((response: AxiosResponse) => {
+                // 解析数据
+                const recommendations = parseMusicData(response, platform, 'newAlbum');
+                // console.log(recommendations);
+                // 展示数据
+                const albumList = recommendations.albumList;
+
+                for (let i = 0; i < 4; i++) {
+                    const albumInfo = albumList[i];
+                    
+                    const albumId = `album-${platform}-${albumInfo.albumId}`;
+                    const albumName = albumInfo.albumName;
+                    const albumCover = albumInfo.albumCover;
+
+                    addSonglistCard(newAlbumContainer, albumId, albumName, albumCover);
+                }
+            });
+    });
+
+    // 获取新歌
+    let newSinglesContainer = null;
+    if (!newSinglesContainer) {
+        newSinglesContainer = document.getElementById('newSingles') as HTMLElement;
+    }
+    const loadedSongs: string[] = [];
+    Object.keys(requestFunc).forEach((platform: string) => {
+        const sendRequest = requestFunc[platform];
+        sendRequest('newSong', {}, userData[platform].cookies)
+            .then((response: AxiosResponse) => {
+                // 解析数据
+                console.log(response.data);
+                const recommendations = parseMusicData(response, platform, 'newSong');
+                // console.log(recommendations);
+                // 展示数据
+                const songs = recommendations.songList;
+
+                for (let i = 0; i < 3; i++) {
+                    let songInfo = songs[i];
+                    let skips = 1;
+                    
+                    if (loadedSongs.includes(songInfo.songName)) {
+                        while (loadedSongs.includes(songInfo.songName)) {
+                            songInfo = songs[i + skips];
+                            skips ++;
+                        }
+                    }
+
+                    const songId = `music-${platform}-${songInfo.songId}`;
+                    const songName = songInfo.songName;
+                    const songCover = songInfo.songCover;
+                    const songAuthors = songInfo.songAuthors;
+
+                    loadedSongs.push(songName);
+
+                    addSongCard(newSinglesContainer, songId, songName, songCover, songAuthors);
+                }
+            });
+    });
+
     console.log('Home.vue loaded');
 });
 </script>
@@ -39,20 +272,23 @@ onMounted(() => {
         <label class="text large bold sectionTitle">今日定制</label>
         <div class="flex row" id="homeRecommends">
             <!-- 今日推荐 -->
-            <div class="flex row songlistCard midlarge" id="dailyRecommends" @click="changePage('songlist', true, 'songlist@netease.recommends')">
+            <div class="songlistCard midlarge" id="dailyRecommends" :style="`background: url(${recommendCover})`"
+                @click="changePage('songlist', true, `songlist-netease-${neteaseRecommendListId}`)">
                 <span class="cardHeader flex row">
                     <span class="cardInfo flex column">
-                        <label class="text medium bold">今日推荐</label>
+                        <label class="text extraLarge bold" id="recommendTitle">今&nbsp;日推&nbsp;荐</label>
                         <label class="text ultraSmall">共 30 首歌</label>
                     </span>
                 </span>
-                <img class="songCover" src="/images/player/testAlbum.png" alt="Playlist cover"/>
+                <button class="songlistPlay" id="dailyRecommends_play">
+                    <img src="/images/player/play.svg" alt="Play"/>
+                </button>
             </div>
 
             <!-- 电台 -->
             <div class="flex row songlistCard midlarge" id="musicRadio">
                 <span class="cardHeader flex column">
-                    <label class="text medium bold">音乐电台</label>
+                    <label id="radioTitle" class="text bold">音&nbsp;乐电&nbsp;台</label>
 
                     <span class="flex row">
                         <button class="songlistPlay" id="musicRadio_prev">
@@ -66,7 +302,7 @@ onMounted(() => {
                         </button>
                     </span>
                 </span>
-                <img class="songCover" src="/images/player/testAlbum.png" alt="Playlist cover"/>
+                <img class="songCover" :src="radioCover" alt="Playlist cover"/>
             </div>
         </div>
 
@@ -79,16 +315,7 @@ onMounted(() => {
             <button class="scrollerButton" @click="scrollLeft">
                 <img src="/images/arrows/left.svg"></img>
             </button>
-            <div class="nowrapBox" id="songlistRecommends">
-                <SonglistCard id="songlist@netease.114514" coverUrl="/images/player/testAlbum.png" name="List 01"></SonglistCard>
-                <SonglistCard id="songlist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="List 02"></SonglistCard>
-                <SonglistCard id="songlist@netease.123456" coverUrl="/images/player/testAlbum.png" name="List 03"></SonglistCard>
-                <SonglistCard id="songlist@netease.789000" coverUrl="/images/player/testAlbum.png" name="List 04"></SonglistCard>
-                <SonglistCard id="songlist@netease.123475891" coverUrl="/images/player/testAlbum.png" name="List 05"></SonglistCard>
-                <SonglistCard id="songlist@netease.123475891" coverUrl="/images/player/testAlbum.png" name="List 06"></SonglistCard>
-                <SonglistCard id="songlist@netease.123475891" coverUrl="/images/player/testAlbum.png" name="List 07"></SonglistCard>
-                <SonglistCard id="songlist@netease.123475891" coverUrl="/images/player/testAlbum.png" name="List 08"></SonglistCard>
-            </div>
+            <div class="nowrapBox" id="songlistRecommends"></div>
             <button class="scrollerButton" @click="scrollRight">
                 <img src="/images/arrows/right.svg"></img>
             </button>
@@ -100,19 +327,7 @@ onMounted(() => {
             <label class="text large bold">推荐单曲</label>
             <a class="text small viewMore" @click="changePage('singleCollections', true, '推荐单曲')">查看更多</a>
         </div>
-        <div class="flex row" id="singleRecommends">
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 01" authors="Sample Text"></SongCard>
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 02" authors="Sample Text"></SongCard>
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 03" authors="Sample Text"></SongCard>
-            
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 04" authors="Sample Text"></SongCard>
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 05" authors="Sample Text"></SongCard>
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 06" authors="Sample Text"></SongCard>
-            
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 07" authors="Sample Text"></SongCard>
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 08" authors="Sample Text"></SongCard>
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 09" authors="Sample Text"></SongCard>
-        </div>
+        <div class="flex row" id="singleRecommends"></div>
 
         <!-- 推荐歌手 -->
         <div class="flex row titleWithMore">
@@ -123,15 +338,7 @@ onMounted(() => {
             <button class="scrollerButton" @click="scrollLeft">
                 <img src="/images/arrows/left.svg"></img>
             </button>
-            <div class="flex row nowrapBox" id="artistRecommends">
-                <ArtistCard id="artist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
-                <ArtistCard id="artist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
-                <ArtistCard id="artist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
-                <ArtistCard id="artist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
-                <ArtistCard id="artist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
-                <ArtistCard id="artist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
-                <ArtistCard id="artist@netease.1919810" coverUrl="/images/player/testAlbum.png" name="Sample Text"></ArtistCard>
-            </div>
+            <div class="flex row nowrapBox" id="artistRecommends"></div>
             <button class="scrollerButton" @click="scrollRight">
                 <img src="/images/arrows/right.svg"></img>
             </button>
@@ -146,15 +353,7 @@ onMounted(() => {
             <button class="scrollerButton" @click="scrollLeft">
                 <img src="/images/arrows/left.svg"></img>
             </button>
-            <div class="flex row nowrapBox" id="rankings">
-                <SonglistCard id="songlist@netease.21854151" coverUrl="/images/player/testAlbum.png" name="Ranking 01"></SonglistCard>
-                <SonglistCard id="songlist@netease.21854152" coverUrl="/images/player/testAlbum.png" name="Ranking 02"></SonglistCard>
-                <SonglistCard id="songlist@netease.21854153" coverUrl="/images/player/testAlbum.png" name="Ranking 03"></SonglistCard>
-                <SonglistCard id="songlist@netease.21854154" coverUrl="/images/player/testAlbum.png" name="Ranking 04"></SonglistCard>
-                <SonglistCard id="songlist@netease.21854155" coverUrl="/images/player/testAlbum.png" name="Ranking 05"></SonglistCard>
-                <SonglistCard id="songlist@netease.21854155" coverUrl="/images/player/testAlbum.png" name="Ranking 06"></SonglistCard>
-                <SonglistCard id="songlist@netease.21854155" coverUrl="/images/player/testAlbum.png" name="Ranking 07"></SonglistCard>
-            </div>
+            <div class="flex row nowrapBox" id="rankings"></div>
             <button class="scrollerButton" @click="scrollRight">
                 <img src="/images/arrows/right.svg"></img>
             </button>
@@ -169,15 +368,7 @@ onMounted(() => {
             <button class="scrollerButton" @click="scrollLeft">
                 <img src="/images/arrows/left.svg"></img>
             </button>
-            <div class="flex row nowrapBox" id="newAlbums">
-                <SonglistCard id="album@netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 01"></SonglistCard>
-                <SonglistCard id="album@netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 02"></SonglistCard>
-                <SonglistCard id="album@netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 03"></SonglistCard>
-                <SonglistCard id="album@netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 04"></SonglistCard>
-                <SonglistCard id="album@netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 05"></SonglistCard>
-                <SonglistCard id="album@netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 06"></SonglistCard>
-                <SonglistCard id="album@netease.123456" coverUrl="/images/player/testAlbum.png" name="Album 07"></SonglistCard>
-            </div>
+            <div class="flex row nowrapBox" id="newAlbums"></div>
             <button class="scrollerButton" @click="scrollRight">
                 <img src="/images/arrows/right.svg"></img>
             </button>
@@ -188,25 +379,13 @@ onMounted(() => {
             <label class="text large bold">新歌速递</label>
             <a class="text small viewMore" @click="changePage('singleCollections', true, '新歌速递')">查看更多</a>
         </div>
-        <div class="flex row" id="newSingles">
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 01" authors="Sample Text"></SongCard>
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 02" authors="Sample Text"></SongCard>
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 03" authors="Sample Text"></SongCard>
-            
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 04" authors="Sample Text"></SongCard>
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 05" authors="Sample Text"></SongCard>
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 06" authors="Sample Text"></SongCard>
-            
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 07" authors="Sample Text"></SongCard>
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 08" authors="Sample Text"></SongCard>
-            <SongCard id="music@netease.123456" coverUrl="/images/player/testAlbum.png" name="Song 09" authors="Sample Text"></SongCard>
-        </div>
+        <div class="flex row" id="newSingles"></div>
 
         <!-- 页面底部 -->
         <div class="flex column" id="pageFooter">
-            <label class="text small grey" id="footerText">---&nbsp;已到达页面底部&nbsp;---</label>
-            <label class="text small grey">Arcanum Music v0.1.0</label>
-            <label class="text small grey">Made by NekoZX</label>
+            <label class="text small grey" id="footerText">-----&nbsp;已到达页面底部&nbsp;-----</label>
+            <label class="text small grey">Arcanum Music v0.3.1</label>
+            <label class="text small grey">Made by NekoZX123</label>
             <label class="text ultraSmall grey">Licensed under Apache-2.0 license</label>
         </div>
     </div>

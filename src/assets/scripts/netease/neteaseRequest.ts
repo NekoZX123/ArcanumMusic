@@ -15,14 +15,16 @@ const requestUrls: { [type: string]: string } = {
     'lyrics': 'https://music.163.com/weapi/song/lyric?csrf_token=',
     'songList': 'https://music.163.com/weapi/v6/playlist/detail',
     'album': 'https://music.163.com/weapi/album/[albumId]',
-    'artist': 'https://interface.music.163.com/weapi/artist/top/song',
+    'artist': 'https://interface.music.163.com/weapi/artist/albums/[artistId]',
+    'artistSongs': 'https://interface.music.163.com/weapi/artist/top/song',
     'hotList': 'https://interface.music.163.com/weapi/personalized/playlist/v1',
     'recommendSong': 'https://interface.music.163.com/weapi/v6/playlist/detail',
     'recommendArtist': 'https://music.163.com/weapi/artist/top',
     'rankings': 'https://music.163.com/weapi/toplist',
     'rankingContent': 'https://music.163.com/weapi/v6/playlist/detail',
     'newSong': 'https://interface.music.163.com/weapi/personalized/newsong',
-    'newAlbum': 'https://music.163.com/weapi/album/new'
+    'newAlbum': 'https://music.163.com/weapi/album/new', 
+    'dailyRecommends': 'https://music.163.com/weapi/v2/discovery/recommend/songs?csrf_token=652ed459d338e791d0dcc036e417d1e6'
 };
 
 // 请求数据
@@ -70,6 +72,11 @@ const requestData: { [type: string]: any } = {
         "csrf_token": ""
     },
     "artist": {
+        "limit": 20,
+        "artistId": "[artistId]",
+        "csrf_token": ""
+    },
+    "artistSongs": {
         "id": "[artistId]",
         "top": 20,
         "csrf_token": ""
@@ -119,16 +126,22 @@ const requestData: { [type: string]: any } = {
         "total": "true",
         "limit": "50",
         "csrf_token": ""
+    },
+    "dailyRecommends": {
+        "offset": "0", 
+        "total": "true",
+        "csrf_token": ""
     }
 };
 
 // User-Agent (两种)
 const mobileUA = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36 Edg/139.0.0.0';
 const ncmDesktopUA = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36 Chrome/91.0.4472.164 NeteaseMusicDesktop/2.10.2.200154';
-const mobileModuleList: MusicModule[] = ['artist', 'hotList', 'recommendSong', 'rankings', 'newSong', 'newAlbum'];
+const mobileModuleList: NeteaseMusicModule[] = ['artist', 'artistSongs', 'hotList', 'recommendSong', 'rankings', 'newSong', 'newAlbum'];
 
-type MusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
-    'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 'newSong' | 'newAlbum';
+type NeteaseMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
+    'artistSongs' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' 
+    | 'newSong' | 'newAlbum' | 'dailyRecommends';
 
 /**
  * 通用网易云音乐 API 请求函数
@@ -151,6 +164,7 @@ type MusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 
  * - songList: { listId: string } - 歌单 ID
  * - album: { albumId: string } - 专辑 ID
  * - artist: { artistId: number } - 歌手 ID
+ * - artistSongs: { artistId: number } - 歌手 ID
  * - hotList: {} - 空对象
  * - recommendSong: {} - 空对象
  * - recommendArtist: {} - 空对象
@@ -158,11 +172,15 @@ type MusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 
  * - rankingContent: { rankingId: string } - 排行榜 ID
  * - newSong: {} - 空对象
  * - newAlbum: {} - 空对象
+ * - dailyRecommends: {} - 空对象
  */
-function getNeteaseResult(moduleName: MusicModule, params: { [type: string]: any }, cookies: { MUSIC_U: string }) {
+function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: string]: any }, cookies: { MUSIC_U: string }) {
     let targetUrl = requestUrls[moduleName];
     if (moduleName === 'album') { // 专辑信息
         targetUrl = targetUrl.replace('[albumId]', params.albumId);
+    }
+    if (moduleName === 'artist') { // 歌手信息及专辑
+        targetUrl = targetUrl.replace('[artistId]', params.artistId);
     }
     const moduleData = requestData[moduleName];
     if (!targetUrl || !moduleData) {

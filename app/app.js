@@ -1,9 +1,9 @@
-import {app, BrowserWindow, ipcMain, Menu, shell, Tray} from 'electron';
-import {fileURLToPath} from 'url';
-import {copyFileSync, mkdir} from 'fs';
+import { app, BrowserWindow, ipcMain, Menu, shell, Tray, session } from 'electron';
+import { fileURLToPath } from 'url';
+import { copyFileSync, mkdir } from 'fs';
 import { userInfo } from 'os';
-import {startService, stopService} from './service.js';
-import {isFileExist, readLocalFile, writeLocalFile} from './fileManager.js';
+import { startService, stopService } from './service.js';
+import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 
 const __dirname = fileURLToPath(import.meta.url);
 
@@ -65,7 +65,9 @@ async function prepareAccountStorage() {
 // 创建主窗口
 function createWindow() {
     prepareAccountStorage();
-    const configLoader = getAppConfig();
+    const configLoad = getAppConfig();
+
+    // checkCookieExpired();
 
     mainWindow = new BrowserWindow({
         width: 1000,
@@ -93,7 +95,7 @@ function createWindow() {
         mainWindow.loadFile('dist/index.html');
     }
     
-    configLoader.then((config) => {
+    configLoad.then((config) => {
         const configObject = JSON.parse(config);
 
         if (configObject.developerOptions.application.devtoolsOnLaunched) { // 启动时打开开发者工具
@@ -135,6 +137,65 @@ function newWindow(_, title, url) {
 }
 
 // 用户账户相关操作
+
+// 获取账号数据位置
+function getAccountDataLocation(platform) {
+    const appData = getAppDataLocal();
+    const location = `${appData}/ArcanumMusic/accounts/${platform}.arca`;
+    return location;
+}
+// 检查 Cookie 是否过期
+const platformCookies = {
+    'netease': {
+        'url': 'https://music.163.com/',
+        'name': 'MUSIC_U'
+    },
+    'qqmusic': {
+        'url': 'https://qq.com/',
+        'name': 'qm_keyst'
+    },
+    'kuwo': {
+        'url': 'https://www.kuwo.cn/',
+        'name': 'userid'
+    },
+    'kugou': {
+        'url': 'https://kugou.com',
+        'name': 'KuGoo'
+    }
+};
+function validateCookieExpiration(_, platform) {
+    return new Promise((resolve, reject) => {
+        const cookiesFilter = platformCookies[platform];
+        if (!cookiesFilter && platform !== 'all') {
+            reject(`[Error] Invalid platform name ${platform}`);
+        }
+        session.defaultSession.cookies.get({ url: cookiesFilter.url, name: cookiesFilter.name })
+            .then((cookies) => {
+                if (cookies.length === 0) {
+                    console.log(`[Debug] No exising cookies on platform '${platform}'`);
+                    resolve(null);
+                    return;
+                }
+
+                const userToken = cookies[0];
+                const expiration = userToken.expirationDate * 1000; // 转换为毫秒单位
+                // Cookie 已过期 => 删除对应用户数据
+                if (Date.now() > expiration) {
+                    console.log(`[Debug] Cookie data '${cookiesFilter.name}' on platform ${platform} has expired, user data will be cleaned`);
+                    const dataLocation = getAccountDataLocation(platform);
+                    writeLocalFile(undefined, dataLocation, '');
+
+                    session.defaultSession.cookies.remove(cookiesFilter.url, cookiesFilter.name);
+
+                    resolve(null);
+                    return;
+                }
+
+                // 返回数据
+                resolve(userToken);
+            });
+    });
+}
 
 // 获取网易云用户信息
 function getNeteaseUser(id) {
@@ -322,6 +383,7 @@ app.whenReady().then(() => {
     ipcMain.handle('getAsarLocation', () => app.getAppPath());
     ipcMain.handle('getUserName', () => userInfo().username);
 
+    ipcMain.handle('validateCookieExpiration', validateCookieExpiration);
     ipcMain.handle('listenCookie', listenForCookie);
 
     ipcMain.handle('openExternal', (_, url) => shell.openExternal(url));

@@ -9,6 +9,7 @@ import { initialize, pageBack, pageForward, togglePlaylist, changePage } from '.
 // import { testRequest } from './assets/utilities/requestTests.ts';
 import { PageButton } from './assets/widgets/pageSwitcher.tsx';
 import { showPopup } from './assets/notifications/popup.tsx';
+import { readAccountInfo } from './assets/utilities/accountManager.ts';
 
 // 设置文件位置
 const configLocation = '/ArcanumMusic/settings.json';
@@ -217,7 +218,8 @@ onMounted(async () => {
     // 初始化播放器
     const player = playerMetaInfo.value;
 
-    // 加载首页内容
+    // 读取账户信息
+    readAccountInfo('all');
 
     // [For Debug]
     player?.updateDuration(114);

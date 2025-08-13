@@ -1,6 +1,14 @@
 import { defineComponent } from "vue";
 import { changePage } from "../utilities/pageSwitcher";
 
+// 各平台图标
+const platformIcons: Record<string, string> = {
+    'netease': '/images/platforms/netease.png',
+    'qqmusic': '/images/platforms/qqmusic.png',
+    'kuwo': '/images/platforms/kuwo.png',
+    'kugou': '/images/platforms/kugou.png'
+}
+
 // 时间格式化
 function timeFormat(timeSeconds: number) {
     let secondNum = timeSeconds % 60;
@@ -34,16 +42,16 @@ const SonglistCard = defineComponent({
         name: String
     },
     setup(props: { id: string, coverUrl: string, name: string }) {
+        const platformName = props.id.replace('new_', '').split('-')[1];
+        const platformIcon = platformIcons[platformName] || '';
         return () => (
             <span class="songlistCard medium" id={props.id} onClick={() => changePage('songlist', true, props.id)}>
                 <span class="flex column">
                     <img class="songCover" src={props.coverUrl} alt="Playlist cover"/>
-                    <span class="cardFooter flex row">
-                        <label class="text small">{props.name}</label>
-                    </span>
+                    <label class="text small">{props.name}</label>
                 </span>
-                <button class="songlistPlay" id={`${props.id}_play`}>
-                    <img src="/images/player/play.svg" alt="Play"/>
+                <button class="songlistPlatform" id={`${props.id}_play`}>
+                    <img src={platformIcon} alt={`From ${platformName}`}/>
                 </button>
             </span>
         );

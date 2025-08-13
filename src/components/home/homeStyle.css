@@ -83,19 +83,40 @@
     right: 0.35rem;
 }
 
+/* 每日推荐背景动画 */
 #dailyRecommends {
-    background: var(--gradient-background1);
+    background-size: cover !important;
+    background-position: center 33% !important;
+
+    box-shadow: inset 0 0 5rem var(--transparent-darkgrey);
 
     margin: 0 2rem;
+    padding: 0 6px;
+
+    overflow: hidden;
 }
-#dailyRecommends:hover label {
-    text-decoration: underline;
+
+#recommendTitle {
+    width: 62pt;
+
+    font-size: 28pt;
+}
+#dailyRecommends_play {
+    position: relative;
+    bottom: 3rem;
+    left: 17rem;
 }
 
 #musicRadio {
     background: var(--gradient-background2);
 
     margin: 0 2rem;
+}
+#radioTitle {
+    width: 60pt;
+    margin-left: 6px;
+    
+    font-size: 25pt;
 }
 
 .nowrapBox {
@@ -115,7 +136,7 @@
 
     padding-left: 2rem;
 }
-#singleRecommends > .songCard {
+#singleRecommends > .songContainer {
     margin: 3px 1rem;
 }
 

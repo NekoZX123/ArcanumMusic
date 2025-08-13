@@ -44,7 +44,7 @@ let userData: { [type: string]: any } = {
 // 登录信息管理
 
 // 获取登录信息
-function getAccountInfo(platform: string) {
+function getAccountInfo(platform: string = 'all') {
     if (platform === 'all') return userData;
     else if (userData[platform]) return userData[platform];
     else return null;
@@ -74,7 +74,18 @@ async function storeAccountInfo(platform: string) {
     window.electron.writeLocalFile(filePath, cipherData);
 }
 // 读取登录信息
-async function readAccountInfo(platform: string) {
+async function readAccountInfo(platform: string = 'all') {
+    if (platform === 'all') {
+        const platforms = ['netease', 'qqmusic', 'kuwo', 'kugou'];
+        platforms.forEach((plat) => {
+            readAccountInfo(plat);
+        });
+        return;
+    }
+
+    const cookieValidate =  await window.electron.validateCookie(platform);
+    console.log(await cookieValidate);
+
     const fileName = `${platform}.arca`;
     const filePath = `${await window.electron.getAppDataLocal()}\\ArcanumMusic\\accounts\\${fileName}`;
 
@@ -82,6 +93,9 @@ async function readAccountInfo(platform: string) {
     if (!fileExist) return null;
 
     const cipherData = await window.electron.readLocalFile(filePath);
+    if (cipherData === '') {
+        return null;
+    }
 
     // 解密登录信息
     const decryptedString = await decrypt(cipherData);

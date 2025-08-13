@@ -143,7 +143,7 @@ const requestData: any = {
                 "singerMid": "[artistId]",
                 "order": 0,
                 "begin": 0,
-                "num": 10,
+                "num": 30,
                 "songNumTag": 0,
                 "singerID": 0
             },

@@ -24,6 +24,7 @@ const requestUrls: { [type: string]: string } = {
     'songList': 'https://m.kugou.com/plist/list/[listId]',
     'album': 'https://m3ws.kugou.com/api/v1/album/info',
     'artist': 'https://gateway.kugou.com/openapi/v2/union/author/audios',
+    'artistAlbums': 'https://gateway.kugou.com/ocean/v6/singer/album',
     'hotList': 'https://m.kugou.com/plist/index',
     'recommendSong': 'https://m.kugou.com/',
     'recommendArtist': 'https://m.kugou.com/singer/list',
@@ -116,6 +117,23 @@ const requestData: { [type: string]: any } = {
         srcappid: 2919,
         uuid: ''
     },
+    'artistAlbums': {
+        appid: 1058,
+        mid: 0,
+        uuid: 0,
+        dfid: '-',
+        clientver: 1000,
+        clienttime: 0,
+        version: 1000,
+        area_code: 1,
+        category: 1,
+        page: 1,
+        pagesize: 20,
+        plat: 0,
+        show_album_tag: 0,
+        singerid: "[artistId]",
+        srcappid: 2919
+    },
     'hotList': {
         json: true
     },
@@ -142,19 +160,20 @@ const artistApiPostData = {
     author_id: "[artistId]",
     need_song_list: 1,
     page: 1,
-    pagesize: 10
+    pagesize: 20
 };
 
-type MusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
-    'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 'newSong' | 'newAlbum';
+type KugouMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
+    'artistAlbums' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 
+    'newSong' | 'newAlbum';
 
 // 需要用户信息的模块
-const needCookies: MusicModule[] = ['songLink', 'songInfo', 'lyrics', 'songList'];
-const needUserIds: MusicModule[] = ['songLink', 'search', 'songInfo', 'album'];
-const needTokens: MusicModule[] = ['songLink', 'search', 'songInfo', 'lyrics'];
+const needCookies: KugouMusicModule[] = ['songLink', 'songInfo', 'lyrics', 'songList'];
+const needUserIds: KugouMusicModule[] = ['songLink', 'search', 'songInfo', 'album'];
+const needTokens: KugouMusicModule[] = ['songLink', 'search', 'songInfo', 'lyrics'];
 // 需要移动端 UA 的模块
 const mobileUA = 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 EdgA/139.0.2151.58';
-const mobileModuleList: MusicModule[] = ['songList', 'album', 'artist', 'hotList', 
+const mobileModuleList: KugouMusicModule[] = ['songList', 'album', 'artist', 'artistAlbums', 'hotList', 
     'recommendSong', 'recommendArtist', 'rankings', 'rankingContent', 'newSong', 'newAlbum'];
 
 /**
@@ -178,6 +197,7 @@ const mobileModuleList: MusicModule[] = ['songList', 'album', 'artist', 'hotList
  * - songList: { listId: string } - 歌单 ID
  * - album: { albumId: string } - 专辑 ID
  * - artist: { artistId: number } - 歌手 ID
+ * - artistAlbums: { artistId: number } - 歌手 ID
  * - hotList: {} - 空对象
  * - recommendSong: {} - 空对象
  * - recommendArtist: {} - 空对象
@@ -186,7 +206,7 @@ const mobileModuleList: MusicModule[] = ['songList', 'album', 'artist', 'hotList
  * - newSong: {} - 空对象
  * - newAlbum: {} - 空对象
  */
-function getKugouResult(moduleName: MusicModule, params: { [type: string]: any }, cookies: { KuGoo: string }) {
+function getKugouResult(moduleName: KugouMusicModule, params: { [type: string]: any }, cookies: { KuGoo: string }) {
     let targetUrl = requestUrls[moduleName];
 
     if (moduleName === 'songList') { // 歌单信息

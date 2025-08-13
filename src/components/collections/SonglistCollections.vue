@@ -13,12 +13,12 @@ const props = defineProps({
     type: {
         type: String,
         required: false,
-        default: 'artist'
+        default: 'hotLists'
     }
 });
 
 onMounted(() => {
-    console.log('SonglistCollections.vue loaded')
+    console.log('SonglistCollections.vue loaded');
 });
 </script>
 <template>
