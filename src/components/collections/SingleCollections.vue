@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { SongCard } from '../../assets/widgets/Widgets.tsx';
 
 import './collectionsStyle.css';
+import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
+import type { AxiosResponse } from 'axios';
+import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest.ts';
+import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest.ts';
+import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest.ts';
+import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest.ts';
+import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
+import { addSongCard } from '../../assets/utilities/elementControl.ts';
 
 const props = defineProps({
     title: {
@@ -10,39 +17,137 @@ const props = defineProps({
         required: false,
         default: '单曲集锦'
     },
-    type: {
+    module: {
         type: String,
         required: false,
-        default: 'artist'
+        default: 'recommendSongs'
     }
 });
 
 onMounted(() => {
-    console.log('SingleCollections.vue loaded')
+    const userData = getAccountInfo('all');
+
+    const parsedModule = props.module.split('-');
+    const moduleName = parsedModule[0];
+
+    // 获取内容组件
+    const container = document.getElementById('collections') as HTMLElement;
+    
+    const requestFunc: Record<string, any> = {
+        'netease': getNeteaseResult,
+        'qqmusic': getQQmusicResult,
+        'kuwo': getKuwoResult,
+        'kugou': getKugouResult
+    };
+
+    // 推荐单曲
+    if (moduleName === 'recommendSong') {
+        const loadedRecommendSongs: string[] = [];
+        Object.keys(requestFunc).forEach((platform: string) => {
+            const sendRequest = requestFunc[platform];
+            sendRequest('recommendSong', {}, userData[platform].cookies)
+                .then((response: AxiosResponse)=> {
+                    // 解析数据
+                    const recommendations = parseMusicData(response, platform, 'recommendSong');
+                    // 展示数据
+                    const songs = recommendations.songList;
+                    for (let i = 0; i < songs.length; i++) {
+                        let skips = 1;
+                        let songDetail = songs[i];
+
+                        if (loadedRecommendSongs.includes(songDetail.songName)) {
+                            while (loadedRecommendSongs.includes(songDetail.songName)) {
+                                songDetail = songs[skips+1];
+                                skips++;
+                            }
+                        }
+
+                        const songId = `songlist-${platform}-${songDetail.songId}`;
+                        const songName = songDetail.songName;
+                        const songCover = songDetail.songCover;
+                        const songAuthors = songDetail.songAuthors
+                        loadedRecommendSongs.push(songName);
+
+                        addSongCard(container, songId, songName, songCover, songAuthors);
+                    }
+                });
+        });
+    }
+    // 新歌曲
+    if (moduleName === 'newSong') {
+        const loadedSongs: string[] = [];
+        Object.keys(requestFunc).forEach((platform: string) => {
+            const sendRequest = requestFunc[platform];
+            sendRequest('newSong', {}, userData[platform].cookies)
+                .then((response: AxiosResponse) => {
+                    // 解析数据
+                    // console.log(response.data);
+                    const recommendations = parseMusicData(response, platform, 'newSong');
+                    // console.log(recommendations);
+                    // 展示数据
+                    const songs = recommendations.songList;
+
+                    for (let i = 0; i < songs.length; i++) {
+                        let songInfo = songs[i];
+                        let skips = 1;
+                        
+                        if (loadedSongs.includes(songInfo.songName)) {
+                            while (loadedSongs.includes(songInfo.songName)) {
+                                songInfo = songs[i + skips];
+                                skips ++;
+                            }
+                        }
+
+                        const songId = `music-${platform}-${songInfo.songId}`;
+                        const songName = songInfo.songName;
+                        const songCover = songInfo.songCover;
+                        const songAuthors = songInfo.songAuthors;
+
+                        loadedSongs.push(songName);
+
+                        addSongCard(container, songId, songName, songCover, songAuthors);
+                    }
+                });
+        });
+    }
+    // 歌手歌曲
+    if (moduleName === 'artistSongs') {
+        const platform = parsedModule[1];
+        const artistId = parsedModule[2];
+
+        let reqModule = 'artist';
+        if (['netease', 'kuwo'].includes(platform)) {
+            reqModule = 'artistSongs';
+        }
+
+        const sendRequest = requestFunc[platform];
+        sendRequest(reqModule, { artistId: artistId }, userData[platform].cookies)
+            .then((response: AxiosResponse) => {
+                // 解析数据
+                // console.log(response.data);
+                const songList = parseMusicData(response, platform, 'artistSongs');
+                // console.log(songList);
+                // 展示数据
+                const songs = songList.songList;
+
+                for (let i = 0; i < songs.length; i++) {
+                    let songInfo = songs[i];
+                    const songId = `music-${platform}-${songInfo.songId}`;
+                    const songName = songInfo.songName;
+                    const songCover = songInfo.songCover;
+                    const songAuthors = songInfo.songAuthors;
+
+                    addSongCard(container, songId, songName, songCover, songAuthors);
+                }
+            });
+    }
+
+    console.log(`SingleCollections.vue loaded with params ${JSON.stringify(props)}`);;
 });
 </script>
 <template>
     <div class="flex column" id="collectionsPage">
         <label class="text large bold" id="collectionsTitle">{{ props.title }}</label>
-        <div :class="`flex row collectionsContent ${props.type}`">
-            <SongCard id="music@netease.2147483647" cover-url="/images/player/testAlbum.png" name="Song 01" authors="NekoZX123"></SongCard>
-            <SongCard id="music@netease.2147483648" cover-url="/images/player/testAlbum.png" name="Song 02" authors="Author02"></SongCard>
-            <SongCard id="music@netease.2147483649" cover-url="/images/player/testAlbum.png" name="Song 03" authors="Author03"></SongCard>
-            <SongCard id="music@netease.2147483650" cover-url="/images/player/testAlbum.png" name="Song 04" authors="Author04"></SongCard>
-
-            <SongCard id="music@netease.2147483651" cover-url="/images/player/testAlbum.png" name="Song 05" authors="Author05"></SongCard>
-            <SongCard id="music@netease.2147483652" cover-url="/images/player/testAlbum.png" name="Song 06" authors="Author06"></SongCard>
-            <SongCard id="music@netease.2147483653" cover-url="/images/player/testAlbum.png" name="Song 07" authors="Author07"></SongCard>
-            <SongCard id="music@netease.2147483654" cover-url="/images/player/testAlbum.png" name="Song 08" authors="Author08"></SongCard>
-
-            <SongCard id="music@netease.2147483655" cover-url="/images/player/testAlbum.png" name="Song 09" authors="Author09"></SongCard>
-            <SongCard id="music@netease.2147483656" cover-url="/images/player/testAlbum.png" name="Song 10" authors="Author10"></SongCard>
-            <SongCard id="music@netease.2147483657" cover-url="/images/player/testAlbum.png" name="Song 11" authors="Author11"></SongCard>
-            <SongCard id="music@netease.2147483658" cover-url="/images/player/testAlbum.png" name="Song 12" authors="Author12"></SongCard>
-
-            <SongCard id="music@netease.2147483659" cover-url="/images/player/testAlbum.png" name="Song 13" authors="Author13"></SongCard>
-            <SongCard id="music@netease.2147483660" cover-url="/images/player/testAlbum.png" name="Song 14" authors="Author14"></SongCard>
-            <SongCard id="music@netease.2147483661" cover-url="/images/player/testAlbum.png" name="Song 15" authors="Author15"></SongCard>
-        </div>
+        <div :class="`flex row collectionsContent single`" id="collections"></div>
     </div>
 </template>

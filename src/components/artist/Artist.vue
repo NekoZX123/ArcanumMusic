@@ -38,17 +38,15 @@ function scrollRight(event: MouseEvent) {
 }
 
 const artistMetaData: Ref<{
+    id: string,
     name: string,
     cover: string,
     description: string,
 }> = ref({
+    id: 'nekozx123',
     name: 'NekoZX123',
     cover: '/images/player/testAlbum.png',
-    description: 'NekoZX123 is an indepentent software developer',
-    newSong: [],
-    newAlbums: [],
-    hotTracks: [],
-    albums: []
+    description: 'NekoZX123 is an indepentent software developer'
 });
 
 const props = defineProps(
@@ -324,7 +322,7 @@ function loadKuwoArtist(artistId: string, cookies: { userid: string }) {
             artistMetaData.value.description = artistInfo.info;
         });
     // 获取最新 / 热门专辑
-    getKuwoResult('artistAlbums', { artistId: artistId }, cookies)
+    getKuwoResult('artistAlbum', { artistId: artistId }, cookies)
         .then((response) => {
             const data = response.data;
             if (data.code !== 200) {
@@ -495,7 +493,7 @@ function loadKugouArtist(artistId: string, cookies: { KuGoo: string }) {
             }
         });
     // 获取最新 / 热门专辑
-    getKugouResult('artistAlbums', { artistId: parseInt(artistId) }, cookies)
+    getKugouResult('artistAlbum', { artistId: parseInt(artistId) }, cookies)
         .then((response) => {
             const data = response.data;
             if (data.errcode !== 0) {
@@ -554,6 +552,7 @@ onMounted(() => {
     const properties = props.id.split('-');
     const platformName = properties[1]; // 平台名
     const artistId = properties[2]; // 歌手 ID
+    artistMetaData.value.id = `${platformName}-${artistId}`;
 
     // 网易云
     if (platformName === 'netease') {
@@ -596,13 +595,16 @@ onMounted(() => {
 
             <div class="flex row titleWithMore">
                 <label class="text large bold">热门歌曲</label>
-                <a class="text small viewMore" @click="changePage('songlistCollections', true, `${artistMetaData.name} 的热门歌曲`)">查看更多</a>
+                <a class="text small viewMore" 
+                    @click="changePage('singleCollections', true, { title: `${artistMetaData.name} 的热门歌曲`, module: `artistSongs-${artistMetaData.id}` })">
+                    查看更多
+                </a>
             </div>
             <div class="flex row" id="hotSongs"></div>
 
             <div class="flex row titleWithMore">
                 <label class="text large bold">专辑</label>
-                <a class="text small viewMore" @click="changePage('songlistCollections', true, `${artistMetaData.name} 的专辑`)">查看更多</a>
+                <a class="text small viewMore" @click="changePage('songlistCollections', true, { title: `${artistMetaData.name} 的专辑`, module: `artistAlbum-${artistMetaData.id}` })">查看更多</a>
             </div>
             <div class="flex row" id="albums">
                 <button class="scrollerButton" @click="scrollLeft">

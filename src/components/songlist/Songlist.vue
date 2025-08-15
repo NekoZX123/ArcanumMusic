@@ -8,7 +8,7 @@ import './songlistStyle.css';
 
 import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
 import { addSongLine } from '../../assets/utilities/elementControl.ts';
-import { getRequestFormat, parseMusicData } from '../../assets/utilities/dataParsers.ts';
+import { formatAuthors, getRequestFormat, parseMusicData } from '../../assets/utilities/dataParsers.ts';
 import type { AxiosResponse } from 'axios';
 
 // 歌单 / 专辑数据
@@ -33,9 +33,10 @@ const props = defineProps(
 
 // 列表类型 (歌单 / 专辑)
 const listType = ref('');
+const typeName = ref('');
 
 // 数据请求及解析
-function requestListInfo(platform: string, module: 'songList' | 'album', listId: string, cookies: object) {
+function requestListInfo(platform: string, module: 'songList' | 'album' | 'rankingContent', dataId: string, cookies: object) {
     const platformRequest = getRequestFormat();
 
     if (!platformRequest[platform]) {
@@ -44,7 +45,7 @@ function requestListInfo(platform: string, module: 'songList' | 'album', listId:
     }
     const requestFunc = platformRequest[platform].function;
     const params = platformRequest[platform].data[module];
-    const paramString = JSON.stringify(params).replace('[data]', listId);
+    const paramString = JSON.stringify(params).replace('[data]', dataId).replace(`'[dataInt]'`, dataId);
     let formData = JSON.parse(paramString);
 
     // 预处理数据
@@ -59,11 +60,10 @@ function requestListInfo(platform: string, module: 'songList' | 'album', listId:
     // 请求数据
     requestFunc(module, formData, cookies)
         .then((response: AxiosResponse) => {
-            console.log(response.data);
             // 解析歌单数据
             const listInfo: any = parseMusicData(response, platform, module);
             if (!listInfo) {
-                console.error(`[ERROR] Unable to parse song list info (Platform ${platform}, param: ${listId})`);
+                console.error(`[ERROR] Unable to parse song list info (Platform ${platform}, param: ${dataId})`);
                 return;
             }
 
@@ -80,6 +80,9 @@ function requestListInfo(platform: string, module: 'songList' | 'album', listId:
             listMetaData.value.cover = listInfo.cover;
             listMetaData.value.description = listInfo.description;
             listMetaData.value.author = listInfo.author;
+            if (platform === 'kugou' && typeof listInfo.author === 'object') {
+                listMetaData.value.author = formatAuthors(listInfo.author, 'kugou');
+            }
             listMetaData.value.content = listContent;
             listMetaData.value.songCount = listInfo.songCount;
 
@@ -101,17 +104,18 @@ function requestListInfo(platform: string, module: 'songList' | 'album', listId:
 onMounted(() => {
     const userData = getAccountInfo('all');
 
-    // 判断类型 (歌单 / 专辑)
-    listType.value = props.id.includes('album') ? 'Album' : 'Songlist';
-
     // 解析歌单 ID
     const properties = props.id.replace('new_', '').split('-');
+    const type = properties[0]; // 类型 (歌单 / 专辑 / 排行榜)
     const platformName = properties[1]; // 平台名
     const listId = properties[2]; // 歌单/专辑 ID
 
+    const module = (type === 'ranking') ? 'rankingContent' : ( type === 'album' ? 'album' : 'songList' );
+    listType.value = module;
+    typeName.value = (type === 'ranking') ? 'Ranking' : ( type === 'album' ? 'Album' : 'Songlist' );
+
     // 加载列表内容
-    const moduleName = listType.value === 'Songlist' ? 'songList' : 'album';
-    requestListInfo(platformName, moduleName, listId, userData[platformName].cookies);
+    requestListInfo(platformName, module, listId, userData[platformName].cookies);
 
     console.log(`Songlist.vue loaded with songlist id ${props.id}`);
 });
@@ -123,7 +127,7 @@ onMounted(() => {
             <div class="flex column" id="songlistDetails">
                 <label class="text xxlarge bold">{{ listMetaData.name }}</label>
                 <label class="text ultraSmall grey">{{ `${listType === 'Album' ? '专辑' : '歌单'} / 共 ${listMetaData.songCount} 首` }}</label>
-                <label class="text medium">{{ listType }} by {{ listMetaData.author }}</label>
+                <label class="text medium">{{ typeName }} by {{ listMetaData.author }}</label>
                 <label class="text ultraSmall" id="listDescription">{{ listMetaData.description }}</label>
             </div>
         </div>

@@ -72,6 +72,7 @@ onMounted(() => {
 
             radioCover.value = data.recommend[0].album.picUrl;
         });
+    
     // 获取推荐歌单
     let hotListContainer = null;
     if (!hotListContainer) {
@@ -95,7 +96,7 @@ onMounted(() => {
                     addSonglistCard(hotListContainer, listId, listName, listCover);
                 }
             });
-    })
+    });
 
     // 获取推荐歌曲
     let recommendSongContainer = null;
@@ -131,7 +132,7 @@ onMounted(() => {
                     addSongCard(recommendSongContainer, songId, songName, songCover, songAuthors);
                 }
             });
-    })
+    });
 
     // 获取推荐歌手
     let recommendArtistContainer = null;
@@ -309,7 +310,10 @@ onMounted(() => {
         <!-- 推荐歌单 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">推荐歌单</label>
-            <a class="text small viewMore" @click="changePage('songlistCollections', true, '推荐歌单')">查看更多</a>
+            <a class="text small viewMore" 
+                @click="changePage('songlistCollections', true, { title: '推荐歌单', module: 'hotList' })">
+                查看更多
+            </a>
         </div>
         <div class="flex row horizontalScroll">
             <button class="scrollerButton" @click="scrollLeft">
@@ -325,14 +329,20 @@ onMounted(() => {
         <!-- 推荐单曲 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">推荐单曲</label>
-            <a class="text small viewMore" @click="changePage('singleCollections', true, '推荐单曲')">查看更多</a>
+            <a class="text small viewMore" 
+                @click="changePage('singleCollections', true, { title: '推荐单曲', module: 'recommendSong' })">
+                查看更多
+            </a>
         </div>
         <div class="flex row" id="singleRecommends"></div>
 
         <!-- 推荐歌手 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">推荐歌手</label>
-            <a class="text small viewMore" @click="changePage('artistCollections', true, '推荐歌手')">查看更多</a>
+            <a class="text small viewMore" 
+                @click="changePage('artistCollections', true, { title: '推荐歌手', module: 'recommendArtist' })">
+                查看更多
+            </a>
         </div>
         <div class="flex row horizontalScroll">
             <button class="scrollerButton" @click="scrollLeft">
@@ -347,7 +357,10 @@ onMounted(() => {
         <!-- 排行榜 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">排行榜</label>
-            <a class="text small viewMore" @click="changePage('songlistCollections', true, '排行榜')">查看更多</a>
+            <a class="text small viewMore" 
+                @click="changePage('songlistCollections', true, { title: '排行榜', module: 'rankings' })">
+                查看更多
+            </a>
         </div>
         <div class="flex row horizontalScroll">
             <button class="scrollerButton" @click="scrollLeft">
@@ -362,7 +375,10 @@ onMounted(() => {
         <!-- 新专辑 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">新专辑</label>
-            <a class="text small viewMore" @click="changePage('songlistCollections', true, '新专辑')">查看更多</a>
+            <a class="text small viewMore" 
+            @click="changePage('songlistCollections', true, { title: '新专辑', module: 'newAlbum' })">
+            查看更多
+        </a>
         </div>
         <div class="flex row horizontalScroll">
             <button class="scrollerButton" @click="scrollLeft">
@@ -377,7 +393,10 @@ onMounted(() => {
         <!-- 新单曲 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">新歌速递</label>
-            <a class="text small viewMore" @click="changePage('singleCollections', true, '新歌速递')">查看更多</a>
+            <a class="text small viewMore" 
+            @click="changePage('singleCollections', true, { title: '新歌速递', module: 'newSong' })">
+            查看更多
+        </a>
         </div>
         <div class="flex row" id="newSingles"></div>
 

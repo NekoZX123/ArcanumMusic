@@ -1,8 +1,15 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { ArtistCard } from '../../assets/widgets/Widgets';
 
 import './collectionsStyle.css';
+import { getAccountInfo } from '../../assets/utilities/accountManager';
+import { addArtistCard } from '../../assets/utilities/elementControl';
+import { parseMusicData } from '../../assets/utilities/dataParsers';
+import type { AxiosResponse } from 'axios';
+import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest';
+import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest';
+import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest';
+import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest';
 
 const props = defineProps({
     title: {
@@ -10,7 +17,7 @@ const props = defineProps({
         required: false,
         default: '歌手集锦'
     },
-    type: {
+    module: {
         type: String,
         required: false,
         default: 'artist'
@@ -18,30 +25,49 @@ const props = defineProps({
 });
 
 onMounted(() => {
-    console.log('ArtistCollections.vue loaded')
+    const userData = getAccountInfo('all');
+
+    const requestFunc: Record<string, any> = {
+        'netease': getNeteaseResult,
+        'qqmusic': getQQmusicResult,
+        'kuwo': getKuwoResult,
+        'kugou': getKugouResult
+    }
+
+    // 获取内容组件
+    const container = document.getElementById('collections') as HTMLElement;
+    const loadedArtists: string[] = [];
+    Object.keys(requestFunc).forEach((platform: string) => {
+        const sendRequest = requestFunc[platform];
+        sendRequest('recommendArtist', {}, userData[platform].cookies)
+            .then((response: AxiosResponse) => {
+                // 解析数据
+                const recommendations = parseMusicData(response, platform, 'recommendArtist');
+                // console.log(recommendations);
+                // 展示数据
+                const artistList = recommendations.artistList;
+
+                artistList.forEach((artistInfo: any) => {
+                    if (loadedArtists.includes(artistInfo.artistName)) {
+                        return;
+                    }
+
+                    const artistId = `artist-${platform}-${artistInfo.artistId}`;
+                    const artistName = artistInfo.artistName;
+                    const artistCover = artistInfo.artistCover;
+                    loadedArtists.push(artistName);
+
+                    addArtistCard(container, artistId, artistName, artistCover);
+                });
+            });
+    });
+
+    console.log(`ArtistCollections.vue loaded with params ${JSON.stringify(props)}`);
 });
 </script>
 <template>
     <div class="flex column" id="collectionsPage">
         <label class="text large bold" id="collectionsTitle">{{ props.title }}</label>
-        <div :class="`flex row collectionsContent ${props.type}`">
-            <ArtistCard id="artist@netease.123456" cover-url="/images/player/testAlbum.png" name="NekoZX123"></ArtistCard>
-            <ArtistCard id="artist@netease.123457" cover-url="/images/player/testAlbum.png" name="ArtistOne"></ArtistCard>
-            <ArtistCard id="artist@netease.123458" cover-url="/images/player/testAlbum.png" name="ArtistTwo"></ArtistCard>
-            <ArtistCard id="artist@netease.123459" cover-url="/images/player/testAlbum.png" name="ArtistThree"></ArtistCard>
-            <ArtistCard id="artist@netease.123460" cover-url="/images/player/testAlbum.png" name="ArtistFour"></ArtistCard>
-
-            <ArtistCard id="artist@netease.123461" cover-url="/images/player/testAlbum.png" name="ArtistFive"></ArtistCard>
-            <ArtistCard id="artist@netease.123462" cover-url="/images/player/testAlbum.png" name="ArtistSix"></ArtistCard>
-            <ArtistCard id="artist@netease.123463" cover-url="/images/player/testAlbum.png" name="ArtistSeven"></ArtistCard>
-            <ArtistCard id="artist@netease.123464" cover-url="/images/player/testAlbum.png" name="ArtistEight"></ArtistCard>
-            <ArtistCard id="artist@netease.123465" cover-url="/images/player/testAlbum.png" name="ArtistNine"></ArtistCard>
-
-            <ArtistCard id="artist@netease.123466" cover-url="/images/player/testAlbum.png" name="ArtistTen"></ArtistCard>
-            <ArtistCard id="artist@netease.123467" cover-url="/images/player/testAlbum.png" name="ArtistEleven"></ArtistCard>
-            <ArtistCard id="artist@netease.123468" cover-url="/images/player/testAlbum.png" name="ArtistTwelve"></ArtistCard>
-            <ArtistCard id="artist@netease.123469" cover-url="/images/player/testAlbum.png" name="ArtistThirteen"></ArtistCard>
-            <ArtistCard id="artist@netease.123470" cover-url="/images/player/testAlbum.png" name="ArtistFourteen"></ArtistCard>
-        </div>
+        <div :class="`flex row collectionsContent artist`" id="collections"></div>
     </div>
 </template>

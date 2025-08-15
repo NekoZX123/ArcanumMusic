@@ -17,7 +17,7 @@ const requestUrls: { [type: string]: string } = {
     'songList': 'https://kuwo.cn/api/www/playlist/playListInfo',
     'album': 'https://searchlist.kuwo.cn/r.s',
     'artist': 'https://wapi.kuwo.cn/api/www/artist/artist',
-    'artistAlbums': 'https://wapi.kuwo.cn/api/www/artist/artistAlbum',
+    'artistAlbum': 'https://wapi.kuwo.cn/api/www/artist/artistAlbum',
     'artistSongs': 'https://kuwo.cn/api/www/artist/artistMusic',
     'hotList': 'https://www.kuwo.cn/api/www/classify/playlist/getRcmPlayList',
     'recommendSong': 'https://kuwo.cn/api/www/playlist/playListInfo',
@@ -37,7 +37,7 @@ const requestData: { [type: string]: string } = {
     'album': 'stype=albuminfo&albumid=[albumId]&show_copyright_off=1&alflac=1&vipver=1&sortby=1&newver=1&mobi=1',
     'artist': 'artistid=[artistId]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'artistSongs': 'artistid=[artistId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'artistAlbums': 'artistid=[artistId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'artistAlbum': 'artistid=[artistId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'hotList': 'pn=1&rn=20&order=hot&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'recommendSong': 'pid=1082685104&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'recommendArtist': 'category=0&prefix=&pn=1&rn=60&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
@@ -48,16 +48,16 @@ const requestData: { [type: string]: string } = {
 };
 
 type KuwoMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
-    'artistAlbums' | 'artistSongs' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 
+    'artistAlbum' | 'artistSongs' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 
     'rankingContent' | 'newSong' | 'newAlbum';
 
 // 无需 UUID 的模块
 const uuidNotRequired: KuwoMusicModule[] = ['search', 'album'];
 // 无需 `Hm_Iuvt_cdb524f42f23cer9b268564v7y735ewrq2324` 参数的模块
-const hmNotRequired: KuwoMusicModule[] = ['album', 'artist', 'artistAlbums'];
+const hmNotRequired: KuwoMusicModule[] = ['album', 'artist', 'artistAlbum'];
 // 无需 `Secrets` 参数的模块
 const secretNotRequired: KuwoMusicModule[] = ['search', 'lyrics', 'album', 'artist', 
-    'artistAlbums', 'recommendArtist'];
+    'artistAlbum', 'recommendArtist'];
 
 /**
  * 通用酷我音乐 API 请求函数

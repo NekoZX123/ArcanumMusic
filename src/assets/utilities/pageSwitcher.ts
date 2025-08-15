@@ -43,7 +43,9 @@ const pageHighlights = ['home', 'library', 'search', 'settings', 'accounts'];
 let currentPage = '';
 let latestPage = '';
 let pageStack: string[] = []; // 页面堆栈
-let backedPages: string[] = []; // 回退页面堆栈
+let paramStack: any[] = []; // 参数堆栈
+let historyPages: string[] = []; // 历史页面堆栈
+let historyParams: any[] = []; // 历史页面参数
 let pageApp = createApp(Home);
 
 /**
@@ -53,7 +55,7 @@ let pageApp = createApp(Home);
  * @param pushStack 是否加入堆栈
  * @param idParam 向页面传递参数
  */
-function changePage(pageId: string, pushStack: boolean = true, idParam?: string) {
+function changePage(pageId: string, pushStack: boolean = true, idParam?: any) {
     let currentTab = document.getElementById(currentPage) as HTMLButtonElement;
     let newTab = document.getElementById(pageId) as HTMLButtonElement;
     if (currentTab) {
@@ -78,15 +80,18 @@ function changePage(pageId: string, pushStack: boolean = true, idParam?: string)
             pageComponents[pageId].props = { id: idParam };
             pageApp = createApp(pageComponents[pageId], { id: idParam });
         }
-        else if (pageId === 'artistCollections' || pageId === 'songlistCollections' || pageId === 'singleCollections') { // 传递集锦标题
-            pageComponents[pageId].props = { title: idParam, type: pageId.replace('Collections', '') };
-            pageApp = createApp(pageComponents[pageId], { title: idParam, type: pageId.replace('Collections', '') });
+        else if (pageId === 'artistCollections' || pageId === 'songlistCollections' || pageId === 'singleCollections') { // 传递集锦标题及模块
+            pageComponents[pageId].props = idParam;
+            pageApp = createApp(pageComponents[pageId], idParam);
         }
         else {
             pageApp = createApp(pageComponents[pageId]);
         }
 
-        if (pushStack) pageStack.push(pageId);
+        if (pushStack) {
+            pageStack.push(pageId);
+            paramStack.push(idParam || {});
+        }
         pageApp.mount('#pageContent');
     }
     currentPage = pageId;
@@ -118,21 +123,28 @@ function togglePlaylist(_: MouseEvent) {
 // 回退页面
 function pageBack() {
     if (pageStack.length <= 1) return;
-    let targetPage = pageStack[pageStack.length - 2];
+    const targetPage = pageStack[pageStack.length - 2];
+    const pageParams = paramStack[paramStack.length - 2];
     let backed = pageStack.pop();
-    if (backed) backedPages.push(backed);
+    let oldParams = paramStack.pop();
+    if (backed) {
+        historyPages.push(backed);
+        historyParams.push(oldParams || {});
+    }
 
-    changePage(targetPage, false);
+    changePage(targetPage, false, pageParams);
 }
 
 // 前进页面
 function pageForward() {
-    if (backedPages.length === 0) return;
-    let targetPage = backedPages[backedPages.length - 1];
+    if (historyPages.length === 0) return;
+    const targetPage = historyPages[historyPages.length - 1];
+    const pageParams = historyParams[historyParams.length - 1];
 
-    backedPages.pop();
+    historyPages.pop();
+    historyParams.pop();
 
-    changePage(targetPage);
+    changePage(targetPage, true, pageParams);
 }
 
 // 返回当前页面

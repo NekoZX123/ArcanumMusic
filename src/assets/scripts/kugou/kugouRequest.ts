@@ -24,7 +24,7 @@ const requestUrls: { [type: string]: string } = {
     'songList': 'https://m.kugou.com/plist/list/[listId]',
     'album': 'https://m3ws.kugou.com/api/v1/album/info',
     'artist': 'https://gateway.kugou.com/openapi/v2/union/author/audios',
-    'artistAlbums': 'https://gateway.kugou.com/ocean/v6/singer/album',
+    'artistAlbum': 'https://gateway.kugou.com/ocean/v6/singer/album',
     'hotList': 'https://m.kugou.com/plist/index',
     'recommendSong': 'https://m.kugou.com/',
     'recommendArtist': 'https://m.kugou.com/singer/list',
@@ -117,7 +117,7 @@ const requestData: { [type: string]: any } = {
         srcappid: 2919,
         uuid: ''
     },
-    'artistAlbums': {
+    'artistAlbum': {
         appid: 1058,
         mid: 0,
         uuid: 0,
@@ -164,7 +164,7 @@ const artistApiPostData = {
 };
 
 type KugouMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
-    'artistAlbums' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 
+    'artistAlbum' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 
     'newSong' | 'newAlbum';
 
 // 需要用户信息的模块
@@ -173,7 +173,7 @@ const needUserIds: KugouMusicModule[] = ['songLink', 'search', 'songInfo', 'albu
 const needTokens: KugouMusicModule[] = ['songLink', 'search', 'songInfo', 'lyrics'];
 // 需要移动端 UA 的模块
 const mobileUA = 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 EdgA/139.0.2151.58';
-const mobileModuleList: KugouMusicModule[] = ['songList', 'album', 'artist', 'artistAlbums', 'hotList', 
+const mobileModuleList: KugouMusicModule[] = ['songList', 'album', 'artist', 'artistAlbum', 'hotList', 
     'recommendSong', 'recommendArtist', 'rankings', 'rankingContent', 'newSong', 'newAlbum'];
 
 /**
@@ -197,7 +197,7 @@ const mobileModuleList: KugouMusicModule[] = ['songList', 'album', 'artist', 'ar
  * - songList: { listId: string } - 歌单 ID
  * - album: { albumId: string } - 专辑 ID
  * - artist: { artistId: number } - 歌手 ID
- * - artistAlbums: { artistId: number } - 歌手 ID
+ * - artistAlbum: { artistId: number } - 歌手 ID
  * - hotList: {} - 空对象
  * - recommendSong: {} - 空对象
  * - recommendArtist: {} - 空对象
