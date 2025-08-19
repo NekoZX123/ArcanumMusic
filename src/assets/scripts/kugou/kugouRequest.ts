@@ -16,9 +16,15 @@ function getUserId(kugoo: string): string {
 }
 
 // 请求链接
+const searchTypes: Record<string, string> = {
+    'singles': 'song',
+    'songlists': 'special',
+    'albums': 'album',
+    'artists': 'author'
+};
 const requestUrls: { [type: string]: string } = {
     'songLink': 'https://wwwapi.kugou.com/play/songinfo',
-    'search': 'https://complexsearch.kugou.com/v2/search/song',
+    'search': 'https://complexsearch.kugou.com/v1/search/[type]',
     'songInfo': 'https://wwwapi.kugou.com/play/songinfo',
     'lyrics': 'https://wwwapi.kugou.com/play/songinfo',
     'songList': 'https://m.kugou.com/plist/list/[listId]',
@@ -58,7 +64,7 @@ const requestData: { [type: string]: any } = {
         clientver: 1000,
         iscorrection: 1,
         privilege_filter: 0,
-        callback: 'callback123',
+        callback: '',
         filter: 10,
         mid: '',
         uuid: '',
@@ -176,6 +182,9 @@ const mobileUA = 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (
 const mobileModuleList: KugouMusicModule[] = ['songList', 'album', 'artist', 'artistAlbum', 'hotList', 
     'recommendSong', 'recommendArtist', 'rankings', 'rankingContent', 'newSong', 'newAlbum'];
 
+function getKugouSearchTypes() {
+    return searchTypes;
+}
 /**
  * 通用酷狗音乐 API 请求函数
  * 
@@ -191,7 +200,7 @@ const mobileModuleList: KugouMusicModule[] = ['songList', 'album', 'artist', 'ar
  * 
  * 附: moduleName 对应的 params 格式
  * - songLink: { songId: string } - 歌曲 ID
- * - search: { keyword: string } - 搜索关键词
+ * - search: { keyword: string, type: string } - 搜索关键词, 搜索类型
  * - songInfo: { songId: string } - 歌曲 ID
  * - lyrics: { songId: string } - 歌曲 ID
  * - songList: { listId: string } - 歌单 ID
@@ -209,6 +218,12 @@ const mobileModuleList: KugouMusicModule[] = ['songList', 'album', 'artist', 'ar
 function getKugouResult(moduleName: KugouMusicModule, params: { [type: string]: any }, cookies: { KuGoo: string }) {
     let targetUrl = requestUrls[moduleName];
 
+    if (moduleName === 'search') { // 指定搜索类型
+        targetUrl = targetUrl.replace('[type]', params.type);
+        if (params.type === 'song') {
+            targetUrl = targetUrl.replace('v1', 'v2');
+        }
+    }
     if (moduleName === 'songList') { // 歌单信息
         targetUrl = targetUrl.replace('[listId]', params.listId);
     }
@@ -287,4 +302,4 @@ function getKugouResult(moduleName: KugouMusicModule, params: { [type: string]: 
     );
 }
 
-export { getKugouResult };
+export { getKugouResult, getKugouSearchTypes };

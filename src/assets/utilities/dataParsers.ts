@@ -4,10 +4,6 @@ import { getQQmusicResult } from "../scripts/qqmusic/qqmusicRequest";
 import { getKuwoResult } from "../scripts/kuwo/kuwoRequest";
 import { getKugouResult } from "../scripts/kugou/kugouRequest";
 
-// 音乐信息模块
-type MusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
-    'artistAlbum' | 'artistSongs' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 'newSong' | 'newAlbum';
-
 /**
  * 数据解析器
  * 按列表逐层索引元素得到答案 
@@ -24,6 +20,40 @@ const dataParsers: Record<string, any> = {
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'netease'),
                 'songDuration': (duration: number) => Math.round(duration / 1000)
             }
+        },
+        'search-singles': {
+            'body': ['data'],
+            'songList': ['result', 'songs'],
+            'songId': ['id'],
+            'songName': ['name'],
+            'songCover': ['al', 'picUrl'],
+            'songAuthors': ['ar'],
+            'songDuration': ['dt'],
+            '@postprocessors' : {
+                'songAuthors': (authors: object[]) => formatAuthors(authors, 'netease'),
+                'songDuration': (duration: number) => Math.round(duration / 1000)
+            }
+        },
+        'search-songlists': {
+            'body': ['data'],
+            'lists': ['result', 'playlists'],
+            'listId': ['id'],
+            'listName': ['name'],
+            'listCover': ['coverImgUrl']
+        },
+        'search-albums': {
+            'body': ['data'],
+            'albumList': ['result', 'albums'],
+            'albumId': ['id'],
+            'albumName': ['name'],
+            'albumCover': ['picUrl']
+        },
+        'search-artists': {
+            'body': ['data'],
+            'artistList': ['result', 'artists'],
+            'artistId': ['id'],
+            'artistName': ['name'],
+            'artistCover': ['picUrl']
         },
         'songList': {
             'body': ['data'], // 数据体
@@ -168,6 +198,40 @@ const dataParsers: Record<string, any> = {
                 'songCover': (pmid: string) => `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`,
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'qqmusic'),
             }
+        },
+        'search-singles': {
+            'body': ['data', 'req_1'],
+            'songList': ['data', 'body', 'song', 'list'],
+            'songId': ['mid'],
+            'songName': ['name'],
+            'songCover': ['album', 'pmid'],
+            'songAuthors': ['singer'],
+            'songDuration': ['interval'],
+            '@postprocessors' : {
+                'songCover': (pmid: string) => `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`,
+                'songAuthors': (authors: any[]) => formatAuthors(authors, 'qqmusic')
+            }
+        },
+        'search-songlists': {
+            'body': ['data', 'req_1'],
+            'lists': ['data', 'body', 'songlist', 'list'],
+            'listId': ['dissid'], // not mid, need fix later
+            'listName': ['dissname'],
+            'listCover': ['imgurl']
+        },
+        'search-albums': {
+            'body': ['data', 'req_1'],
+            'albumList': ['data', 'body', 'album', 'list'],
+            'albumId': ['albumMID'],
+            'albumName': ['albumName'],
+            'albumCover': ['albumPic']
+        },
+        'search-artists': {
+            'body': ['data', 'req_1'],
+            'artistList': ['data', 'body', 'zhida', 'list'],
+            'artistId': ['custom_info', 'mid'],
+            'artistName': ['title'],
+            'artistCover': ['pic']
         },
         'songList': {
             'body': ['data', 'req_1'],
@@ -331,6 +395,40 @@ const dataParsers: Record<string, any> = {
                 'songAuthors': (authors: string) => authors.split('&').join(', ')
             }
         },
+        'search-singles': {
+            'body': ['data'],
+            'songList': ['abslist'],
+            'songId': ['DC_TARGETID'],
+            'songName': ['NAME'],
+            'songCover': ['web_albumpic_short'],
+            'songAuthors': ['ARTIST'],
+            'songDuration': ['DURATION'],
+            '@postprocessors' : {
+                'songAuthors': (authors: string) => formatAuthors(authors.split('&'), 'kuwo'),
+                'songCover': (short: string) => `https://img3.kuwo.cn/star/albumcover/${short}`
+            }
+        },
+        'search-songlists': {
+            'body': ['data'],
+            'lists': ['data', 'list'],
+            'listId': ['id'],
+            'listName': ['name'],
+            'listCover': ['img']
+        },
+        'search-albums': {
+            'body': ['data'],
+            'albumList': ['data', 'albumList'],
+            'albumId': ['albumid'],
+            'albumName': ['album'],
+            'albumCover': ['pic']
+        },
+        'search-artists': {
+            'body': ['data'],
+            'artistList': ['data', 'artistList'],
+            'artistId': ['id'],
+            'artistName': ['name'],
+            'artistCover': ['pic']
+        },
         'songList': {
             'body': ['data'],
             'name': ['data', 'name'],
@@ -423,6 +521,7 @@ const dataParsers: Record<string, any> = {
             '@preprocessors': {
                 'rankingList': (groups: any[]) => {
                     const lists: object[] = [];
+                    
                     // console.log(groups);
                     for (let i = 0; i < groups.length; i++) {
                         const groupInfo = groups[i];
@@ -484,6 +583,39 @@ const dataParsers: Record<string, any> = {
             '@postprocessors' : {
                 'songDuration': (duration: number) => Math.round(duration / 1000)
             }
+        },
+        'search-singles': {
+            'body': ['data'],
+            'songList': ['data', 'lists'],
+            'songId': ['MixSongID'],
+            'songName': ['SongName'],
+            'songCover': ['Image'],
+            'songAuthors': ['SingerName'],
+            'songDuration': ['Duration'],
+            '@postprocessors' : {
+                'songCover': (img: string) => img.replace('{size}', '500')
+            }
+        },
+        'search-songlists': {
+            'body': ['data'],
+            'lists': ['data', 'lists'],
+            'listId': ['specialid'],
+            'listName': ['specialname'],
+            'listCover': ['img']
+        },
+        'search-albums': {
+            'body': ['data'],
+            'albumList': ['data', 'lists'],
+            'albumId': ['albumid'],
+            'albumName': ['albumname'],
+            'albumCover': ['img']
+        },
+        'search-artists': {
+            'body': ['data'],
+            'artistList': ['data', 'lists'],
+            'artistId': ['AuthorId'],
+            'artistName': ['AuthorName'],
+            'artistCover': ['Avatar']
         },
         'songList': {
             'body': ['data'],
@@ -642,6 +774,18 @@ const targetFormats: Record<string, any> = {
         'songCover': '',
         'songAuthors': [],
         'songDuration': 0
+    },
+    'search-singles': {
+        'songList': '@song_brief'
+    },
+    'search-songlists': {
+        'lists': '@songList_brief'
+    },
+    'search-albums': {
+        'albumList': '@album_brief'
+    },
+    'search-artists': {
+        'artistList': '@artist_brief'
     },
     'song_brief': {
         'songId': '',
@@ -886,7 +1030,7 @@ function parseData(data: any, platform: string, module: string, parentModule: st
     return result;
 }
 
-function parseMusicData(response: AxiosResponse, platform: string, module: MusicModule) {
+function parseMusicData(response: AxiosResponse, platform: string, module: string) {
     if (!dataParsers[platform]) {
         console.error(`[ERROR] Unsupported platform ${platform}`);
     }

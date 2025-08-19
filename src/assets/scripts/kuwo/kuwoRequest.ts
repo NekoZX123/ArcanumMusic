@@ -9,9 +9,22 @@ type KuwoEncryptParams = {
 };
 
 // 请求链接
+// 搜索类型链接
+const searchTypes: Record<string, string> = {
+    'singles': 'singles',
+    'songlists': 'songlists',
+    'albums': 'albums',
+    'artists': 'artists'
+};
+const searchLinks: Record<string, string> = {
+    'singles': 'https://kuwo.cn/search/searchMusicBykeyWord',
+    'songlists': 'https://www.kuwo.cn/api/www/search/searchPlayListBykeyWord',
+    'albums': 'https://www.kuwo.cn/api/www/search/searchAlbumBykeyWord',
+    'artists': 'https://www.kuwo.cn/api/www/search/searchArtistBykeyWord'
+};
 const requestUrls: { [type: string]: string } = {
     'songLink': 'https://kuwo.cn/api/v1/www/music/playUrl',
-    'search': 'https://kuwo.cn/search/searchMusicBykeyWord',
+    'search': '@searchLinks',
     'songInfo': 'https://kuwo.cn/api/www/music/musicInfo',
     'lyrics': 'https://kuwo.cn/openapi/v1/www/lyric/getlyric',
     'songList': 'https://kuwo.cn/api/www/playlist/playListInfo',
@@ -28,9 +41,16 @@ const requestUrls: { [type: string]: string } = {
     'newAlbum': 'https://www.kuwo.cn/api/www/bang/bang/musicList'
 };
 // 请求数据
+// 搜索数据
+const searchData: Record<string, string> = {
+    'singles': 'vipver=1&client=kt&ft=music&cluster=0&strategy=2012&encoding=utf8&rformat=json&mobi=1&issubtitle=1&show_copyright_off=1&pn=0&rn=30&all=[keyword]',
+    'songlists': 'key=[keyword]&pn=1&rn=30&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'albums': 'key=[keyword]&pn=1&rn=30&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'artists': 'key=[keyword]&pn=1&rn=30&httpsStatus=1&reqId=[uuid]&plat=web_www&from='
+};
 const requestData: { [type: string]: string } = {
     'songLink': 'mid=[songId]&type=music&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'search': 'vipver=1&client=kt&ft=music&cluster=0&strategy=2012&encoding=utf8&rformat=json&mobi=1&issubtitle=1&show_copyright_off=1&pn=0&rn=20&all=[keyword]',
+    'search': '@searchData',
     'songInfo': 'mid=[songId]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'lyrics': 'musicId=[songId]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'songList': 'pid=[listId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
@@ -52,13 +72,16 @@ type KuwoMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList
     'rankingContent' | 'newSong' | 'newAlbum';
 
 // 无需 UUID 的模块
-const uuidNotRequired: KuwoMusicModule[] = ['search', 'album'];
+const uuidNotRequired: KuwoMusicModule[] = ['album'];
 // 无需 `Hm_Iuvt_cdb524f42f23cer9b268564v7y735ewrq2324` 参数的模块
 const hmNotRequired: KuwoMusicModule[] = ['album', 'artist', 'artistAlbum'];
 // 无需 `Secrets` 参数的模块
-const secretNotRequired: KuwoMusicModule[] = ['search', 'lyrics', 'album', 'artist', 
+const secretNotRequired: KuwoMusicModule[] = ['lyrics', 'album', 'artist', 
     'artistAlbum', 'recommendArtist'];
 
+function getKuwoSearchTypes() {
+    return searchTypes;
+}
 /**
  * 通用酷我音乐 API 请求函数
  * 
@@ -74,7 +97,7 @@ const secretNotRequired: KuwoMusicModule[] = ['search', 'lyrics', 'album', 'arti
  * 
  * 附: moduleName 对应的 params 格式
  * - songLink: { songId: string } - 歌曲 ID
- * - search: { keyword: string } - 搜索关键词
+ * - search: { keyword: string, type: string } - 搜索关键词, 搜索类型
  * - songInfo: { songId: string } - 歌曲 ID
  * - lyrics: { songId: string } - 歌曲 ID
  * - songList: { listId: string } - 歌单 ID
@@ -91,6 +114,12 @@ const secretNotRequired: KuwoMusicModule[] = ['search', 'lyrics', 'album', 'arti
 function getKuwoResult(moduleName: KuwoMusicModule, params: { [type: string]: any }, cookies?: { userid: string }) {
     let targetUrl = requestUrls[moduleName];
     let moduleData = requestData[moduleName];
+    // 搜索特判
+    if (moduleName === 'search') {
+        const searchType = params['type'];
+        targetUrl = searchLinks[searchType];
+        moduleData = searchData[searchType];
+    }
     if (!targetUrl || !moduleData) {
         throw new Error(`Module ${moduleName} not found in request data.`);
     }
@@ -103,8 +132,9 @@ function getKuwoResult(moduleName: KuwoMusicModule, params: { [type: string]: an
 
     // 替换验证参数
     let cookieHeader = `userid=${cookies?.userid || ''};`;
+    // let cookieHeader = ``;
     if (!hmNotRequired.includes(moduleName)) {
-        cookieHeader += `Hm_Iuvt_cdb524f42f23cer9b268564v7y735ewrq2324=${hm_iuvt};`;
+        cookieHeader += `Hm_Iuvt_cdb524f42f23cer9b268564v7y735ewrq2324=${hm_iuvt}`;
     }
     if (!uuidNotRequired.includes(moduleName)) {
         moduleData = moduleData.replace('[uuid]', uuid);
@@ -121,8 +151,8 @@ function getKuwoResult(moduleName: KuwoMusicModule, params: { [type: string]: an
 
     const requestHeaders: { [type: string]: any } = {
         'Accept': 'application/json',
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Cookie': cookieHeader
+        'Cookie': cookieHeader,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0'
     };
     if (!secretNotRequired.includes(moduleName)) {
         requestHeaders['Secret'] = secret;
@@ -136,4 +166,4 @@ function getKuwoResult(moduleName: KuwoMusicModule, params: { [type: string]: an
     );
 }
 
-export { getKuwoResult };
+export { getKuwoResult, getKuwoSearchTypes };

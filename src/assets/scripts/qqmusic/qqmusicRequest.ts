@@ -11,6 +11,13 @@ import type { AxiosResponse } from 'axios';
 // 推荐歌单 热门单曲 热门歌手 排行榜 新歌 新专辑
 
 // 表单数据
+// 搜索类型
+const searchTypes: Record<string, number> = {
+    'singles': 0,
+    'songlists': 3,
+    'albums': 2,
+    'artists': 0
+};
 const requestData: any = {
     // 通用数据
     "common": {
@@ -55,8 +62,8 @@ const requestData: any = {
             "param": {
                 "remoteplace": "txt.yqq.top",
                 "searchid": 0,
-                "search_type": 0,
-                "query": "[searchQuery]",
+                "search_type": "[type]",
+                "query": "[keyword]",
                 "page_num": 1,
                 "num_per_page": 10
             }
@@ -256,6 +263,9 @@ const universalUrl = 'https://u6.y.qq.com/cgi-bin/musics.fcg';
 type MusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
     'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 'newSong' | 'newAlbum';
 
+function getQQmusicSearchTypes() {
+    return searchTypes;
+}
 /**
  * 通用 QQ 音乐 API 请求函数
  * 
@@ -271,7 +281,7 @@ type MusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 
  * 
  * 附: moduleName 对应的 params 格式
  * - songLink: { songMid: string } - 歌曲 ID
- * - search: { keyword: string } - 搜索关键词
+ * - search: { keyword: string, type: number } - 搜索关键词, 搜索类型
  * - songInfo: { songMid: string } - 歌曲 ID
  * - lyrics: { songMid: string } - 歌曲 ID
  * - songList: { listId: number } - 歌单 ID
@@ -402,4 +412,4 @@ function getQQmusicAccount(cookies: { uin: number, qm_keyst: string }) {
     );
 }
 
-export { getQQmusicResult, getQQmusicAccount };
+export { getQQmusicResult, getQQmusicAccount, getQQmusicSearchTypes };

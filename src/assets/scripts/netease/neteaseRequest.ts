@@ -28,6 +28,13 @@ const requestUrls: { [type: string]: string } = {
 };
 
 // 请求数据
+// 搜索类型 (// 单曲 => 1; 歌单 => 1000; 专辑 => 10; 歌手 => 100)
+const searchTypes: Record<string, number> = {
+    'singles': 1,
+    'songlists': 1000,
+    'albums': 10,
+    'artists': 100
+};
 const requestData: { [type: string]: any } = {
     "songLink": {
         "ids": ["[songId]"],
@@ -38,10 +45,10 @@ const requestData: { [type: string]: any } = {
         "hlpretag": "<span class=\"s-fc7\">",
         "hlposttag": "</span>",
         "s": "[keyword]",
-        "type": "1",
+        "type": "[type]",
         "offset": "0",
         "total": "true",
-        "limit": "100",
+        "limit": "30",
         "csrf_token": ""
     },
     "songInfo": {
@@ -143,6 +150,10 @@ type NeteaseMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songL
     'artistSongs' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' 
     | 'newSong' | 'newAlbum' | 'dailyRecommends';
 
+function getNeteaseSearchTypes() {
+    return searchTypes;
+}
+
 /**
  * 通用网易云音乐 API 请求函数
  * 
@@ -158,7 +169,7 @@ type NeteaseMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songL
  * 
  * 附: moduleName 对应的 params 格式
  * - songLink: { songId: string } - 歌曲 ID
- * - search: { keyword: string } - 搜索关键词
+ * - search: { keyword: string, type: number } - 搜索关键词, 搜索类型
  * - songInfo: { songId: string } - 歌曲 ID
  * - lyrics: { songId: string } - 歌曲 ID
  * - songList: { listId: string } - 歌单 ID
@@ -224,4 +235,4 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
     );
 }
 
-export { getNeteaseResult };
+export { getNeteaseResult, getNeteaseSearchTypes };

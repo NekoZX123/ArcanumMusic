@@ -82,3 +82,11 @@
 [id^="searchType_"] > .tabSwitcher {
     justify-content: center;
 }
+
+.musicBox {
+    width: 100%;
+
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}

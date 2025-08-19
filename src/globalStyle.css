@@ -857,14 +857,6 @@ a {
 .musicBox.types.current {
     display: flex;
 }
-/* 单曲 */
-.musicBox.singles {
-    gap: 6px;
-}
-/* 歌单 / 专辑 */
-.musicBox.songlists {
-    gap: 1rem;
-}
 
 /* 播放控制 */
 #playControlContainer {

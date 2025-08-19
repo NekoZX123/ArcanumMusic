@@ -33,6 +33,11 @@ const TabWidget =  defineComponent({
             type: Boolean,
             required: false,
             default: false
+        },
+        onTabSwitch: {
+            type: Function,
+            required: false,
+            default: () => {}
         }
     },
     setup(props) {
@@ -49,12 +54,13 @@ const TabWidget =  defineComponent({
             currentIndex.value = index;
 
             if (props.scrollOnClick) {
-                console.log('Scrolling...');
                 const container = document.querySelector(`#${props.id}`);
                 if (container) {
                     container.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
             }
+
+            props.onTabSwitch({ widgetId: props.id, current: index });
         };
 
         return {

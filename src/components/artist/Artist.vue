@@ -88,6 +88,7 @@ function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
                 return toTime(b.publishTime) - toTime(a.publishTime);
             });
             for (let i = 0; i < 3; i++) {
+                if (i >= sortedAlbums.length) break;
                 let albumInfo = sortedAlbums[i];
 
                 const albumId = `album-netease-${albumInfo.id}`;
@@ -102,6 +103,7 @@ function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
             // 获取热门专辑
             const hotAlbumsContainer = document.getElementById('hotAlbums') as HTMLElement;
             for (let i = 0; i < 8; i++) {
+                if (i >= albums.length) break;
                 let albumInfo = albums[i];
 
                 let skips = 1;
@@ -126,7 +128,7 @@ function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
     getNeteaseResult('artistSongs', { artistId: parseInt(artistId) }, cookies)
         .then((response) => {
             const data = response.data;
-            console.log(data);
+            // console.log(data);
             if (data.code !== 200) {
                 console.error(`[Error] Failed to get Netease artist songs (artist id ${artistId}, code ${data.code})`);
             }
@@ -142,6 +144,7 @@ function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
                 return toTime(b.publishTime) - toTime(a.publishTime);
             });
             for (let i = 0; i < 3; i++) {
+                if (i >= sortedSongs.length) break;
                 let songInfo = sortedSongs[i];
 
                 const songId = `music-netease-${songInfo.id}`;
@@ -157,6 +160,7 @@ function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
             // 获取热门歌曲
             const hotSongContainer = document.getElementById('hotSongs') as HTMLElement;
             for (let i = 0; i < 9; i++) {
+                if (i >= songs.length) break;
                 let songInfo = songs[i];
 
                 let skips = 1;
@@ -214,6 +218,7 @@ function loadQQMusicArtist(artistId: string, cookies: { qm_keyst: string, uin: n
                     return toTime(b.publishDate) - toTime(a.publishDate);
                 });
                 for (let i = 0; i < 3; i++) {
+                    if (i >= sortedAlbums.length) break;
                     let albumInfo = sortedAlbums[i];
 
                     const albumId = `album-qqmusic-${albumInfo.albumMid}`;
@@ -227,6 +232,7 @@ function loadQQMusicArtist(artistId: string, cookies: { qm_keyst: string, uin: n
                 // 获取热门专辑
                 const hotAlbumsContainer = document.getElementById('hotAlbums') as HTMLElement;
                 for (let i = 0; i < 8; i++) {
+                    if (i >= albums.length) break;
                     let albumInfo = albums[i];
 
                     let skips = 1;
@@ -261,6 +267,7 @@ function loadQQMusicArtist(artistId: string, cookies: { qm_keyst: string, uin: n
                     return toTime(b.songInfo.time_public) - toTime(a.songInfo.time_public);
                 });
                 for (let i = 0; i < 3; i++) {
+                    if (i >= sortedSongs.length) break;
                     let songInfo = sortedSongs[i];
 
                     const songId = `music-qqmusic-${songInfo.songInfo.mid}`;
@@ -276,6 +283,7 @@ function loadQQMusicArtist(artistId: string, cookies: { qm_keyst: string, uin: n
                 // 获取热门歌曲
                 const hotSongContainer = document.getElementById('hotSongs') as HTMLElement;
                 for (let i = 0; i < 9; i++) {
+                    if (i >= songs.length) break;
                     let songInfo = songs[i];
 
                     let skips = 1;
@@ -341,6 +349,7 @@ function loadKuwoArtist(artistId: string, cookies: { userid: string }) {
                 return toTime(b.releaseDate) - toTime(a.releaseDate);
             });
             for (let i = 0; i < 3; i++) {
+                if (i >= sortedAlbums.length) break;
                 let albumInfo = sortedAlbums[i];
 
                 const albumId = `album-kuwo-${albumInfo.albumid}`;
@@ -354,6 +363,7 @@ function loadKuwoArtist(artistId: string, cookies: { userid: string }) {
             // 获取热门专辑
             const hotAlbumsContainer = document.getElementById('hotAlbums') as HTMLElement;
             for (let i = 0; i < 8; i++) {
+                if (i >= albums.length) break;
                 let albumInfo = albums[i];
 
                 let skips = 1;
@@ -392,6 +402,7 @@ function loadKuwoArtist(artistId: string, cookies: { userid: string }) {
                 return toTime(b.releasedate) - toTime(a.releasedate);
             });
             for (let i = 0; i < 3; i++) {
+                if (i >= sortedSongs.length) break;
                 let songInfo = sortedSongs[i];
 
                 const songId = `music-kuwo-${songInfo.rid}`;
@@ -406,6 +417,7 @@ function loadKuwoArtist(artistId: string, cookies: { userid: string }) {
             // 获取热门歌曲
             const hotSongContainer = document.getElementById('hotSongs') as HTMLElement;
             for (let i = 0; i < 9; i++) {
+                if (i >= songs.length) break;
                 let songInfo = songs[i];
 
                 let skips = 1;
@@ -459,6 +471,7 @@ function loadKugouArtist(artistId: string, cookies: { KuGoo: string }) {
                 return toTime(b.publish_date) - toTime(a.publish_date);
             });
             for (let i = 0; i < 3; i++) {
+                if (i >= sortedSongs.length) break;
                 let songInfo = sortedSongs[i];
 
                 const songId = `music-kugou-${songInfo.audio_id}`;
@@ -473,6 +486,7 @@ function loadKugouArtist(artistId: string, cookies: { KuGoo: string }) {
             // 获取热门歌曲
             const hotSongContainer = document.getElementById('hotSongs') as HTMLElement;
             for (let i = 0; i < 9; i++) {
+                if (i >= songs.length) break;
                 let songInfo = songs[i];
 
                 let skips = 1;
@@ -512,6 +526,8 @@ function loadKugouArtist(artistId: string, cookies: { KuGoo: string }) {
                 return toTime(b.publishtime) - toTime(a.publishtime);
             });
             for (let i = 0; i < 3; i++) {
+                if (i >= sortedAlbums.length) break;
+
                 let albumInfo = sortedAlbums[i];
 
                 const albumId = `album-kugou-${albumInfo.albumid}`;
@@ -525,6 +541,7 @@ function loadKugouArtist(artistId: string, cookies: { KuGoo: string }) {
             // 获取热门专辑
             const hotAlbumsContainer = document.getElementById('hotAlbums') as HTMLElement;
             for (let i = 0; i < 8; i++) {
+                if (i >= albums.length) break;
                 let albumInfo = albums[i];
 
                 let skips = 1;
