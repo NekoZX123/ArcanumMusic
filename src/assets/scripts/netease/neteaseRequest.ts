@@ -24,7 +24,9 @@ const requestUrls: { [type: string]: string } = {
     'rankingContent': 'https://music.163.com/weapi/v6/playlist/detail',
     'newSong': 'https://interface.music.163.com/weapi/personalized/newsong',
     'newAlbum': 'https://music.163.com/weapi/album/new', 
-    'dailyRecommends': 'https://music.163.com/weapi/v2/discovery/recommend/songs?csrf_token=652ed459d338e791d0dcc036e417d1e6'
+    'dailyRecommends': 'https://music.163.com/weapi/v2/discovery/recommend/songs?csrf_token=',
+    'userFavourites': 'https://music.163.com/weapi/v6/playlist/detail',
+    'userPlaylists': 'https://music.163.com/weapi/user/playlist?csrf_token='
 };
 
 // 请求数据
@@ -54,7 +56,7 @@ const requestData: { [type: string]: any } = {
     "songInfo": {
         "id": "[songId]",
         "ids": "['[songId]']",
-        "limit": 10000,
+        "limit": 1000,
         "offset": 0,
         "csrf_token": ""
     },
@@ -67,14 +69,14 @@ const requestData: { [type: string]: any } = {
     "songList": {
         "id": "[listId]",
         "ids": "['[listId]']",
-        "limit": 10000,
+        "limit": 1000,
         "offset": 0,
         "csrf_token": ""
     },
     "album": {
         "id": "[albumId]",
         "ids": "[\"[albumId]\"]",
-        "limit": 10000,
+        "limit": 1000,
         "offset": 0,
         "csrf_token": ""
     },
@@ -119,7 +121,7 @@ const requestData: { [type: string]: any } = {
     "rankingContent": {
         "id": "[rankingId]",
         "ids": "['[rankingId]']",
-        "limit": 10000,
+        "limit": 1000,
         "offset": 0,
         "csrf_token": ""
     },
@@ -138,6 +140,19 @@ const requestData: { [type: string]: any } = {
         "offset": "0", 
         "total": "true",
         "csrf_token": ""
+    },
+    "userFavourites": {
+        "id": "[12352057833]",
+        "ids": "['12352057833']",
+        "limit": 1000,
+        "offset": 0,
+        "csrf_token": ""
+    },
+    "userPlaylists": {
+        "offset": "0", 
+        "limit":"1001", 
+        "uid": "[userId]", 
+        "csrf_token": ""
     }
 };
 
@@ -148,7 +163,7 @@ const mobileModuleList: NeteaseMusicModule[] = ['artist', 'artistSongs', 'hotLis
 
 type NeteaseMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
     'artistSongs' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' 
-    | 'newSong' | 'newAlbum' | 'dailyRecommends';
+    | 'newSong' | 'newAlbum' | 'dailyRecommends' | 'userFavourites';
 
 function getNeteaseSearchTypes() {
     return searchTypes;
@@ -184,6 +199,8 @@ function getNeteaseSearchTypes() {
  * - newSong: {} - 空对象
  * - newAlbum: {} - 空对象
  * - dailyRecommends: {} - 空对象
+ * - userFavourites: {} - 空对象
+ * - userPlaylists: { userId: string } - 用户 ID
  */
 function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: string]: any }, cookies: { MUSIC_U: string }) {
     let targetUrl = requestUrls[moduleName];
@@ -235,4 +252,31 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
     );
 }
 
-export { getNeteaseResult, getNeteaseSearchTypes };
+/**
+ * 获取网易云用户信息
+ * @param cookies (必填, 否则无法获取数据) 用户 Cookie 信息, 含有 `MUSIC_U` 参数
+ */
+function getNeteaseAccount(cookies: { MUSIC_U: string }) {
+    const userInfoUrl = 'https://music.163.com/weapi/w/nuser/account/get?csrf_token=';
+    const requestData = { csrf_token: '' };
+
+    const requestParams: neteaseEncryptedData = getNeteaseEncrypt(JSON.stringify(requestData));
+    const cookieHeader = `MUSIC_U=${cookies.MUSIC_U}`;
+
+    return proxyRequest(
+        'POST',
+        userInfoUrl,
+        {
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Cookie': cookieHeader,
+            'User-Agent': ncmDesktopUA
+        },
+        {
+            'params': requestParams.encText,
+            'encSecKey': requestParams.encSecKey
+        }
+    );
+}
+
+export { getNeteaseResult, getNeteaseSearchTypes, getNeteaseAccount };

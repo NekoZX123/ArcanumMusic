@@ -22,6 +22,7 @@ export interface IElectronAPI {
 
     listenCookie: (windowId: Number, targetCookies: String[]) => Promise,
     validateCookie: (platform: string) => Promise,
+    deleteCookies: (platform: string) => Promise,
 
     openExternal: (url: String) => Promise,
 }

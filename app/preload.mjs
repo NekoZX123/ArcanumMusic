@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld(
         
         listenCookie: (windowId, targetCookies) => ipcRenderer.invoke('listenCookie', windowId, targetCookies), // 监听 cookie
         validateCookie: (platform) => ipcRenderer.invoke('validateCookieExpiration', platform), // 验证 Cookie 有效期
+        deleteCookies: (platform) => ipcRenderer.invoke('deleteCookie', platform), // 清除指定平台 Cookies
 
         openExternal: (url) => ipcRenderer.invoke('openExternal', url) // 打开外部链接
     }

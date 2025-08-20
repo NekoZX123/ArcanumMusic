@@ -4,7 +4,8 @@ let userData: { [type: string]: any } = {
     netease: {
         userData: {
             avatarUrl: '/images/library/defaultAvatar.png',
-            nickname: '未登录'
+            nickname: '未登录',
+            userId: -1
         },
         cookies: {
             'MUSIC_U': '',
@@ -113,10 +114,7 @@ async function readAccountInfo(platform: string = 'all') {
 }
 // 重置登录信息
 async function cleanAccountInfo(platform: string) {
-    const fileName = `${platform}.arca`;
-    const filePath = `${await window.electron.getAppDataLocal()}\\ArcanumMusic\\accounts\\${fileName}`;
-
-    window.electron.writeLocalFile(filePath, '');
+    window.electron.deleteCookies(platform);
 }
 
 export {

@@ -163,6 +163,13 @@ const platformCookies = {
         'name': 'KuGoo'
     }
 };
+function deleteCookies(_, platform) {
+    const cookiesFilter = platformCookies[platform];
+    const dataLocation = getAccountDataLocation(platform);
+
+    writeLocalFile(undefined, dataLocation, '');
+    session.defaultSession.cookies.remove(cookiesFilter.url, cookiesFilter.name);
+}
 function validateCookieExpiration(_, platform) {
     return new Promise((resolve, reject) => {
         const cookiesFilter = platformCookies[platform];
@@ -182,10 +189,7 @@ function validateCookieExpiration(_, platform) {
                 // Cookie 已过期 => 删除对应用户数据
                 if (Date.now() > expiration) {
                     console.log(`[Debug] Cookie data '${cookiesFilter.name}' on platform ${platform} has expired, user data will be cleaned`);
-                    const dataLocation = getAccountDataLocation(platform);
-                    writeLocalFile(undefined, dataLocation, '');
-
-                    session.defaultSession.cookies.remove(cookiesFilter.url, cookiesFilter.name);
+                    deleteCookies(undefined, platform);
 
                     resolve(null);
                     return;
@@ -385,6 +389,7 @@ app.whenReady().then(() => {
 
     ipcMain.handle('validateCookieExpiration', validateCookieExpiration);
     ipcMain.handle('listenCookie', listenForCookie);
+    ipcMain.handle('deleteCookie', deleteCookies);
 
     ipcMain.handle('openExternal', (_, url) => shell.openExternal(url));
 

@@ -5,6 +5,7 @@ import { showNotify } from "../notifications/Notification";
 
 import { storeAccountInfo, readAccountInfo, cleanAccountInfo, setAccountInfo } from "../utilities/accountManager.ts";
 import { getQQmusicAccount } from "../scripts/qqmusic/qqmusicRequest.ts";
+import { getNeteaseAccount } from "../scripts/netease/neteaseRequest.ts";
 
 // 各平台登录信息
 const initialTokens: { [type: string]: any } = {
@@ -135,9 +136,11 @@ async function platformLogin(platform: string) {
         console.log(`[Debug] User info received: ${JSON.stringify(userData)}`);
 
         // 获取用户信息
+        let loginSuccess = false;
         if (platform === 'qqmusic' && userData.cookies) { // QQ 音乐 - 网络请求用户信息
             const qm_keyst = userData.cookies['qm_keyst'];
             const uin = userData.cookies['uin'];
+            loginSuccess = true;
 
             getQQmusicAccount({ uin: parseInt(uin), qm_keyst }).then((response) => {
                 // console.log(response.data);
@@ -178,7 +181,49 @@ async function platformLogin(platform: string) {
                 displayAccount(platform, nickname, avatarUrl);
             });
         }
+        else if (platform === 'netease' && userData.cookies) {
+            const musicu = userData.cookies.MUSIC_U;
+            loginSuccess = true;
+
+            getNeteaseAccount({ MUSIC_U: musicu }).then((response) => {
+                const result = response.data;
+                // console.log(result);
+                // 错误处理
+                if (result.code !== 200) {
+                    console.error(`[Error] Failed to get Netease Music account info (Code ${result.code})`);
+                    showNotify('arcanummusic.accounts.neteaselogin', 'critical', '错误', '网易云音乐用户信息获取失败, 用户数据已储存');
+                    return;
+                }
+
+                const infoObject = result.profile;
+                if (infoObject === undefined) {
+                    console.error(`[Error] Failed to get Netease Music account info (Profile = 'undefined')`);
+                    showNotify('arcanummusic.accounts.neteaselogin', 'critical', '错误', '网易云音乐用户信息获取失败, 用户数据已储存');
+                    return;
+                }
+                
+                const nickname = infoObject.nickname || '未知用户';
+                const avatarUrl = infoObject.avatarUrl || '/images/library/defaultAvatar.svg';
+                const userId = infoObject.userId;
+                // 设置并存储用户信息
+                const completeUserData = {
+                    userData: {
+                        avatarUrl: avatarUrl,
+                        nickname: nickname,
+                        userId: userId
+                    },
+                    cookies: {
+                        'MUSIC_U': musicu
+                    }
+                }
+                setAccountInfo(platform, completeUserData);
+                storeAccountInfo(platform);
+                // 展示用户信息
+                displayAccount(platform, nickname, avatarUrl);
+            });
+        }
         else if (userData.userData) { // 其他平台 - 从 localStorage (网易云) / cookie (酷我 / 酷狗) 获取用户信息
+            loginSuccess = true;
             console.log(userData);
             const avatarUrl = userData.userData.avatarUrl || '/images/library/defaultAvatar.svg';
             const nickname = userData.userData.nickname || '未知用户';
@@ -189,21 +234,30 @@ async function platformLogin(platform: string) {
             displayAccount(platform, nickname, avatarUrl);
         }
 
-        closePopup(0, () => {
-            showNotify('arcanummusic.accounts.loginsuccess', 'success',
-                '登录成功!', `${platformNames[platform]} 登录成功`, 3000);
-        });
+        if (loginSuccess) {
+            closePopup(0, () => {
+                showNotify('arcanummusic.accounts.loginsuccess', 'success',
+                    '登录成功!', `${platformNames[platform]} 登录成功`, 3000);
+            });
 
-        window.electron.closeWindowById(loginWindowId);
+            window.electron.closeWindowById(loginWindowId);
 
-        // 更改按钮绑定事件
-        let loginButton = document.getElementById(`${platform}`) as HTMLButtonElement;
-        if (loginButton) {
-            loginButton.innerHTML = '登出';
+            // 更改按钮绑定事件
+            let loginButton = document.getElementById(`${platform}`) as HTMLButtonElement;
+            console.log(loginButton);
+            if (loginButton) {
+                loginButton.innerHTML = '登出';
 
-            loginButton.onclick = () => {
-                platformLogout(platform);
+                loginButton.onclick = () => {
+                    platformLogout(platform);
+                }
             }
+        }
+        else {
+            closePopup(0, () => {
+                showNotify('arcanummusic.accounts.loginfailed', 'critical',
+                    '登录失败', `${platformNames[platform]} 登录失败, 无法获取用户 Token`, 3000);
+            });
         }
     });
 }
