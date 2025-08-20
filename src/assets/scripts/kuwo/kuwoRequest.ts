@@ -152,6 +152,7 @@ function getKuwoResult(moduleName: KuwoMusicModule, params: { [type: string]: an
     const requestHeaders: { [type: string]: any } = {
         'Accept': 'application/json',
         'Cookie': cookieHeader,
+        'Referer': 'https://www.kuwo.cn', 
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0'
     };
     if (!secretNotRequired.includes(moduleName)) {

@@ -34,7 +34,7 @@ function f(t, e) {
         n = (r * n + c) % l;
     for (d = d.toString(16); d.length < 8; )
         d = "0" + d;
-    return h += d
+    return h += d;
 }
 
 function getKuwoParams(){
@@ -44,7 +44,7 @@ function getKuwoParams(){
     for (let i = 0; i < 6; i++) node.push(Math.floor(Math.random() * 256));
     p.uuid = uuidv1({
         'node': node,
-        'nsecs': Math.floor(Math.random() * 9999)
+        'nsecs': Math.floor(Math.random() * 1e4)
     });
     p.hm_iuvt = r(32);
     p.secret = f(p.hm_iuvt, "Hm_Iuvt_cdb524f42f23cer9b268564v7y735ewrq2324");
