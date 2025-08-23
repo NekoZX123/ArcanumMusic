@@ -185,6 +185,29 @@ const dataParsers: Record<string, any> = {
                 'songAuthors': (authorList: object[]) => formatAuthors(authorList, 'netease'),
                 'songDuration': (duration: number) => Math.round(duration / 1000)
             }
+        },
+        'userFavourites': {
+            'body': ['data'],
+            'songCount': null,
+            'tracks': ['playlist', 'trackIds'],
+            'loadTracks': ['playlist', 'tracks'],
+            'songId': ['id'],
+            'songName': ['name'],
+            'songCover': ['al', 'picUrl'],
+            'songAuthors': ['ar'],
+            'songDuration': ['dt'],
+            '@postprocessors': {
+                'tracks': (trackList: any[]) => trackList.map((trackInfo) => trackInfo.id),
+                'songAuthors': (authors: object[]) => formatAuthors(authors, 'netease'),
+                'songDuration': (duration: number) => Math.round(duration / 1000)
+            }
+        },
+        'userPlaylists': {
+            'body': ['data'],
+            'lists': ['playlist'],
+            'listId': ['id'],
+            'listName': ['name'],
+            'listCover': ['coverImgUrl']
         }
     },
     'qqmusic': {
@@ -382,6 +405,28 @@ const dataParsers: Record<string, any> = {
                 'songCover': (pmid: string) => `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`,
                 'songAuthors': (authorList: object[]) => formatAuthors(authorList, 'qqmusic')
             }
+        },
+        'userFavourites': {
+            'body': ['data', 'req_1'],
+            'songCount': null,
+            'tracks': ['data', 'songlist'],
+            'loadTracks': ['data', 'songlist'],
+            'songId': ['mid'],
+            'songName': ['name'],
+            'songCover': ['album', 'pmid'],
+            'songAuthors': ['singer'],
+            'songDuration': ['interval'],
+            '@postprocessors': {
+                'songCover': (pmid: string) => `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`,
+                'songAuthors': (authors: object[]) => formatAuthors(authors, 'qqmusic'),
+            }
+        },
+        'userPlaylists': {
+            'body': ['data'],
+            'lists': ['data', 'cdlist'],
+            'listId': ['dissid'],
+            'listName': ['dissname'],
+            'listCover': ['logo']
         }
     },
     'kuwo': {
@@ -873,6 +918,14 @@ const targetFormats: Record<string, any> = {
     },
     'newSong': {
         'songList': '@song_brief'
+    },
+    'userFavourites': {
+        'songCount': 0,
+        'tracks': [],
+        'loadTracks': '@song_brief'
+    },
+    'userPlaylists': {
+        'lists': '@songList_brief'
     }
 }
 

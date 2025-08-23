@@ -12,6 +12,7 @@ import { getRequestFormat, parseMusicData } from '../../assets/utilities/dataPar
 import type { AxiosResponse } from 'axios';
 
 const songMetaData = ref({
+    id: 'ID',
     name: '单曲名称',
     cover: '/images/player/testAlbum.png',
     authors: 'NekoZX123',
@@ -58,6 +59,7 @@ onMounted(() => {
     const properties = props.id.split('-');
     const platformName = properties[1]; // 平台名
     const songId = properties[2]; // 歌曲 ID
+    songMetaData.value.id = props.id;
     
     loadSongInfo(platformName, songId, userData[platformName].cookies);
 
@@ -75,7 +77,7 @@ onMounted(() => {
             </div>
         </div>
         <div class="flex column" id="content">
-            <SongInfoLine :name="songMetaData.name" :authors="songMetaData.authors" :cover-url="songMetaData.cover" :duration="songMetaData.duration"></SongInfoLine>
+            <SongInfoLine :id="songMetaData.id" :name="songMetaData.name" :authors="songMetaData.authors" :cover-url="songMetaData.cover" :duration="songMetaData.duration"></SongInfoLine>
         </div>
     </div>
 </template>

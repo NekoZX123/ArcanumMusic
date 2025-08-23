@@ -1,6 +1,7 @@
 // !Last validated: 2025/05/25
 
 import { MD5 } from "crypto-js";
+import { v4 as uuidv4 } from "uuid";
 
 // const window = {};
 // window.addEventListener = function () { };
@@ -1245,19 +1246,19 @@ function getToken(kugoo) {
     return new Param().parse(kugoo)['t'];
 }
 
-const kugouKey = 'NVPh5oo715z5DIWAeQlhMDsWXXQV4hwt';
+const kugouMobileKey = 'NVPh5oo715z5DIWAeQlhMDsWXXQV4hwt';
 function getMobileSign(params, data) {
     var mid = kgUser.getKgMid();
 
     params.mid = mid;
     params.uuid = mid;
 
-    let targetList = [kugouKey];
+    let targetList = [kugouMobileKey];
     Object.keys(params).forEach((value) => {
         targetList.push(`${value}=${params[value]}`);
     });
     targetList.push(JSON.stringify(data));
-    targetList.push(kugouKey);
+    targetList.push(kugouMobileKey);
     console.log(targetList);
 
     const signature = MD5(targetList.join('')).toString();
@@ -1267,7 +1268,23 @@ function getMobileSign(params, data) {
     return params;
 }
 
-export { getSignedParams, getToken, getMobileSign };
+const kugouAppKey = 'OIlwieks28dk2k092lksi2UIkp';
+function getAppSign(params, data) {
+    params.mid = MD5(params.dfid).toString();
+    params.uuid = MD5(`${params.dfid}${params.mid}`).toString();
+    // console.log(`[Debug] getAppSign(params=${JSON.stringify(params)}, data=${JSON.stringify(data)})`);
+    const paramsString = Object.keys(params)
+        .sort()
+        .map((key) => `${key}=${typeof params[key] === 'object' ? JSON.stringify(params[key]) : params[key]}`)
+        .join('');
+
+    // console.log(params, data);
+    params.signature = MD5(`${kugouAppKey}${paramsString}${JSON.stringify(data)}${kugouAppKey}`).toString();
+
+    return params;
+}
+
+export { getSignedParams, getToken, getMobileSign, getAppSign };
 
 // Debug only
 // console.log(getParams('7q696414', 0))

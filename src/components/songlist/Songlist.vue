@@ -88,9 +88,10 @@ function requestListInfo(platform: string, module: 'songList' | 'album' | 'ranki
 
             const loadContents = listInfo.loadTracks;
             const listContentContainer = document.getElementById('songlistContent') as HTMLElement;
-            loadContents.forEach((songInfo: any, index: number) => {
+            // console.log(loadContents);
+            loadContents.forEach((songInfo: any) => {
                 // 获取歌曲信息
-                const songId = listContent[index];
+                const songId = `music-${platform}-${songInfo.songId}`;
                 const songName = songInfo.songName;
                 const songCover = songInfo.songCover;
                 const songAuthors = songInfo.songAuthors;

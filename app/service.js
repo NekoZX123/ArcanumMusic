@@ -16,6 +16,7 @@ const allowedHosts = [
     'music.163.com',
     'interface.music.163.com',
     'u6.y.qq.com',
+    'c6.y.qq.com',
     'kuwo.cn',
     'www.kuwo.cn',
     'searchlist.kuwo.cn',

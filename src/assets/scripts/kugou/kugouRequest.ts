@@ -1,6 +1,6 @@
 import { proxyRequest } from "../../utilities/proxyRequest.ts";
 
-import { getSignedParams, getToken, getMobileSign } from './kugouEncrypt.js';
+import { getSignedParams, getToken, getMobileSign, getAppSign } from './kugouEncrypt.js';
 
 function objectToKeyPairs(source: { [key: string]: any }): string {
     let keyValuePairs = Object.keys(source).map((key) => `${key}=${source[key]}`);
@@ -37,7 +37,8 @@ const requestUrls: { [type: string]: string } = {
     'rankings': 'https://m.kugou.com/rank/list',
     'rankingContent': 'https://m.kugou.com/rank/info/[rankingId]',
     'newSong': 'https://m.kugou.com/newsong/index',
-    'newAlbum': 'https://m.kugou.com/rank/info/8888'
+    'newAlbum': 'https://m.kugou.com/rank/info/8888',
+    'userPlaylists': 'https://gateway.kugou.com/v7/get_all_list'
 };
 
 // 请求数据
@@ -160,6 +161,17 @@ const requestData: { [type: string]: any } = {
     },
     'newAlbum': {
         json: true
+    },
+    'userPlaylists': {
+        appid: 1005,
+        clienttime: 0,
+        clientver: 12569,
+        dfid: '-',
+        mid: '',
+        plat: 1,
+        token: '',
+        userid: 0,
+        uuid: ''
     }
 };
 const artistApiPostData = {
@@ -168,15 +180,23 @@ const artistApiPostData = {
     page: 1,
     pagesize: 20
 };
+const userPlaylistsData = {
+    "userid": "[userid]",
+    "token": "[token]",
+    "total_ver": 979,
+    "type": 2,
+    "page": 1,
+    "pagesize": 30,
+};
 
 type KugouMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
     'artistAlbum' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 
-    'newSong' | 'newAlbum';
+    'newSong' | 'newAlbum' | 'userPlaylists';
 
 // 需要用户信息的模块
 const needCookies: KugouMusicModule[] = ['songLink', 'songInfo', 'lyrics', 'songList'];
-const needUserIds: KugouMusicModule[] = ['songLink', 'search', 'songInfo', 'album'];
-const needTokens: KugouMusicModule[] = ['songLink', 'search', 'songInfo', 'lyrics'];
+const needUserIds: KugouMusicModule[] = ['songLink', 'search', 'songInfo', 'album', 'userPlaylists'];
+const needTokens: KugouMusicModule[] = ['songLink', 'search', 'songInfo', 'lyrics', 'userPlaylists'];
 // 需要移动端 UA 的模块
 const mobileUA = 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 EdgA/139.0.2151.58';
 const mobileModuleList: KugouMusicModule[] = ['songList', 'album', 'artist', 'artistAlbum', 'hotList', 
@@ -273,7 +293,7 @@ function getKugouResult(moduleName: KugouMusicModule, params: { [type: string]: 
     const cookieHeader = `KuGoo=${cookies.KuGoo}`;
     const userAgent = mobileModuleList.includes(moduleName) ? mobileUA : '';
 
-    // 歌手信息 - POST API
+    // 歌手信息 (POST request)
     if (moduleName === 'artist') {
         const formData = artistApiPostData;
         formData.author_id = params.artistId;
@@ -285,7 +305,32 @@ function getKugouResult(moduleName: KugouMusicModule, params: { [type: string]: 
             `${targetUrl}?${urlParams}`,
             {
                 'Cookie': cookieHeader,
-                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; SM-G973F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36 EdgA/139.0.2151.58'
+            },
+            formData
+        );
+    }
+    // 用户歌单 (POST request)
+    if (moduleName === 'userPlaylists') {
+        const formData = userPlaylistsData;
+        const userId = getUserId(cookies.KuGoo);
+        const token = getToken(cookies.KuGoo);
+        moduleParams.clienttime = Math.floor(Date.now() / 1000);
+        moduleParams.userid = parseInt(userId);
+        moduleParams.token = token;
+        formData.userid = userId;
+        formData.token = token;
+
+        const encryptedParams = getAppSign(moduleParams, formData);
+        const urlParams = objectToKeyPairs(encryptedParams);
+        console.log(`urlParams = ${urlParams}`);
+        console.log(`formData = ${JSON.stringify(formData)}`);
+        return proxyRequest(
+            'POST',
+            `${targetUrl}?${urlParams}`,
+            {
+                'Cookie': cookieHeader,
+                'User-Agent': 'Android15-1070-11083-46-0-DiscoveryDRADProtocol-wifi',
+                'x-router': 'cloudlist.service.kugou.com'
             },
             formData
         );

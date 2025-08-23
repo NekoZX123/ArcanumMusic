@@ -2,9 +2,16 @@
 import { onMounted, ref } from 'vue';
 import './libraryStyle.css';
 
-// 导入组件
-import { SonglistCard, SongCard } from '../../assets/widgets/Widgets.tsx';
+import { SongCard } from '../../assets/widgets/Widgets.tsx';
 import TabWidget from '../../assets/widgets/TabWidget.vue';
+import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest.ts';
+import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
+import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
+import { addSongCard, addSonglistCard } from '../../assets/utilities/elementControl.ts';
+import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest.ts';
+import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest.ts';
+import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest.ts';
+import type { AxiosResponse } from 'axios';
 
 const platformTabs = [
     {
@@ -32,13 +39,102 @@ const greetingsEnd = ref('');
 const greetList = ['欢迎回来! ', 'Welcome back! ', 'お帰りなさい! '];
 const greetSubfix = [' ~', ' ~', ' ちゃん~'];
 
+const platformList = ['netease', 'qqmusic', 'kuwo', 'kugou'];
+const requestFuncs: Record<string, Function> = {
+    netease: getNeteaseResult,
+    qqmusic: getQQmusicResult,
+    kuwo: getKuwoResult,
+    kugou: getKugouResult,
+}
+function platformChange(widgetInfo: { widgetId: string, current: number }) {
+    const userData = getAccountInfo('all');
+
+    const platform = platformList[widgetInfo.current];
+    if (platform === 'kuwo') {
+        console.warn(`[Warning] Platform ${platform} is not supported yet`);
+        return;
+    }
+
+    setTimeout(() => {
+        const container = document.getElementById(`playlists_${platform}`) as HTMLElement;
+        if (!container) {
+            console.error(`[Error] Failed to get element #playlists_${platform}`);
+            return;
+        }
+
+        // 清空容器
+        container.innerHTML = '';
+
+        // 获取歌单数据
+        const sendRequest = requestFuncs[platform];
+        if (!sendRequest) {
+            console.error(`[Error] No request function found for platform: ${platform}`);
+            return;
+        }
+
+        let requestParams = {};
+        if (platform === 'netease') {
+            requestParams = { userId: userData.netease.userData.userId };
+        }
+        sendRequest('userPlaylists', requestParams, userData[platform].cookies)
+            .then((response: AxiosResponse) => {
+                // console.log(response.data);
+                if (platform === 'kugou') {
+                    console.log(response.data);
+                    return;
+                }
+                const userLists = parseMusicData(response, platform, 'userPlaylists');
+                // console.log(userLists);
+
+                const songLists = userLists.lists;
+                songLists.forEach((listInfo: any) => {
+                    const listId = `songList-${platform}-${listInfo.listId}`;
+                    addSonglistCard(container, listId, listInfo.listName, listInfo.listCover);
+                });
+            });
+    }, 300);
+}
+
 onMounted(() => {
-    console.log('Library.vue loaded');
+    const userData = getAccountInfo('all');
 
     // 加载问候语
     const choice = Math.floor(Math.random() * greetList.length);
     greetings.value = greetList[choice];
     greetingsEnd.value = greetSubfix[choice];
+
+    // 加载收藏歌曲
+    getNeteaseResult('userFavourites', {}, userData.netease.cookies)
+        .then((response) => {
+            // console.log(response.data);
+            const favList = parseMusicData(response, 'netease', 'userFavourites');
+
+            const favContainer = document.getElementById('userFavouritesPreview') as HTMLElement;
+            if (!favContainer) {
+                console.error(`[Error] Failed to get element #userFavouritesPreview`);
+                return;
+            }
+            
+            const loadList = favList.loadTracks;
+            for (let i = 0; i < 4; i++) {
+                const songInfo = loadList[i];
+                if (i >= loadList.length) {
+                    break;
+                }
+
+                const songId = `music-netease-${songInfo.songId}`;
+                addSongCard(favContainer, songId, songInfo.songName, songInfo.songCover, songInfo.songAuthors);
+            }
+        });
+    // getQQmusicResult('userFavourites', {}, userData.qqmusic.cookies)
+    //     .then((response) => {
+    //         console.log(response.data);
+    //     });
+
+    // 加载初始标签内容
+    platformChange({ widgetId: 'HOMO114514', current: 0 });
+
+    console.log('Library.vue loaded');
 });
 </script>
 
@@ -65,12 +161,7 @@ onMounted(() => {
                         <img src="/images/player/play.svg" alt="Play"/>
                     </button>
                 </span>
-                <span class="listContent flex column">
-                    <SongCard id="1" coverUrl="/images/player/testAlbum.png" name="Song name 1" authors="Author 1"></SongCard>
-                    <SongCard id="2" coverUrl="/images/player/testAlbum.png" name="Song name 02" authors="Author 2"></SongCard>
-                    <SongCard id="3" coverUrl="/images/player/testAlbum.png" name="nekozx daisuki" authors="Author 3"></SongCard>
-                    <SongCard id="4" coverUrl="/images/player/testAlbum.png" name="Song Name 333" authors="Author 4, 5, 6"></SongCard>
-                </span>
+                <span class="listContent flex column" id="userFavouritesPreview"></span>
             </div>
 
             <div class="songlistCard large flex column" id="dailyRecommend">
@@ -95,32 +186,12 @@ onMounted(() => {
         </div>
 
         <!-- 用户歌单 -->
-        <TabWidget id="userLists" :tabs="platformTabs" :scrollOnClick="true">
+        <TabWidget id="userLists" :tabs="platformTabs" :scrollOnClick="true" :onTabSwitch="platformChange">
             <template #default>
-                <div class="musicBox songlists" id="playlists_netease">
-                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 01"></SonglistCard>
-                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 02"></SonglistCard>
-                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 03"></SonglistCard>
-                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 04"></SonglistCard>
-                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 114514"></SonglistCard>
-                    
-                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="List 1919810"></SonglistCard>
-                </div>
-
-                <div class="musicBox songlists" id="playlists_qqmusic">
-                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="QQMusic List"></SonglistCard>
-                </div>
-
-                <div class="musicBox songlists" id="playlists_kuwo">
-                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="Kuwo List 01"></SonglistCard>
-                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="Kuwo List 02"></SonglistCard>
-                </div>
-
-                <div class="musicBox songlists" id="playlists_kugou">
-                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="Kugou List 01"></SonglistCard>
-                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="Kugou List 02"></SonglistCard>
-                    <SonglistCard id="114514" coverUrl="/images/player/testAlbum.png" name="Kugou List 03"></SonglistCard>
-                </div>
+                <div class="musicBox songlists userLists" id="playlists_netease"></div>
+                <div class="musicBox songlists userLists" id="playlists_qqmusic"></div>
+                <div class="musicBox songlists userLists" id="playlists_kuwo"></div>
+                <div class="musicBox songlists userLists" id="playlists_kugou"></div>
             </template>
         </TabWidget>
     </div>

@@ -25,3 +25,6 @@ build
 *.njsproj
 *.sln
 *.sw?
+
+# Test files including personal information
+tests

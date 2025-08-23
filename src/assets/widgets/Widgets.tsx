@@ -1,5 +1,6 @@
 import { defineComponent } from "vue";
 import { changePage } from "../utilities/pageSwitcher";
+import { getPlayer } from "../player/player";
 
 // 各平台图标
 const platformIcons: Record<string, string> = {
@@ -74,7 +75,7 @@ const SongCard = defineComponent({
                     <label class="text small bold">{props.name}</label>
                     <label class="text ultraSmall grey">{props.authors}</label>
                 </span>
-                <button class="songPlay">
+                <button class="songPlay" onClick={() => getPlayer()?.playlistAdd(props.id)}>
                     <img src="/images/player/play.dark.svg" alt="Play"/>
                 </button>
             </span>
@@ -85,15 +86,16 @@ const SongCard = defineComponent({
 // 歌曲卡片 (单行)
 const SongInfoLine = defineComponent({
     props: {
+        id: String,
         name: String,
         authors: String,
         coverUrl: String,
         duration: Number
     },
-    setup(props: { name: string, authors: string, coverUrl: string, duration: number }) {
+    setup(props: { id: string, name: string, authors: string, coverUrl: string, duration: number }) {
         return () => (
             <span class="songLine flex row">
-                <button class="songPlay">
+                <button class="songPlay" onClick={() => getPlayer()?.playlistAdd(props.id)}>
                     <img src="/images/player/play.dark.svg"/>
                 </button>
                 <img class="songCover" src={props.coverUrl}></img>

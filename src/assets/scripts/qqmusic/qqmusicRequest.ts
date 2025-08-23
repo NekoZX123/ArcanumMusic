@@ -245,7 +245,21 @@ const requestData: any = {
                 "num": 50
             }
         }
-    ]
+    ],
+    // 收藏歌曲
+    "userFavourites": [
+        {
+            "module": "music.srfDissInfo.aiDissInfo",
+            "method": "uniform_get_Dissinfo",
+            "param": {
+                "song_begin": 0,
+                "song_num": 100,
+                "disstid": 5507561315,
+                "ctx": 1
+            }
+        }
+    ],
+    "userPlaylists": []
 };
 // 特例 - 用户信息
 const userInfoData = {
@@ -259,10 +273,35 @@ const userInfoData = {
 };
 // 请求链接
 const universalUrl = 'https://u6.y.qq.com/cgi-bin/musics.fcg';
+// 收藏歌单链接
+const userPlaylistsUrl = 'https://c6.y.qq.com/fav/fcgi-bin/fcg_get_profile_order_asset.fcg?_=[timestamp]&cv=4747474&ct=20&format=json&inCharset=utf-8&outCharset=utf-8&notice=0&platform=yqq.json&needNewCode=1&uin=[uin]&g_tk_new_20200303=1923713770&g_tk=1923713770&cid=205360956&userid=[uin]&reqtype=3&sin=0&ein=10'
 
-type MusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
-    'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 'newSong' | 'newAlbum';
+type QQMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
+    'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 'newSong' | 'newAlbum' | 
+    'userFavourites' | 'userPlaylists';
 
+/**
+ * 获取 QQ音乐 用户收藏歌单
+ * @param cookies (必填, 否则无法获取数据) 用户 Cookie 信息，包括 uin 和 qm_keyst
+ * @returns Promise<AxiosResponse> - 请求结果
+ */
+function getQQmusicUserLists(cookies: { uin: number, qm_keyst: string }) {
+    const uin = cookies.uin;
+    const now = Date.now();
+
+    const targetUrl = userPlaylistsUrl.replace('[timestamp]', now.toString()).replace(/\[uin\]/g, uin.toString());
+    const cookieHeader = `uin=${cookies.uin}; qm_keyst=${cookies.qm_keyst}; qqmusic_key=${cookies.qm_keyst};`;
+    return proxyRequest(
+        'GET',
+        targetUrl,
+        {
+            'Accept': 'application/json',
+            'Cookie': cookieHeader,
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36 Edg/138.0.0.0'
+        },
+        null
+    );
+}
 function getQQmusicSearchTypes() {
     return searchTypes;
 }
@@ -294,8 +333,15 @@ function getQQmusicSearchTypes() {
  * - rankingContent: { rankingId: number } - 排行榜 ID
  * - newSong: {} - 空对象
  * - newAlbum: {} - 空对象
+ * - userFavourites: {} - 空对象
+ * - userPlaylists: {} - 空对象
  */
-function getQQmusicResult(moduleName: MusicModule, params: { [type: string]: any }, cookies: { uin: number, qm_keyst: string }) {
+function getQQmusicResult(moduleName: QQMusicModule, params: { [type: string]: any }, cookies: { uin: number, qm_keyst: string }) {
+    // 用户收藏歌单特判
+    if (moduleName === 'userPlaylists') {
+        return getQQmusicUserLists(cookies);
+    }
+    
     const common = requestData.common;
     const moduleData = requestData[moduleName];
     if (!moduleData) {
@@ -330,7 +376,7 @@ function getQQmusicResult(moduleName: MusicModule, params: { [type: string]: any
     const sign = getSign(JSON.stringify(data));
     const requestParams = `_=${Date.now()}&sign=${sign}`; // 不使用ag-1编码 (不加密数据)
     const cookieHeader = `uin=${cookies.uin};qm_keyst=${cookies.qm_keyst};qqmusic_key=${cookies.qm_keyst}`;
-    console.log(cookieHeader);
+    // console.log(cookieHeader);
 
     if (moduleName === 'lyrics') { // 对歌词进行 Base64 解析
         return new Promise<AxiosResponse>((resolve, reject) => {

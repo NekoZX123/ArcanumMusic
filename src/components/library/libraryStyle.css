@@ -36,3 +36,9 @@
 
     padding: 0 1rem;
 }
+
+.musicBox.userLists {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+}

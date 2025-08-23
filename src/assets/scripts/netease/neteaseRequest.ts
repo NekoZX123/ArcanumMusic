@@ -39,9 +39,10 @@ const searchTypes: Record<string, number> = {
 };
 const requestData: { [type: string]: any } = {
     "songLink": {
-        "ids": ["[songId]"],
+        "ids": "[[songId]]",
         "level": "jymaster",
-        "encodeType": "flac"
+        "encodeType": "aac",
+        "csrf_token": ""
     },
     "search": {
         "hlpretag": "<span class=\"s-fc7\">",
@@ -69,42 +70,42 @@ const requestData: { [type: string]: any } = {
     "songList": {
         "id": "[listId]",
         "ids": "['[listId]']",
-        "limit": 1000,
+        "limit": 50,
         "offset": 0,
         "csrf_token": ""
     },
     "album": {
         "id": "[albumId]",
         "ids": "[\"[albumId]\"]",
-        "limit": 1000,
+        "limit": 50,
         "offset": 0,
         "csrf_token": ""
     },
     "artist": {
-        "limit": 20,
+        "limit": 30,
         "artistId": "[artistId]",
         "csrf_token": ""
     },
     "artistSongs": {
         "id": "[artistId]",
-        "top": 20,
+        "top": 30,
         "csrf_token": ""
     },
     "hotList": {
         "order": "hot",
         "cat": "ALL",
-        "limit": 35,
+        "limit": 40,
         "offset": 0
     },
     "recommendSong": {
         "id": 3778678,
-        "n": 20,
+        "n": 30,
         "csrf_token": ""
     },
     "recommendArtist": {
         "offset": "0",
         "total": "true",
-        "limit": "100",
+        "limit": "60",
         "csrf_token": ""
     },
     "rankings": {
@@ -113,7 +114,7 @@ const requestData: { [type: string]: any } = {
         "offset": "0",
         "orderType": "1",
         "pageNo": "1",
-        "pageSize": "100",
+        "pageSize": "60",
         "rid": "",
         "threadId": "",
         "total": "true"
@@ -126,7 +127,7 @@ const requestData: { [type: string]: any } = {
         "csrf_token": ""
     },
     "newSong": {
-        "data": "{\"limit\": 10}",
+        "data": "{\"limit\": 20}",
         "csrf_token": ""
     },
     "newAlbum": {
@@ -142,15 +143,15 @@ const requestData: { [type: string]: any } = {
         "csrf_token": ""
     },
     "userFavourites": {
-        "id": "[12352057833]",
+        "id": "12352057833",
         "ids": "['12352057833']",
-        "limit": 1000,
+        "limit": 1001,
         "offset": 0,
         "csrf_token": ""
     },
     "userPlaylists": {
         "offset": "0", 
-        "limit":"1001", 
+        "limit": "1001", 
         "uid": "[userId]", 
         "csrf_token": ""
     }
@@ -163,7 +164,7 @@ const mobileModuleList: NeteaseMusicModule[] = ['artist', 'artistSongs', 'hotLis
 
 type NeteaseMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
     'artistSongs' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' 
-    | 'newSong' | 'newAlbum' | 'dailyRecommends' | 'userFavourites';
+    | 'newSong' | 'newAlbum' | 'dailyRecommends' | 'userFavourites' | 'userPlaylists';
 
 function getNeteaseSearchTypes() {
     return searchTypes;
