@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getPlayer } from '../../assets/player/player';
 import { SongInfoLine } from '../../assets/widgets/Widgets';
 import './playlistStyle.css';
 
@@ -7,16 +8,38 @@ import './playlistStyle.css';
     <div class="flex column" id="playlistPage">
         <div class="playlistPart flex column" id="currentSong">
             <label class="text large bold playlistSubtitle">正在播放</label>
-            <SongInfoLine id="0" name="Arcanum" authors="NekoZX123" cover-url="/images/player/testAlbum.png" :duration="114"></SongInfoLine>
+            <SongInfoLine 
+                v-if="`playlist_${getPlayer()?.playlist.current.id}`"
+                :id="`playlist_${getPlayer()?.playlist.current.id}`" 
+                :name="getPlayer()?.playlist.current.name" 
+                :authors="getPlayer()?.playlist.current.authors" 
+                :cover-url="getPlayer()?.playlist.current.coverUrl" 
+                :duration="getPlayer()?.playlist.current.duration"
+            />
         </div>
         <div class="playlistPart flex column" id="songsCutInLine">
             <label class="text large bold playlistSubtitle">插队播放</label>
-            <SongInfoLine id="0" name="Cut in Line" authors="123456" cover-url="/images/player/testAlbum.png" :duration="514"></SongInfoLine>
+            <SongInfoLine
+                v-for="song in getPlayer()?.playlist.breakIn"
+                :key="`playlist_${song.id}`"
+                :id="`playlist_${song.id}`"
+                :name="song.name"
+                :authors="song.authors"
+                :cover-url="song.coverUrl"
+                :duration="song.duration"
+            />
         </div>
         <div class="playlistPart flex column" id="songsCutInLine">
             <label class="text large bold playlistSubtitle">播放列表</label>
-            <SongInfoLine id="0" name="Test1" authors="114514" cover-url="/images/player/testAlbum.png" :duration="100"></SongInfoLine>
-            <SongInfoLine id="0" name="Test2" authors="1919810" cover-url="/images/player/testAlbum.png" :duration="200"></SongInfoLine>
+            <SongInfoLine
+                v-for="song in getPlayer()?.playlist.waitList"
+                :key="`playlist_${song.id}`"
+                :id="`playlist_${song.id}`"
+                :name="song.name"
+                :authors="song.authors"
+                :cover-url="song.coverUrl"
+                :duration="song.duration"
+            />
         </div>
     </div>
 </template>

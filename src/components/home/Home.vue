@@ -126,10 +126,11 @@ onMounted(() => {
                     const songId = `songlist-${platform}-${songDetail.songId}`;
                     const songName = songDetail.songName;
                     const songCover = songDetail.songCover;
-                    const songAuthors = songDetail.songAuthors
+                    const songAuthors = songDetail.songAuthors;
+                    const songDuration = songDetail.songDuration;
                     loadedRecommendSongs.push(songName);
 
-                    addSongCard(recommendSongContainer, songId, songName, songCover, songAuthors);
+                    addSongCard(recommendSongContainer, songId, songName, songCover, songAuthors, songDuration);
                 }
             });
     });
@@ -255,10 +256,11 @@ onMounted(() => {
                     const songName = songInfo.songName;
                     const songCover = songInfo.songCover;
                     const songAuthors = songInfo.songAuthors;
+                    const songDuration = songInfo.songDuration;
 
                     loadedSongs.push(songName);
 
-                    addSongCard(newSinglesContainer, songId, songName, songCover, songAuthors);
+                    addSongCard(newSinglesContainer, songId, songName, songCover, songAuthors, songDuration);
                 }
             });
     });
@@ -406,6 +408,7 @@ onMounted(() => {
             <label class="text small grey">Arcanum Music v0.6.2</label>
             <label class="text small grey">Made by NekoZX123</label>
             <label class="text ultraSmall grey">Licensed under Apache-2.0 license</label>
+            <label class="text ultraSmall grey">仅供学习交流使用, 不得用于商业用途</label>
         </div>
     </div>
 </template>

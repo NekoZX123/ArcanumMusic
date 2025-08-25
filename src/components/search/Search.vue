@@ -144,7 +144,8 @@ function typeChange(tabInfo: { widgetId: string, current: number }) {
                     const songList = result.songList;
                     songList?.forEach((songInfo: any) => {
                         const songId = `music-${currentPlatform.value}-${songInfo.songId}`;
-                        addSongCard(container, songId, songInfo.songName, songInfo.songCover, songInfo.songAuthors);
+                        addSongCard(container, songId, songInfo.songName, songInfo.songCover, 
+                            songInfo.songAuthors, songInfo.songDuration);
                     });
                 }
                 if (type === 'songlists') { // 歌单

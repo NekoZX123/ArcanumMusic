@@ -10,6 +10,10 @@ import { getKugouResult } from "../scripts/kugou/kugouRequest";
  */
 const dataParsers: Record<string, any> = {
     'netease': {
+        'songLink': {
+            'body': ['data'],
+            'url': ['data', '0', 'url']
+        },
         'songInfo': {
             'body': ['data'],
             'songName': ['songs', '0', 'name'],
@@ -211,6 +215,13 @@ const dataParsers: Record<string, any> = {
         }
     },
     'qqmusic': {
+        'songLink': {
+            'body': ['data', 'req_1'],
+            'url': ['data', 'midurlinfo', '0', 'purl'],
+            '@postprocessors': {
+                'url': (fileName: string) => `http://aqqmusic.tc.qq.com/${fileName}`
+            }
+        },
         'songInfo': {
             'body': ['data', 'req_1'],
             'songName': ['data', 'track_info', 'title'],
@@ -430,6 +441,10 @@ const dataParsers: Record<string, any> = {
         }
     },
     'kuwo': {
+        'songLink': {
+            'body': ['data'],
+            'url': ['data', 'url']
+        },
         'songInfo': {
             'body': ['data'],
             'songName': ['data', 'name'],
@@ -619,6 +634,10 @@ const dataParsers: Record<string, any> = {
         }
     },
     'kugou': {
+        'songLink': {
+            'body': ['data'],
+            'url': ['data', 'play_url']
+        },
         'songInfo': {
             'body': ['data'],
             'songName': ['data', 'song_name'],
@@ -814,6 +833,9 @@ const dataParsers: Record<string, any> = {
 
 // 解析目标数据
 const targetFormats: Record<string, any> = {
+    'songLink': {
+        'url': ''
+    },
     'songInfo': {
         'songName': '',
         'songCover': '',

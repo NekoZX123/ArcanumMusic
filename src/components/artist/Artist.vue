@@ -151,10 +151,11 @@ function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
                 const songName = songInfo.name;
                 const songCover = songInfo.al.picUrl;
                 const songAuthors = formatAuthors(songInfo.ar, 'netease');
+                const songDuration = Math.round(songInfo.dt / 1000);
 
                 loadedSongs.push(songName);
 
-                addSongCard(newSongContainer, songId, songName, songCover, songAuthors, true);
+                addSongCard(newSongContainer, songId, songName, songCover, songAuthors, songDuration, true);
             }
 
             // 获取热门歌曲
@@ -175,9 +176,10 @@ function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
                 const songName = songInfo.name;
                 const songCover = songInfo.al.picUrl;
                 const songAuthors = formatAuthors(songInfo.ar, 'netease');
+                const songDuration = Math.round(songInfo.dt / 1000);
                 loadedSongs.push(songName);
 
-                addSongCard(hotSongContainer, songId, songName, songCover, songAuthors);
+                addSongCard(hotSongContainer, songId, songName, songCover, songAuthors, songDuration);
             }
         });
 }
@@ -275,9 +277,10 @@ function loadQQMusicArtist(artistId: string, cookies: { qm_keyst: string, uin: n
                     const pmid = songInfo.songInfo.album.pmid;
                     const songCover = `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`;
                     const songAuthors = formatAuthors(songInfo.songInfo.singer, 'qqmusic');
+                    const songDuration = songInfo.songInfo.interval;
                     loadedSongs.push(songName);
 
-                    addSongCard(newSongContainer, songId, songName, songCover, songAuthors, true);
+                    addSongCard(newSongContainer, songId, songName, songCover, songAuthors, songDuration, true);
                 }
 
                 // 获取热门歌曲
@@ -299,9 +302,10 @@ function loadQQMusicArtist(artistId: string, cookies: { qm_keyst: string, uin: n
                     const pmid = songInfo.songInfo.album.pmid;
                     const songCover = `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`;
                     const songAuthors = formatAuthors(songInfo.songInfo.singer, 'qqmusic');
+                    const songDuration = songInfo.songInfo.interval;
                     loadedSongs.push(songName);
 
-                    addSongCard(hotSongContainer, songId, songName, songCover, songAuthors);
+                    addSongCard(hotSongContainer, songId, songName, songCover, songAuthors, songDuration);
                 }
             }
             
@@ -409,9 +413,10 @@ function loadKuwoArtist(artistId: string, cookies: { userid: string }) {
                 const songName = songInfo.name;
                 const songCover = songInfo.pic;
                 const songAuthors = formatAuthors(songInfo.artist.split('&'), 'kuwo');
+                const songDuration = songInfo.duration;
                 loadedSongs.push(songName);
 
-                addSongCard(newSongContainer, songId, songName, songCover, songAuthors, true);
+                addSongCard(newSongContainer, songId, songName, songCover, songAuthors, songDuration, true);
             }
 
             // 获取热门歌曲
@@ -432,9 +437,10 @@ function loadKuwoArtist(artistId: string, cookies: { userid: string }) {
                 const songName = songInfo.name;
                 const songCover = songInfo.pic;
                 const songAuthors = formatAuthors(songInfo.artist.split('&'), 'kuwo');
+                const songDuration = songInfo.duration;
                 loadedSongs.push(songName);
 
-                addSongCard(hotSongContainer, songId, songName, songCover, songAuthors);
+                addSongCard(hotSongContainer, songId, songName, songCover, songAuthors, songDuration);
             }
         });
 }
@@ -478,9 +484,10 @@ function loadKugouArtist(artistId: string, cookies: { KuGoo: string }) {
                 const songName = songInfo.audio_name;
                 const songCover = songInfo.album_info?.cover?.replace('{size}', '500') || '/images/player/testAlbum.png';
                 const songAuthors = formatAuthors(songInfo.authors, 'kugou');
+                const songDuration = songInfo.duration;
                 loadedSongs.push(songName);
 
-                addSongCard(newSongContainer, songId, songName, songCover, songAuthors, true);
+                addSongCard(newSongContainer, songId, songName, songCover, songAuthors, songDuration, true);
             }
 
             // 获取热门歌曲
@@ -501,9 +508,10 @@ function loadKugouArtist(artistId: string, cookies: { KuGoo: string }) {
                 const songName = songInfo.audio_name;
                 const songCover = songInfo.album_info?.cover?.replace('{size}', '500') || '/images/player/testAlbum.png';
                 const songAuthors = formatAuthors(songInfo.authors, 'kugou');
+                const songDuration = songInfo.duration;
                 loadedSongs.push(songName);
 
-                addSongCard(hotSongContainer, songId, songName, songCover, songAuthors);
+                addSongCard(hotSongContainer, songId, songName, songCover, songAuthors, songDuration);
             }
         });
     // 获取最新 / 热门专辑

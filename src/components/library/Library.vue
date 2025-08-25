@@ -123,7 +123,8 @@ onMounted(() => {
                 }
 
                 const songId = `music-netease-${songInfo.songId}`;
-                addSongCard(favContainer, songId, songInfo.songName, songInfo.songCover, songInfo.songAuthors);
+                addSongCard(favContainer, songId, songInfo.songName, songInfo.songCover, 
+                    songInfo.songAuthors, songInfo.songDuration);
             }
         });
     // getQQmusicResult('userFavourites', {}, userData.qqmusic.cookies)
@@ -170,8 +171,8 @@ onMounted(() => {
                     <label class="text light ultraSmall">共 30 首</label>
                 </span>
                 <span class="listContent flex column">
-                    <SongCard id="5" coverUrl="/images/player/testAlbum.png" name="nekozx daisuki" authors="Author 114"></SongCard>
-                    <SongCard id="6" coverUrl="/images/player/testAlbum.png" name="daily recommend" authors="Author 514"></SongCard>
+                    <SongCard id="5" coverUrl="/images/player/testAlbum.png" name="nekozx daisuki" authors="Author 114" :duration="100"></SongCard>
+                    <SongCard id="6" coverUrl="/images/player/testAlbum.png" name="daily recommend" authors="Author 514" :duration="100"></SongCard>
                 </span>
                 <span class="cardFooter flex row">
                     <span class="musicSource flex row">

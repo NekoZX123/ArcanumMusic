@@ -65,10 +65,11 @@ onMounted(() => {
                         const songId = `songlist-${platform}-${songDetail.songId}`;
                         const songName = songDetail.songName;
                         const songCover = songDetail.songCover;
-                        const songAuthors = songDetail.songAuthors
+                        const songAuthors = songDetail.songAuthors;
+                        const songDuration = songDetail.songDuration;
                         loadedRecommendSongs.push(songName);
 
-                        addSongCard(container, songId, songName, songCover, songAuthors);
+                        addSongCard(container, songId, songName, songCover, songAuthors, songDuration);
                     }
                 });
         });
@@ -102,10 +103,11 @@ onMounted(() => {
                         const songName = songInfo.songName;
                         const songCover = songInfo.songCover;
                         const songAuthors = songInfo.songAuthors;
+                        const songDuration = songInfo.songDuration;
 
                         loadedSongs.push(songName);
 
-                        addSongCard(container, songId, songName, songCover, songAuthors);
+                        addSongCard(container, songId, songName, songCover, songAuthors, songDuration);
                     }
                 });
         });
@@ -136,8 +138,9 @@ onMounted(() => {
                     const songName = songInfo.songName;
                     const songCover = songInfo.songCover;
                     const songAuthors = songInfo.songAuthors;
+                    const songDuration = songInfo.songDuration;
 
-                    addSongCard(container, songId, songName, songCover, songAuthors);
+                    addSongCard(container, songId, songName, songCover, songAuthors, songDuration);
                 }
             });
     }

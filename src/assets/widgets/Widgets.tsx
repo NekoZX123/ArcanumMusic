@@ -65,9 +65,10 @@ const SongCard = defineComponent({
         id: String,
         coverUrl: String,
         name: String,
-        authors: String
+        authors: String,
+        duration: Number
     },
-    setup(props: { id: string, coverUrl: string, name: string, authors: string }) {
+    setup(props: { id: string, coverUrl: string, name: string, authors: string, duration: number }) {
         return () => (
             <span class="songCard flex row">
                 <img class="songCover" src={props.coverUrl} onClick={() => changePage('single', true, props.id)}></img>
@@ -75,7 +76,7 @@ const SongCard = defineComponent({
                     <label class="text small bold">{props.name}</label>
                     <label class="text ultraSmall grey">{props.authors}</label>
                 </span>
-                <button class="songPlay" onClick={() => getPlayer()?.playlistAdd(props.id)}>
+                <button class="songPlay" onClick={() => getPlayer()?.playNow(props)}>
                     <img src="/images/player/play.dark.svg" alt="Play"/>
                 </button>
             </span>

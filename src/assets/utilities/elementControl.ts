@@ -18,7 +18,7 @@ function addSonglistCard(target: HTMLElement, id: string, name: string, coverUrl
 }
 
 // 添加歌曲卡片
-function addSongCard(target: HTMLElement, id: string, name: string, coverUrl: string, authors: string, isNew: boolean = false) {
+function addSongCard(target: HTMLElement, id: string, name: string, coverUrl: string, authors: string, duration: number, isNew: boolean = false) {
     const container = document.createElement('div');
     container.classList.add('songContainer', 'medium');
     container.id = `${isNew ? 'new_' : ''}${id}_container`;
@@ -28,7 +28,8 @@ function addSongCard(target: HTMLElement, id: string, name: string, coverUrl: st
         id: id,
         coverUrl: coverUrl,
         name: name,
-        authors: authors
+        authors: authors,
+        duration: duration
     };
 
     createApp(SongCard, listProps).mount(`#${isNew ? 'new_' : ''}${id}_container`);
