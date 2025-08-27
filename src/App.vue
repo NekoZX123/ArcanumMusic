@@ -4,12 +4,13 @@ import Lyrics from './components/lyrics/Lyrics.vue';
 
 import { showNotify } from './assets/notifications/Notification.ts';
 // import { showPopup } from './assets/notifications/popup.tsx';
-import { createPlayer } from './assets/player/player.ts';
+import { createPlayer, getPlayer } from './assets/player/player.ts';
 import { initialize, pageBack, pageForward, togglePlaylist, changePage } from './assets/utilities/pageSwitcher.ts';
 // import { testRequest } from './assets/utilities/requestTests.ts';
 import { PageButton } from './assets/widgets/pageSwitcher.tsx';
 import { showPopup } from './assets/notifications/popup.tsx';
 import { readAccountInfo } from './assets/utilities/accountManager.ts';
+import { hideRightMenu } from './assets/utilities/elementControl.ts';
 
 // 设置文件位置
 const configLocation = '/ArcanumMusic/settings.json';
@@ -221,6 +222,13 @@ onMounted(async () => {
     // 读取账户信息
     readAccountInfo('all');
 
+    // 设置点击 / 滚动时隐藏右键菜单
+    window.addEventListener('click', (event) => {
+        if (event.button === 0) {
+            hideRightMenu();
+        }
+    });
+    document.getElementById('pageContainer')?.addEventListener('scroll', (_) => hideRightMenu());
     // [For Debug]
     player?.updateDuration(114);
     player?.updateProgress(0);
@@ -296,22 +304,22 @@ onMounted(async () => {
             <div class="flex row" id="playControlBar">
                 <!-- 当前歌曲信息 -->
                 <div class="flex row" id="currentSong">
-                    <img class="currentSongCover" :src="playerMetaInfo.coverUrl"/>
+                    <img class="currentSongCover" :src="getPlayer()?.coverUrl"/>
                     <span class="flex column">
-                        <label class="text small bold">{{ playerMetaInfo.name }}</label>
-                        <label class="text ultraSmall">{{ playerMetaInfo.authors }}</label>
+                        <label class="text small bold">{{ getPlayer()?.name }}</label>
+                        <label class="text ultraSmall">{{ getPlayer()?.authors }}</label>
                     </span>
                 </div>
 
                 <!-- 播放控制 -->
                 <div class="flex row" id="playControl">
-                    <button class="playControl" id="previousButton">
+                    <button class="playControl" id="previousButton" @click="getPlayer()?.previousSong">
                         <img src="/images/player/previous.svg" alt="Previous song"/>
                     </button>
                     <button class="playControl large" id="playButton">
                         <img src="/images/player/play.dark.svg" alt="Play / Pause"/>
                     </button>
-                    <button class="playControl" id="nextButton">
+                    <button class="playControl" id="nextButton" @click="getPlayer()?.nextSong">
                         <img src="/images/player/next.svg" alt="Next song"/>
                     </button>
                 </div>
@@ -321,19 +329,19 @@ onMounted(async () => {
                     <button class="playControl small" id="playlist" @click="togglePlaylistPanel">
                         <img :src="playlistButtonImg" alt="Toggle playlist"/>
                     </button>
-                    <button class="playControl small" id="repeat" @click="playerMetaInfo.toggleRepeat">
-                        <img :src="playerMetaInfo.repeatStateImage" alt="Toggle repeat"/>
+                    <button class="playControl small" id="repeat" @click="getPlayer()?.toggleRepeat">
+                        <img :src="getPlayer()?.repeatStateImage" alt="Toggle repeat"/>
                     </button>
-                    <button class="playControl small" id="shuffle" @click="playerMetaInfo.toggleShuffle">
-                        <img :src="playerMetaInfo.shuffleStateImage" alt="Toggle shuffle"/>
+                    <button class="playControl small" id="shuffle" @click="getPlayer()?.toggleShuffle">
+                        <img :src="getPlayer()?.shuffleStateImage" alt="Toggle shuffle"/>
                     </button>
                     <span class="flex row">
-                        <img class="playControl small" :src="playerMetaInfo.volumeLevel" @click="playerMetaInfo.toggleMute"/>
+                        <img class="playControl small" :src="getPlayer()?.volumeLevel" @click="playerMetaInfo.toggleMute"/>
                         <div id="volumeAdjust" @mousemove="adjustVolume">
                             <div id="volumeBar">
-                                <div id="volumeFilled" :style="`width: ${playerMetaInfo.volume}%`"></div>
+                                <div id="volumeFilled" :style="`width: ${getPlayer()?.volume}%`"></div>
                             </div>
-                            <div class="text ultraSmall" id="volumeLabel" :style="`left: calc(${playerMetaInfo.volume}% - 1.5rem)`">{{ playerMetaInfo.volume }}%</div>
+                            <div class="text ultraSmall" id="volumeLabel" :style="`left: calc(${getPlayer()?.volume}% - 1.5rem)`">{{ playerMetaInfo.volume }}%</div>
                         </div>
                     </span>
                     <button class="playControl small" id="lyrics" @click="showLyrics">
@@ -356,5 +364,11 @@ onMounted(async () => {
 
         <!-- 歌词面板 -->
         <div id="lyricsArea"></div>
+
+        <!-- 播放器 -->
+        <audio id="arcanummusic-playcontrol" :src="getPlayer()?.url" controls autoplay="false"></audio>
+
+        <!-- 右键菜单 -->
+        <div id="rightClickMenuContainer"></div>
     </div>
 </template>

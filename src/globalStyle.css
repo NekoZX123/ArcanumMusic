@@ -1321,3 +1321,85 @@ a {
 #lyricsArea.show {
     transform: translateY(0);
 }
+
+#arcanummusic-playcontrol {
+    position: absolute;
+    top: 6rem;
+}
+
+/* 右键菜单 */
+#rightClickMenuContainer {
+    position: absolute;
+
+    background: transparent;
+    width: 10rem;
+    height: auto;
+    top: 0;
+
+    z-index: 150;
+
+    opacity: 0;
+    transition: opacity 200ms ease-in-out;
+}
+#rightClickMenuContainer.show {
+    opacity: 1;
+}
+.rightMenu {
+    position: relative;
+    width: 100%;
+    height: auto;
+
+    background: var(--default-white);
+    border-style: solid;
+    border-color: var(--default-grey);
+    border-width: 1px;
+    border-radius: 10px;
+
+    box-shadow: 2px 2px 6px 0 var(--transparent-darkgrey);
+
+    padding: 2px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.menuPart {
+    width: 100%;
+    
+    border-style: solid;
+    border-color: var(--default-lightgrey);
+    border-width: 0;
+    border-bottom-width: 1px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.menuItem {
+    width: 100%;
+    height: 2.5rem;
+
+    background: transparent;
+    color: var(--default-black);
+
+    border: none;
+    border-radius: 8px;
+
+    padding: 0 4px;
+    margin: 2px 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    transition: all 200ms ease-in-out;
+}
+.menuItem:hover {
+    background: var(--color-blue-light);
+}
+.menuIcon {
+    width: 16pt;
+    height: 16pt;
+
+    margin: 4px;
+}

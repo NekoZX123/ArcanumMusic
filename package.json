@@ -37,9 +37,12 @@
         "electron": "^34.1.1",
         "electron-builder": "^25.1.8",
         "express": "^4.21.2",
+        "node-fetch": "^3.3.2",
         "typescript": "~5.7.2",
         "uuid": "^11.1.0",
         "vite": "^6.3.5",
-        "vue-tsc": "^2.2.0"
+        "vue-tsc": "^2.2.0",
+        "websocket": "^1.0.35",
+        "ws": "^8.18.3"
     }
 }

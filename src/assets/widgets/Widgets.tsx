@@ -1,6 +1,7 @@
 import { defineComponent } from "vue";
 import { changePage } from "../utilities/pageSwitcher";
 import { getPlayer } from "../player/player";
+import { triggerRightMenu } from "../utilities/elementControl";
 
 // 各平台图标
 const platformIcons: Record<string, string> = {
@@ -35,6 +36,10 @@ function timeFormat(timeSeconds: number) {
 
 // 自定义组件
 
+// 歌单卡片右键点击事件处理
+function handleSongListRightClick(event: MouseEvent, props: any) {
+    if (event.button === 2) triggerRightMenu(event, props, 'collections');
+}
 // 歌单卡片
 const SonglistCard = defineComponent({
     props: {
@@ -46,12 +51,14 @@ const SonglistCard = defineComponent({
         const platformName = props.id.replace('new_', '').split('-')[1];
         const platformIcon = platformIcons[platformName] || '';
         return () => (
-            <span class="songlistCard medium" id={props.id} onClick={() => changePage('songlist', true, props.id)}>
+            <span class="songlistCard medium" id={props.id} 
+                onClick={(_) => changePage('songlist', true, props.id)} 
+                onContextmenu={(event) => handleSongListRightClick(event, props)}>
                 <span class="flex column">
                     <img class="songCover" src={props.coverUrl} alt="Playlist cover"/>
                     <label class="text small">{props.name}</label>
                 </span>
-                <button class="songlistPlatform" id={`${props.id}_play`}>
+                <button class="songlistPlatform" id={`${props.id}_platform`}>
                     <img src={platformIcon} alt={`From ${platformName}`}/>
                 </button>
             </span>
@@ -59,6 +66,10 @@ const SonglistCard = defineComponent({
     },
 });
 
+// 歌曲卡片右键点击事件处理
+function handleSongRightClick(event: MouseEvent, props: any) {
+    if (event.button === 2) triggerRightMenu(event, props, 'song');
+}
 // 歌曲卡片
 const SongCard = defineComponent({
     props: {
@@ -70,8 +81,9 @@ const SongCard = defineComponent({
     },
     setup(props: { id: string, coverUrl: string, name: string, authors: string, duration: number }) {
         return () => (
-            <span class="songCard flex row">
-                <img class="songCover" src={props.coverUrl} onClick={() => changePage('single', true, props.id)}></img>
+            <span class="songCard flex row" onContextmenu={(event) => handleSongRightClick(event, props)}>
+                <img class="songCover" src={props.coverUrl} 
+                    onClick={() => changePage('single', true, props.id)}></img>
                 <span class="songInfo flex column">
                     <label class="text small bold">{props.name}</label>
                     <label class="text ultraSmall grey">{props.authors}</label>
@@ -84,6 +96,10 @@ const SongCard = defineComponent({
     }
 });
 
+// 单行歌曲卡片右键点击事件处理
+function handleSongLineRightClick(event: MouseEvent, props: any) {
+    if (event.button === 2) triggerRightMenu(event, props, 'playlistItem');
+}
 // 歌曲卡片 (单行)
 const SongInfoLine = defineComponent({
     props: {
@@ -95,8 +111,8 @@ const SongInfoLine = defineComponent({
     },
     setup(props: { id: string, name: string, authors: string, coverUrl: string, duration: number }) {
         return () => (
-            <span class="songLine flex row">
-                <button class="songPlay" onClick={() => getPlayer()?.playlistAdd(props.id)}>
+            <span class="songLine flex row" onContextmenu={(event) => handleSongLineRightClick(event, props)}>
+                <button class="songPlay" onClick={() => getPlayer()?.playNow(props)}>
                     <img src="/images/player/play.dark.svg"/>
                 </button>
                 <img class="songCover" src={props.coverUrl}></img>
@@ -110,6 +126,10 @@ const SongInfoLine = defineComponent({
     }
 });
 
+// 歌手卡片右键点击事件处理
+function handleArtistRightClick(event: MouseEvent, props: any) {
+    if (event.button === 2) triggerRightMenu(event, props, 'collections');
+}
 // 歌手卡片
 const ArtistCard = defineComponent({
     props: {
@@ -119,7 +139,9 @@ const ArtistCard = defineComponent({
     },
     setup(props: { id: string, coverUrl: string, name: string }) {
         return () => (
-            <span class="artistCard flex column" onClick={() => changePage('artist', true, props.id)}>
+            <span class="artistCard flex column" 
+            onClick={() => changePage('artist', true, props.id)} 
+            onContextmenu={(event) => handleArtistRightClick(event, props)}>
                 <img class="artistCover" src={props.coverUrl}></img>
                 <label class="text small">{props.name}</label>
             </span>
