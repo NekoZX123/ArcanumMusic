@@ -24,6 +24,27 @@
     margin: 0 1rem;
 }
 
+#userFavouritesPreview {
+    width: calc(15rem + 6px);
+    height: calc(14rem + 8px);
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+#userFavouritesPreview::-webkit-scrollbar {
+    display: none;
+}
+#recommendContainer {
+    width: 100%;
+    height: calc(7rem + 6px + 1rem);
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+#recommendContainer::-webkit-scrollbar {
+    display: none;
+}
+
 #userLists {
     width: 100%;
 

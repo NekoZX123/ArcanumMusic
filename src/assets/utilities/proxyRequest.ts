@@ -16,7 +16,7 @@ function proxyRequest(method: string = 'GET', url: string, headers: object = {},
             url: `http://localhost:3000/proxy`,
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json; text/plain; application/octet-stream'
+                'Accept': 'application/json; text/plain; application/octet-stream; */*'
             },
             data: {
                 url: url,

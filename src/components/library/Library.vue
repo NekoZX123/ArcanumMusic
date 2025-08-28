@@ -2,7 +2,6 @@
 import { onMounted, ref } from 'vue';
 import './libraryStyle.css';
 
-import { SongCard } from '../../assets/widgets/Widgets.tsx';
 import TabWidget from '../../assets/widgets/TabWidget.vue';
 import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest.ts';
 import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
@@ -116,21 +115,29 @@ onMounted(() => {
             }
             
             const loadList = favList.loadTracks;
-            for (let i = 0; i < 4; i++) {
-                const songInfo = loadList[i];
-                if (i >= loadList.length) {
-                    break;
-                }
-
+            loadList.forEach((songInfo: any) => {
                 const songId = `music-netease-${songInfo.songId}`;
                 addSongCard(favContainer, songId, songInfo.songName, songInfo.songCover, 
                     songInfo.songAuthors, songInfo.songDuration);
-            }
+            });
         });
-    // getQQmusicResult('userFavourites', {}, userData.qqmusic.cookies)
-    //     .then((response) => {
-    //         console.log(response.data);
-    //     });
+    // 获取每日推荐封面
+    getNeteaseResult('songList', { listId: '3136952023' }, userData.netease.cookies)
+        .then((response) => {
+            const recommends = parseMusicData(response, 'netease', 'songList');
+
+            const container = document.getElementById('recommendContainer') as HTMLElement;
+            if (!container) {
+                console.error(`[Error] Failed to get element #recommendContainer`);
+            }
+            
+            const songList = recommends.loadTracks;
+            songList.forEach((songInfo: any) => {
+                const songId = `music-netease-${songInfo.songId}`;
+                addSongCard(container, songId, songInfo.songName, songInfo.songCover, 
+                    songInfo.songAuthors, songInfo.songDuration);
+            });
+        });
 
     // 加载初始标签内容
     platformChange({ widgetId: 'HOMO114514', current: 0 });
@@ -170,10 +177,7 @@ onMounted(() => {
                     <label class="text bold medium">每日推荐</label>
                     <label class="text light ultraSmall">共 30 首</label>
                 </span>
-                <span class="listContent flex column">
-                    <SongCard id="5" coverUrl="/images/player/testAlbum.png" name="nekozx daisuki" authors="Author 114" :duration="100"></SongCard>
-                    <SongCard id="6" coverUrl="/images/player/testAlbum.png" name="daily recommend" authors="Author 514" :duration="100"></SongCard>
-                </span>
+                <span class="listContent flex column" id="recommendContainer"></span>
                 <span class="cardFooter flex row">
                     <span class="musicSource flex row">
                         <label class="text ultraSmall">音乐源: </label>
