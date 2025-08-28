@@ -112,12 +112,13 @@ function togglePlaylist(_: MouseEvent) {
     let currentPage = getCurrentPage();
 
     if (currentPage === 'playlist') {
-        changePage(latestPage);
+        pageBack();
     }
     else {
         latestPage = currentPage;
         changePage('playlist');
     }
+    updatePlaylistIcon();
 }
 
 // 回退页面
@@ -133,6 +134,7 @@ function pageBack() {
     }
 
     changePage(targetPage, false, pageParams);
+    updatePlaylistIcon();
 }
 
 // 前进页面
@@ -145,11 +147,25 @@ function pageForward() {
     historyParams.pop();
 
     changePage(targetPage, true, pageParams);
+    updatePlaylistIcon();
 }
 
 // 返回当前页面
 function getCurrentPage() {
     return currentPage;
+}
+
+// 更改播放列表显示状态图标
+function updatePlaylistIcon() {
+    const listStateElem = document.getElementById('playlistState') as HTMLImageElement;
+    if (!listStateElem) {
+        console.error(`[Error] Failed to get element #playlistState`);
+        return;
+    }
+    const playlistEnabled = getCurrentPage() === 'playlist';
+    listStateElem.src = `/images/player/playlist${playlistEnabled ? '.on' : ''}.svg`;
+
+    return playlistEnabled;
 }
 
 // 初始化
@@ -164,5 +180,6 @@ export {
     pageBack,
     pageForward,
     getCurrentPage,
-    togglePlaylist
+    togglePlaylist,
+    updatePlaylistIcon
 }
