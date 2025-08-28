@@ -94,27 +94,37 @@ function titlebarMouseUp() {
 }
 
 // 当前音乐信息
-const playerMetaInfo = ref(createPlayer(['lyricsVolume']));
+// 创建播放器
+createPlayer(['lyricsVolume']);
 const progressTooltipOffset = ref('left: 0');
+let targetProgress = 0;
+const targetPercentage = ref(0);
+const playTimeAdjustFlag = ref(false);
 
 // 播放进度调整
 function startProgressAdjust(event: MouseEvent) {
-    if (event.buttons === 1) {
+    if (event.buttons === 1 && !playTimeAdjustFlag.value) {
         // 添加全局事件监听器
         showProgressTooltip();
         document.addEventListener('mousemove', adjustPlayProgress);
+        playTimeAdjustFlag.value = true;
 
-        document.addEventListener('mouseup', () => {
+        const handleMouseUp = () => {
             hideProgressTooltip();
             document.removeEventListener('mousemove', adjustPlayProgress);
-        });
+            document.removeEventListener('mouseup', handleMouseUp);
+            getPlayer()?.setProgress(targetProgress);
+            playTimeAdjustFlag.value = false;
+        };
+
+        document.addEventListener('mouseup', handleMouseUp);
     }
 }
 function adjustPlayProgress(event: MouseEvent) {
     const progressBar = document.getElementById('playProgress');
     if (!progressBar) return;
 
-    if (event.buttons === 1) {
+    if (event.buttons === 1 && playTimeAdjustFlag.value) {
         // 移动播放进度提示
         let tooltipX = event.clientX;
         if (tooltipX < 80) tooltipX = 80;
@@ -123,7 +133,8 @@ function adjustPlayProgress(event: MouseEvent) {
         progressTooltipOffset.value = `left: calc(${tooltipX}px - 4rem)`;
 
         // 设置进度条宽度
-        let deltaX = event.clientX - progressBar.getBoundingClientRect().left;
+        const barRect = progressBar.getBoundingClientRect();
+        let deltaX = event.clientX - barRect.left;
         let progress = deltaX / progressBar.clientWidth;
 
         // 防止范围溢出
@@ -131,8 +142,10 @@ function adjustPlayProgress(event: MouseEvent) {
         if (progress > 1) progress = 1;
 
         // 设置播放进度文字
-        let playProgress = Math.round(playerMetaInfo.value.duration * progress);
-        playerMetaInfo.value.updateProgress(playProgress);
+        let playProgress = Math.round((getPlayer()?.duration || 0) * progress);
+        getPlayer()?.updateProgress(playProgress);
+        targetProgress = playProgress;
+        targetPercentage.value = progress * 100;
     }
 }
 
@@ -163,17 +176,13 @@ function adjustVolume(event: MouseEvent) {
         if (volume < 0) volume = 0;
         if (volume > 100) volume = 100;
 
-        playerMetaInfo.value.setVolume(volume);
+        getPlayer()?.setVolume(volume);
     }
 }
 
 // 切换播放列表
-let playlistEnabled = false;
-const playlistButtonImg = ref('/images/player/playlist.svg');
-function togglePlaylistPanel(_: MouseEvent) {
-    playlistEnabled = !playlistEnabled;
-    playlistButtonImg.value = `/images/player/playlist${playlistEnabled ? '.on' : ''}.svg`;
-    togglePlaylist(_);
+function togglePlaylistPanel(event: MouseEvent) {
+    togglePlaylist(event);
 }
 
 // 切换歌词面板
@@ -216,9 +225,6 @@ onMounted(async () => {
     const lyricsArea = document.getElementById('lyricsArea');
     if (lyricsArea) lyricsArea.style = 'display: none;';
 
-    // 初始化播放器
-    const player = playerMetaInfo.value;
-
     // 读取账户信息
     readAccountInfo('all');
 
@@ -229,9 +235,18 @@ onMounted(async () => {
         }
     });
     document.getElementById('pageContainer')?.addEventListener('scroll', (_) => hideRightMenu());
-    // [For Debug]
-    player?.updateDuration(114);
-    player?.updateProgress(0);
+    
+    // 设置触发器
+    const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+    if (!playerElem) {
+        console.error('[Error] Player element not found');
+        return;
+    }
+    playerElem.addEventListener('timeupdate', () => {
+        if (!playTimeAdjustFlag.value) getPlayer()?.updateProgress(Math.ceil(playerElem.currentTime));
+
+        getPlayer()?.checkNextSong();
+    });
 });
 </script>
 
@@ -298,8 +313,10 @@ onMounted(async () => {
 
         <!-- 播放器控制栏 -->
         <div class="flex column" id="playControlContainer">
-            <div class="fluentProgress flex row" id="playProgress" @mousedown="startProgressAdjust" @mousemove="adjustPlayProgress">
-                <div class="fluentFilled" id="playedCover" :style="`width: ${playerMetaInfo.progressPercentage}%`"></div>
+            <div class="fluentProgress flex row" id="playProgress" 
+                @mousedown="startProgressAdjust" @mousemove="adjustPlayProgress">
+                <div class="fluentFilled" id="playedCover" 
+                    :style="`width: ${playTimeAdjustFlag ? targetPercentage : getPlayer()?.progressPercentage}%`"></div>
             </div>
             <div class="flex row" id="playControlBar">
                 <!-- 当前歌曲信息 -->
@@ -316,8 +333,8 @@ onMounted(async () => {
                     <button class="playControl" id="previousButton" @click="getPlayer()?.previousSong">
                         <img src="/images/player/previous.svg" alt="Previous song"/>
                     </button>
-                    <button class="playControl large" id="playButton">
-                        <img src="/images/player/play.dark.svg" alt="Play / Pause"/>
+                    <button class="playControl large" id="playButton" @click="getPlayer()?.togglePlayPause">
+                        <img :src="getPlayer()?.playStateImage" alt="Play / Pause"/>
                     </button>
                     <button class="playControl" id="nextButton" @click="getPlayer()?.nextSong">
                         <img src="/images/player/next.svg" alt="Next song"/>
@@ -327,7 +344,7 @@ onMounted(async () => {
                 <!-- 其他控制 / 歌词 -->
                 <div class="flex row" id="controlRightBar">
                     <button class="playControl small" id="playlist" @click="togglePlaylistPanel">
-                        <img :src="playlistButtonImg" alt="Toggle playlist"/>
+                        <img src="/images/player/playlist.svg" id="playlistState" alt="Toggle playlist"/>
                     </button>
                     <button class="playControl small" id="repeat" @click="getPlayer()?.toggleRepeat">
                         <img :src="getPlayer()?.repeatStateImage" alt="Toggle repeat"/>
@@ -336,12 +353,12 @@ onMounted(async () => {
                         <img :src="getPlayer()?.shuffleStateImage" alt="Toggle shuffle"/>
                     </button>
                     <span class="flex row">
-                        <img class="playControl small" :src="getPlayer()?.volumeLevel" @click="playerMetaInfo.toggleMute"/>
+                        <img class="playControl small" :src="getPlayer()?.volumeLevel" @click="getPlayer()?.toggleMute"/>
                         <div id="volumeAdjust" @mousemove="adjustVolume">
                             <div id="volumeBar">
                                 <div id="volumeFilled" :style="`width: ${getPlayer()?.volume}%`"></div>
                             </div>
-                            <div class="text ultraSmall" id="volumeLabel" :style="`left: calc(${getPlayer()?.volume}% - 1.5rem)`">{{ playerMetaInfo.volume }}%</div>
+                            <div class="text ultraSmall" id="volumeLabel" :style="`left: calc(${getPlayer()?.volume}% - 1.5rem)`">{{ getPlayer()?.volume }}%</div>
                         </div>
                     </span>
                     <button class="playControl small" id="lyrics" @click="showLyrics">
@@ -359,7 +376,7 @@ onMounted(async () => {
 
         <!-- 播放进度标签 -->
         <div class="text ultraSmall flex column" id="progressTooltip" :style="progressTooltipOffset">
-            {{ `${playerMetaInfo.playedTimeText} / ${playerMetaInfo.durationText}` }}
+            {{ `${getPlayer()?.playedTimeText} / ${getPlayer()?.durationText}` }}
         </div>
 
         <!-- 歌词面板 -->

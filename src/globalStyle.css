@@ -1325,6 +1325,8 @@ a {
 #arcanummusic-playcontrol {
     position: absolute;
     top: 6rem;
+
+    display: none;
 }
 
 /* 右键菜单 */

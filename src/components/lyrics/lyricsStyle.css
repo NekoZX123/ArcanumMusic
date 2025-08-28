@@ -60,6 +60,9 @@
 }
 
 /* 歌曲信息 */
+#songInfo {
+    align-items: center;
+}
 #songCover {
     width: 18rem;
     height: 18rem;
@@ -71,7 +74,12 @@
     margin: 1rem 0;
 }
 #songName {
+    max-width: 13rem;
+    max-height: 48pt;
+
     margin-left: 3px;
+
+    overflow: hidden;
 }
 #songAuthors {
     margin-left: 3px;

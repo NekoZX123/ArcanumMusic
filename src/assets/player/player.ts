@@ -6,6 +6,7 @@ import { getQQmusicResult } from "../scripts/qqmusic/qqmusicRequest";
 import { getAccountInfo } from "../utilities/accountManager";
 import { parseMusicData } from "../utilities/dataParsers";
 import { reactive } from "vue";
+import { showNotify } from "../notifications/Notification";
 
 // 时间格式化
 function timeFormat(timeSeconds: number) {
@@ -36,6 +37,7 @@ const requestFuncs: Record<string, Function> = {
     kuwo: getKuwoResult,
     kugou: getKugouResult
 }
+const neteaseCdnPostfix = 'music.126.net';
 /**
  * 根据歌曲 ID 解析歌曲信息
  * @param songId 歌曲 ID (`music-${platform}-${id}`)
@@ -93,6 +95,7 @@ class Player {
     playedTime: number;
     playedTimeText: string;
     progressPercentage: number;
+    playStateImage: string;
 
     // 音量信息
     volume: number;
@@ -121,7 +124,7 @@ class Player {
         };
 
         this.name = '未在播放';
-        this.authors = 'undefined';
+        this.authors = '';
         this.coverUrl = '/images/player/testAlbum.png';
 
         this.playedTime = 0;
@@ -129,6 +132,7 @@ class Player {
         this.durationText = '';
         this.playedTimeText = '';
         this.progressPercentage = 0;
+        this.playStateImage = '/images/player/play.dark.svg';
 
         this.volume = 100;
         this.volumeLevel = '/images/player/volume_04.svg';
@@ -154,7 +158,7 @@ class Player {
         this.shuffleState = 0;
         this.shuffleStateImage = IMAGES_SHUFFLE[0];
 
-        this.url = 'https://example.com/example.flac';
+        this.url = '';
     }
 
     // 更新歌曲长度
@@ -168,10 +172,30 @@ class Player {
         this.playedTimeText = timeFormat(time);
 
         this.progressPercentage = time / this.duration * 100;
+
+        this.checkNextSong();
+    }
+    // 设置播放进度
+    setProgress(time: number) {
+        const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+        if (!playerElem) {
+            console.error('[Error] Player element not found');
+            return;
+        }
+        console.log(`[Debug] Time adjusted to ${time}`);
+        playerElem.currentTime = time;
+
+        this.checkNextSong();
     }
 
     // 更改音量
     setVolume(value: number) {
+        const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+        if (!playerElem) {
+            console.error('[Error] Player element not found');
+            return;
+        }
+
         if (value < 0) value = 0;
         if (value > 100) value = 100;
 
@@ -186,23 +210,26 @@ class Player {
 
         this.volume = value;
         this.volumeLevel = `/images/player/volume_0${level}.svg`;
+        playerElem.volume = value / 100;
 
         let volumeBarStyle = document.getElementById('globalVolumeFill');
-        if (volumeBarStyle) {
-            let fillStyle = ``;
-            this.volumeBarIds.forEach(id => {
-                fillStyle += `
-                #${id}::-webkit-slider-runnable-track {
-                    --fill-percentage: ${this.volume}%;
-                }
-                `;
-
-                let bar = document.getElementById(id) as HTMLInputElement;
-                if (bar) bar.value = String(this.volume);
-            });
-
-            volumeBarStyle.innerHTML = fillStyle;
+        if (!volumeBarStyle) {
+            volumeBarStyle = document.createElement('style');
+            document.body.appendChild(volumeBarStyle);
         }
+        let fillStyle = ``;
+        this.volumeBarIds.forEach(id => {
+            fillStyle += `
+            #${id}::-webkit-slider-runnable-track {
+                --fill-percentage: ${this.volume}%;
+            }
+            `;
+
+            let bar = document.getElementById(id) as HTMLInputElement;
+            if (bar) bar.value = String(this.volume);
+        });
+
+        volumeBarStyle.innerHTML = fillStyle;
     }
     // 切换静音
     toggleMute() {
@@ -258,14 +285,33 @@ class Player {
     }
 
     /**
+     * 切换播放 / 暂停
+     */
+    togglePlayPause() {
+        const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+        if (!playerElem) {
+            console.error('[Error] Player element not found');
+            return;
+        }
+
+        this.playStateImage = playerElem.paused ? '/images/player/pause.dark.svg' : '/images/player/play.dark.svg';
+        if (playerElem.paused && this.url !== '') {
+            playerElem.play();
+        } else {
+            playerElem.pause();
+        }
+    }
+
+    /**
      * 播放指定歌曲
      * @param songInfo 歌曲信息
      */
-    playAudio(songInfo: any) {
+    playAudio(songInfo: any, addToHistory: boolean = true) {
+        songInfo = Object.assign({}, songInfo);
         songInfo.id = songInfo.id.replace('new_', '').replace('playlist_', '');
 
         const current = this.playlist.current;
-        if (Object.keys(current).length !== 0) this.playlist.history.unshift(current);
+        if (Object.keys(current).length !== 0 && addToHistory) this.playlist.history.unshift(current);
 
         this.playlist.current = songInfo;
 
@@ -277,13 +323,53 @@ class Player {
             };
             console.log(`[Debug]>>> Playing: ${JSON.stringify(playInfo)}`);
 
+            // 设置歌曲信息
             this.name = playInfo.name;
             this.authors = playInfo.authors;
             this.coverUrl = playInfo.coverUrl;
             this.duration = playInfo.duration;
             this.updateDuration(playInfo.duration);
             this.updateProgress(0);
-            this.url = playInfo.url;
+            this.setProgress(0);
+            // 设置播放链接
+            if (playInfo.url === null) {
+                showNotify('songUrlNullError', 'critical', `无法播放 ${this.name}`, '获取播放链接失败');
+                if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0) {
+                    this.togglePlayPause();
+                this.playStateImage = '/images/player/play.dark.svg';
+                    return;
+                }
+                this.nextSong();
+                return;
+            }
+            if (playInfo.url.includes(neteaseCdnPostfix)) {
+                // const audioChunks: BlobPart[] = [];
+                // const ws =  new WebSocket('ws://127.0.0.1:3001');
+
+                // ws.onmessage = (event) => {
+                //     audioChunks.push(event.data);
+                // };
+                // ws.onclose = (_) => {
+                //     const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+                //     const audioUrl = URL.createObjectURL(audioBlob);
+                //     console.log(`[Debug] Audio blob URL: ${audioUrl}`);
+                //     this.url = audioUrl;
+                // };
+
+                // ws.onopen = () => {
+                //     ws.send(playInfo.url);
+                // };
+                const idParts = playInfo.id.split('-');
+                const musicId = idParts[2];
+                const fallbackUrl = `https://music.163.com/song/media/outer/url?id=${musicId}.mp3`;
+                console.log(`[Debug] Play URL: ${fallbackUrl}`);
+                this.url = fallbackUrl;
+            }
+            else {
+                this.url = playInfo.url;
+            }
+
+            this.playStateImage = '/images/player/pause.dark.svg';
         });
     }
     /**
@@ -293,36 +379,125 @@ class Player {
     playNow(songInfo: any) {
         this.playAudio(songInfo);
     }
+    /**
+     * 检查播放状态并切换下一首
+     */
+    checkNextSong() {
+        // console.log(this.playedTime, this.duration);
+        if (this.playedTime >= this.duration) {
+            console.log(`[Debug] Song playing finished, changing to next song...`);
+            this.nextSong();
+        }
+    }
 
     /**
      * 播放上一首
      */
     previousSong() {
-        if (this.playlist.history.length === 0) {
+        // 历史记录为空
+        if (this.playlist.history.length === 0 && this.repeatState === 0) {
             console.warn(`[Warning] No songs in play history, ignoring...`);
             return;
         }
-        const prevSong = this.playlist.history[0];
-        this.playAudio(prevSong);
-        this.playlist.history.splice(0);
+        // 历史记录为空 (列表循环开启)
+        if (this.playlist.history.length <= 1 && this.repeatState === 1) {
+            console.log(`[Debug] List repeat enabled`);
+
+            const current = Object.assign({}, this.playlist.current);
+            this.playlist.breakIn.unshift(current);
+
+            let lastSong;
+            if (this.playlist.waitList.length === 0) {
+                const breakInLength = this.playlist.breakIn.length;
+                if (breakInLength === 0) {
+                    console.log(`[Debug] No songs in list, replaying current song...`);
+                    this.updateProgress(0);
+                    this.setProgress(0);
+                    return;
+                }
+                lastSong = this.playlist.breakIn[breakInLength - 1];
+                this.playlist.breakIn.pop();
+            }
+            else {
+                const index = this.playlist.waitList.length - 1;
+                lastSong = this.playlist.waitList[index];
+                this.playlist.waitList.pop();
+            }
+            this.playAudio(lastSong, false);
+            return;
+        }
+        // 单曲循环
+        if (this.repeatState === 2) {
+            console.log(`[Debug] Single repeat enabled`);
+            this.updateProgress(0);
+            this.setProgress(0);
+            return;
+        }
+        // 播放上一首
+        const prevSong = Object.assign({}, this.playlist.history[0]);
+        const current = Object.assign({}, this.playlist.current);
+        this.playlist.breakIn.unshift(current); // 将当前播放作为下一首
+        this.playlist.history.splice(0, 1);
+        this.playAudio(prevSong, false);
     }
     /**
      * 播放下一首
      */
     nextSong() {
-        if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0) {
+        // 末端曲目播放完成
+        if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0 
+            && this.repeatState === 0 && this.shuffleState === 0) {
             console.warn(`[Warning] No songs to play in the list, ignoring...`);
             return;
         }
+        
+        // 单曲循环
+        if (this.repeatState === 2) {
+            console.log(`[Debug] Single repeat enabled`);
+            this.updateProgress(0);
+            this.setProgress(0);
+            return;
+        }
+        // 随机播放
+        if (this.shuffleState === 1) {
+            console.log(`[Debug] Shuffle playing enabled`);
+            const listSize = this.playlist.breakIn.length + this.playlist.waitList.length;
+            const songIndex = Math.floor(Math.random() * listSize);
+            let songInfo;
+            if (listSize === 0) { // 列表为空
+                console.log(`[Debug] No songs to play in the list, ignoring...`);
+                this.playAudio(this.playlist.current, false);
+                return;
+            }
+            if (songIndex >= this.playlist.breakIn.length) { // 从非插队播放中选取
+                const waitListIndex = songIndex - this.playlist.breakIn.length;
+                songInfo = this.playlist.waitList[waitListIndex];
+            }
+            else { // 从插队播放中选取
+                songInfo = this.playlist.breakIn[songIndex];
+            }
+
+            this.playAudio(songInfo, false);
+            return;
+        }
+        // 继续播放
         if (this.playlist.breakIn.length !== 0) { // 有插队播放
-            const nextSong = this.playlist.breakIn[0];
+            const currentSong = Object.assign({}, this.playlist.current);
+            // 列表循环时将当前歌曲加至队列末
+            if (this.repeatState === 1) this.playlist.waitList.push(currentSong);
+
+            const nextSong = Object.assign({}, this.playlist.breakIn[0]);
             this.playAudio(nextSong);
-            this.playlist.breakIn.splice(0);
+            this.playlist.breakIn.splice(0, 1);
         }
         else { // 无插队播放
-            const nextSong = this.playlist.waitList[0];
+            const currentSong = Object.assign({}, this.playlist.current);
+            // 列表循环时将当前歌曲加至队列末
+            if (this.repeatState === 1) this.playlist.waitList.push(currentSong);
+
+            const nextSong = Object.assign({}, this.playlist.waitList[0]);
             this.playAudio(nextSong);
-            this.playlist.waitList.splice(0);
+            this.playlist.waitList.splice(0, 1);
         }
     }
 
@@ -332,6 +507,11 @@ class Player {
      * @param isBreakIn 是否插队播放
      */
     playlistAdd(songInfo: any, isBreakIn: boolean = true) {
+        // 当前无播放时直接播放
+        if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0) {
+            this.playAudio(songInfo);
+            return;
+        }
         if (isBreakIn) {
             this.playlist.breakIn.push(songInfo);
         }

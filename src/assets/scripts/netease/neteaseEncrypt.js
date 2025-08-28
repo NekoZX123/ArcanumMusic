@@ -116,8 +116,8 @@ function biToDecimal(a) {
 }
 function digitToHex(a) {
     var b = 15
-      , c = "", i;
-    for (i = 0; 4 > i; ++i)
+      , c = "";
+    for (var i = 0; 4 > i; ++i)
         c += hexToChar[a & b],
         a >>>= 4;
     return reverseStr(c)
@@ -219,7 +219,7 @@ function biNumBits(a) {
     return e
 }
 function biMultiply(a, b) {
-    var d, h, i, k, j, c = new BigInt, e = biHighIndex(a), f = biHighIndex(b);
+    var d, h, i, k, c = new BigInt, e = biHighIndex(a), f = biHighIndex(b), j;
     for (k = 0; f >= k; ++k) {
         for (d = 0,
         i = k,
@@ -234,8 +234,8 @@ function biMultiply(a, b) {
     c
 }
 function biMultiplyDigit(a, b) {
-    var c, d, e, f, result;
-    for (result = new BigInt,
+    var c, d, e, f;
+    for (var result = new BigInt,
     c = biHighIndex(a),
     d = 0,
     f = 0; c >= f; ++f)

@@ -11,13 +11,20 @@ const PROGRESS_OFFSET_MAX = 15;
 let offsetDirection = 0;
 
 // 播放进度调整
+let targetProgress = 0;
+const targetPercentage = ref(0);
+const playTimeAdjustFlag = ref(false);
 function startProgressAdjust(event: MouseEvent) {
     if (event.buttons === 1) {
         // 添加全局事件监听器
         document.addEventListener('mousemove', adjustPlayProgress);
+        playTimeAdjustFlag.value = true;
 
-        document.addEventListener('mouseup', () => {
+        const handleMouseUp = () => {
             document.removeEventListener('mousemove', adjustPlayProgress);
+            document.removeEventListener('mouseup', handleMouseUp);
+            getPlayer()?.setProgress(targetProgress);
+            playTimeAdjustFlag.value = false;
 
             const progressBar = document.getElementById('progressBar');
             if (!progressBar) return;
@@ -27,14 +34,16 @@ function startProgressAdjust(event: MouseEvent) {
                 progressBar.style.transform = 'translateX(0)';
                 offsetDirection = 0;
             }, 200);
-        });
+        };
+
+        document.addEventListener('mouseup', handleMouseUp);
     }
 }
 function adjustPlayProgress(event: MouseEvent) {
     const progressBar = document.getElementById('progressBar');
     if (!progressBar || !songData.value) return;
 
-    if (event.buttons === 1) {
+    if (event.buttons === 1 && playTimeAdjustFlag.value) {
         // 设置进度条宽度
         let deltaX = event.clientX - progressBar.getBoundingClientRect().left;
         let progress = deltaX / progressBar.clientWidth;
@@ -51,8 +60,10 @@ function adjustPlayProgress(event: MouseEvent) {
         }
 
         // 设置播放进度文字
-        let playProgress = Math.round(songData.value.duration * progress);
-        songData.value.updateProgress(playProgress);
+        let playProgress = Math.round((getPlayer()?.duration || 0) * progress);
+        getPlayer()?.updateProgress(playProgress);
+        targetProgress = playProgress;
+        targetPercentage.value = progress * 100;
     }
 }
 
@@ -75,10 +86,22 @@ function adjustVolume(event: MouseEvent) {
     let volumeBar = document.getElementById('lyricsVolume') as HTMLInputElement;
     if (!volumeBar || !songData.value) return;
     
-    songData.value.setVolume(Number(volumeBar.value));
+    getPlayer()?.setVolume(Number(volumeBar.value));
 }
 
 onMounted(() => {
+    // 设置触发器
+    const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+    if (!playerElem) {
+        console.error('[Error] Player element not found');
+        return;
+    }
+    playerElem.addEventListener('timeupdate', () => {
+        if (!playTimeAdjustFlag.value) getPlayer()?.updateProgress(Math.floor(playerElem.currentTime));
+
+        getPlayer()?.checkNextSong();
+    });
+
     console.log('Lyrics.vue loaded');
 });
 
@@ -96,15 +119,15 @@ onMounted(() => {
             <!-- 歌曲信息 & 播放控制 -->
             <div class="flex column" id="controller">
                 <div class="flex column" id="songInfo">
-                    <img id="songCover" src="/images/player/testAlbum.png"/>
+                    <img id="songCover" :src="getPlayer()?.playlist.current.coverUrl"/>
                     <div class="flex row" id="playerInfo">
                         <div class="flex column">
-                            <label class="text large white bold" id="songName">{{ songData?.name }}</label>
-                            <label class="text medium white bold" id="songAuthors">{{ songData?.authors }}</label>
+                            <label class="text medium white bold" id="songName">{{ getPlayer()?.playlist.current.name }}</label>
+                            <label class="text small white bold" id="songAuthors">{{ getPlayer()?.playlist.current.authors }}</label>
                         </div>
                         <div id="volumeInLyrics">
-                            <button id="toggleMute" @click="songData?.toggleMute">
-                                <img :src="songData?.volumeLevel"/>
+                            <button id="toggleMute" @click="getPlayer()?.toggleMute">
+                                <img :src="getPlayer()?.volumeLevel"/>
                             </button>
                             <input type="range" id="lyricsVolume" min="0" max="100" value="100" step="1" @mousemove="adjustVolume"/>
                         </div>
@@ -112,27 +135,29 @@ onMounted(() => {
                 </div>
                 <div class="flex column" id="playerControl">
                     <span class="flex row" id="progressContainer">
-                        <label class="text ultraSmall bold white">{{ songData?.playedTimeText }}</label>
+                        <label class="text ultraSmall bold white">{{ getPlayer()?.playedTimeText }}</label>
                         <span class="fluentProgress flex row" id="progressBar" @mousedown="startProgressAdjust" @mousemove="adjustPlayProgress">
-                            <span class="fluentFilled" id="progressDone" :style="`width: ${songData?.progressPercentage}%`"></span>
+                            <span class="fluentFilled" id="progressDone" 
+                                :style="`width: ${playTimeAdjustFlag ? targetPercentage : getPlayer()?.progressPercentage}%`"></span>
                         </span>
-                        <label class="text ultraSmall bold white">{{ songData?.durationText }}</label>
+                        <label class="text ultraSmall bold white">{{ getPlayer()?.durationText }}</label>
                     </span>
+                    <!-- 播放控制器栏 -->
                     <span class="flex row" id="controlBar">
-                        <button class="playControl small" id="toggleRepeat" @click="songData?.toggleRepeat">
-                            <img :src="songData?.repeatStateImage" alt="Toggle repeat"/>
+                        <button class="playControl small" id="toggleRepeat" @click="getPlayer()?.toggleRepeat">
+                            <img :src="getPlayer()?.repeatStateImage" alt="Toggle repeat"/>
                         </button>
-                        <button class="playControl" id="previous">
+                        <button class="playControl" id="previous" @click="getPlayer()?.previousSong">
                             <img src="/images/player/previous.svg" alt="Previous song"/>
                         </button>
-                        <button class="playControl large" id="playPause">
-                            <img src="/images/player/play.dark.svg" alt="Play / Pause"/>
+                        <button class="playControl large" id="playPause" @click="getPlayer()?.togglePlayPause">
+                            <img :src="getPlayer()?.playStateImage" alt="Play / Pause"/>
                         </button>
-                        <button class="playControl" id="next">
+                        <button class="playControl" id="next" @click="getPlayer()?.nextSong">
                             <img src="/images/player/next.svg" alt="Next song"/>
                         </button>
-                        <button class="playControl small" id="toggleShuffle" @click="songData?.toggleShuffle">
-                            <img :src="songData?.shuffleStateImage" alt="Toggle shuffle"/>
+                        <button class="playControl small" id="toggleShuffle" @click="getPlayer()?.toggleShuffle">
+                            <img :src="getPlayer()?.shuffleStateImage" alt="Toggle shuffle"/>
                         </button>
                     </span>
                 </div>

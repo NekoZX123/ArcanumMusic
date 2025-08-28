@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import { copyFileSync, mkdir } from 'fs';
 import { userInfo } from 'os';
 import { startService, stopService } from './service.js';
+import { startWebSocket } from './webSocket.js';
 import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 
 const __dirname = fileURLToPath(import.meta.url);
@@ -395,6 +396,7 @@ app.whenReady().then(() => {
 
     // 启动服务
     startService();
+    // startWebSocket();
 
     // 创建应用主窗口
     createWindow();
