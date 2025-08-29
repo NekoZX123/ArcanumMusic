@@ -6,7 +6,7 @@ import TabWidget from '../../assets/widgets/TabWidget.vue';
 import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest.ts';
 import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
 import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
-import { addSongCard, addSonglistCard } from '../../assets/utilities/elementControl.ts';
+import { addSongCard, addSonglistCard, triggerRightMenu } from '../../assets/utilities/elementControl.ts';
 import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest.ts';
 import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest.ts';
 import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest.ts';
@@ -94,6 +94,8 @@ function platformChange(widgetInfo: { widgetId: string, current: number }) {
     }, 300);
 }
 
+const favLength = ref(0);
+const recommendLength = ref(0);
 onMounted(() => {
     const userData = getAccountInfo('all');
 
@@ -114,6 +116,7 @@ onMounted(() => {
                 return;
             }
             
+            favLength.value = favList.tracks.length;
             const loadList = favList.loadTracks;
             loadList.forEach((songInfo: any) => {
                 const songId = `music-netease-${songInfo.songId}`;
@@ -131,6 +134,7 @@ onMounted(() => {
                 console.error(`[Error] Failed to get element #recommendContainer`);
             }
             
+            recommendLength.value = recommends.tracks.length;
             const songList = recommends.loadTracks;
             songList.forEach((songInfo: any) => {
                 const songId = `music-netease-${songInfo.songId}`;
@@ -160,10 +164,11 @@ onMounted(() => {
         <!-- 收藏 & 推荐 -->
         <div class="flex row" id="userCollections">
             <div class="songlistCard exlarge flex row" id="userFavourites">
-                <span class="cardHeader flex row">
+                <span class="cardHeader flex row" id="userFavouritesBackground" 
+                    @contextmenu="(event) => {triggerRightMenu(event, {}, 'platformSelect')}">
                     <span class="cardInfo flex column">
                         <label class="text medium bold">我喜欢的音乐</label>
-                        <label class="text ultraSmall">共 0 首歌</label>
+                        <label class="text ultraSmall">共 {{ favLength }} 首</label>
                     </span>
                     <button class="songlistPlay" id="userFavrourites_play">
                         <img src="/images/player/play.svg" alt="Play"/>
@@ -175,7 +180,7 @@ onMounted(() => {
             <div class="songlistCard large flex column" id="dailyRecommend">
                 <span class="cardHeader flex column">
                     <label class="text bold medium">每日推荐</label>
-                    <label class="text light ultraSmall">共 30 首</label>
+                    <label class="text light ultraSmall">共 {{ recommendLength }} 首</label>
                 </span>
                 <span class="listContent flex column" id="recommendContainer"></span>
                 <span class="cardFooter flex row">

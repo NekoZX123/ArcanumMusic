@@ -235,7 +235,7 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
     const cookieHeader = `MUSIC_U=${cookies.MUSIC_U}`;
     const userAgent = mobileModuleList.includes(moduleName) ? mobileUA : ncmDesktopUA;
 
-    console.log(`[Netease Music]\n URL: ${targetUrl};\n Data: ${moduleParams};`);
+    // console.log(`[Netease Music]\n URL: ${targetUrl};\n Data: ${moduleParams};`);
 
     return proxyRequest(
         'POST',

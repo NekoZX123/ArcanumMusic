@@ -10,6 +10,7 @@ import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
 import { addSongLine } from '../../assets/utilities/elementControl.ts';
 import { formatAuthors, getRequestFormat, parseMusicData } from '../../assets/utilities/dataParsers.ts';
 import type { AxiosResponse } from 'axios';
+import { getPlayer } from '../../assets/player/player.ts';
 
 // 歌单 / 专辑数据
 const listMetaData = ref({
@@ -66,14 +67,34 @@ function requestListInfo(platform: string, module: 'songList' | 'album' | 'ranki
                 console.error(`[ERROR] Unable to parse song list info (Platform ${platform}, param: ${dataId})`);
                 return;
             }
+            console.log(listInfo);
+            // console.log(listInfo);
 
             // 获取歌单内容
+            if (platform !== 'netease') {
+                listInfo.tracks = listInfo.loadTracks;
+            }
             const listTracks = listInfo.tracks;
-            const listContent: string[] = [];
-            listTracks.forEach((trackInfo: Record<string, any>) => {
-                const musicId = `music-${platform}-${trackInfo}`;
-                listContent.push(musicId);
+            const listContent: any[] = [];
+            listTracks.forEach((track: any) => {
+                if (typeof track !== 'object') {
+                    const musicId = `music-${platform}-${track}`;
+                    listContent.push(musicId);
+                }
+                else {
+                    if (platform === 'kugou' && track.songCover) {
+                        track.songCover = track.songCover.replace('{size}', '500');
+                    }
+                    listContent.push({
+                        id: `music-${platform}-${track.songId}`,
+                        name: track.songName,
+                        coverUrl: track.songCover || '/images/library/player/testAlbum.png',
+                        authors: track.songAuthors,
+                        duration: track.songDuration
+                    });
+                }
             });
+            listMetaData.value.content = listContent;
 
             // 设置歌单信息
             listMetaData.value.name = listInfo.name;
@@ -83,7 +104,6 @@ function requestListInfo(platform: string, module: 'songList' | 'album' | 'ranki
             if (platform === 'kugou' && typeof listInfo.author === 'object') {
                 listMetaData.value.author = formatAuthors(listInfo.author, 'kugou');
             }
-            listMetaData.value.content = listContent;
             listMetaData.value.songCount = listInfo.songCount;
 
             const loadContents = listInfo.loadTracks;
@@ -100,6 +120,10 @@ function requestListInfo(platform: string, module: 'songList' | 'album' | 'ranki
                 addSongLine(listContentContainer, songId, songName, songCover, songAuthors, songDuration);
             });
         });
+}
+
+function playCurrentList() {
+    getPlayer()?.playByList(listMetaData.value.content);
 }
 
 onMounted(() => {
@@ -130,6 +154,10 @@ onMounted(() => {
                 <label class="text ultraSmall grey">{{ `${listType === 'Album' ? '专辑' : '歌单'} / 共 ${listMetaData.songCount} 首` }}</label>
                 <label class="text medium">{{ typeName }} by {{ listMetaData.author }}</label>
                 <label class="text ultraSmall" id="listDescription">{{ listMetaData.description }}</label>
+                <button class="flex row" id="playAllContent" @click="playCurrentList">
+                    <img src="/images/player/play.dark.svg"></img>
+                    <label class="text small bold">播放</label>
+                </button>
             </div>
         </div>
         <div class="flex column" id="songlistContent"></div>

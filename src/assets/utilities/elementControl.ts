@@ -71,7 +71,7 @@ function addArtistCard(target: HTMLElement, id: string, name: string, coverUrl: 
 }
 
 // 显示右键菜单
-type MenuType = 'collections' | 'song' | 'playlistItem';
+type MenuType = 'collections' | 'song' | 'playlistItem' | 'platformSelect';
 function triggerRightMenu(event: MouseEvent, info: any, menuType: MenuType) {
     // 获取容器
     const menuContainer = document.getElementById('rightClickMenuContainer') as HTMLElement;

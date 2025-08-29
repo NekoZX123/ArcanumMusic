@@ -74,6 +74,7 @@ const dataParsers: Record<string, any> = {
             'songAuthors': ['ar'], // 歌曲作者
             'songDuration': ['dt'], // 歌曲时长
             '@postprocessors': { // 后处理函数
+                'tracks': (tracks: any[]) => tracks.map((trackInfo) => trackInfo.id),
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'netease'),
                 'songDuration': (duration: number) => Math.round(duration / 1000)
             }
@@ -93,6 +94,7 @@ const dataParsers: Record<string, any> = {
             'songAuthors': ['artists'], // 歌曲作者
             'songDuration': ['duration'], // 歌曲时长
             '@postprocessors': { // 后处理函数
+                'tracks': (tracks: any[]) => tracks.map((trackInfo) => trackInfo.id),
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'netease'),
                 'songDuration': (duration: number) => Math.round(duration / 1000)
             }
@@ -282,6 +284,7 @@ const dataParsers: Record<string, any> = {
             'songAuthors': ['singer'],
             'songDuration': ['interval'],
             '@postprocessors': {
+                'tracks': (tracks: any[]) => tracks.map((trackInfo) => trackInfo.mid),
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'qqmusic'),
                 'songCover': (pmid: string) => `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`
             }
@@ -301,6 +304,7 @@ const dataParsers: Record<string, any> = {
             'songAuthors': ['songInfo', 'singer'],
             'songDuration': ['songInfo', 'interval'],
             '@postprocessors': {
+                'tracks': (tracks: any[]) => tracks.map((trackInfo) => trackInfo.mid),
                 'author': (authorList: object[]) => formatAuthors(authorList, 'qqmusic'),
                 'cover': (pmid: string) => `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`,
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'qqmusic'),
@@ -428,6 +432,7 @@ const dataParsers: Record<string, any> = {
             'songAuthors': ['singer'],
             'songDuration': ['interval'],
             '@postprocessors': {
+                'tracks': (tracks: any[]) => tracks.map((trackInfo) => trackInfo.mid),
                 'songCover': (pmid: string) => `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`,
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'qqmusic'),
             }

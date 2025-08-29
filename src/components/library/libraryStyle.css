@@ -24,6 +24,12 @@
     margin: 0 1rem;
 }
 
+#userFavouritesBackground {
+    background-image: url('/images/library/favouritesBackground_red.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
 #userFavouritesPreview {
     width: calc(15rem + 6px);
     height: calc(14rem + 8px);

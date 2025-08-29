@@ -1351,11 +1351,12 @@ a {
     width: 100%;
     height: auto;
 
-    background: var(--default-white);
+    background: var(--transparent-white);
     border-style: solid;
     border-color: var(--default-grey);
     border-width: 1px;
     border-radius: 10px;
+    backdrop-filter: blur(8px);
 
     box-shadow: 2px 2px 6px 0 var(--transparent-darkgrey);
 

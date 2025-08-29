@@ -37,6 +37,40 @@
     overflow-y: auto;
 }
 
+#playAllContent {
+    appearance: none;
+
+    width: 6rem;
+    height: 2.5rem;
+
+    background: var(--default-lightgrey);
+    border: none;
+    border-radius: 8px;
+
+    justify-content: center;
+    align-items: center;
+
+    transform: scale(1.0);
+    transition: all 200ms ease-in-out;
+}
+#playAllContent:hover {
+    background: var(--color-blue-light);
+    transform: scale(1.1);
+}
+#playAllContent > img {
+    width: 1.8rem;
+    height: 1.8rem;
+
+    margin-right: 5px;
+}
+#playAllContent > label {
+    color: var(--default-black);
+    transition: all 200ms ease-in-out;
+}
+#playAllContent:hover > label {
+    color: var(--color-blue-deep);
+}
+
 #songlistContent {
     width: 100%;
 

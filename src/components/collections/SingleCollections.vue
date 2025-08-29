@@ -51,15 +51,9 @@ onMounted(() => {
                     const recommendations = parseMusicData(response, platform, 'recommendSong');
                     // 展示数据
                     const songs = recommendations.songList;
-                    for (let i = 0; i < songs.length; i++) {
-                        let skips = 1;
-                        let songDetail = songs[i];
-
+                    songs.forEach((songDetail: any) => {
                         if (loadedRecommendSongs.includes(songDetail.songName)) {
-                            while (loadedRecommendSongs.includes(songDetail.songName)) {
-                                songDetail = songs[skips+1];
-                                skips++;
-                            }
+                            return;
                         }
 
                         const songId = `songlist-${platform}-${songDetail.songId}`;
@@ -70,7 +64,7 @@ onMounted(() => {
                         loadedRecommendSongs.push(songName);
 
                         addSongCard(container, songId, songName, songCover, songAuthors, songDuration);
-                    }
+                    });
                 });
         });
     }
@@ -88,15 +82,9 @@ onMounted(() => {
                     // 展示数据
                     const songs = recommendations.songList;
 
-                    for (let i = 0; i < songs.length; i++) {
-                        let songInfo = songs[i];
-                        let skips = 1;
-                        
+                    songs.forEach((songInfo: any) => {
                         if (loadedSongs.includes(songInfo.songName)) {
-                            while (loadedSongs.includes(songInfo.songName)) {
-                                songInfo = songs[i + skips];
-                                skips ++;
-                            }
+                            return;
                         }
 
                         const songId = `music-${platform}-${songInfo.songId}`;
@@ -108,7 +96,7 @@ onMounted(() => {
                         loadedSongs.push(songName);
 
                         addSongCard(container, songId, songName, songCover, songAuthors, songDuration);
-                    }
+                    });
                 });
         });
     }
