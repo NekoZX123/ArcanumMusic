@@ -322,8 +322,8 @@ function getKugouResult(moduleName: KugouMusicModule, params: { [type: string]: 
 
         const encryptedParams = getAppSign(moduleParams, formData);
         const urlParams = objectToKeyPairs(encryptedParams);
-        console.log(`urlParams = ${urlParams}`);
-        console.log(`formData = ${JSON.stringify(formData)}`);
+        // console.log(`urlParams = ${urlParams}`);
+        // console.log(`formData = ${JSON.stringify(formData)}`);
         return proxyRequest(
             'POST',
             `${targetUrl}?${urlParams}`,

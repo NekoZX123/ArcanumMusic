@@ -10,7 +10,7 @@ import { initialize, pageBack, pageForward, togglePlaylist, changePage } from '.
 import { PageButton } from './assets/widgets/pageSwitcher.tsx';
 import { showPopup } from './assets/notifications/popup.tsx';
 import { readAccountInfo } from './assets/utilities/accountManager.ts';
-import { hideRightMenu } from './assets/utilities/elementControl.ts';
+import { hideArtistSelect, hideRightMenu } from './assets/utilities/elementControl.ts';
 
 // 设置文件位置
 const configLocation = '/ArcanumMusic/settings.json';
@@ -245,7 +245,7 @@ onMounted(async () => {
     playerElem.addEventListener('timeupdate', () => {
         if (!playTimeAdjustFlag.value) getPlayer()?.updateProgress(Math.ceil(playerElem.currentTime));
 
-        getPlayer()?.checkNextSong();
+        getPlayer()?.checkNextSong('App.vue');
     });
 });
 </script>
@@ -323,7 +323,7 @@ onMounted(async () => {
                 <div class="flex row" id="currentSong">
                     <img class="currentSongCover" :src="getPlayer()?.coverUrl"/>
                     <span class="flex column">
-                        <label class="text small bold">{{ getPlayer()?.name }}</label>
+                        <label class="text small bold" id="currentSongName">{{ getPlayer()?.name }}</label>
                         <label class="text ultraSmall">{{ getPlayer()?.authors }}</label>
                     </span>
                 </div>
@@ -373,6 +373,16 @@ onMounted(async () => {
 
         <!-- 弹出窗口 -->
         <div class="flex column" id="popupArea"></div>
+        <!-- 歌手选择弹窗 -->
+        <div class="flex column" id="artistSelect">
+            <div class="flex row" id="artistSelectTopBar">
+                <label class="text medium">请选择</label>
+                <button id="artistSelectClose" @click="hideArtistSelect">
+                    <img src="/images/windowControl/close.svg"></img>
+                </button>
+            </div>
+            <div id="artistSelectContent"></div>
+        </div>
 
         <!-- 播放进度标签 -->
         <div class="text ultraSmall flex column" id="progressTooltip" :style="progressTooltipOffset">

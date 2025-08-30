@@ -25,6 +25,7 @@ export interface IElectronAPI {
     deleteCookies: (platform: string) => Promise,
 
     openExternal: (url: String) => Promise,
+    copyToClipboard: (content: String) => Promise
 }
 
 declare global {

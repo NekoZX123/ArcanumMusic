@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld(
         validateCookie: (platform) => ipcRenderer.invoke('validateCookieExpiration', platform), // 验证 Cookie 有效期
         deleteCookies: (platform) => ipcRenderer.invoke('deleteCookie', platform), // 清除指定平台 Cookies
 
-        openExternal: (url) => ipcRenderer.invoke('openExternal', url) // 打开外部链接
+        openExternal: (url) => ipcRenderer.invoke('openExternal', url), // 打开外部链接
+        copyToClipboard: (content) => ipcRenderer.invoke('copyContent', content) // 复制内容至剪贴板
     }
 );

@@ -11,6 +11,7 @@ import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest.ts
 import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest.ts';
 import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest.ts';
 import type { AxiosResponse } from 'axios';
+import { getPlayer } from '../../assets/player/player.ts';
 
 const platformTabs = [
     {
@@ -94,6 +95,9 @@ function platformChange(widgetInfo: { widgetId: string, current: number }) {
     }, 300);
 }
 
+const neteaseUserFavourites = ref('songList-netease-12352057833');
+const neteaseRecommends = ref('songList-netease-3136952023');
+
 const favLength = ref(0);
 const recommendLength = ref(0);
 onMounted(() => {
@@ -170,7 +174,7 @@ onMounted(() => {
                         <label class="text medium bold">我喜欢的音乐</label>
                         <label class="text ultraSmall">共 {{ favLength }} 首</label>
                     </span>
-                    <button class="songlistPlay" id="userFavrourites_play">
+                    <button class="songlistPlay" id="userFavrourites_play" @click="getPlayer()?.playListId(neteaseUserFavourites)">
                         <img src="/images/player/play.svg" alt="Play"/>
                     </button>
                 </span>
@@ -188,7 +192,7 @@ onMounted(() => {
                         <label class="text ultraSmall">音乐源: </label>
                         <img class="playlistSource" src="/images/platforms/netease.png" alt="Netease Music"/>
                     </span>
-                    <button class="songlistPlay" id="dailyRecommend_play">
+                    <button class="songlistPlay" id="dailyRecommend_play" @click="getPlayer()?.playListId(neteaseRecommends)">
                         <img src="/images/player/play.svg" alt="Play"/>
                     </button>
                 </span>

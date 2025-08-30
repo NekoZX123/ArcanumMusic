@@ -1,7 +1,7 @@
 import { defineComponent } from "vue";
 import { changePage } from "../utilities/pageSwitcher";
 import { getPlayer } from "../player/player";
-import { triggerRightMenu } from "../utilities/elementControl";
+import { hideArtistSelect, triggerRightMenu } from "../utilities/elementControl";
 
 // 各平台图标
 const platformIcons: Record<string, string> = {
@@ -149,5 +149,26 @@ const ArtistCard = defineComponent({
         );
     }
 });
+// 单行歌手卡片
+const ArtistLine = defineComponent({
+    props: {
+        id: String,
+        coverUrl: String,
+        name: String
+    },
+    setup(props: { id: string, coverUrl: string, name: string }) {
+        return () => (
+            <span class="artistLine flex row" 
+            onClick={() => {
+                hideArtistSelect();
+                changePage('artist', true, props.id);
+            }} 
+            onContextmenu={(event) => handleArtistRightClick(event, props)}>
+                <img class="artistCover" src={props.coverUrl}></img>
+                <label class="text small">{props.name}</label>
+            </span>
+        );
+    }
+});
 
-export { SonglistCard, SongCard, SongInfoLine, ArtistCard };
+export { SonglistCard, SongCard, SongInfoLine, ArtistCard, ArtistLine };

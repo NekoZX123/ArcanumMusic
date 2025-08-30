@@ -11,6 +11,7 @@ import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest.ts';
 import { addSonglistCard, addSongCard, addArtistCard } from '../../assets/utilities/elementControl.ts';
 import type { AxiosResponse } from 'axios';
 import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
+import { getPlayer } from '../../assets/player/player.ts';
 
 // 默认滑动量
 const BOX_SCROLL_DISTANCE = 330;
@@ -37,6 +38,7 @@ function scrollRight(event: MouseEvent) {
 
 const recommendCover = ref('/images/player/testAlbum.png');
 const radioCover = ref('/images/player/testAlbum.png');
+const completeRecommendListId = ref('songList-netease-3136952023');
 const neteaseRecommendListId = ref('3136952023');
 
 const requestFunc: Record<string, any> = {
@@ -235,7 +237,7 @@ onMounted(() => {
         sendRequest('newSong', {}, userData[platform].cookies)
             .then((response: AxiosResponse) => {
                 // 解析数据
-                console.log(response.data);
+                // console.log(response.data);
                 const recommendations = parseMusicData(response, platform, 'newSong');
                 // console.log(recommendations);
                 // 展示数据
@@ -283,7 +285,7 @@ onMounted(() => {
                         <label class="text ultraSmall">共 30 首歌</label>
                     </span>
                 </span>
-                <button class="songlistPlay" id="dailyRecommends_play">
+                <button class="songlistPlay" id="dailyRecommends_play" @click="getPlayer()?.playListId(completeRecommendListId)">
                     <img src="/images/player/play.svg" alt="Play"/>
                 </button>
             </div>

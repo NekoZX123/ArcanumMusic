@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, shell, Tray, session } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, shell, Tray, session, clipboard } from 'electron';
 import { fileURLToPath } from 'url';
 import { copyFileSync, mkdir } from 'fs';
 import { userInfo } from 'os';
@@ -393,6 +393,7 @@ app.whenReady().then(() => {
     ipcMain.handle('deleteCookie', deleteCookies);
 
     ipcMain.handle('openExternal', (_, url) => shell.openExternal(url));
+    ipcMain.handle('copyContent', (_, content) => clipboard.writeText(content))
 
     // 启动服务
     startService();

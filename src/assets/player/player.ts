@@ -1,12 +1,6 @@
-import type { AxiosError, AxiosResponse } from "axios";
-import { getKugouResult } from "../scripts/kugou/kugouRequest";
-import { getKuwoResult } from "../scripts/kuwo/kuwoRequest";
-import { getNeteaseResult } from "../scripts/netease/neteaseRequest";
-import { getQQmusicResult } from "../scripts/qqmusic/qqmusicRequest";
-import { getAccountInfo } from "../utilities/accountManager";
-import { parseMusicData } from "../utilities/dataParsers";
 import { reactive } from "vue";
-import { showNotify } from "../notifications/Notification";
+import { showNotify } from "../notifications/Notification.ts";
+import { getListContent, getSongInfo, getSongLink } from "./songUtils.ts";
 
 // 时间格式化
 function timeFormat(timeSeconds: number) {
@@ -31,76 +25,7 @@ function timeFormat(timeSeconds: number) {
     return result;
 }
 
-const requestFuncs: Record<string, Function> = {
-    netease: getNeteaseResult,
-    qqmusic: getQQmusicResult,
-    kuwo: getKuwoResult,
-    kugou: getKugouResult
-}
 const neteaseCdnPostfix = 'music.126.net';
-/**
- * 根据歌曲 ID 解析歌曲链接
- * @param songId 歌曲 ID (`music-${platform}-${id}`)
- */
-function getSongLink(songId: string) {
-    // console.log(songId);
-    const idParts = songId.split('-');
-    const platform = idParts[1];
-    const id = idParts[2];
-    
-    return new Promise((resolve, reject) => {
-        const sendRequest = requestFuncs[platform];
-        if (!sendRequest) {
-            reject(`[Error] Unsupported platform: ${platform}`);
-        }
-
-        const userData = getAccountInfo('all');
-        let idParams: object = { songId: id };
-        if (platform === 'qqmusic') {
-            idParams = { songMid: id };
-        }
-        sendRequest('songLink', idParams, userData[platform].cookies)
-            .then((response: AxiosResponse) => {
-                console.log(response.data);
-                const parsedInfo = parseMusicData(response, platform, 'songLink');
-                resolve(parsedInfo);
-            })
-            .catch((error: AxiosError) => {
-                reject(error);
-            });
-    });
-}
-/**
- * 根据歌曲 ID 解析歌曲信息
- * @param songId 歌曲 ID (`music-${platform}-${id}`)
- */
-function getSongInfo(songId: string) {
-    // console.log(songId);
-    const idParts = songId.split('-');
-    const platform = idParts[1];
-    const id = idParts[2];
-    
-    return new Promise((resolve, reject) => {
-        const sendRequest = requestFuncs[platform];
-        if (!sendRequest) {
-            reject(`[Error] Unsupported platform: ${platform}`);
-        }
-
-        const userData = getAccountInfo('all');
-        let idParams: object = { songId: id };
-        if (platform === 'qqmusic') {
-            idParams = { songMid: id };
-        }
-        sendRequest('songInfo', idParams, userData[platform].cookies)
-            .then((response: AxiosResponse) => {
-                const parsedInfo = parseMusicData(response, platform, 'songInfo');
-                resolve(parsedInfo);
-            })
-            .catch((error: AxiosError) => {
-                reject(error);
-            });
-    });
-}
 
 // 循环 / 随机播放图片链接常量池
 const IMAGES_REPEAT = ['/images/player/repeat.svg', '/images/player/repeat.on.svg', '/images/player/repeatSingle.svg'];
@@ -205,11 +130,9 @@ class Player {
         this.playedTimeText = timeFormat(time);
 
         this.progressPercentage = time / this.duration * 100;
-
-        this.checkNextSong();
     }
     // 设置播放进度
-    setProgress(time: number) {
+    setProgress(time: number, check: boolean = true) {
         const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
         if (!playerElem) {
             console.error('[Error] Player element not found');
@@ -218,7 +141,9 @@ class Player {
         console.log(`[Debug] Time adjusted to ${time}`);
         playerElem.currentTime = time;
 
-        this.checkNextSong();
+        if (check) {
+            this.checkNextSong('setProgess');
+        }
     }
 
     // 更改音量
@@ -366,7 +291,7 @@ class Player {
             this.duration = playInfo.duration;
             this.updateDuration(playInfo.duration);
             this.updateProgress(0);
-            this.setProgress(0);
+            this.setProgress(0, false);
             // 设置播放链接
             if (!playInfo.url) {
                 showNotify('songUrlNullError', 'critical', `无法播放 ${this.name}`, '获取播放链接失败');
@@ -419,11 +344,11 @@ class Player {
     /**
      * 检查播放状态并切换下一首
      */
-    checkNextSong() {
+    checkNextSong(caller?: any) {
         // console.log(this.playedTime, this.duration);
         if (this.playedTime >= this.duration) {
             console.log(`[Debug] Song playing finished, changing to next song...`);
-            this.nextSong();
+            this.nextSong(caller);
         }
     }
 
@@ -480,10 +405,14 @@ class Player {
     /**
      * 播放下一首
      */
-    nextSong() {
+    nextSong(caller?: any) {
+        console.log(caller);
         // 末端曲目播放完成
         if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0 
             && this.repeatState === 0 && this.shuffleState === 0) {
+            if (this.isPlaying) {
+                this.togglePlayPause();
+            }
             console.warn(`[Warning] No songs to play in the list, ignoring...`);
             return;
         }
@@ -524,8 +453,8 @@ class Player {
             if (this.repeatState === 1) this.playlist.waitList.push(currentSong);
 
             const nextSong = Object.assign({}, this.playlist.breakIn[0]);
-            this.playAudio(nextSong);
             this.playlist.breakIn.splice(0, 1);
+            this.playAudio(nextSong);
         }
         else { // 无插队播放
             const currentSong = Object.assign({}, this.playlist.current);
@@ -533,8 +462,8 @@ class Player {
             if (this.repeatState === 1) this.playlist.waitList.push(currentSong);
 
             const nextSong = Object.assign({}, this.playlist.waitList[0]);
-            this.playAudio(nextSong);
             this.playlist.waitList.splice(0, 1);
+            this.playAudio(nextSong);
         }
     }
 
@@ -594,6 +523,33 @@ class Player {
                 this.playlistAdd(infoObject, false);
             }
         }
+    }
+    /**
+     * 根据 ID 播放歌单 / 专辑
+     * @param listId 歌单 / 专辑 ID
+     */
+    playListId(listId: string) {
+        getListContent(listId)
+        .then((listInfo: any) => {
+            const idParts = listId.split('-');
+            const platform = idParts[1];
+
+            const tracks = listInfo.tracks;
+            const parsedTracks: any[] = [];
+            const hasDetail = !(platform === 'netease');
+            tracks.forEach((trackInfo: any) => {
+                if (typeof trackInfo === 'object') {
+                    trackInfo.id = `music-${platform}-${trackInfo.id}`;
+                    parsedTracks.push(trackInfo);
+                }
+                else {
+                    parsedTracks.push(`music-${platform}-${trackInfo}`);
+                }
+            });
+            console.log(parsedTracks);
+
+            this.playByList(parsedTracks, hasDetail);
+        });
     }
 }
 

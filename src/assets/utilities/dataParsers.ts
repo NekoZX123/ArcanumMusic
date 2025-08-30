@@ -20,9 +20,12 @@ const dataParsers: Record<string, any> = {
             'songCover': ['songs', '0', 'album', 'picUrl'],
             'songAuthors': ['songs', '0', 'artists'],
             'songDuration': ['songs', '0', 'duration'],
+            'albumId': ['songs', '0', 'album', 'id'],
+            'authorsObject': ['songs', '0', 'artists'],
             '@postprocessors' : {
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'netease'),
-                'songDuration': (duration: number) => Math.round(duration / 1000)
+                'songDuration': (duration: number) => Math.round(duration / 1000),
+                'authorsObject': (authors: object[]) => getAuthorObject(authors, 'netease')
             }
         },
         'search-singles': {
@@ -230,9 +233,12 @@ const dataParsers: Record<string, any> = {
             'songCover': ['data', 'track_info', 'album', 'pmid'],
             'songAuthors': ['data', 'track_info', 'singer'],
             'songDuration': ['data', 'track_info', 'interval'],
+            'albumId': ['data', 'track_info', 'album', 'mid'],
+            'authorsObject': ['data', 'track_info', 'singer'],
             '@postprocessors' : {
                 'songCover': (pmid: string) => `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`,
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'qqmusic'),
+                'authorsObject': (authors: any[]) => getAuthorObject(authors, 'qqmusic')
             }
         },
         'search-singles': {
@@ -304,7 +310,7 @@ const dataParsers: Record<string, any> = {
             'songAuthors': ['songInfo', 'singer'],
             'songDuration': ['songInfo', 'interval'],
             '@postprocessors': {
-                'tracks': (tracks: any[]) => tracks.map((trackInfo) => trackInfo.mid),
+                'tracks': (tracks: any[]) => tracks.map((trackInfo) => trackInfo.songInfo.mid),
                 'author': (authorList: object[]) => formatAuthors(authorList, 'qqmusic'),
                 'cover': (pmid: string) => `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`,
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'qqmusic'),
@@ -456,8 +462,11 @@ const dataParsers: Record<string, any> = {
             'songCover': ['data', 'pic'],
             'songAuthors': ['data', 'artist'],
             'songDuration': ['data', 'duration'],
+            'albumId': ['data', 'albumid'],
+            'authorsObject': ['data'],
             '@postprocessors' : {
-                'songAuthors': (authors: string) => authors.split('&').join(', ')
+                'songAuthors': (authors: string) => authors.split('&').join(', '),
+                'authorsObject': (data: any) => getAuthorObject([data], 'kuwo')
             }
         },
         'search-singles': {
@@ -509,6 +518,7 @@ const dataParsers: Record<string, any> = {
             'songAuthors': ['artist'],
             'songDuration': ['duration'],
             '@postprocessors': {
+                'tracks': (trackList: any[]) => trackList.map((trackInfo) => trackInfo.rid),
                 'songAuthors': (param: string) => formatAuthors(param.split('&'), 'kuwo')
             }
         },
@@ -528,6 +538,7 @@ const dataParsers: Record<string, any> = {
             'songDuration': ['duration'],
             '@postprocessors': {
                 'author': (authors: string) => formatAuthors(authors.split('&'), 'kuwo'),
+                'tracks': (trackList: any[]) => trackList.map((trackInfo) => trackInfo.id),
                 'songAuthors': (authors: string) => formatAuthors(authors.split('&'), 'kuwo'),
                 'songDuration': (duration: string) => parseInt(duration)
             }
@@ -649,14 +660,17 @@ const dataParsers: Record<string, any> = {
             'songCover': ['data', 'img'],
             'songAuthors': ['data', 'author_name'],
             'songDuration': ['data', 'timelength'],
+            'albumId': ['data', 'album_id'],
+            'authorsObject': ['data', 'authors'],
             '@postprocessors' : {
-                'songDuration': (duration: number) => Math.round(duration / 1000)
+                'songDuration': (duration: number) => Math.round(duration / 1000),
+                'authorsObject': (authors: any[]) => getAuthorObject(authors, 'kugou')
             }
         },
         'search-singles': {
             'body': ['data'],
             'songList': ['data', 'lists'],
-            'songId': ['MixSongID'],
+            'songId': ['EMixSongID'],
             'songName': ['SongName'],
             'songCover': ['Image'],
             'songAuthors': ['SingerName'],
@@ -702,6 +716,9 @@ const dataParsers: Record<string, any> = {
             'songDuration': ['duration'],
             '@postprocessors': {
                 'cover': (imgUrl: string) => imgUrl.replace('{size}', '500'),
+                'tracks': (trackList: any[]) => trackList.map(
+                    (trackInfo) => trackInfo.song_url.replace('https://m.kugou.com/mixsong/', '').replace('.html', '')
+                    ),
                 'songId': (songPage: string) => songPage.replace('https://m.kugou.com/mixsong/', '').replace('.html', ''),
                 'songName': (fileName: string) => fileName.split(' - ')[1],
                 'songAuthors': (fileName: string) => fileName.split(' - ')[0].split('、').join(',')
@@ -724,6 +741,9 @@ const dataParsers: Record<string, any> = {
             '@postprocessors': {
                 'author': (authors: string) => authors.split('、')
                     .map((name: string) => { return { 'author_name': name }; }),
+                'tracks': (trackList: any[]) => trackList.map(
+                    (trackInfo) => trackInfo.url.replace('https://m3ws.kugou.com/mixsong/', '').replace('/html', '')
+                    ),
                 'songId': (songPage: string) => songPage.replace('https://m3ws.kugou.com/mixsong/', '').replace('/html', ''),
                 'songName': (fileName: string) => fileName.split(' - ')[1],
                 'songAuthors': (fileName: string) => fileName.split(' - ')[0].split('、').join(',')
@@ -845,7 +865,9 @@ const targetFormats: Record<string, any> = {
         'songName': '',
         'songCover': '',
         'songAuthors': [],
-        'songDuration': 0
+        'songDuration': 0,
+        'albumId': '',
+        'authorsObject': []
     },
     'search-singles': {
         'songList': '@song_brief'
@@ -1026,6 +1048,42 @@ function formatAuthors(authorList: any[], platform: string): string {
         names.push(info);
     });
     return names.join(', ');
+}
+function getAuthorObject(authorList: any[], platform: string) {
+    const parsedList: any[] = [];
+    authorList.forEach((authorInfo: any) => {
+        let result;
+        if (platform === 'netease') {
+            result = {
+                id: `artist-netease-${authorInfo.id}`,
+                name: authorInfo.name,
+                coverUrl: authorInfo.picUrl
+            }
+        }
+        if (platform === 'qqmusic') {
+            result = {
+                id: `artist-qqmusic-${authorInfo.mid}`,
+                name: authorInfo.name,
+                coverUrl: '/images/library/defaultAvatar.svg'
+            }
+        }
+        if (platform === 'kuwo') {
+            result = {
+                id: `artist-kuwo-${authorInfo.artistid}`,
+                name: authorInfo.artist,
+                coverUrl: '/images/library/defaultAvatar.svg'
+            }
+        }
+        if (platform === 'kugou') {
+            result = {
+                id: `artist-kugou-${authorInfo.author_id}`,
+                name: authorInfo.author_name,
+                coverUrl: authorInfo.avatar
+            }
+        }
+        parsedList.push(result);
+    });
+    return parsedList;
 }
 /**
  * 根据列表解析数据

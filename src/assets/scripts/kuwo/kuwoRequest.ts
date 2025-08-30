@@ -147,7 +147,7 @@ function getKuwoResult(moduleName: KuwoMusicModule, params: { [type: string]: an
         }
     });
 
-    console.log(`[Kuwo Music] ${targetUrl}?${moduleData}`);
+    // console.log(`[Kuwo Music] ${targetUrl}?${moduleData}`);
 
     const requestHeaders: { [type: string]: any } = {
         'Accept': 'application/json',

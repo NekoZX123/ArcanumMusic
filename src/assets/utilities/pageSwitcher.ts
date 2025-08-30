@@ -42,12 +42,16 @@ const pageHighlights = ['home', 'library', 'search', 'settings', 'accounts'];
 
 let currentPage = '';
 let latestPage = '';
-let pageStack: string[] = []; // 页面堆栈
+let pageStack: page[] = []; // 页面堆栈
 let paramStack: any[] = []; // 参数堆栈
-let historyPages: string[] = []; // 历史页面堆栈
+let historyPages: page[] = []; // 历史页面堆栈
 let historyParams: any[] = []; // 历史页面参数
 let pageApp = createApp(Home);
 
+type page ='home' |'library' | 'search' | 'settings' | 'accounts' | 
+    'playlist' | 
+    'songlist' | 'single' | 'artist' | 
+    'artistCollections' | 'songlistCollections' | 'singleCollections';
 /**
  * ### 切换应用页面
  * 
@@ -55,7 +59,7 @@ let pageApp = createApp(Home);
  * @param pushStack 是否加入堆栈
  * @param idParam 向页面传递参数
  */
-function changePage(pageId: string, pushStack: boolean = true, idParam?: any) {
+function changePage(pageId: page, pushStack: boolean = true, idParam?: any) {
     let currentTab = document.getElementById(currentPage) as HTMLButtonElement;
     let newTab = document.getElementById(pageId) as HTMLButtonElement;
     if (currentTab) {

@@ -99,7 +99,7 @@ onMounted(() => {
     playerElem.addEventListener('timeupdate', () => {
         if (!playTimeAdjustFlag.value) getPlayer()?.updateProgress(Math.floor(playerElem.currentTime));
 
-        getPlayer()?.checkNextSong();
+        getPlayer()?.checkNextSong('Lyrics.vue');
     });
 
     console.log('Lyrics.vue loaded');

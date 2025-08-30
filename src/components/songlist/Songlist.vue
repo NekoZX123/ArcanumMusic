@@ -129,6 +129,7 @@ function playCurrentList() {
 onMounted(() => {
     const userData = getAccountInfo('all');
 
+    console.log(props.id);
     // 解析歌单 ID
     const properties = props.id.replace('new_', '').split('-');
     const type = properties[0]; // 类型 (歌单 / 专辑 / 排行榜)

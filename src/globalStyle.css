@@ -157,7 +157,7 @@ a {
 #windowControlBar {
     position: fixed;
     width: 100%;
-    height: 2rem;
+    height: 2.5rem;
     top: 0;
 
     background: var(--default-white);
@@ -166,7 +166,7 @@ a {
 
 #windowDrag {
     position: relative;
-    height: 2rem;
+    height: 2.5rem;
     float: left;
 
     align-items: center;
@@ -177,15 +177,15 @@ a {
 }
 
 #appIcon {
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 2rem;
+    height: 2rem;
 
     margin-right: 0.5rem;
 }
 
 #windowOptions {
     position: relative;
-    height: 2rem;
+    height: 2.5rem;
 
     float: right;
 
@@ -225,7 +225,7 @@ a {
     position: relative;
     width: 100%;
     height: calc(100vh - 3rem);
-    top: 2rem;
+    top: 2.5rem;
 }
 
 /* 页面切换 */
@@ -825,6 +825,37 @@ a {
     text-decoration: underline;
 }
 
+/* 单行歌手卡片 */
+.artistLine {
+    position: relative;
+    width: 100%;
+    height: 4rem;
+
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+
+    margin-top: 4px;
+    padding: 0 6px;
+
+    align-items: center;
+
+    transition: all 200ms ease-in-out;
+    cursor: pointer;
+}
+.artistLine > img {
+    width: 3rem;
+    height: 3rem;
+
+    border: none;
+    border-radius: 1.5rem;
+
+    margin-right: 6px;
+}
+.artistLine:hover {
+    background: var(--color-blue-light);
+}
+
 /* 播放列表区域 */
 .musicContainer {
     width: 100%;
@@ -965,6 +996,9 @@ a {
     flex: 1 0;
 }
 
+#currentSong {
+    align-items: center;
+}
 .currentSongCover {
     width: 3rem;
     height: 3rem;
@@ -974,8 +1008,23 @@ a {
 
     margin-right: 6px;
 }
+#currentSongName {
+    width: 15rem;
+    height: 16pt;
+
+    white-space: nowrap;
+    
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+#currentSongName::-webkit-scrollbar {
+    display: none;
+}
 
 #playControl {
+    position: absolute;
+    left: calc(50% - 6rem);
+
     align-items: center;
 }
 
@@ -1356,7 +1405,7 @@ a {
     border-color: var(--default-grey);
     border-width: 1px;
     border-radius: 10px;
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(12px);
 
     box-shadow: 2px 2px 6px 0 var(--transparent-darkgrey);
 
@@ -1406,3 +1455,57 @@ a {
 
     margin: 4px;
 }
+
+/* 歌手选择弹窗 */
+#artistSelect {
+    position: absolute;
+    width: 24rem;
+    height: auto;
+    left: calc(50% - 12rem);
+    top: 10rem;
+
+    background: var(--default-white);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 0 6px var(--transparent-darkgrey);
+
+    padding: 3px;
+
+    opacity: 0;
+    transition: all 200ms ease-in-out;
+
+    display: none;
+}
+#artistSelect.show {
+    opacity: 0;
+
+    display: flex;
+}
+#artistSelect.show.anim {
+    opacity: 1;
+}
+#artistSelectTopBar {
+    width: 100%;
+    height: 2rem;
+    
+    justify-content: space-between;
+}
+#artistSelectClose {
+    appearance: none;
+    width: 2rem;
+    height: 2rem;
+
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+
+    transition: all 200ms ease-in-out;
+}
+#artistSelectClose > img {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+#artistSelectClose:hover {
+    background: var(--transparent-grey);
+}
+
