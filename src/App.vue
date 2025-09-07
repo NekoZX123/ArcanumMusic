@@ -196,6 +196,35 @@ function showLyrics(_: MouseEvent) {
     }, 50);
 }
 
+// 长歌曲名称焦点滚动
+function checkScrollAnimation(_: MouseEvent) {
+    const nameContainer = document.getElementById('songNameContainer') as HTMLElement;
+    const nameContent = document.getElementById('currentSongName') as HTMLElement;
+    
+    if (nameContainer.scrollWidth > nameContainer.offsetWidth && !nameContent.classList.contains('autoScroll')) {
+        nameContent.classList.add(`autoScroll`);
+    }
+}
+// 重置滚动动画
+function resetScroll(_: MouseEvent) {
+    const nameContent = document.getElementById('currentSongName') as HTMLElement;
+    nameContent.classList.remove('autoScroll');
+}
+
+// 限制歌手文字长度
+function limitAuthorsTextLength(authors: string) {
+    const authorsContent = document.getElementById('currentSongAuthors') as HTMLElement;
+    if (!authorsContent) {
+        return;
+    }
+
+    if (authors.length > 15) {
+        const limitedText = `${authors.substring(0, 15)}...`;
+        return limitedText;
+    }
+    return authors;
+}
+
 onMounted(async () => {
     // 绕过 QQ 音乐脚本环境监测
     // 参考 / Reference: https://jixun.uk/posts/2024/qqmusic-zzc-sign/
@@ -323,8 +352,10 @@ onMounted(async () => {
                 <div class="flex row" id="currentSong">
                     <img class="currentSongCover" :src="getPlayer()?.coverUrl"/>
                     <span class="flex column">
-                        <label class="text small bold" id="currentSongName">{{ getPlayer()?.name }}</label>
-                        <label class="text ultraSmall">{{ getPlayer()?.authors }}</label>
+                        <span id="songNameContainer" @mouseenter="checkScrollAnimation" @mouseleave="resetScroll">
+                            <label class="text small bold" id="currentSongName">{{ getPlayer()?.name }}</label>
+                        </span>
+                        <label class="text ultraSmall" id="currentSongAuthors">{{ limitAuthorsTextLength(getPlayer()?.authors || '') }}</label>
                     </span>
                 </div>
 

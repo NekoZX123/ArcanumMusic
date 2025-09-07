@@ -69,20 +69,47 @@
 
     border: none;
     border-radius: 12px;
-    box-shadow: 0 0 10px var(--transparent-grey);
+    box-shadow: 0 0 10px var(--transparent-darkgrey);
 
     margin: 1rem 0;
 }
+#lyricsPageSongNameContainer {
+    width: 13rem;
+    height: 24pt;
+
+    margin-left: 3px;
+
+    white-space: nowrap;
+    overflow: hidden;
+}
 #songName {
-    max-width: 13rem;
-    max-height: 48pt;
+    display: inline-block;
+    height: 24pt;
+}
+#songName.autoScroll {
+    animation: longTextScroll 6s linear infinite;
+    animation-play-state: paused;
+}
+#lyricsPageSongNameContainer:hover #songName.autoScroll,
+#lyricsPageSongNameContainer:focus #songName.autoScroll,
+#songName.autoScroll:focus {
+    animation-play-state: running;
+}
+@keyframes longTextScroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(calc(-100% + 20rem));
+    }
+}
+#songAuthors {
+    width: 13rem;
+    height: 16pt;
 
     margin-left: 3px;
 
     overflow: hidden;
-}
-#songAuthors {
-    margin-left: 3px;
 }
 
 #playerInfo {
@@ -115,48 +142,33 @@
     background: var(--transparent-grey);
 }
 
-#lyricsVolume {
-    appearance: none;
-
-    position: relative;
+#lyricsPageVolumeFilled {
     width: 6rem;
-    height: calc(1.5rem + 6px);
+    height: 2rem;
 
     background: transparent;
-    border-radius: 8px;
-
-    transition: all 200ms ease-in-out;
 }
-#lyricsVolume::-webkit-slider-thumb {
-    appearance: none;
+#lyricsPageVolumeFilled > #lyricsPageVolumeBar {
+    position: relative;
+    height: 8px;
+    top: calc(50% - 3px);
 
-    width: 1rem;
-    height: 1rem;
-    margin-top: calc(7px - 0.75rem);
+    background: var(--transparent-lightgrey);
+    border: none;
+    border-radius: 4px;
+}
+#lyricsPageVolumeFilled #lyricsPageVolumeFilled {
+    width: 50%;
+    height: 8px;
 
+    background: var(--transparent-white);
+    border: none;
+    border-radius: 4px;
+
+    transition: background 200ms ease-in-out;
+}
+#lyricsPageVolumeFilled:hover #lyricsPageVolumeFilled {
     background: var(--default-white);
-    border-radius: 0.5rem;
-
-    opacity: 0;
-
-    transition: all 200ms ease-in-out;
-}
-#lyricsVolume:hover::-webkit-slider-thumb {
-    opacity: 1;
-}
-#lyricsVolume::-webkit-slider-runnable-track {
-    --fill-percentage: 100%;
-    appearance: none;
-
-    position: absolute;
-    width: 6rem;
-    height: 6px;
-
-    background: linear-gradient(to right, var(--default-white) 0%, 
-        var(--default-white) var(--fill-percentage), var(--transparent-lightgrey) var(--fill-percentage));
-    border-radius: 3px;
-
-    transform: translateY(calc(0.75rem - 6px));
 }
 
 /* 播放器控制 */

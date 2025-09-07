@@ -81,13 +81,52 @@ function hideLyrics(_: any) {
 
 // 音量调整
 function adjustVolume(event: MouseEvent) {
-    if (event.buttons !== 1) return;
+    const volumeBar = document.getElementById('lyricsPageVolumeBar');
+    if (!volumeBar) return;
 
-    let volumeBar = document.getElementById('lyricsVolume') as HTMLInputElement;
-    if (!volumeBar || !songData.value) return;
-    
-    getPlayer()?.setVolume(Number(volumeBar.value));
+    if (event.buttons === 1) {
+        // 设置音量条宽度
+        let deltaX = event.clientX - volumeBar.getBoundingClientRect().left;
+        let volume = Math.round(deltaX / volumeBar.clientWidth * 100);
+
+        // 防止范围溢出
+        if (volume < 0) volume = 0;
+        if (volume > 100) volume = 100;
+
+        getPlayer()?.setVolume(volume);
+    }
 }
+
+// 长歌曲名称焦点滚动
+function checkScrollAnimation(_: MouseEvent) {
+    const nameContainer = document.getElementById('lyricsPageSongNameContainer') as HTMLElement;
+    const nameContent = document.getElementById('songName') as HTMLElement;
+    
+    if (nameContainer.scrollWidth > nameContainer.offsetWidth && !nameContent.classList.contains('autoScroll')) {
+        nameContent.classList.add(`autoScroll`);
+    }
+}
+// 重置滚动动画
+function resetScroll(_: MouseEvent) {
+    const nameContent = document.getElementById('songName') as HTMLElement;
+    nameContent.classList.remove('autoScroll');
+}
+
+// 限制歌手文字长度
+function limitAuthorsTextLength(authors: string) {
+    const authorsContent = document.getElementById('currentSongAuthors') as HTMLElement;
+    if (!authorsContent) {
+        return;
+    }
+
+    if (authors.length > 10) {
+        const limitedText = `${authors.substring(0, 10)}...`;
+        return limitedText;
+    }
+    return authors;
+}
+
+
 
 onMounted(() => {
     // 设置触发器
@@ -122,14 +161,20 @@ onMounted(() => {
                     <img id="songCover" :src="getPlayer()?.playlist.current.coverUrl"/>
                     <div class="flex row" id="playerInfo">
                         <div class="flex column">
-                            <label class="text medium white bold" id="songName">{{ getPlayer()?.playlist.current.name }}</label>
-                            <label class="text small white bold" id="songAuthors">{{ getPlayer()?.playlist.current.authors }}</label>
+                            <span id="lyricsPageSongNameContainer" @mouseenter="checkScrollAnimation" @mouseleave="resetScroll">
+                                <label class="text medium white bold" id="songName">{{ getPlayer()?.playlist.current.name }}</label>
+                            </span>
+                            <label class="text small white bold" id="songAuthors">{{ limitAuthorsTextLength(getPlayer()?.playlist.current.authors || '') }}</label>
                         </div>
-                        <div id="volumeInLyrics">
+                        <div class="flex row" id="volumeInLyrics">
                             <button id="toggleMute" @click="getPlayer()?.toggleMute">
                                 <img :src="getPlayer()?.volumeLevel"/>
                             </button>
-                            <input type="range" id="lyricsVolume" min="0" max="100" value="100" step="1" @mousemove="adjustVolume"/>
+                            <div id="lyricsPageVolumeFilled" @mousemove="adjustVolume">
+                                <div id="lyricsPageVolumeBar">
+                                    <div id="lyricsPageVolumeFilled" :style="`width: ${getPlayer()?.volume}%`"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -164,9 +209,9 @@ onMounted(() => {
             </div>
             <!-- 歌词内容 -->
             <div class="flex column" id="lyricsContent">
-                <LyricsLine content="歌词内容 1" subline="Lyrics content 1"></LyricsLine>
+                <LyricsLine content="歌词内容 1" translation="Lyrics content 1"></LyricsLine>
                 <LyricsLine content="这是一段较长的内容, 用于测试应用对长歌词的显示情况" 
-                    subline="This content is long, in order to test whether the application can display long content well"></LyricsLine>
+                    translation="This content is long, in order to test whether the application can display long content well"></LyricsLine>
             </div>
         </div>
     </div>

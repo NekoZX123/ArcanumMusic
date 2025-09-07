@@ -1008,17 +1008,39 @@ a {
 
     margin-right: 6px;
 }
-#currentSongName {
+#songNameContainer {
     width: 15rem;
     height: 16pt;
 
     white-space: nowrap;
     
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: hidden;
 }
-#currentSongName::-webkit-scrollbar {
-    display: none;
+#currentSongName {
+    display: inline-block;
+}
+#currentSongName.autoScroll {
+    animation: longTextScroll 6s linear infinite;
+    animation-play-state: paused;
+}
+#songNameContainer:hover #currentSongName.autoScroll,
+#songNameContainer:focus #currentSongName.autoScroll,
+#currentSongName.autoScroll:focus {
+    animation-play-state: running;
+}
+@keyframes longTextScroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(calc(-100% + 15rem));
+    }
+}
+#currentSongAuthors {
+    width: 18rem;
+    height: 14pt;
+
+    overflow: hidden;
 }
 
 #playControl {

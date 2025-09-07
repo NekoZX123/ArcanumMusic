@@ -74,7 +74,11 @@ class Player {
 
     constructor(volumeBarIds: string[] = []) {
         this.playlist = {
-            current: {},
+            current: {
+                'name': '未在播放',
+                'authors': '',
+                'coverUrl': '/images/player/testAlbum.png'
+            },
             breakIn: [],
             waitList: [],
             history: []
