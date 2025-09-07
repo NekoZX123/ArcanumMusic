@@ -34,7 +34,7 @@
         "crypto": "^1.0.1",
         "crypto-js": "^4.2.0",
         "cryptojs": "^2.5.3",
-        "electron": "^34.1.1",
+        "electron": "^35.7.5",
         "electron-builder": "^25.1.8",
         "express": "^4.21.2",
         "node-fetch": "^3.3.2",
