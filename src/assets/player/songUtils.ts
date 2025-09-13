@@ -79,6 +79,10 @@ function getSongInfo(songId: string) {
     });
 }
 
+/**
+ * 获取歌单 / 专辑信息
+ * @param listId 歌单 / 专辑 ID
+ */
 function getListContent(listId: string) {
     const idParts = listId.split('-');
     let type = idParts[0];
@@ -114,4 +118,32 @@ function getListContent(listId: string) {
     });
 }
 
-export { getSongLink, getSongInfo, getListContent };
+function getSongLyrics(songId: string) {
+    // console.log(songId);
+    const idParts = songId.split('-');
+    const platform = idParts[1];
+    const id = idParts[2];
+    
+    return new Promise((resolve, reject) => {
+        const sendRequest = requestFuncs[platform];
+        if (!sendRequest) {
+            reject(`[Error] Unsupported platform: ${platform}`);
+        }
+
+        const userData = getAccountInfo('all');
+        let idParams: object = { songId: id };
+        if (platform === 'qqmusic') {
+            idParams = { songMid: id };
+        }
+        sendRequest('lyrics', idParams, userData[platform].cookies)
+            .then((response: AxiosResponse) => {
+                const parsedLyrics = parseMusicData(response, platform, 'lyrics');
+                resolve(parsedLyrics);
+            })
+            .catch((error: AxiosError) => {
+                reject(error);
+            });
+    });
+}
+
+export { getSongLink, getSongInfo, getListContent, getSongLyrics };

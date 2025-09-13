@@ -53,11 +53,6 @@
 
     align-items: center;
 }
-#lyricsContent {
-    width: calc(100% - 30rem);
-
-    justify-content: left;
-}
 
 /* 歌曲信息 */
 #songInfo {
@@ -216,10 +211,49 @@
 }
 
 /* 歌词 */
+#lyricsContent {
+    max-width: calc(100% - 30rem);
+    height: 100%;
+
+    justify-content: left;
+
+    padding-top: 25%;
+    padding-bottom: 25%;
+    padding-right: 3rem;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+#lyricsContent::-webkit-scrollbar {
+    display: none;
+}
+
 .lyricsBox {
     max-width: 100%;
 
-    margin: 1rem 0;
+    padding: 1rem 0;
+    padding-right: 0.8rem;
+
+    background: transparent;
+    border: none;
+    border-radius: 15px;
+
+    transition: all 300ms ease-in-out;
+}
+.lyricsBox:hover {
+    background: var(--transparent-grey);
+}
+.lyricsBox > ul {
+    color: var(--transparent-darkgrey);
+
+    text-shadow: 0 0 2px var(--transparent-darkgrey);
+
+    transition: all 300ms ease-in-out;
+}
+.lyricsBox.focused > ul {
+    color: var(--default-white);
+
+    text-shadow: 0 0 3px var(--default-white);
 }
 .lyricsBox > ul {
     margin: 0;

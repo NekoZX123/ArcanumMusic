@@ -1,15 +1,21 @@
 import { defineComponent } from "vue";
+import { getPlayer } from "../player/player";
 
 const LyricsLine = defineComponent({
     props: {
+        time: Number,
         content: String,
-        subline: String
+        translation: {
+            type: String,
+            required: false,
+            default: ''
+        }
     },
-    setup(props: { content: string, subline: string}) {
+    setup(props: { time:number, content: string, translation: string}) {
         return () => (
-            <span class="lyricsBox">
-                <ul class="text large bold white">{props.content}</ul>
-                <ul class="text medium bold white">{props.subline}</ul>
+            <span class="lyricsBox" onClick={() => getPlayer()?.setProgress(props.time)}>
+                <ul class="text large bold">{props.content}</ul>
+                <ul class="text medium bold">{props.translation}</ul>
             </span>
         );
     }

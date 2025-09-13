@@ -28,6 +28,15 @@ const dataParsers: Record<string, any> = {
                 'authorsObject': (authors: object[]) => getAuthorObject(authors, 'netease')
             }
         },
+        'lyrics': {
+            'body': ['data'],
+            'lyrics': ['lrc', 'lyric'],
+            'translation': ['tlyric', 'lyric'],
+            '@postprocessors': {
+                'lyrics': (lyricText: string) => lyricText.split('\n'),
+                'translation': (lyricText: string) => lyricText.split('\n')
+            }
+        },
         'search-singles': {
             'body': ['data'],
             'songList': ['result', 'songs'],
@@ -240,6 +249,11 @@ const dataParsers: Record<string, any> = {
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'qqmusic'),
                 'authorsObject': (authors: any[]) => getAuthorObject(authors, 'qqmusic')
             }
+        },
+        'lyrics': {
+            'body': ['data'],
+            'lyrics': ['lyrics'],
+            'translation': ['translation']
         },
         'search-singles': {
             'body': ['data', 'req_1'],
@@ -469,6 +483,11 @@ const dataParsers: Record<string, any> = {
                 'authorsObject': (data: any) => getAuthorObject([data], 'kuwo')
             }
         },
+        'lyrics': {
+            'body': ['data'],
+            'lyrics': ['data', 'lrclist'],
+            'translation': ['data', 'lrclist'],
+        },
         'search-singles': {
             'body': ['data'],
             'songList': ['abslist'],
@@ -665,6 +684,15 @@ const dataParsers: Record<string, any> = {
             '@postprocessors' : {
                 'songDuration': (duration: number) => Math.round(duration / 1000),
                 'authorsObject': (authors: any[]) => getAuthorObject(authors, 'kugou')
+            }
+        },
+        'lyrics': {
+            'body': ['data'],
+            'lyrics': ['data', 'lyrics'],
+            'translation': ['data', 'lyrics'],
+            '@postprocessors': {
+                'lyrics': (lyricText: string) => lyricText.split('\n'),
+                'translation': (_: any) => []
             }
         },
         'search-singles': {
@@ -868,6 +896,10 @@ const targetFormats: Record<string, any> = {
         'songDuration': 0,
         'albumId': '',
         'authorsObject': []
+    },
+    'lyrics': {
+        'lyrics': [],
+        'translation': []
     },
     'search-singles': {
         'songList': '@song_brief'
@@ -1178,9 +1210,11 @@ function parseMusicData(response: AxiosResponse, platform: string, module: strin
     const body = parseDataByArray(response, bodyParser);
 
     // 检查请求结果
-    if ((body.code !== undefined && body.code !== 200 && platform !== 'qqmusic') || (body.code !== 0 && platform === 'qqmusic')) {
-        console.error(`[ERROR] Failed to request ${platform} api (Code ${body.code})`);
-        return;
+    if (body.code !== undefined) {
+        if ((body.code !== 200 && platform !== 'qqmusic') || (body.code !== 0 && platform === 'qqmusic')) {
+            console.error(`[ERROR] Failed to request ${platform} api (Code ${body.code})`);
+            return;
+        }
     }
     
     const parsedResponse = parseData(body, platform, module);

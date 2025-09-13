@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, type Ref } from 'vue';
 import './lyricsStyle.css';
-import { LyricsLine } from '../../assets/lyrics/Lyrics';
-import { getPlayer } from '../../assets/player/player';
+import { LyricsLine } from '../../assets/lyrics/Lyrics.tsx';
+import { getPlayer } from '../../assets/player/player.ts';
+import { getSongLyrics } from '../../assets/player/songUtils.ts';
+import { parseLyrics, type LyricData } from '../../assets/lyrics/lyricsParser.ts';
 
 const songData = ref(getPlayer());
 // 最大偏移回弹距离
@@ -80,6 +82,7 @@ function hideLyrics(_: any) {
 }
 
 // 音量调整
+// 音量调整
 function adjustVolume(event: MouseEvent) {
     const volumeBar = document.getElementById('lyricsPageVolumeBar');
     if (!volumeBar) return;
@@ -126,7 +129,85 @@ function limitAuthorsTextLength(authors: string) {
     return authors;
 }
 
+const lyricLines: Ref<LyricData> = ref({
+    lyrics: [],
+    metaData: {}
+});
+/**
+ * 更新歌词内容
+ */
+function updateCurrentLyrics() {
+    const songId = getPlayer()?.playlist.current.id;
+    if (!songId) return;
+    const platform = songId.split('-')[1];
+    getSongLyrics(songId)
+    .then((lyricsInfo: any) => {
+        // console.log(lyricsInfo);
+        // console.log(parseLyrics(lyricsInfo, platform));
 
+        const parseResult = parseLyrics(lyricsInfo, platform);
+        if (!parseResult) {
+            console.error(`[Error] Failed to parse lyrics`);
+            return;
+        }
+        lyricLines.value = parseResult;
+
+        updateFocusedLyric(0);
+    });
+}
+
+let currentLyricIndex = -1;
+const containerElement: Ref<HTMLElement | null> = ref(null);
+const lyricElements: Ref<any[]> = ref([]);
+/**
+ * 获取当前焦点歌词
+ * @param time 播放时间
+ */
+function findLyricIndex(time: number) {
+    let start = 0, end = lyricLines.value.lyrics.length - 1;
+
+    while (start <= end) {
+        const mid = Math.floor((start + end) / 2);
+        const midTime = lyricLines.value.lyrics[mid].time;
+
+        if (midTime <= time) {
+            start = mid + 1;
+        }
+        else {
+            end = mid - 1;
+        }
+    }
+
+    return end;
+}
+/**
+ * 更新当前焦点歌词
+ */
+function updateFocusedLyric(time: number) {
+    const targetIndex = findLyricIndex(time);
+    
+    if (targetIndex !== currentLyricIndex && lyricElements.value.length > 0) {
+        // 更新样式
+        if (currentLyricIndex >= 0) {
+            lyricElements.value[currentLyricIndex].classList.remove('focused');
+        }
+        lyricElements.value[targetIndex].classList.add('focused');
+
+        // 更新焦点索引
+        currentLyricIndex = targetIndex;
+
+        // 滚动至焦点位置
+        const activeElement = lyricElements.value[targetIndex];
+        if (activeElement) {
+            requestAnimationFrame(() => {
+                containerElement.value?.scrollTo({
+                    top: activeElement.offsetTop - containerElement.value.offsetHeight / 2,
+                    behavior: 'smooth'
+                });
+            });
+        }
+    }
+}
 
 onMounted(() => {
     // 设置触发器
@@ -135,11 +216,32 @@ onMounted(() => {
         console.error('[Error] Player element not found');
         return;
     }
+    // 歌词自动滚动
+    playerElem.addEventListener('timeupdate', () => {
+        updateFocusedLyric(playerElem.currentTime);
+    });
+    // 进度条更新 & 检测下一首
     playerElem.addEventListener('timeupdate', () => {
         if (!playTimeAdjustFlag.value) getPlayer()?.updateProgress(Math.floor(playerElem.currentTime));
 
         getPlayer()?.checkNextSong('Lyrics.vue');
     });
+
+    // 监听歌曲文件变化
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
+                updateCurrentLyrics();
+                updateFocusedLyric(0);
+            }
+        });
+    });
+    observer.observe(playerElem, { attributes: true, attributeFilter: ['src'] });
+
+    // 歌词元素
+    const lyricsContainer = document.getElementById('lyricsContent') as HTMLElement;
+    containerElement.value = lyricsContainer;
+    lyricElements.value = lyricsContainer.children as any;
 
     console.log('Lyrics.vue loaded');
 });
@@ -209,9 +311,12 @@ onMounted(() => {
             </div>
             <!-- 歌词内容 -->
             <div class="flex column" id="lyricsContent">
-                <LyricsLine content="歌词内容 1" translation="Lyrics content 1"></LyricsLine>
-                <LyricsLine content="这是一段较长的内容, 用于测试应用对长歌词的显示情况" 
-                    translation="This content is long, in order to test whether the application can display long content well"></LyricsLine>
+                <LyricsLine 
+                    v-for="lyricInfo in lyricLines.lyrics"
+                    :time="lyricInfo.time"
+                    :content="lyricInfo.content"
+                    :translation="lyricInfo.translation"
+                />
             </div>
         </div>
     </div>
