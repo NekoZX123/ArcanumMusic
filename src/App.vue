@@ -235,9 +235,6 @@ onMounted(async () => {
     appConfig = JSON.parse(configData);
     console.log(appConfig);
 
-    // 加载初始页面
-    initialize();
-
     // 测试通知
     setTimeout(() => showNotify('Notify1', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 2000);
 
@@ -255,7 +252,12 @@ onMounted(async () => {
     if (lyricsArea) lyricsArea.style = 'display: none;';
 
     // 读取账户信息
-    readAccountInfo('all');
+    await readAccountInfo('all');
+
+    // 加载初始页面
+    setTimeout(() => {
+        initialize();
+    }, 300);
 
     // 设置点击 / 滚动时隐藏右键菜单
     window.addEventListener('click', (event) => {
@@ -285,7 +287,7 @@ onMounted(async () => {
         <div class="flex row" id="windowControlBar" 
             @mousedown="titlebarMouseDown" @mousemove="titlebarMouseMove" @mouseup="titlebarMouseUp">
             <span class="flex row" id="windowDrag">
-                <img id="appIcon" src="/images/appIcon/ArcanumMusic_nogrid.png"/>
+                <img id="appIcon" src="/images/appIcon/ArcanumMusic.png"/>
                 <label class="text small">Arcanum Music</label>
             </span>
             <span id="windowOptions">

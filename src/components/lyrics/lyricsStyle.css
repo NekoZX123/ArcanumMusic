@@ -1,5 +1,5 @@
 #lyricsPanel {
-    height: 100vh;
+    height: 100%;
 
     background: linear-gradient(45deg, var(--color-blue-light), var(--color-green-light));
 
@@ -212,6 +212,7 @@
 
 /* 歌词 */
 #lyricsContent {
+    min-width: 30rem;
     max-width: calc(100% - 30rem);
     height: 100%;
 

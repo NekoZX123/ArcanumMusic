@@ -16,6 +16,7 @@ import Artist from "../../components/artist/Artist.vue";
 import ArtistCollections from "../../components/collections/ArtistCollections.vue";
 import SonglistCollections from "../../components/collections/SonglistCollections.vue";
 import SingleCollections from "../../components/collections/SingleCollections.vue";
+import { getAccountInfo } from "./accountManager";
 
 // 应用各页面
 const appPageNames = [
@@ -41,7 +42,6 @@ var pageComponents: { [key: string]: any } = {
 const pageHighlights = ['home', 'library', 'search', 'settings', 'accounts'];
 
 let currentPage = '';
-let latestPage = '';
 let pageStack: page[] = []; // 页面堆栈
 let paramStack: any[] = []; // 参数堆栈
 let historyPages: page[] = []; // 历史页面堆栈
@@ -119,7 +119,6 @@ function togglePlaylist(_: MouseEvent) {
         pageBack();
     }
     else {
-        latestPage = currentPage;
         changePage('playlist');
     }
     updatePlaylistIcon();
@@ -174,7 +173,20 @@ function updatePlaylistIcon() {
 
 // 初始化
 function initialize() {
-    changePage('home');
+    const platformList = ['netease', 'qqmusic', 'kuwo', 'kugou'];
+    let loginedCount = 0;
+    const states = getAccountInfo();
+    platformList.forEach((platform) => {
+        if (states[platform].loggedIn) loginedCount++;
+    });
+
+    if (loginedCount === 0) {
+        changePage('accounts');
+    }
+    else {
+        changePage('home');
+    }
+    
 }
 
 export {

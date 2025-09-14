@@ -2,6 +2,7 @@ import { decrypt, encrypt } from './crypto.ts';
 
 let userData: { [type: string]: any } = {
     netease: {
+        loggedIn: false,
         userData: {
             avatarUrl: '/images/library/defaultAvatar.png',
             nickname: '未登录',
@@ -12,6 +13,7 @@ let userData: { [type: string]: any } = {
         }
     },
     qqmusic: {
+        loggedIn: false,
         userData: {
             avatarUrl: '/images/library/defaultAvatar.png',
             nickname: '未登录'
@@ -23,6 +25,7 @@ let userData: { [type: string]: any } = {
         }
     },
     kuwo: {
+        loggedIn: false,
         userData: {
             avatarUrl: '/images/library/defaultAvatar.png',
             nickname: '未登录'
@@ -32,6 +35,7 @@ let userData: { [type: string]: any } = {
         }
     },
     kugou: {
+        loggedIn: false,
         userData: {
             avatarUrl: '/images/library/defaultAvatar.png',
             nickname: '未登录'
@@ -40,7 +44,8 @@ let userData: { [type: string]: any } = {
             "KuGoo": ""
         }
     }
-}
+};
+let userDataRead = false;
 
 // 登录信息管理
 
@@ -56,6 +61,7 @@ function setAccountInfo(platform: string, data: any) {
 
     // 设置用户信息
     userData[platform] = data;
+    userData[platform].loggedIn = true;
 }
 
 // 存储登录信息
@@ -78,9 +84,10 @@ async function storeAccountInfo(platform: string) {
 async function readAccountInfo(platform: string = 'all') {
     if (platform === 'all') {
         const platforms = ['netease', 'qqmusic', 'kuwo', 'kugou'];
-        platforms.forEach((plat) => {
-            readAccountInfo(plat);
+        platforms.forEach(async (plat) => {
+            await readAccountInfo(plat);
         });
+        userDataRead = true;
         return;
     }
 
