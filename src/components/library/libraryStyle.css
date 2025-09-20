@@ -25,7 +25,7 @@
 }
 
 #userFavouritesBackground {
-    background-image: url('/images/library/favouritesBackground_red.jpg');
+    /* background-image: url('/images/library/favouritesBackground_red.jpg'); */
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;

@@ -16,19 +16,19 @@ import { getPlayer } from '../../assets/player/player.ts';
 const platformTabs = [
     {
         title: '网易云音乐',
-        icon: '/images/platforms/netease.png'
+        icon: './images/platforms/netease.png'
     },
     {
         title: 'QQ 音乐',
-        icon: '/images/platforms/qqmusic.png'
+        icon: './images/platforms/qqmusic.png'
     },
     {
         title: '酷我音乐',
-        icon: '/images/platforms/kuwo.png'
+        icon: './images/platforms/kuwo.png'
     },
     {
         title: '酷狗音乐',
-        icon: '/images/platforms/kugou.png'
+        icon: './images/platforms/kugou.png'
     }
 ];
 
@@ -169,7 +169,8 @@ onMounted(() => {
         <div class="flex row" id="userCollections">
             <div class="songlistCard exlarge flex row" id="userFavourites">
                 <span class="cardHeader flex row" id="userFavouritesBackground" 
-                    @contextmenu="(event) => {triggerRightMenu(event, {}, 'platformSelect')}">
+                    @contextmenu="(event) => {triggerRightMenu(event, {}, 'platformSelect')}" 
+                    :style="`background-image: url('./images/library/favouritesBackground_red.jpg')`">
                     <span class="cardInfo flex column">
                         <label class="text medium bold">我喜欢的音乐</label>
                         <label class="text ultraSmall">共 {{ favLength }} 首</label>

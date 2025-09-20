@@ -54,9 +54,11 @@ const TabWidget =  defineComponent({
             currentIndex.value = index;
 
             if (props.scrollOnClick) {
-                const container = document.querySelector(`#${props.id}`);
-                if (container) {
-                    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const container = document.querySelector(`#${props.id}`) as HTMLElement;
+                const pageElement = document.getElementById('pageContainer') as HTMLElement;
+                if (container && pageElement) {
+                    const offset = container.offsetTop - pageElement.scrollTop;
+                    pageElement.scrollTo({ top: offset, behavior: 'smooth' });
                 }
             }
 
