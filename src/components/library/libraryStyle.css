@@ -42,7 +42,7 @@
 }
 #recommendContainer {
     width: 100%;
-    height: calc(7rem + 6px + 1rem);
+    height: calc(8rem + 6px);
 
     overflow-x: hidden;
     overflow-y: auto;

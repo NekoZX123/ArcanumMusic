@@ -7,7 +7,7 @@
     },
     "description": "Arcanum Music - a multi-platform music application made by NekoZX",
     "private": true,
-    "version": "1.0.1",
+    "version": "1.0.20",
     "type": "module",
     "main": "app/app.js",
     "devtron": true,
@@ -19,7 +19,9 @@
         "electron:build": "npm run build && electron-builder build --config electron-builder.json"
     },
     "dependencies": {
-        "vue": "^3.5.13"
+        "vue": "^3.5.13",
+        "express": "^4.21.2",
+        "cors": "^2.8.5"
     },
     "devDependencies": {
         "@types/crypto-js": "^4.2.2",
