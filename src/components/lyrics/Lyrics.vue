@@ -77,7 +77,7 @@ function hideLyrics(_: any) {
     lyricsPanel.classList.remove('show');
 
     setTimeout(() => {
-        lyricsPanel.style = 'display: none;';
+        lyricsPanel.style.display = 'none;';
     }, 500);
 }
 

@@ -15,19 +15,19 @@ import { addArtistCard, addSongCard, addSonglistCard } from '../../assets/utilit
 const platformTabs = [
     {
         title: '网易云音乐',
-        icon: '/images/platforms/netease.png'
+        icon: './images/platforms/netease.png'
     },
     {
         title: 'QQ 音乐',
-        icon: '/images/platforms/qqmusic.png'
+        icon: './images/platforms/qqmusic.png'
     },
     {
         title: '酷我音乐',
-        icon: '/images/platforms/kuwo.png'
+        icon: './images/platforms/kuwo.png'
     },
     {
         title: '酷狗音乐',
-        icon: '/images/platforms/kugou.png'
+        icon: './images/platforms/kugou.png'
     }
 ];
 const searchTypeTabs = [

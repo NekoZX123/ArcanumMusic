@@ -14,7 +14,7 @@ import type { AxiosResponse } from 'axios';
 const songMetaData = ref({
     id: 'ID',
     name: '单曲名称',
-    cover: '/images/player/testAlbum.png',
+    cover: './images/player/testAlbum.png',
     authors: 'NekoZX123',
     duration: 0
 });

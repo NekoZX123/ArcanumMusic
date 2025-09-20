@@ -62,7 +62,9 @@ function closePopup(code: number, callback: Function) {
 }
 
 // 显示弹窗
-function showPopup(type: string, optionsType: string, title: string, content: string, highlights: string[], callback: Function) {
+type popupType = 'success' | 'info' | 'warning' | 'error';
+type optionType = 'notice' | 'confirm' | 'yesno' | 'yesnoCancel' | 'cancel';
+function showPopup(type: popupType, optionsType: optionType, title: string, content: string, highlights: string[], callback: Function) {
     let popupArea = document.getElementById('popupArea') as HTMLDivElement;
     if (popupArea) {
         let popup = createApp(PopupWindow, {
@@ -127,15 +129,15 @@ const PopupWindow = defineComponent({
         return () => (
             <div class="popup flex column" id="popupWindow">
                 <div class="popupTitle flex row">
-                    <img class="popupIcon" src={`/images/notification/${props.type}.svg`} />
+                    <img class="popupIcon" src={`./images/notification/${props.type}.svg`} />
                     <label class="popupLabel text medium bold">{props.title}</label>
                     <button class="popupClose" onClick={
                         () => {closePopup(buttonTypes.BUTTON_CLOSE, props.callback)}
                     }>
-                        <img src="/images/windowControl/close.svg"/>
+                        <img src="./images/windowControl/close.svg"/>
                     </button>
                 </div>
-                <div class="popupContent text ultraSmall">{props.content}</div>
+                <div class="popupContent text ultraSmall" innerHTML={props.content}></div>
                 <PopupOptions type={props.optionsType} highlights={props.highlights} callback={
                     (code: number) => {closePopup(code, props.callback)}
                 } />

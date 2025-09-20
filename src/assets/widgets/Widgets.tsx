@@ -5,10 +5,10 @@ import { hideArtistSelect, triggerRightMenu } from "../utilities/elementControl"
 
 // 各平台图标
 const platformIcons: Record<string, string> = {
-    'netease': '/images/platforms/netease.png',
-    'qqmusic': '/images/platforms/qqmusic.png',
-    'kuwo': '/images/platforms/kuwo.png',
-    'kugou': '/images/platforms/kugou.png'
+    'netease': './images/platforms/netease.png',
+    'qqmusic': './images/platforms/qqmusic.png',
+    'kuwo': './images/platforms/kuwo.png',
+    'kugou': './images/platforms/kugou.png'
 }
 
 // 时间格式化
@@ -89,7 +89,7 @@ const SongCard = defineComponent({
                     <label class="text ultraSmall grey">{props.authors}</label>
                 </span>
                 <button class="songPlay" onClick={() => getPlayer()?.playNow(props)}>
-                    <img src="/images/player/play.dark.svg" alt="Play"/>
+                    <img src="./images/player/play.dark.svg" alt="Play"/>
                 </button>
             </span>
         );
@@ -114,7 +114,7 @@ const SongInfoLine = defineComponent({
         return () => (
             <span class="songLine flex row" onContextmenu={(event) => handleSongLineRightClick(event, props)}>
                 <button class="songPlay" onClick={() => getPlayer()?.playNow(props)}>
-                    <img src="/images/player/play.dark.svg"/>
+                    <img src="./images/player/play.dark.svg"/>
                 </button>
                 <img class="songCover" src={props.coverUrl}></img>
                 <span class="songInfo flex column">

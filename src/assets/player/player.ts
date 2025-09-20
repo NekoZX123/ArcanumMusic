@@ -28,8 +28,8 @@ function timeFormat(timeSeconds: number) {
 const neteaseCdnPostfix = 'music.126.net';
 
 // 循环 / 随机播放图片链接常量池
-const IMAGES_REPEAT = ['/images/player/repeat.svg', '/images/player/repeat.on.svg', '/images/player/repeatSingle.svg'];
-const IMAGES_SHUFFLE = ['/images/player/shuffle.svg', '/images/player/shuffle.on.svg'];
+const IMAGES_REPEAT = ['./images/player/repeat.svg', './images/player/repeat.on.svg', './images/player/repeatSingle.svg'];
+const IMAGES_SHUFFLE = ['./images/player/shuffle.svg', './images/player/shuffle.on.svg'];
 
 class Player {
     // 播放列表信息
@@ -77,7 +77,7 @@ class Player {
             current: {
                 'name': '未在播放',
                 'authors': '',
-                'coverUrl': '/images/player/testAlbum.png'
+                'coverUrl': './images/player/testAlbum.png'
             },
             breakIn: [],
             waitList: [],
@@ -86,18 +86,18 @@ class Player {
 
         this.name = '未在播放';
         this.authors = '';
-        this.coverUrl = '/images/player/testAlbum.png';
+        this.coverUrl = './images/player/testAlbum.png';
 
         this.playedTime = 0;
         this.duration = 1;
         this.durationText = '';
         this.playedTimeText = '';
         this.progressPercentage = 0;
-        this.playStateImage = '/images/player/play.dark.svg';
+        this.playStateImage = './images/player/play.dark.svg';
         this.isPlaying = false;
 
         this.volume = 100;
-        this.volumeLevel = '/images/player/volume_04.svg';
+        this.volumeLevel = './images/player/volume_04.svg';
         this.volumeBarIds = volumeBarIds;
         this.isMuted = false;
         this.latestVolume = 100;
@@ -171,7 +171,7 @@ class Player {
         if (this.isMuted) this.isMuted = false;
 
         this.volume = value;
-        this.volumeLevel = `/images/player/volume_0${level}.svg`;
+        this.volumeLevel = `./images/player/volume_0${level}.svg`;
         playerElem.volume = value / 100;
 
         let volumeBarStyle = document.getElementById('globalVolumeFill');
@@ -256,7 +256,7 @@ class Player {
             return;
         }
 
-        this.playStateImage = playerElem.paused ? '/images/player/pause.dark.svg' : '/images/player/play.dark.svg';
+        this.playStateImage = playerElem.paused ? './images/player/pause.dark.svg' : './images/player/play.dark.svg';
         if (playerElem.paused && this.url !== '') {
             playerElem.play();
             this.isPlaying = true;
@@ -301,7 +301,7 @@ class Player {
                 showNotify('songUrlNullError', 'critical', `无法播放 ${this.name}`, '获取播放链接失败');
                 if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0) {
                     this.togglePlayPause();
-                this.playStateImage = '/images/player/play.dark.svg';
+                this.playStateImage = './images/player/play.dark.svg';
                     return;
                 }
                 this.nextSong();
@@ -334,7 +334,7 @@ class Player {
                 this.url = playInfo.url;
             }
 
-            this.playStateImage = '/images/player/pause.dark.svg';
+            this.playStateImage = './images/player/pause.dark.svg';
             this.isPlaying = true;
         });
     }

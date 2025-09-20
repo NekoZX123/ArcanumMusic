@@ -88,7 +88,7 @@ function requestListInfo(platform: string, module: 'songList' | 'album' | 'ranki
                     listContent.push({
                         id: `music-${platform}-${track.songId}`,
                         name: track.songName,
-                        coverUrl: track.songCover || '/images/library/player/testAlbum.png',
+                        coverUrl: track.songCover || './images/library/player/testAlbum.png',
                         authors: track.songAuthors,
                         duration: track.songDuration
                     });

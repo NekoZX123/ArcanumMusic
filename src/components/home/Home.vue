@@ -36,8 +36,8 @@ function scrollRight(event: MouseEvent) {
     elementToscroll.scrollBy({ left: BOX_SCROLL_DISTANCE, behavior: 'smooth' });
 }
 
-const recommendCover = ref('/images/player/testAlbum.png');
-const radioCover = ref('/images/player/testAlbum.png');
+const recommendCover = ref('./images/player/testAlbum.png');
+const radioCover = ref('./images/player/testAlbum.png');
 const completeRecommendListId = ref('songList-netease-3136952023');
 const neteaseRecommendListId = ref('3136952023');
 
@@ -407,7 +407,7 @@ onMounted(() => {
         <!-- 页面底部 -->
         <div class="flex column" id="pageFooter">
             <label class="text small grey" id="footerText">-----&nbsp;已到达页面底部&nbsp;-----</label>
-            <label class="text small grey">Arcanum Music v1.0.1-Kosmos (Internal)</label>
+            <label class="text small grey">Arcanum Music v1.0.20-Kosmos (Internal)</label>
             <label class="text small grey">Made by NekoZX123</label>
             <label class="text ultraSmall grey">Licensed under Apache-2.0 license</label>
             <label class="text ultraSmall grey">仅供学习交流使用, 不得用于商业用途</label>

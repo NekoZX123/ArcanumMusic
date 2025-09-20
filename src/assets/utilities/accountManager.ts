@@ -4,7 +4,7 @@ let userData: { [type: string]: any } = {
     netease: {
         loggedIn: false,
         userData: {
-            avatarUrl: '/images/library/defaultAvatar.png',
+            avatarUrl: './images/library/defaultAvatar.png',
             nickname: '未登录',
             userId: -1
         },
@@ -15,7 +15,7 @@ let userData: { [type: string]: any } = {
     qqmusic: {
         loggedIn: false,
         userData: {
-            avatarUrl: '/images/library/defaultAvatar.png',
+            avatarUrl: './images/library/defaultAvatar.png',
             nickname: '未登录'
         },
         cookies: {
@@ -27,7 +27,7 @@ let userData: { [type: string]: any } = {
     kuwo: {
         loggedIn: false,
         userData: {
-            avatarUrl: '/images/library/defaultAvatar.png',
+            avatarUrl: './images/library/defaultAvatar.png',
             nickname: '未登录'
         },
         cookies: {
@@ -37,7 +37,7 @@ let userData: { [type: string]: any } = {
     kugou: {
         loggedIn: false,
         userData: {
-            avatarUrl: '/images/library/defaultAvatar.png',
+            avatarUrl: './images/library/defaultAvatar.png',
             nickname: '未登录'
         },
         cookies: {
@@ -45,7 +45,6 @@ let userData: { [type: string]: any } = {
         }
     }
 };
-let userDataRead = false;
 
 // 登录信息管理
 
@@ -87,7 +86,6 @@ async function readAccountInfo(platform: string = 'all') {
         platforms.forEach(async (plat) => {
             await readAccountInfo(plat);
         });
-        userDataRead = true;
         return;
     }
 

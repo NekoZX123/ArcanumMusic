@@ -45,10 +45,10 @@ let platformTokens: { [type: string]: any } = {
 
 // 平台图标
 const platformIcons: { [type: string]: string } = {
-    "netease": "/images/platforms/netease.png",
-    "qqmusic": "/images/platforms/qqmusic.png",
-    "kuwo": "/images/platforms/kuwo.png",
-    "kugou": "/images/platforms/kugou.png"
+    "netease": "./images/platforms/netease.png",
+    "qqmusic": "./images/platforms/qqmusic.png",
+    "kuwo": "./images/platforms/kuwo.png",
+    "kugou": "./images/platforms/kugou.png"
 }
 
 // 平台名称
@@ -102,7 +102,7 @@ function platformLogout(platform: string) {
     platformTokens[platform] = initialTokens[platform];
 
     cleanAccountInfo(platform);
-    displayAccount(platform, '未登录', '/images/library/defaultAvatar.svg');
+    displayAccount(platform, '未登录', './images/library/defaultAvatar.svg');
 
     showNotify('arcanummusic.accounts.logout', 'success', '登出成功!', `${platformNames[platform]} 已登出`, 3000);
 
@@ -162,7 +162,7 @@ async function platformLogin(platform: string) {
                 const userInfo = infoObject[parseInt(uin)];
                 
                 const nickname = userInfo.nick || '未知用户';
-                const avatarUrl = userInfo.headurl || '/images/library/defaultAvatar.svg';
+                const avatarUrl = userInfo.headurl || './images/library/defaultAvatar.svg';
                 // 设置并存储用户信息
                 const completeUserData = {
                     userData: {
@@ -203,7 +203,7 @@ async function platformLogin(platform: string) {
                 }
                 
                 const nickname = infoObject.nickname || '未知用户';
-                const avatarUrl = infoObject.avatarUrl || '/images/library/defaultAvatar.svg';
+                const avatarUrl = infoObject.avatarUrl || './images/library/defaultAvatar.svg';
                 const userId = infoObject.userId;
                 // 设置并存储用户信息
                 const completeUserData = {
@@ -225,7 +225,7 @@ async function platformLogin(platform: string) {
         else if (userData.userData) { // 其他平台 - 从 localStorage (网易云) / cookie (酷我 / 酷狗) 获取用户信息
             loginSuccess = true;
             console.log(userData);
-            const avatarUrl = userData.userData.avatarUrl || '/images/library/defaultAvatar.svg';
+            const avatarUrl = userData.userData.avatarUrl || './images/library/defaultAvatar.svg';
             const nickname = userData.userData.nickname || '未知用户';
             // 设置并存储用户信息
             setAccountInfo(platform, userData);
@@ -272,7 +272,7 @@ const AccountCard = defineComponent({
         let type = platformNames[props.platform];
 
         const isLogin = ref(false);
-        const avatar = ref('/images/library/defaultAvatar.svg');
+        const avatar = ref('./images/library/defaultAvatar.svg');
         const userName = ref('未登录');
 
         onMounted(async () => {
@@ -280,7 +280,7 @@ const AccountCard = defineComponent({
             if (user && user.userData) {
                 const userData = user.userData;
                 isLogin.value = true;
-                avatar.value = userData.avatarUrl || '/images/library/defaultAvatar.svg';
+                avatar.value = userData.avatarUrl || './images/library/defaultAvatar.svg';
                 userName.value = userData.nickname || '未知用户';
                 console.log(`[Debug] User data detected: Name = ${userName.value}; Avatar = ${avatar.value}`);
             }

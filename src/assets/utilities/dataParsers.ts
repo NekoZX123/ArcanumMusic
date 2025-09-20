@@ -1096,14 +1096,14 @@ function getAuthorObject(authorList: any[], platform: string) {
             result = {
                 id: `artist-qqmusic-${authorInfo.mid}`,
                 name: authorInfo.name,
-                coverUrl: '/images/library/defaultAvatar.svg'
+                coverUrl: './images/library/defaultAvatar.svg'
             }
         }
         if (platform === 'kuwo') {
             result = {
                 id: `artist-kuwo-${authorInfo.artistid}`,
                 name: authorInfo.artist,
-                coverUrl: '/images/library/defaultAvatar.svg'
+                coverUrl: './images/library/defaultAvatar.svg'
             }
         }
         if (platform === 'kugou') {

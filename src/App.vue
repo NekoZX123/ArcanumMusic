@@ -43,7 +43,7 @@ function minimizeWindow() {
 }
 
 // 最大化 / 还原窗口
-const maxButtonSrc = ref('/images/windowControl/maximize.svg');
+const maxButtonSrc = ref('./images/windowControl/maximize.svg');
 async function toggleMaximize() {
     let winMaximumState = await (window as any).electron.toggleMaximize();
 
@@ -56,12 +56,12 @@ async function toggleMaximize() {
 }
 
 // 关闭当前窗口
-const closeButtonSrc = ref('/images/windowControl/close.svg');
+const closeButtonSrc = ref('./images/windowControl/close.svg');
 function closeHover() {
-    closeButtonSrc.value = '/images/windowControl/close.hover.svg';
+    closeButtonSrc.value = './images/windowControl/close.hover.svg';
 }
 function closeUnHover() {
-    closeButtonSrc.value = '/images/windowControl/close.svg';
+    closeButtonSrc.value = './images/windowControl/close.svg';
 }
 function closeWindow() {
     (window as any).electron.closeWindow();
@@ -190,7 +190,7 @@ function showLyrics(_: MouseEvent) {
     const lyricsPanel = document.getElementById('lyricsArea');
     if (!lyricsPanel) return;
 
-    lyricsPanel.style = 'display: block';
+    lyricsPanel.style.display = 'block';
     setTimeout(() => {
         lyricsPanel.classList.add('show');
     }, 50);
@@ -239,17 +239,30 @@ onMounted(async () => {
     setTimeout(() => showNotify('Notify1', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 2000);
 
     // 测试弹窗
-    const testPopup = false;
-    if (testPopup) showPopup('success', 'notice', 
-       'Welcome', '欢迎使用 Arcanum Music! \n (此应用仍在开发中)', 
-       [], (code: number) => {console.log(code)});
+    const internalInfo = `[当前版本: v1.0.20 Kosmos (Internal)]<br/>
+    <br/>
+    特别说明: <br/>
+    您所使用的是该应用首个Kosmos测试版本, 该版本可满足日常使用, 但暂未实现以下功能: <br/>
+    - 设置页面: 除开发者工具设定以外的功能<br/>
+    - 歌词页面: 动态背景<br/>
+    - 首页: 音乐电台<br/>
+    - 音乐库页面: 除网易云音乐外的用户收藏歌曲、酷我/酷狗用户歌单(暂未获取到API)<br/>
+    <br/>
+    您的用户数据均在本地加密储存, 我们只会在与音乐平台通信时使用这些数据, 您的数据不会被发送到其他服务器<br/>
+    此版本仅供测试使用, 可能存在尚未发现的其他问题, 如有使用问题及改进建议可到 GitHub 项目页提出 Issue / Pull Request<br/>
+    <br/>
+    made by NekoZX123
+    <br/>`;
+    showPopup('info', 'notice', 
+        '欢迎使用 Arcanum Music', internalInfo, 
+        [], (code: number) => {console.log(code)});
 
     // 歌词面板挂载
     const lyrics = createApp(Lyrics);
     lyrics.mount('#lyricsArea');
 
     const lyricsArea = document.getElementById('lyricsArea');
-    if (lyricsArea) lyricsArea.style = 'display: none;';
+    if (lyricsArea) lyricsArea.style.display = 'none;';
 
     // 读取账户信息
     await readAccountInfo('all');
@@ -287,7 +300,7 @@ onMounted(async () => {
         <div class="flex row" id="windowControlBar" 
             @mousedown="titlebarMouseDown" @mousemove="titlebarMouseMove" @mouseup="titlebarMouseUp">
             <span class="flex row" id="windowDrag">
-                <img id="appIcon" src="/images/appIcon/ArcanumMusic.png"/>
+                <img id="appIcon" src="/appIcon/ArcanumMusic.png"/>
                 <label class="text small">Arcanum Music</label>
             </span>
             <span id="windowOptions">
@@ -331,9 +344,9 @@ onMounted(async () => {
             <!-- 页面内容 -->
             <div class="flex row">
                 <div class="flex column" id="pageSelector">
-                    <PageButton id="home" icon="/images/pageSwitcher/home.svg" text="首页"></PageButton>
-                    <PageButton id="library" icon="/images/pageSwitcher/library.svg" text="音乐库"></PageButton>
-                    <PageButton id="search" icon="/images/pageSwitcher/search.svg" text="搜索"></PageButton>
+                    <PageButton id="home" icon="./images/pageSwitcher/home.svg" text="首页"></PageButton>
+                    <PageButton id="library" icon="./images/pageSwitcher/library.svg" text="音乐库"></PageButton>
+                    <PageButton id="search" icon="./images/pageSwitcher/search.svg" text="搜索"></PageButton>
                 </div>
                 <div id="pageContainer">
                     <div id="pageContent"></div>

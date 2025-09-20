@@ -44,7 +44,7 @@ onMounted(() => {
     <div :class="`notification ${props.type} flex column`" :id="props.id">
         <div class="notifyContainer flex row">
             <span class="notifyIcon">
-                <img :src="`/images/notification/${props.type}.svg`" />
+                <img :src="`./images/notification/${props.type}.svg`" />
             </span>
             <span class="notifyContent flex column">
                 <span class="text small bold">{{ props.title }}</span>

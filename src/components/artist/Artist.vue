@@ -45,7 +45,7 @@ const artistMetaData: Ref<{
 }> = ref({
     id: 'nekozx123',
     name: 'NekoZX123',
-    cover: '/images/player/testAlbum.png',
+    cover: './images/player/testAlbum.png',
     description: 'NekoZX123 is an indepentent software developer'
 });
 
@@ -482,7 +482,7 @@ function loadKugouArtist(artistId: string, cookies: { KuGoo: string }) {
 
                 const songId = `music-kugou-${songInfo.audio_id}`;
                 const songName = songInfo.audio_name;
-                const songCover = songInfo.album_info?.cover?.replace('{size}', '500') || '/images/player/testAlbum.png';
+                const songCover = songInfo.album_info?.cover?.replace('{size}', '500') || './images/player/testAlbum.png';
                 const songAuthors = formatAuthors(songInfo.authors, 'kugou');
                 const songDuration = songInfo.duration;
                 loadedSongs.push(songName);
@@ -506,7 +506,7 @@ function loadKugouArtist(artistId: string, cookies: { KuGoo: string }) {
 
                 const songId = `music-kugou-${songInfo.audio_id}`;
                 const songName = songInfo.audio_name;
-                const songCover = songInfo.album_info?.cover?.replace('{size}', '500') || '/images/player/testAlbum.png';
+                const songCover = songInfo.album_info?.cover?.replace('{size}', '500') || './images/player/testAlbum.png';
                 const songAuthors = formatAuthors(songInfo.authors, 'kugou');
                 const songDuration = songInfo.duration;
                 loadedSongs.push(songName);
