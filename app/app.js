@@ -8,7 +8,8 @@ import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 
 const __dirname = fileURLToPath(import.meta.url);
 
-const environment = 'dev';
+// const environment = 'dev';
+const environment = 'build-kosmos-internal';
 let tray;
 let mainWindow = null;
 

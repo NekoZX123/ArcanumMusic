@@ -1,9 +1,14 @@
 {
-    "appId": "moe.nekozx.arcanummusic",
     "productName": "ArcanumMusic",
+    "appId": "moe.nekozx.arcanummusic",
+    "icon": "./public/AppIcon.ico",
     "files": [
-        "./dist/**/*",
-        "./app/**/*"
+        "./app/app.js",
+        "./app/preload.mjs",
+        "./app/fileManager.js",
+        "./app/service.js",
+        "./app/webSocket.js",
+        "./dist"
     ],
     "directories": {
         "output": "./build"
@@ -11,6 +16,8 @@
     "nsis": {
         "artifactName": "${productName}_${version}_Setup.${ext}",
         "shortcutName": "${productName}",
-        "uninstallDisplayName": "${productName}"
+        "uninstallDisplayName": "${productName}",
+        "installerIcon": "./dist/appIcon/AppIcon.ico",
+        "uninstallerIcon": "./dist/appIcon/AppIcon.ico"
     }
 }
