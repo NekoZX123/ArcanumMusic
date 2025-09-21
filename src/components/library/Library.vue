@@ -12,6 +12,7 @@ import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest.ts';
 import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest.ts';
 import type { AxiosResponse } from 'axios';
 import { getPlayer } from '../../assets/player/player.ts';
+import { getConfig } from '../../assets/utilities/configLoader.ts';
 
 const platformTabs = [
     {
@@ -33,6 +34,7 @@ const platformTabs = [
 ];
 
 // 问候语
+const userAvatar = ref('./images/library/defaultAvatar.svg');
 const userName = ref('NekoZX');
 const greetings = ref('');
 const greetingsEnd = ref('');
@@ -103,6 +105,15 @@ const recommendLength = ref(0);
 onMounted(() => {
     const userData = getAccountInfo('all');
 
+    // 加载用户名称
+    const config = getConfig();
+    if (config) {
+        const name = config.user.localInfo.user.userName;
+        const pic = config.user.localInfo.user.avatarLink;
+        userName.value = name;
+        userAvatar.value = pic;
+    }
+
     // 加载问候语
     const choice = Math.floor(Math.random() * greetList.length);
     greetings.value = greetList[choice];
@@ -158,7 +169,7 @@ onMounted(() => {
     <div class="flex column" id="musicLibrary">
         <!-- 当前用户信息 -->
         <div class="flex row" id="userInfo">
-            <img src="/images/library/defaultAvatar.svg" id="avatar" alt="User avatar"/>
+            <img :src="userAvatar" id="avatar" alt="User avatar"/>
             <div class="flex column" id="userInfoText">
                 <label class="text large bold" id="userName">{{ greetings + userName + greetingsEnd }}</label>
                 <label class="text ultraSmall decoration">在此处访问您的所有音乐</label>

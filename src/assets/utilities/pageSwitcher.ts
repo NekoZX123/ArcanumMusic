@@ -166,7 +166,7 @@ function updatePlaylistIcon() {
         return;
     }
     const playlistEnabled = getCurrentPage() === 'playlist';
-    listStateElem.src = `/images/player/playlist${playlistEnabled ? '.on' : ''}.svg`;
+    listStateElem.src = `./images/player/playlist${playlistEnabled ? '.on' : ''}.svg`;
 
     return playlistEnabled;
 }

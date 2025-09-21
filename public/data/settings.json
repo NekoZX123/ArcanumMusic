@@ -28,7 +28,7 @@
     "user": {
         "localInfo": {
             "user": {
-                "avatarLink": "/public/images/library/defaultAvatar.png",
+                "avatarLink": "./images/library/defaultAvatar.svg",
                 "userName": "User"
             },
             "greetings": {

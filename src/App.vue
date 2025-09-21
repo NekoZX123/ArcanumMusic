@@ -5,32 +5,13 @@ import Lyrics from './components/lyrics/Lyrics.vue';
 import { showNotify } from './assets/notifications/Notification.ts';
 // import { showPopup } from './assets/notifications/popup.tsx';
 import { createPlayer, getPlayer } from './assets/player/player.ts';
-import { initialize, pageBack, pageForward, togglePlaylist, changePage } from './assets/utilities/pageSwitcher.ts';
+import { initialize, pageBack, pageForward, togglePlaylist, changePage, updatePlaylistIcon } from './assets/utilities/pageSwitcher.ts';
 // import { testRequest } from './assets/utilities/requestTests.ts';
 import { PageButton } from './assets/widgets/pageSwitcher.tsx';
 import { showPopup } from './assets/notifications/popup.tsx';
 import { readAccountInfo } from './assets/utilities/accountManager.ts';
 import { hideArtistSelect, hideRightMenu } from './assets/utilities/elementControl.ts';
-
-// 设置文件位置
-const configLocation = '/ArcanumMusic/settings.json';
-var appConfig = '';
-
-// 获取应用配置存放位置
-async function getConfigPath() {
-    let prefix = await window.electron.getAppDataLocal();
-    return `${prefix}${configLocation}`;
-}
-// 设置文件判断 & 创建 / 读取
-function prepareSettings() {
-    return new Promise<string>(async (resolve) => {
-        let configPath = await getConfigPath();
-
-        let configData = await window.electron.readLocalFile(configPath);
-
-        resolve(configData);
-    });
-}
+import { loadConfig } from './assets/utilities/configLoader.ts';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -230,26 +211,24 @@ onMounted(async () => {
     // 参考 / Reference: https://jixun.uk/posts/2024/qqmusic-zzc-sign/
     window.__qmfe_sign_check = 1;
 
-    // 设置文件准备
-    let configData = await prepareSettings();
-    appConfig = JSON.parse(configData);
-    console.log(appConfig);
+    loadConfig();
 
     // 测试通知
     setTimeout(() => showNotify('Notify1', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 2000);
 
     // 测试弹窗
-    const internalInfo = `[当前版本: v1.0.20 Kosmos (Internal)]<br/>
+    const internalInfo = `[当前版本: v1.0.21 Kosmos (Internal)]<br/>
     <br/>
     特别说明: <br/>
     您所使用的是该应用首个Kosmos测试版本, 该版本可满足日常使用, 但暂未实现以下功能: <br/>
-    - 设置页面: 除开发者工具设定以外的功能<br/>
+    - 设置页面: 除开发者工具设定、本地用户头像及名称以外的功能<br/>
     - 歌词页面: 动态背景<br/>
     - 首页: 音乐电台<br/>
     - 音乐库页面: 除网易云音乐外的用户收藏歌曲、酷我/酷狗用户歌单(暂未获取到API)<br/>
     <br/>
     您的用户数据均在本地加密储存, 我们只会在与音乐平台通信时使用这些数据, 您的数据不会被发送到其他服务器<br/>
     此版本仅供测试使用, 可能存在尚未发现的其他问题, 如有使用问题及改进建议可到 GitHub 项目页提出 Issue / Pull Request<br/>
+    当应用出现问题影响使用时, 可按下 Ctrl + R 刷新应用<br/>
     <br/>
     made by NekoZX123
     <br/>`;
@@ -268,6 +247,7 @@ onMounted(async () => {
     await readAccountInfo('all');
 
     // 加载初始页面
+    updatePlaylistIcon();
     setTimeout(() => {
         initialize();
     }, 300);

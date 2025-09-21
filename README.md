@@ -1,6 +1,6 @@
 # Arcanum Music
 
-v1.0.20 (Kosmos Internal)
+v1.0.21 (Kosmos Internal)
 
 由 @NekoZX123 制作的多平台音乐播放器
 

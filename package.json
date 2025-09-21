@@ -7,7 +7,7 @@
     },
     "description": "Arcanum Music - a multi-platform music application made by NekoZX123",
     "private": true,
-    "version": "1.0.20",
+    "version": "1.0.21",
     "type": "module",
     "main": "app/app.js",
     "devtron": true,
