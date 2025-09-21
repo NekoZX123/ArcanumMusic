@@ -21,7 +21,14 @@
     "dependencies": {
         "vue": "^3.5.13",
         "express": "^4.21.2",
-        "cors": "^2.8.5"
+        "node-fetch": "^3.3.2",
+        "cors": "^2.8.5",
+        "axios": "^1.7.9",
+        "crypto-js": "^4.2.0",
+        "cryptojs": "^2.5.3",
+        "uuid": "^11.1.0",
+        "websocket": "^1.0.35",
+        "ws": "^8.18.3"
     },
     "devDependencies": {
         "@types/crypto-js": "^4.2.2",
