@@ -73,7 +73,7 @@ function proxyRequest(link, method, headers = {}, body = null, responseType = 'j
     });
 }
 
-function startService() {
+function startService(environment) {
     /**
      * localhost:{srvPort}/proxy/
      * 本地回环代理服务器
@@ -127,6 +127,7 @@ function startService() {
         
     });
 
+    const port = environment === 'dev' ? 3001 : 3000;
     server.listen(port, () => {
         console.log(`[Arcanum Music - Service] Local proxy server running at http://localhost:${port}/`)
     })

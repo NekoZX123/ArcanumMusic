@@ -5,7 +5,7 @@
         "email": "guess@whoiam.qwq",
         "url": "https://github.com/NekoZX123"
     },
-    "description": "Arcanum Music - a multi-platform music application made by NekoZX123",
+    "description": "Arcanum Music",
     "private": true,
     "version": "1.0.21",
     "type": "module",

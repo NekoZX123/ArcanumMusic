@@ -8,8 +8,8 @@ import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 
 const __dirname = fileURLToPath(import.meta.url);
 
-// const environment = 'dev';
-const environment = 'build-kosmos-internal';
+const environment = 'dev';
+// const environment = 'build-kosmos-internal';
 let tray;
 let mainWindow = null;
 
@@ -397,7 +397,7 @@ app.whenReady().then(() => {
     ipcMain.handle('copyContent', (_, content) => clipboard.writeText(content))
 
     // 启动服务
-    startService();
+    startService(environment);
     // startWebSocket();
 
     // 创建应用主窗口
