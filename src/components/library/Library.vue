@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import './libraryStyle.css';
 
 import TabWidget from '../../assets/widgets/TabWidget.vue';
@@ -97,8 +97,108 @@ function platformChange(widgetInfo: { widgetId: string, current: number }) {
     }, 300);
 }
 
-const neteaseUserFavourites = ref('songList-netease-12352057833');
-const neteaseRecommends = ref('songList-netease-3136952023');
+// 加载收藏歌曲
+const currentFavPlatform = ref('netease');
+function loadFavPreview(platform: string, cookies: any) {
+    const sendRequest = requestFuncs[platform];
+    if (!sendRequest) {
+        console.error(`[Error] Unknown platform ${platform}`);
+        return;
+    }
+    else if (['kuwo', 'kugou'].includes(platform)) {
+        console.warn(`[Warning] Unsupported platform ${platform}`);
+        return;
+    }
+
+    currentFavPlatform.value = platform;
+    userFavourites.value = userFavouriteIds[platform];
+
+    sendRequest('userFavourites', {}, cookies)
+        .then((response: any) => {
+            // console.log(response.data);
+            const favList = parseMusicData(response, platform, 'userFavourites');
+
+            const favContainer = document.getElementById('userFavouritesPreview') as HTMLElement;
+            if (!favContainer) {
+                console.error(`[Error] Failed to get element #userFavouritesPreview`);
+                return;
+            }
+            favContainer.innerHTML = '';
+            
+            favLength.value = favList.tracks.length;
+            const loadList = favList.loadTracks;
+            loadList.forEach((songInfo: any) => {
+                const songId = `music-${platform}-${songInfo.songId}`;
+                addSongCard(favContainer, songId, songInfo.songName, songInfo.songCover, 
+                    songInfo.songAuthors, songInfo.songDuration);
+            });
+        });
+}
+function favouritesLoadHandler(event: any) {
+    const userData = getAccountInfo('all');
+    const platform = event.detail.platform;
+    loadFavPreview(platform, userData[platform]?.cookies);
+}
+
+// 加载每日推荐
+const currentRecommendPlatform = ref('netease');
+function loadRecommendPreview(platform: string, cookies: any) {
+    const sendRequest = requestFuncs[platform];
+    if (!sendRequest) {
+        console.error(`[Error] Unknown platform ${platform}`);
+        return;
+    }
+    else if (['kuwo', 'kugou'].includes(platform)) {
+        console.warn(`[Warning] Unsupported platform ${platform}`);
+        return;
+    }
+
+    currentRecommendPlatform.value = platform;
+    dailyRecommends.value = `songList-${platform}-${dailyRecommendIds[platform]}`;
+    const targetId = dailyRecommendIds[platform];
+
+    sendRequest('songList', { listId: targetId }, cookies)
+        .then((response: any) => {
+            const recommends = parseMusicData(response, platform, 'songList');
+
+            const container = document.getElementById('recommendContainer') as HTMLElement;
+            if (!container) {
+                console.error(`[Error] Failed to get element #recommendContainer`);
+            }
+            container.innerHTML = '';
+            
+            recommendLength.value = recommends.tracks.length;
+            const songList = recommends.loadTracks;
+            songList.forEach((songInfo: any, index: number) => {
+                if (index >= 10) {
+                    return;
+                }
+                const songId = `music-${platform}-${songInfo.songId}`;
+                addSongCard(container, songId, songInfo.songName, songInfo.songCover, 
+                    songInfo.songAuthors, songInfo.songDuration);
+            });
+        });
+}
+function recommendsLoadHandler(event: any) {
+    const userData = getAccountInfo('all');
+    const platform = event.detail.platform;
+    loadRecommendPreview(platform, userData[platform]?.cookies);
+}
+
+const userFavouriteIds: Record<string, string> = {
+    'netease': 'songList-netease-12352057833',
+    'qqmusic': 'songList-qqmusic-5507561315',
+    'kuwo': '',
+    'kugou': ''
+}
+const dailyRecommendIds: Record<string, string | number> = {
+    'netease': 3136952023,
+    'qqmusic': 7309419218,
+    'kuwo': '',
+    'kugou': ''
+}
+const userFavourites = ref('songList-netease-12352057833');
+const dailyRecommends = ref('songList-netease-3136952023');
 
 const favLength = ref(0);
 const recommendLength = ref(0);
@@ -119,49 +219,23 @@ onMounted(() => {
     greetings.value = greetList[choice];
     greetingsEnd.value = greetSubfix[choice];
 
-    // 加载收藏歌曲
-    getNeteaseResult('userFavourites', {}, userData.netease.cookies)
-        .then((response) => {
-            // console.log(response.data);
-            const favList = parseMusicData(response, 'netease', 'userFavourites');
+    loadFavPreview('netease', userData.netease.cookies);
 
-            const favContainer = document.getElementById('userFavouritesPreview') as HTMLElement;
-            if (!favContainer) {
-                console.error(`[Error] Failed to get element #userFavouritesPreview`);
-                return;
-            }
-            
-            favLength.value = favList.tracks.length;
-            const loadList = favList.loadTracks;
-            loadList.forEach((songInfo: any) => {
-                const songId = `music-netease-${songInfo.songId}`;
-                addSongCard(favContainer, songId, songInfo.songName, songInfo.songCover, 
-                    songInfo.songAuthors, songInfo.songDuration);
-            });
-        });
-    // 获取每日推荐封面
-    getNeteaseResult('songList', { listId: '3136952023' }, userData.netease.cookies)
-        .then((response) => {
-            const recommends = parseMusicData(response, 'netease', 'songList');
-
-            const container = document.getElementById('recommendContainer') as HTMLElement;
-            if (!container) {
-                console.error(`[Error] Failed to get element #recommendContainer`);
-            }
-            
-            recommendLength.value = recommends.tracks.length;
-            const songList = recommends.loadTracks;
-            songList.forEach((songInfo: any) => {
-                const songId = `music-netease-${songInfo.songId}`;
-                addSongCard(container, songId, songInfo.songName, songInfo.songCover, 
-                    songInfo.songAuthors, songInfo.songDuration);
-            });
-        });
+    loadRecommendPreview('netease', userData.netease.cookies);
 
     // 加载初始标签内容
     platformChange({ widgetId: 'HOMO114514', current: 0 });
 
+    // 监听收藏平台更新事件
+    window.addEventListener('load-favourites', favouritesLoadHandler);
+    window.addEventListener('load-recommends', recommendsLoadHandler);
+
     console.log('Library.vue loaded');
+});
+onUnmounted(() => {
+    // 自动卸载监听器
+    window.removeEventListener('load-favourites', favouritesLoadHandler);
+    window.removeEventListener('load-recommends', recommendsLoadHandler);
 });
 </script>
 
@@ -180,13 +254,15 @@ onMounted(() => {
         <div class="flex row" id="userCollections">
             <div class="songlistCard exlarge flex row" id="userFavourites">
                 <span class="cardHeader flex row" id="userFavouritesBackground" 
-                    @contextmenu="(event) => {triggerRightMenu(event, {}, 'platformSelect')}" 
-                    :style="`background-image: url('./images/library/favouritesBackground_red.jpg')`">
+                    @contextmenu="(event) => {
+                        triggerRightMenu(event, { type: 'userFavourites' }, 'platformSelect')
+                    }" 
+                    :style="`background-image: url('./images/library/favouritesBackground_${currentFavPlatform}.jpg')`">
                     <span class="cardInfo flex column">
                         <label class="text medium bold">我喜欢的音乐</label>
                         <label class="text ultraSmall">共 {{ favLength }} 首</label>
                     </span>
-                    <button class="songlistPlay" id="userFavrourites_play" @click="getPlayer()?.playListId(neteaseUserFavourites)">
+                    <button class="songlistPlay" id="userFavrourites_play" @click="getPlayer()?.playListId(userFavourites)">
                         <img src="/images/player/play.svg" alt="Play"/>
                     </button>
                 </span>
@@ -200,11 +276,13 @@ onMounted(() => {
                 </span>
                 <span class="listContent flex column" id="recommendContainer"></span>
                 <span class="cardFooter flex row">
-                    <span class="musicSource flex row">
+                    <span class="flex row" id="musicSource" @contextmenu="(event) => {
+                        triggerRightMenu(event, { type: 'dailyRecommends' }, 'platformSelect')
+                    }">
                         <label class="text ultraSmall">音乐源: </label>
-                        <img class="playlistSource" src="/images/platforms/netease.png" alt="Netease Music"/>
+                        <img class="playlistSource" :src="`./images/platforms/${currentRecommendPlatform}.png`" alt="Netease Music"/>
                     </span>
-                    <button class="songlistPlay" id="dailyRecommend_play" @click="getPlayer()?.playListId(neteaseRecommends)">
+                    <button class="songlistPlay" id="dailyRecommend_play" @click="getPlayer()?.playListId(dailyRecommends)">
                         <img src="/images/player/play.svg" alt="Play"/>
                     </button>
                 </span>
