@@ -9,8 +9,8 @@ import './playlistStyle.css';
         <div class="playlistPart flex column" id="currentSong">
             <label class="text large bold playlistSubtitle">正在播放</label>
             <SongInfoLine 
-                v-if="`playlist_${getPlayer()?.playlist.current.id}`"
-                :id="`playlist_${getPlayer()?.playlist.current.id}`" 
+                v-if="`playlist_current_${getPlayer()?.playlist.current.id}`"
+                :id="`playlist_current_${getPlayer()?.playlist.current.id}`" 
                 :name="getPlayer()?.playlist.current.name" 
                 :authors="getPlayer()?.playlist.current.authors" 
                 :cover-url="getPlayer()?.playlist.current.coverUrl" 
@@ -21,8 +21,8 @@ import './playlistStyle.css';
             <label class="text large bold playlistSubtitle">插队播放</label>
             <SongInfoLine
                 v-for="song in getPlayer()?.playlist.breakIn"
-                :key="`playlist_${song.id}`"
-                :id="`playlist_${song.id}`"
+                :key="`playlist_cutin_${song.id}`"
+                :id="`playlist_cutin_${song.id}`"
                 :name="song.name"
                 :authors="song.authors"
                 :cover-url="song.coverUrl"

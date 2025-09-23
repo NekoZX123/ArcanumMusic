@@ -131,7 +131,7 @@ onMounted(() => {
         </span>
         <span class="menuPart flex column">
             <MenuItem id="listRemove" icon="./images/menu/removeFromList.svg" text="从列表中删除" 
-                :on-click="() => {}" 
+                :on-click="() => {getPlayer()?.playlistRemove(props.targetInfo.id)}" 
                 v-if="props.menuType === 'playlistItem'"></MenuItem>
         </span>
         <span class="menuPart flex column">
