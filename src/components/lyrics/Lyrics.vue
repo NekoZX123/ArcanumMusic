@@ -136,10 +136,17 @@ const lyricLines: Ref<LyricData> = ref({
 /**
  * 更新歌词内容
  */
-function updateCurrentLyrics() {
+function updateCurrentLyrics(_?: any) {
     const songId = getPlayer()?.playlist.current.id;
     if (!songId) return;
     const platform = songId.split('-')[1];
+
+    // 重置歌词
+    lyricLines.value = {
+        lyrics: [],
+        metaData: {}
+    };
+
     getSongLyrics(songId)
     .then((lyricsInfo: any) => {
         // console.log(lyricsInfo);
@@ -237,6 +244,9 @@ onMounted(() => {
         });
     });
     observer.observe(playerElem, { attributes: true, attributeFilter: ['src'] });
+
+    // 监听歌词更新事件
+    window.addEventListener('update-lyrics', updateCurrentLyrics);
 
     // 歌词元素
     const lyricsContainer = document.getElementById('lyricsContent') as HTMLElement;

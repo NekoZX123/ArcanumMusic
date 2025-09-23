@@ -336,6 +336,10 @@ class Player {
 
             this.playStateImage = './images/player/pause.dark.svg';
             this.isPlaying = true;
+
+            // 更新歌词
+            const lyricsEvent = new CustomEvent('update-lyrics');
+            window.dispatchEvent(lyricsEvent);
         });
     }
     /**
