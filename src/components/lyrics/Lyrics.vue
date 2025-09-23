@@ -6,7 +6,7 @@ import { getPlayer } from '../../assets/player/player.ts';
 import { getSongLyrics } from '../../assets/player/songUtils.ts';
 import { parseLyrics, type LyricData } from '../../assets/lyrics/lyricsParser.ts';
 
-const songData = ref(getPlayer());
+// const songData = ref(getPlayer());
 // 最大偏移回弹距离
 const PROGRESS_OFFSET_MAX = 15;
 // 回弹方向 (左: -1 | 右: 1)
@@ -16,14 +16,41 @@ let offsetDirection = 0;
 let targetProgress = 0;
 const targetPercentage = ref(0);
 const playTimeAdjustFlag = ref(false);
+function adjustPlayProgress(mouseX: number) {
+    const progressBar = document.getElementById('progressBar');
+    if (!progressBar) return;
+
+    // 设置进度条宽度
+    let deltaX = mouseX - progressBar.getBoundingClientRect().left;
+    let progress = deltaX / progressBar.clientWidth;
+
+    // 防止范围溢出 & 处理回弹动画
+    if (progress < 0 || progress > 1) {
+        if (deltaX > PROGRESS_OFFSET_MAX) deltaX = PROGRESS_OFFSET_MAX;
+        if (deltaX < -PROGRESS_OFFSET_MAX) deltaX = -PROGRESS_OFFSET_MAX;
+
+        progressBar.style.transform = `translateX(${deltaX}px)`;
+        offsetDirection = deltaX < 0 ? 1 : -1;
+
+        progress = deltaX < 0 ? 0 : 1;
+    }
+
+    // 设置播放进度文字
+    let playProgress = Math.round((getPlayer()?.duration || 0) * progress);
+    getPlayer()?.updateProgress(playProgress);
+    targetProgress = playProgress;
+    targetPercentage.value = progress * 100;
+}
 function startProgressAdjust(event: MouseEvent) {
     if (event.buttons === 1) {
         // 添加全局事件监听器
-        document.addEventListener('mousemove', adjustPlayProgress);
+        document.addEventListener('mousemove', adjustOnMouseMove);
         playTimeAdjustFlag.value = true;
 
+        adjustPlayProgress(event.clientX);
+
         const handleMouseUp = () => {
-            document.removeEventListener('mousemove', adjustPlayProgress);
+            document.removeEventListener('mousemove', adjustOnMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
             getPlayer()?.setProgress(targetProgress);
             playTimeAdjustFlag.value = false;
@@ -41,31 +68,13 @@ function startProgressAdjust(event: MouseEvent) {
         document.addEventListener('mouseup', handleMouseUp);
     }
 }
-function adjustPlayProgress(event: MouseEvent) {
-    const progressBar = document.getElementById('progressBar');
-    if (!progressBar || !songData.value) return;
+// 鼠标移动事件调整处理
+function adjustOnMouseMove(event: MouseEvent) {
+    const progressBar = document.getElementById('playProgress');
+    if (!progressBar) return;
 
     if (event.buttons === 1 && playTimeAdjustFlag.value) {
-        // 设置进度条宽度
-        let deltaX = event.clientX - progressBar.getBoundingClientRect().left;
-        let progress = deltaX / progressBar.clientWidth;
-
-        // 防止范围溢出 & 处理回弹动画
-        if (progress < 0 || progress > 1) {
-            if (deltaX > PROGRESS_OFFSET_MAX) deltaX = PROGRESS_OFFSET_MAX;
-            if (deltaX < -PROGRESS_OFFSET_MAX) deltaX = -PROGRESS_OFFSET_MAX;
-
-            progressBar.style.transform = `translateX(${deltaX}px)`;
-            offsetDirection = deltaX < 0 ? 1 : -1;
-
-            progress = deltaX < 0 ? 0 : 1;
-        }
-
-        // 设置播放进度文字
-        let playProgress = Math.round((getPlayer()?.duration || 0) * progress);
-        getPlayer()?.updateProgress(playProgress);
-        targetProgress = playProgress;
-        targetPercentage.value = progress * 100;
+        adjustPlayProgress(event.clientX);
     }
 }
 
@@ -293,7 +302,7 @@ onMounted(() => {
                 <div class="flex column" id="playerControl">
                     <span class="flex row" id="progressContainer">
                         <label class="text ultraSmall bold white">{{ getPlayer()?.playedTimeText }}</label>
-                        <span class="fluentProgress flex row" id="progressBar" @mousedown="startProgressAdjust" @mousemove="adjustPlayProgress">
+                        <span class="fluentProgress flex row" id="progressBar" @mousedown="startProgressAdjust" @mousemove="adjustOnMouseMove">
                             <span class="fluentFilled" id="progressDone" 
                                 :style="`width: ${playTimeAdjustFlag ? targetPercentage : getPlayer()?.progressPercentage}%`"></span>
                         </span>

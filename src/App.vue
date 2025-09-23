@@ -8,10 +8,11 @@ import { createPlayer, getPlayer } from './assets/player/player.ts';
 import { initialize, pageBack, pageForward, togglePlaylist, changePage, updatePlaylistIcon } from './assets/utilities/pageSwitcher.ts';
 // import { testRequest } from './assets/utilities/requestTests.ts';
 import { PageButton } from './assets/widgets/pageSwitcher.tsx';
-import { showPopup } from './assets/notifications/popup.tsx';
+// import { showPopup } from './assets/notifications/popup.tsx';
 import { readAccountInfo } from './assets/utilities/accountManager.ts';
 import { hideArtistSelect, hideRightMenu } from './assets/utilities/elementControl.ts';
 import { loadConfig } from './assets/utilities/configLoader.ts';
+import { loadProxyPort } from './assets/utilities/proxyRequest.ts';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -83,16 +84,47 @@ const targetPercentage = ref(0);
 const playTimeAdjustFlag = ref(false);
 
 // 播放进度调整
+// 开始调整
+function adjustPlayProgress(mouseX: number) {
+    const progressBar = document.getElementById('playProgress');
+    if (!progressBar) return;
+
+    // 移动播放进度提示
+    let tooltipX = mouseX;
+    if (tooltipX < 80) tooltipX = 80;
+    if (tooltipX > document.body.clientWidth - 80) tooltipX = document.body.clientWidth - 80;
+
+    progressTooltipOffset.value = `left: calc(${tooltipX}px - 4rem)`;
+
+    // 设置进度条宽度
+    const barRect = progressBar.getBoundingClientRect();
+    let deltaX = mouseX - barRect.left;
+    let progress = deltaX / progressBar.clientWidth;
+
+    // 防止范围溢出
+    if (progress < 0) progress = 0;
+    if (progress > 1) progress = 1;
+
+    // 设置播放进度文字
+    let playProgress = Math.round((getPlayer()?.duration || 0) * progress);
+    getPlayer()?.updateProgress(playProgress);
+    targetProgress = playProgress;
+    targetPercentage.value = progress * 100;
+}
 function startProgressAdjust(event: MouseEvent) {
     if (event.buttons === 1 && !playTimeAdjustFlag.value) {
         // 添加全局事件监听器
         showProgressTooltip();
-        document.addEventListener('mousemove', adjustPlayProgress);
+        document.addEventListener('mousemove', adjustOnMouseMove);
         playTimeAdjustFlag.value = true;
 
+        // 点击时同样调整进度
+        adjustPlayProgress(event.clientX);
+
+        // 结束调整
         const handleMouseUp = () => {
             hideProgressTooltip();
-            document.removeEventListener('mousemove', adjustPlayProgress);
+            document.removeEventListener('mousemove', adjustOnMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
             getPlayer()?.setProgress(targetProgress);
             playTimeAdjustFlag.value = false;
@@ -101,32 +133,13 @@ function startProgressAdjust(event: MouseEvent) {
         document.addEventListener('mouseup', handleMouseUp);
     }
 }
-function adjustPlayProgress(event: MouseEvent) {
+// 鼠标移动事件调整处理
+function adjustOnMouseMove(event: MouseEvent) {
     const progressBar = document.getElementById('playProgress');
     if (!progressBar) return;
 
     if (event.buttons === 1 && playTimeAdjustFlag.value) {
-        // 移动播放进度提示
-        let tooltipX = event.clientX;
-        if (tooltipX < 80) tooltipX = 80;
-        if (tooltipX > document.body.clientWidth - 80) tooltipX = document.body.clientWidth - 80;
-
-        progressTooltipOffset.value = `left: calc(${tooltipX}px - 4rem)`;
-
-        // 设置进度条宽度
-        const barRect = progressBar.getBoundingClientRect();
-        let deltaX = event.clientX - barRect.left;
-        let progress = deltaX / progressBar.clientWidth;
-
-        // 防止范围溢出
-        if (progress < 0) progress = 0;
-        if (progress > 1) progress = 1;
-
-        // 设置播放进度文字
-        let playProgress = Math.round((getPlayer()?.duration || 0) * progress);
-        getPlayer()?.updateProgress(playProgress);
-        targetProgress = playProgress;
-        targetPercentage.value = progress * 100;
+        adjustPlayProgress(event.clientX);
     }
 }
 
@@ -322,7 +335,7 @@ onMounted(async () => {
         <!-- 播放器控制栏 -->
         <div class="flex column" id="playControlContainer">
             <div class="fluentProgress flex row" id="playProgress" 
-                @mousedown="startProgressAdjust" @mousemove="adjustPlayProgress">
+                @mousedown="startProgressAdjust" @mousemove="adjustOnMouseMove">
                 <div class="fluentFilled" id="playedCover" 
                     :style="`width: ${playTimeAdjustFlag ? targetPercentage : getPlayer()?.progressPercentage}%`"></div>
             </div>

@@ -153,12 +153,19 @@ function triggerRightMenu(event: MouseEvent, info: any, menuType: MenuType) {
     menuContainer.style.left = `${xOffset}px`;
     menuContainer.style.top = `${yOffset}px`;
 
-    menuContainer.classList.add('show');    
+    menuContainer.style.display = 'block';
+    setTimeout(() => {
+        menuContainer.classList.add('show'); 
+    }, 50);
+    
 }
 // 隐藏右键菜单
 function hideRightMenu() {
     const menuContainer = document.getElementById('rightClickMenuContainer') as HTMLElement;
     menuContainer.classList.remove('show');
+    setTimeout(() => {
+        menuContainer.style.display = 'none';
+    }, 250);
 }
 
 // 显示歌手选取弹窗
