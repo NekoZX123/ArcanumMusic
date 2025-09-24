@@ -1,9 +1,24 @@
 #lyricsPanel {
     height: 100%;
 
-    background: linear-gradient(45deg, var(--color-blue-light), var(--color-green-light));
+    /* background: linear-gradient(45deg, var(--color-blue-light), var(--color-green-light)); */
 
     align-items: center;
+}
+
+/* 动态背景 */
+#dynamicBackgroundContainer{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+
+    background: transparent;
+
+    z-index: -1;
+}
+#dynamicBackground {
+    width: 100%;
+    height: 100%;
 }
 
 /* 顶栏 */
@@ -245,9 +260,9 @@
     background: var(--transparent-grey);
 }
 .lyricsBox > ul {
-    color: var(--transparent-darkgrey);
+    color: var(--transparent-grey);
 
-    text-shadow: 0 0 2px var(--transparent-darkgrey);
+    text-shadow: 0 0 2px var(--transparent-grey);
 
     transition: all 300ms ease-in-out;
 }

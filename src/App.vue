@@ -180,6 +180,7 @@ function togglePlaylistPanel(event: MouseEvent) {
 }
 
 // 切换歌词面板
+const lyricShowEvent = new CustomEvent('lyrics-background-anim');
 function showLyrics(_: MouseEvent) {
     const lyricsPanel = document.getElementById('lyricsArea');
     if (!lyricsPanel) return;
@@ -188,6 +189,7 @@ function showLyrics(_: MouseEvent) {
     setTimeout(() => {
         lyricsPanel.classList.add('show');
     }, 50);
+    window.dispatchEvent(lyricShowEvent);
 }
 
 // 长歌曲名称焦点滚动

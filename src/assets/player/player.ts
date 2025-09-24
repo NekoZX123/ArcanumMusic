@@ -341,6 +341,10 @@ class Player {
             // 更新歌词
             const lyricsEvent = new CustomEvent('update-lyrics');
             window.dispatchEvent(lyricsEvent);
+
+            // 更新动态背景
+            const backgroundEvent = new CustomEvent('update-background');
+            window.dispatchEvent(backgroundEvent);
         });
     }
     /**

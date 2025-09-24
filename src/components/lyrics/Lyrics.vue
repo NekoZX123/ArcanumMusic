@@ -5,6 +5,7 @@ import { LyricsLine } from '../../assets/lyrics/Lyrics.tsx';
 import { getPlayer } from '../../assets/player/player.ts';
 import { getSongLyrics } from '../../assets/player/songUtils.ts';
 import { parseLyrics, type LyricData } from '../../assets/lyrics/lyricsParser.ts';
+import { getMainColors, ParticleManager } from '../../assets/utilities/colorUtils.ts';
 
 // const songData = ref(getPlayer());
 // 最大偏移回弹距离
@@ -82,6 +83,10 @@ function adjustOnMouseMove(event: MouseEvent) {
 function hideLyrics(_: any) {
     const lyricsPanel = document.getElementById('lyricsArea');
     if (!lyricsPanel) return;
+
+    if (particleSystem) {
+        particleSystem.stopAnimation();
+    }
 
     lyricsPanel.classList.remove('show');
 
@@ -225,6 +230,62 @@ function updateFocusedLyric(time: number) {
     }
 }
 
+let particleSystem: ParticleManager | null = null;
+const PARTICLES_COUNT = 3;
+/**
+ * 加载动态背景 (颜色根据歌曲封面提取)
+ */
+async function loadMainColorBackground(_: any) {
+    const coverUrl = getPlayer()?.coverUrl;
+    if (coverUrl) {
+        // 获取封面主色
+        const colorList: any = await getMainColors(coverUrl, PARTICLES_COUNT);
+        if (!particleSystem) return;
+
+        // 重置动画
+        particleSystem.stopAnimation();
+
+        // 设置光斑颜色
+        console.log(colorList);
+        particleSystem.setColors(colorList);
+
+        // 重置粒子效果
+        particleSystem.clearCanvas();
+        particleSystem.createParticles();
+
+        setTimeout(() => {
+            particleSystem?.startAnimation();
+        }, 50);
+    }
+}
+
+/**
+ * 歌词面板显示时检测是否开始动画
+ */
+function pendStartAnimation(_: any) {
+    // 播放时开始动画
+    if (getPlayer()?.isPlaying && particleSystem) {
+        particleSystem.stopAnimation(); // 先停止已有动画
+        particleSystem.startAnimation();
+    }
+}
+
+/**
+ * 切换播放/暂停
+ */
+function togglePlayPauseInLyrics(_: MouseEvent) {
+    const musicPlayer = getPlayer();
+    if (!musicPlayer || !particleSystem) return;
+    musicPlayer.togglePlayPause();
+
+    if (musicPlayer.isPlaying) {
+        particleSystem.startAnimation();
+    }
+    else {
+        particleSystem.stopAnimation();
+    }
+}
+
 onMounted(() => {
     // 设置触发器
     const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
@@ -254,13 +315,27 @@ onMounted(() => {
     });
     observer.observe(playerElem, { attributes: true, attributeFilter: ['src'] });
 
-    // 监听歌词更新事件
+    // 监听歌词/背景更新/歌词面板显示事件
     window.addEventListener('update-lyrics', updateCurrentLyrics);
+    window.addEventListener('update-background', loadMainColorBackground);
+    window.addEventListener('lyrics-background-anim', pendStartAnimation);
 
     // 歌词元素
     const lyricsContainer = document.getElementById('lyricsContent') as HTMLElement;
     containerElement.value = lyricsContainer;
     lyricElements.value = lyricsContainer.children as any;
+
+    // 光斑背景动效
+    particleSystem = new ParticleManager(['rgb(144,202,249)', 'rgb(248,187,208)', 'rgb(144,150,249)']);
+    particleSystem.createParticles();
+    particleSystem.update();
+
+    window.addEventListener('beforeunload', () => {
+        if (particleSystem) {
+            particleSystem.destroy();
+            particleSystem = null;
+        }
+    });
 
     console.log('Lyrics.vue loaded');
 });
@@ -268,6 +343,10 @@ onMounted(() => {
 </script>
 <template>
     <div class="flex column" id="lyricsPanel">
+        <!-- 动态背景 -->
+        <div id="dynamicBackgroundContainer">
+            <canvas id="dynamicBackground"></canvas>
+        </div>
         <!-- 面板顶栏 -->
         <div class="flex row" id="panelTop">
             <button id="lyricsHide" @click="hideLyrics">
@@ -316,7 +395,7 @@ onMounted(() => {
                         <button class="playControl" id="previous" @click="getPlayer()?.previousSong">
                             <img src="/images/player/previous.svg" alt="Previous song"/>
                         </button>
-                        <button class="playControl large" id="playPause" @click="getPlayer()?.togglePlayPause">
+                        <button class="playControl large" id="playPause" @click="togglePlayPauseInLyrics">
                             <img :src="getPlayer()?.playStateImage" alt="Play / Pause"/>
                         </button>
                         <button class="playControl" id="next" @click="getPlayer()?.nextSong">
