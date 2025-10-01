@@ -226,6 +226,21 @@ const dataParsers: Record<string, any> = {
             'listId': ['id'],
             'listName': ['name'],
             'listCover': ['coverImgUrl']
+        },
+        'dailyRecommends': {
+            'body': ['data'],
+            'songCount': null,
+            'tracks': ['recommend'],
+            'loadTracks': ['recommend'],
+            'songId': ['id'],
+            'songName': ['name'],
+            'songCover': ['album', 'picUrl'],
+            'songAuthors': ['artists'],
+            'songDuration': ['duration'],
+            '@postprocessors': {
+                'songAuthors': (authors: object[]) => formatAuthors(authors, 'netease'),
+                'songDuration': (duration: number) => Math.round(duration / 1000)
+            }
         }
     },
     'qqmusic': {
@@ -1007,6 +1022,11 @@ const targetFormats: Record<string, any> = {
     },
     'userPlaylists': {
         'lists': '@songList_brief'
+    },
+    'dailyRecommends': {
+        'tracks': [],
+        'loadTracks': '@song_brief',
+        'songCount': 0
     }
 }
 

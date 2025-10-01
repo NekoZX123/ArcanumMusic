@@ -12,6 +12,7 @@ import { addSonglistCard, addSongCard, addArtistCard } from '../../assets/utilit
 import type { AxiosResponse } from 'axios';
 import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
 import { getPlayer } from '../../assets/player/player.ts';
+import { getMainColors } from '../../assets/utilities/colorUtils.ts';
 
 // 默认滑动量
 const BOX_SCROLL_DISTANCE = 330;
@@ -48,6 +49,29 @@ const requestFunc: Record<string, any> = {
     'kugou': getKugouResult
 }
 
+function playNeteaseRadio(_: MouseEvent) {
+    const userData = getAccountInfo('all');
+
+    getNeteaseResult('dailyRecommends', {}, userData.netease.cookies)
+        .then((response) => {
+            const recommends = parseMusicData(response, 'netease', 'dailyRecommends');
+
+            const tracks = recommends.loadTracks;
+            const listContent: any[] = [];
+            tracks.forEach((trackInfo: any) => {
+                listContent.push({
+                    id: `music-netease-${trackInfo.songId}`,
+                    name: trackInfo.songName,
+                    coverUrl: trackInfo.songCover || './images/library/player/testAlbum.png',
+                    authors: trackInfo.songAuthors,
+                    duration: trackInfo.songDuration
+                });
+            });
+
+            getPlayer()?.playByList(listContent);
+        });
+}
+
 onMounted(() => {
     const userData = getAccountInfo('all');
 
@@ -60,7 +84,18 @@ onMounted(() => {
                 return;
             }
 
-            recommendCover.value = data.playlist.coverImgUrl;
+            const imgUrl = data.playlist.coverImgUrl;
+            recommendCover.value = imgUrl;
+
+            getMainColors(imgUrl, 2)
+            .then((colors: any) => {
+                const [gradientColor1, gradientColor2] = colors;
+
+                const radioBox = document.getElementById('musicRadio');
+                if (!radioBox) return;
+
+                radioBox.style.background = `linear-gradient(120deg, ${gradientColor1}, ${gradientColor2})`;
+            });
         });
     // 获取音乐雷达封面
     getNeteaseResult('dailyRecommends', {}, userData.netease.cookies)
@@ -292,22 +327,17 @@ onMounted(() => {
 
             <!-- 电台 -->
             <div class="flex row songlistCard midlarge" id="musicRadio">
-                <span class="cardHeader flex column">
+                <span class="cardHeader flex column" id="radioHeader">
                     <label id="radioTitle" class="text bold">音&nbsp;乐电&nbsp;台</label>
 
-                    <span class="flex row">
-                        <button class="songlistPlay" id="musicRadio_prev">
-                            <img src="/images/player/previous.svg" alt="Previous"/>
-                        </button>
-                        <button class="songlistPlay" id="musicRadio_play">
-                            <img src="/images/player/play.dark.svg" alt="Play"/>
-                        </button>
-                        <button class="songlistPlay" id="musicRadio_next">
-                            <img src="/images/player/next.svg" alt="Next"/>
-                        </button>
-                    </span>
+                    <label id="radioSource" class="text ultraSmall white">by Netease Music</label>
                 </span>
-                <img class="songCover" :src="radioCover" alt="Playlist cover"/>
+                <span id="radioCoverBox">
+                    <img class="songCover" id="radioCover" :src="radioCover" alt="Playlist cover"/>
+                    <button class="songlistPlay" id="musicRadio_play" @click="playNeteaseRadio">
+                        <img src="/images/player/play.dark.svg" alt="Play"/>
+                    </button>
+                </span>
             </div>
         </div>
 
