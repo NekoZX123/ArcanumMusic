@@ -127,11 +127,13 @@ function loadFavPreview(platform: string, cookies: any) {
             
             favLength.value = favList.tracks.length;
             const loadList = favList.loadTracks;
-            loadList.forEach((songInfo: any) => {
+            
+            for (let i = 0; i < Math.min(10, loadList.length); i++) {
+                const songInfo = loadList[i];
                 const songId = `music-${platform}-${songInfo.songId}`;
                 addSongCard(favContainer, songId, songInfo.songName, songInfo.songCover, 
                     songInfo.songAuthors, songInfo.songDuration);
-            });
+            }
         });
 }
 function favouritesLoadHandler(event: any) {
@@ -169,14 +171,12 @@ function loadRecommendPreview(platform: string, cookies: any) {
             
             recommendLength.value = recommends.tracks.length;
             const songList = recommends.loadTracks;
-            songList.forEach((songInfo: any, index: number) => {
-                if (index >= 10) {
-                    return;
-                }
+            for (let i = 0; i < Math.min(10, songList.length); i++) {
+                const songInfo = songList[i];
                 const songId = `music-${platform}-${songInfo.songId}`;
                 addSongCard(container, songId, songInfo.songName, songInfo.songCover, 
                     songInfo.songAuthors, songInfo.songDuration);
-            });
+            }
         });
 }
 function recommendsLoadHandler(event: any) {

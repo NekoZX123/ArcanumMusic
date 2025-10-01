@@ -112,11 +112,33 @@
 
     margin: 0 2rem;
 }
+#radioHeader {
+    justify-content: flex-start;
+
+    padding-top: 8px;
+    padding-left: 12px;
+}
 #radioTitle {
     width: 60pt;
-    margin-left: 6px;
     
     font-size: 25pt;
+}
+#radioCoverBox {
+    position: relative;
+
+    top: calc(1rem + 8px);
+    left: calc(1rem + 4px);
+}
+#radioCover {
+    width: calc(8rem - 12px);
+    height: calc(8rem - 12px);
+
+    border-radius: 8px;
+}
+#musicRadio_play {
+    position: relative;
+    top: -3rem;
+    left: 4.5rem;
 }
 
 .nowrapBox {

@@ -34,10 +34,11 @@ const props = defineProps(
 
 // 列表类型 (歌单 / 专辑)
 const listType = ref('');
+const platform = ref('');
 const typeName = ref('');
 
 // 数据请求及解析
-function requestListInfo(platform: string, module: 'songList' | 'album' | 'rankingContent', dataId: string, cookies: object) {
+function loadListContent(platform: string, module: 'songList' | 'album' | 'rankingContent', dataId: string, cookies: object) {
     const platformRequest = getRequestFormat();
 
     if (!platformRequest[platform]) {
@@ -68,7 +69,6 @@ function requestListInfo(platform: string, module: 'songList' | 'album' | 'ranki
                 return;
             }
             console.log(listInfo);
-            // console.log(listInfo);
 
             // 获取歌单内容
             if (platform !== 'netease') {
@@ -139,9 +139,10 @@ onMounted(() => {
     const module = (type === 'ranking') ? 'rankingContent' : ( type === 'album' ? 'album' : 'songList' );
     listType.value = module;
     typeName.value = (type === 'ranking') ? 'Ranking' : ( type === 'album' ? 'Album' : 'Songlist' );
+    platform.value = platformName;
 
     // 加载列表内容
-    requestListInfo(platformName, module, listId, userData[platformName].cookies);
+    loadListContent(platformName, module, listId, userData[platformName].cookies);
 
     console.log(`Songlist.vue loaded with songlist id ${props.id}`);
 });
@@ -155,7 +156,7 @@ onMounted(() => {
                 <label class="text ultraSmall grey">{{ `${listType === 'Album' ? '专辑' : '歌单'} / 共 ${listMetaData.songCount} 首` }}</label>
                 <label class="text medium">{{ typeName }} by {{ listMetaData.author }}</label>
                 <label class="text ultraSmall" id="listDescription">{{ listMetaData.description }}</label>
-                <button class="flex row" id="playAllContent" @click="playCurrentList">
+                <button class="flex row listButton" id="playAllContent" @click="playCurrentList">
                     <img src="/images/player/play.dark.svg"></img>
                     <label class="text small bold">播放</label>
                 </button>
