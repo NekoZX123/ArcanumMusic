@@ -1,7 +1,7 @@
 <script setup lang="tsx">
 import { defineComponent, onMounted } from 'vue';
 import { getPlayer } from '../player/player.ts';
-import { changePage } from '../utilities/pageSwitcher.ts';
+import { changePage, getCurrentPage, togglePlaylist } from '../utilities/pageSwitcher.ts';
 import { getSongInfo, getSongLink } from '../player/songUtils.ts';
 import { hideArtistSelect, showArtistSelect } from '../utilities/elementControl.ts';
 import { showNotify } from '../notifications/Notification.ts';
@@ -38,6 +38,14 @@ function playCurrentContent() {
     }
 }
 
+function jumpToSongInfo(songId: string) {
+    if (getCurrentPage() === 'playlist') {
+        togglePlaylist(undefined);
+    }
+
+    changePage('single', true, songId);
+}
+
 /**
  * 跳转至歌曲专辑
  * @param songId 歌曲 ID
@@ -45,6 +53,10 @@ function playCurrentContent() {
 function jumpToSongAlbum(songId: string) {
     const idParts = songId.split('-');
     const platform = idParts[1];
+
+    if (getCurrentPage() === 'playlist') {
+        togglePlaylist(undefined);
+    }
 
     getSongInfo(songId)
     .then((songInfo: any) => {
@@ -59,6 +71,10 @@ function jumpToSongAlbum(songId: string) {
  * @param songId 歌曲 ID
  */
 function jumpToSongArtist(songId: string) {
+    if (getCurrentPage() === 'playlist') {
+        togglePlaylist(undefined);
+    }
+
     getSongInfo(songId)
     .then((songInfo: any) => {
         const artists = songInfo.authorsObject;
@@ -143,7 +159,7 @@ onMounted(() => {
         </span>
         <span class="menuPart flex column">
             <MenuItem id="songInfo" icon="./images/menu/play.svg" text="查看歌曲信息" 
-                :on-click="() => {changePage('single', true, props.targetInfo.id)}" 
+                :on-click="() => {jumpToSongInfo(props.targetInfo.id)}" 
                 v-if="props.menuType === 'playlistItem'"></MenuItem>
             <MenuItem id="albumInfo" icon="./images/menu/album.svg" text="查看专辑" 
                 :on-click="() => {jumpToSongAlbum(props.targetInfo.id)}" 
