@@ -42,18 +42,27 @@ type LyricsInfo = { lyrics: string[], translation: string[] };
  * @returns 格式化过的歌词信息
  */
 function parseLyricsCommon(lyricsInfo: LyricsInfo) {
-    // 去除空字符串
-    for (let i = 0; i < lyricsInfo.lyrics.length; i++) {
-        if (!lyricsInfo.lyrics[i]) lyricsInfo.lyrics.splice(i, 1);
-    }
-    for (let i = 0; i < lyricsInfo.translation.length; i++) {
-        if (!lyricsInfo.translation[i]) lyricsInfo.translation.splice(i, 1);
-    }
-
     const parsedLyrics: LyricData = {
         lyrics: [],
         metaData: {}
     };
+
+    // 去除空字符串
+
+    // 无歌词时返回空数据
+    if (!lyricsInfo.lyrics) return parsedLyrics;
+    // 翻译存在标记
+    const isTranslationExist = lyricsInfo.translation ? true : false;
+
+    for (let i = 0; i < lyricsInfo.lyrics.length; i++) {
+        if (!lyricsInfo.lyrics[i]) lyricsInfo.lyrics.splice(i, 1);
+    }
+    if (isTranslationExist) {
+        for (let i = 0; i < lyricsInfo.translation.length; i++) {
+            if (!lyricsInfo.translation[i]) lyricsInfo.translation.splice(i, 1);
+        }
+    }
+
     // 添加歌词内容
     for (let i = 0; i < lyricsInfo.lyrics.length; i++) {
         const lyric = lyricsInfo.lyrics[i];
@@ -76,27 +85,30 @@ function parseLyricsCommon(lyricsInfo: LyricsInfo) {
     }
     // 添加翻译
     let lastIndex = 0; // 上次时间匹配到的位置
-    for (let i = 0; i < lyricsInfo.translation.length; i++) {
-        const translation = lyricsInfo.translation[i];
-        const prefix = getBracketContent(translation) || '';
-        const transText = translation.split(']')[1];
+    if (isTranslationExist) {
+        for (let i = 0; i < lyricsInfo.translation.length; i++) {
+            const translation = lyricsInfo.translation[i];
+            const prefix = getBracketContent(translation) || '';
+            const transText = translation.split(']')[1];
 
-        const prefixMark = prefix.split(':')[0];
-        // 元数据前缀
-        if (metaDataMarks.includes(prefixMark)) {
-            const metaContent = prefix.split(':')[1];
-            parsedLyrics.metaData[prefixMark] = metaContent;
-            continue;
-        }
+            const prefixMark = prefix.split(':')[0];
+            // 元数据前缀
+            if (metaDataMarks.includes(prefixMark)) {
+                const metaContent = prefix.split(':')[1];
+                parsedLyrics.metaData[prefixMark] = metaContent;
+                continue;
+            }
 
-        const targetTime = formatLyricTime(prefix);
-        for (let i = lastIndex; i < parsedLyrics.lyrics.length; i++){
-            if (parsedLyrics.lyrics[i].time === targetTime) {
-                parsedLyrics.lyrics[i].translation = transText;
-                lastIndex = i;
+            const targetTime = formatLyricTime(prefix);
+            for (let i = lastIndex; i < parsedLyrics.lyrics.length; i++){
+                if (parsedLyrics.lyrics[i].time === targetTime) {
+                    parsedLyrics.lyrics[i].translation = transText;
+                    lastIndex = i;
+                }
             }
         }
     }
+    
 
     return parsedLyrics;
 }

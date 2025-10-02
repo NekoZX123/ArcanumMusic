@@ -18,9 +18,9 @@ function rgb2hsv(r: number, g: number, b: number): { h: number, s: number, v: nu
     return { h, s, v };
 }
 
-const MAX_BRIGHTNESS = 0.85; // 最大明度
-const MIN_BRIGHTNESS = 0.15; // 最小明度
-const MIN_SATURATION = 0.15; // 最小饱和度
+const MAX_BRIGHTNESS = 0.90; // 最大明度
+const MIN_BRIGHTNESS = 0.10; // 最小明度
+const MIN_SATURATION = 0.20; // 最小饱和度
 /**
  * 判断颜色是否适合作为背景主色
  * @param r RGB - R
@@ -44,9 +44,9 @@ class ParticleSpot {
     speedY: number;
     color: string;
 
-    constructor(color: string) {
-        this.x = 0;
-        this.y = 0;
+    constructor(color: string, x: number = 0, y: number = 0) {
+        this.x = x;
+        this.y = y;
         this.size = 0;
         this.speedX = 0;
         this.speedY = 0;
@@ -58,9 +58,6 @@ class ParticleSpot {
             return;
         }
         this.context = this.canvas.getContext('2d', { willReadFrequently: false });
-
-        this.x = (Math.random() * 0.5 + 0.2) * this.canvas.width;
-        this.y = (Math.random() * 0.5 + 0.2) * this.canvas.height;
 
         this.size = (Math.random() * 0.4 + 0.6) * this.canvas.width;
 
@@ -140,8 +137,10 @@ class ParticleManager {
      */
     createParticles() {
         this.spots = [];
-        this.colors.forEach((color) => {
-            this.spots.push(new ParticleSpot(color));
+        this.colors.forEach((color, index) => {
+            const particleX = this.canvas.width * 0.333 * (index + 1);
+            const particleY = this.canvas.height * 0.333 * (index + 1);
+            this.spots.push(new ParticleSpot(color, particleX, particleY));
         });
     }
 
@@ -249,7 +248,22 @@ function getMainColors(imgUrl: string, count: number = 3) {
 
             // 采样
             const colorMap = new Map<string, number>();
-            const step = Math.max(1, Math.floor(pixels.length / 10000));
+            let fallbackColors: string[] = [];
+            for (let i = 0; i < pixels.length && fallbackColors.length < count; i += 4) {
+                const [r, g, b] = [pixels[i], pixels[i + 1], pixels[i + 2]];
+                if (isProperColor(r, g, b)) {
+                    const simplefiedColor = `${Math.floor(r/COLOR_STEP)*COLOR_STEP},${Math.floor(g/COLOR_STEP)*COLOR_STEP},${Math.floor(b/COLOR_STEP)*COLOR_STEP}`;
+                    if (!fallbackColors.includes(simplefiedColor)) {
+                        fallbackColors.push(simplefiedColor);
+                    }
+                }
+            }
+            fallbackColors.forEach(color => {
+                if (!colorMap.has(color)) {
+                    colorMap.set(color, 1);
+                }
+            });
+            const step = Math.max(1, Math.floor(pixels.length / 1000));
 
             // 获取颜色频率
             for (let i = 0; i < pixels.length; i += 4 * step) {

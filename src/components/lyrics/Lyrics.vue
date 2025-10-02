@@ -163,8 +163,6 @@ function updateCurrentLyrics(_?: any) {
 
     getSongLyrics(songId)
     .then((lyricsInfo: any) => {
-        // console.log(lyricsInfo);
-        // console.log(parseLyrics(lyricsInfo, platform));
 
         const parseResult = parseLyrics(lyricsInfo, platform);
         if (!parseResult) {
@@ -173,6 +171,7 @@ function updateCurrentLyrics(_?: any) {
         }
         lyricLines.value = parseResult;
 
+        currentLyricIndex = -1;
         updateFocusedLyric(0);
     });
 }
@@ -206,10 +205,11 @@ function findLyricIndex(time: number) {
  */
 function updateFocusedLyric(time: number) {
     const targetIndex = findLyricIndex(time);
-    
-    if (targetIndex !== currentLyricIndex && lyricElements.value.length > 0) {
+
+    if (targetIndex !== currentLyricIndex && lyricElements.value.length > 0 && targetIndex >= 0) {
         // 更新样式
         if (currentLyricIndex >= 0) {
+            console.log(targetIndex, currentLyricIndex, lyricElements.value);
             lyricElements.value[currentLyricIndex].classList.remove('focused');
         }
         lyricElements.value[targetIndex].classList.add('focused');

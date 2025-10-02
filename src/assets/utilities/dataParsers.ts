@@ -33,8 +33,8 @@ const dataParsers: Record<string, any> = {
             'lyrics': ['lrc', 'lyric'],
             'translation': ['tlyric', 'lyric'],
             '@postprocessors': {
-                'lyrics': (lyricText: string) => lyricText.split('\n'),
-                'translation': (lyricText: string) => lyricText.split('\n')
+                'lyrics': (lyricText: string) => lyricText?.split('\n'),
+                'translation': (lyricText: string) => lyricText?.split('\n')
             }
         },
         'search-singles': {
@@ -706,7 +706,7 @@ const dataParsers: Record<string, any> = {
             'lyrics': ['data', 'lyrics'],
             'translation': ['data', 'lyrics'],
             '@postprocessors': {
-                'lyrics': (lyricText: string) => lyricText.split('\n'),
+                'lyrics': (lyricText: string) => lyricText?.split('\n'),
                 'translation': (_: any) => []
             }
         },
@@ -1146,11 +1146,14 @@ function getAuthorObject(authorList: any[], platform: string) {
  */
 function parseDataByArray(data: any, parserList: string[]) {
     let object = data;
+
     if (parserList === undefined) console.log(data);
+
     for (let i = 0; i < parserList.length; i++) {
         const param = parserList[i];
         if (object === undefined) {
-            throw new Error(`[ERROR] Cannot parse data 'undefined' with key '${param}'`);
+            console.warn(`[Warning] Cannot parse data 'undefined' with key '${param}'`);
+            return null;
         }
         object = object[param];
     }
