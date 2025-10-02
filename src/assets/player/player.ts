@@ -4,7 +4,7 @@ import { getListContent, getSongInfo, getSongLink } from "./songUtils.ts";
 
 // 时间格式化
 function timeFormat(timeSeconds: number) {
-    let secondNum = timeSeconds % 60;
+    let secondNum = Math.round(timeSeconds % 60);
     if (secondNum < 0) secondNum = 0;
     let minTemp = Math.floor(timeSeconds / 60);
     let minuteNum = minTemp % 60;

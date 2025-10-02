@@ -38,6 +38,9 @@ function adjustPlayProgress(mouseX: number) {
 
     // 设置播放进度文字
     let playProgress = Math.round((getPlayer()?.duration || 0) * progress);
+    if (progress >= 1) {
+        playProgress = (Math.max(0, (getPlayer()?.duration || 0) - 0.1));
+    }
     getPlayer()?.updateProgress(playProgress);
     targetProgress = playProgress;
     targetPercentage.value = progress * 100;
@@ -53,7 +56,7 @@ function startProgressAdjust(event: MouseEvent) {
         const handleMouseUp = () => {
             document.removeEventListener('mousemove', adjustOnMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
-            getPlayer()?.setProgress(targetProgress);
+            getPlayer()?.setProgress(targetProgress, false);
             playTimeAdjustFlag.value = false;
 
             const progressBar = document.getElementById('progressBar');
@@ -209,7 +212,7 @@ function updateFocusedLyric(time: number) {
     if (targetIndex !== currentLyricIndex && lyricElements.value.length > 0 && targetIndex >= 0) {
         // 更新样式
         if (currentLyricIndex >= 0) {
-            console.log(targetIndex, currentLyricIndex, lyricElements.value);
+            // console.log(targetIndex, currentLyricIndex, lyricElements.value);
             lyricElements.value[currentLyricIndex].classList.remove('focused');
         }
         lyricElements.value[targetIndex].classList.add('focused');
