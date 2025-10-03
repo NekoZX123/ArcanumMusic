@@ -512,6 +512,7 @@ const dataParsers: Record<string, any> = {
             'songAuthors': ['ARTIST'],
             'songDuration': ['DURATION'],
             '@postprocessors' : {
+                'songDuration': (durationText: string) => parseInt(durationText),
                 'songAuthors': (authors: string) => formatAuthors(authors.split('&'), 'kuwo'),
                 'songCover': (short: string) => `https://img3.kuwo.cn/star/albumcover/${short}`
             }
