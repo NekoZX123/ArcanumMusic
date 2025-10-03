@@ -14,6 +14,10 @@ import { addArtistCard, addSongCard, addSonglistCard } from '../../assets/utilit
 
 const platformTabs = [
     {
+        title: '综合搜索',
+        icon: './images/platforms/multiplatform.png'
+    },
+    {
         title: '网易云音乐',
         icon: './images/platforms/netease.png'
     },
@@ -56,21 +60,24 @@ function clearSearchBar(_: any) {
 }
 
 // 平台标签页顺序
-const platformArray = ['netease', 'qqmusic', 'kuwo', 'kugou'];
+const platformArray = ['multiplatform', 'netease', 'qqmusic', 'kuwo', 'kugou'];
 const typeGetters: Record<string, any> = {
+    'multiplatform': getMultiplatformSearchTypes,
     'netease': getNeteaseSearchTypes,
     'qqmusic': getQQmusicSearchTypes,
     'kuwo': getKuwoSearchTypes,
     'kugou': getKugouSearchTypes
 };
 const requestFunc: Record<string, any> = {
+    'multiplatform': searchMultiplatform,
     'netease': getNeteaseResult,
     'qqmusic': getQQmusicResult,
     'kuwo': getKuwoResult,
     'kugou': getKugouResult
 }
-let currentPlatform = ref('netease');
+let currentPlatform = ref('multiplatform');
 let currentType = ref(0);
+
 // 类型标签页顺序
 const typeArray = ['singles', 'songlists', 'albums', 'artists'];
 
@@ -88,9 +95,120 @@ function platformChange(tabInfo: { widgetId: string, current: number }) {
     typeChange({ widgetId: tabInfo.widgetId, current: currentType.value });
 }
 
+// 综合搜索
+
+// 搜索类型
+function getMultiplatformSearchTypes () {
+    return {
+        'netease': getNeteaseSearchTypes(),
+        'qqmusic': getQQmusicSearchTypes(),
+        'kuwo': getKuwoSearchTypes(),
+        'kugou': getKugouSearchTypes()
+    };
+}
+
+// 单平台搜索
+function searchSinglePlatform(platform: string, keyword: string, type: string, isMultiplatform: boolean = false) {
+    const userData = getAccountInfo('all');
+
+    const getType = typeGetters[platform];
+    if (!getType) {
+        console.error(`[Error] Unsupported platform ${platform}`);
+        return;
+    }
+
+    const searchType = getType(type)[type];
+
+    const sendRequest = requestFunc[platform];
+    if (!sendRequest) {
+        console.error(`[Error] Unsupported platform ${platform}`);
+        return;
+    }
+    
+    sendRequest('search', { keyword: keyword, type: searchType }, userData[platform].cookies)
+        .then((response: AxiosResponse) => {
+            // console.log(response.data);
+            const result = parseMusicData(response, platform, `search-${type}`);
+            console.log(result);
+            
+            setTimeout(() => {
+                const containerFilter = `type-${isMultiplatform ? 'multiplatform' : platform}-${type}`;
+                const container = document.getElementById(containerFilter) as HTMLElement;
+                // console.log(container);
+                if (!container) {
+                    console.error(`[Error] Failed to get HTML Element #${containerFilter}`);
+                    return;
+                }
+
+                // 非多平台搜索时清空容器
+                if (!isMultiplatform) {
+                    container.innerHTML = '';
+                }
+
+                if (type === 'singles') { // 单曲
+                    const songList = result.songList;
+                    songList?.forEach((songInfo: any) => {
+                        const songId = `music-${platform}-${songInfo.songId}`;
+                        addSongCard(container, songId, songInfo.songName, songInfo.songCover, 
+                            songInfo.songAuthors, songInfo.songDuration);
+                    });
+                }
+                if (type === 'songlists') { // 歌单
+                    const lists = result.lists;
+                    lists?.forEach((listInfo: any) => {
+                        const listId = `songlist-${platform}-${listInfo.listId}`;
+                        addSonglistCard(container, listId, listInfo.listName, listInfo.listCover);
+                    });
+                }
+                if (type === 'albums') { // 专辑
+                    const albumList = result.albumList;
+                    albumList?.forEach((albumInfo: any) => {
+                        const albumId = `album-${platform}-${albumInfo.albumId}`;
+                        addSonglistCard(container, albumId, albumInfo.albumName, albumInfo.albumCover);
+                    });
+                }
+                if (type === 'artists') { // 歌手
+                    const artistList = result.artistList;
+                    artistList?.forEach((artistInfo: any) => {
+                        const artistId = `artist-${platform}-${artistInfo.artistId}`;
+                        addArtistCard(container, artistId, artistInfo.artistName, artistInfo.artistCover);
+                    });
+                }
+            }, 200);
+        })
+        .catch((error: AxiosError) => {
+            console.log(error);
+        });
+}
+
+// 进行综合搜索
+function searchMultiplatform(type: string) {
+    // 获取搜索关键词
+    const inputBar = document.getElementById('searchBar') as HTMLInputElement;
+    if (!inputBar) {
+        console.error('[Error] Search bar element not found');
+        return;
+    }
+    const keyword = inputBar.value;
+    if (keyword === '') {
+        console.warn(`[Warning] Empty search bar, no request sent`);
+        return;
+    }
+
+    for (let i = 1; i < platformArray.length; i++) {
+        const platform = platformArray[i];
+
+        searchSinglePlatform(platform, keyword, type, true);
+    }
+}
+
 // 搜索类型改变时触发
 function typeChange(tabInfo: { widgetId: string, current: number }) {
-    const userData = getAccountInfo('all');
+    // 综合搜索判断
+    if (currentPlatform.value === 'multiplatform') {
+        searchMultiplatform(typeArray[tabInfo.current]);
+        return;
+    }
 
     const getType = typeGetters[currentPlatform.value];
     if (!getType) {
@@ -103,7 +221,7 @@ function typeChange(tabInfo: { widgetId: string, current: number }) {
         console.error(`[Error] Index out of range (platformArray, index ${tabInfo.current})`);
         return;
     }
-    const searchType = getType(type)[type];
+    
     currentType.value = tabInfo.current;
 
     // 获取搜索关键词
@@ -118,62 +236,7 @@ function typeChange(tabInfo: { widgetId: string, current: number }) {
         return;
     }
 
-    const sendRequest = requestFunc[currentPlatform.value];
-    if (!sendRequest) {
-        console.error(`[Error] Unsupported platform ${currentPlatform.value}`);
-        return;
-    }
-    
-    sendRequest('search', { keyword: keyword, type: searchType }, userData[currentPlatform.value].cookies)
-        .then((response: AxiosResponse) => {
-            // console.log(response.data);
-            const result = parseMusicData(response, currentPlatform.value, `search-${type}`);
-            console.log(result);
-            
-            setTimeout(() => {
-                const containerFilter = `type-${currentPlatform.value}-${type}`;
-                const container = document.getElementById(containerFilter) as HTMLElement;
-                // console.log(container);
-                if (!container) {
-                    console.error(`[Error] Failed to get HTML Element #${containerFilter}`);
-                    return;
-                }
-                container.innerHTML = '';
-
-                if (type === 'singles') { // 单曲
-                    const songList = result.songList;
-                    songList?.forEach((songInfo: any) => {
-                        const songId = `music-${currentPlatform.value}-${songInfo.songId}`;
-                        addSongCard(container, songId, songInfo.songName, songInfo.songCover, 
-                            songInfo.songAuthors, songInfo.songDuration);
-                    });
-                }
-                if (type === 'songlists') { // 歌单
-                    const lists = result.lists;
-                    lists?.forEach((listInfo: any) => {
-                        const listId = `songlist-${currentPlatform.value}-${listInfo.listId}`;
-                        addSonglistCard(container, listId, listInfo.listName, listInfo.listCover);
-                    });
-                }
-                if (type === 'albums') { // 专辑
-                    const albumList = result.albumList;
-                    albumList?.forEach((albumInfo: any) => {
-                        const albumId = `album-${currentPlatform.value}-${albumInfo.albumId}`;
-                        addSonglistCard(container, albumId, albumInfo.albumName, albumInfo.albumCover);
-                    });
-                }
-                if (type === 'artists') { // 歌手
-                    const artistList = result.artistList;
-                    artistList?.forEach((artistInfo: any) => {
-                        const artistId = `artist-${currentPlatform.value}-${artistInfo.artistId}`;
-                        addArtistCard(container, artistId, artistInfo.artistName, artistInfo.artistCover);
-                    });
-                }
-            }, 200);
-        })
-        .catch((error: AxiosError) => {
-            console.log(error);
-        });
+    searchSinglePlatform(currentPlatform.value, keyword, type);
 }
 
 onMounted(() => {
@@ -207,6 +270,15 @@ onMounted(() => {
         <!-- 内容 -->
         <TabWidget id="searchPlatform" :tabs="platformTabs" :scroll-on-click="false" :on-tab-switch="platformChange">
             <template #default>
+                <TabWidget id="searchType_multiplatform" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="typeChange">
+                    <template #default>
+                        <div class="musicBox singles" id="type-multiplatform-singles"></div>
+                        <div class="musicBox songlists" id="type-multiplatform-songlists"></div>
+                        <div class="musicBox songlists" id="type-multiplatform-albums"></div>
+                        <div class="musicBox artists" id="type-multiplatform-artists"></div>
+                    </template>
+                </TabWidget>
+
                 <TabWidget id="searchType_netease" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="typeChange">
                     <template #default>
                         <div class="musicBox singles" id="type-netease-singles"></div>
