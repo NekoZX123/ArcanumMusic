@@ -13,6 +13,7 @@ import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest.ts';
 import type { AxiosResponse } from 'axios';
 import { getPlayer } from '../../assets/player/player.ts';
 import { getConfig } from '../../assets/utilities/configLoader.ts';
+import { changePage } from '../../assets/utilities/pageSwitcher.ts';
 
 const platformTabs = [
     {
@@ -255,11 +256,12 @@ onUnmounted(() => {
             <div class="songlistCard exlarge flex row" id="userFavourites">
                 <span class="cardHeader flex row" id="userFavouritesBackground" 
                     @contextmenu="(event) => {
-                        triggerRightMenu(event, { type: 'userFavourites' }, 'platformSelect')
+                        triggerRightMenu(event, { type: 'userFavourites' }, 'platformSelect');
                     }" 
                     :style="`background-image: url('./images/library/favouritesBackground_${currentFavPlatform}.jpg')`">
                     <span class="cardInfo flex column">
-                        <label class="text medium bold">我喜欢的音乐</label>
+                        <label class="text medium bold interactiveTitle"
+                            @click="changePage('songlist', true, userFavourites)">我喜欢的音乐</label>
                         <label class="text ultraSmall">共 {{ favLength }} 首</label>
                     </span>
                     <button class="songlistPlay" id="userFavrourites_play" @click="getPlayer()?.playListId(userFavourites)">
@@ -271,13 +273,14 @@ onUnmounted(() => {
 
             <div class="songlistCard large flex column" id="dailyRecommend">
                 <span class="cardHeader flex column">
-                    <label class="text bold medium">每日推荐</label>
+                    <label class="text bold medium interactiveTitle"
+                        @click="changePage('songlist', true, dailyRecommends)">每日推荐</label>
                     <label class="text light ultraSmall">共 {{ recommendLength }} 首</label>
                 </span>
                 <span class="listContent flex column" id="recommendContainer"></span>
                 <span class="cardFooter flex row">
                     <span class="flex row" id="musicSource" @contextmenu="(event) => {
-                        triggerRightMenu(event, { type: 'dailyRecommends' }, 'platformSelect')
+                        triggerRightMenu(event, { type: 'dailyRecommends' }, 'platformSelect');
                     }">
                         <label class="text ultraSmall">音乐源: </label>
                         <img class="playlistSource" :src="`./images/platforms/${currentRecommendPlatform}.png`" alt="Netease Music"/>

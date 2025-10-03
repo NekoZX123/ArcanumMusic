@@ -51,6 +51,31 @@
 #recommendContainer::-webkit-scrollbar {
     display: none;
 }
+.interactiveTitle {
+    cursor: pointer;
+
+    transition: all 200ms ease-in-out;
+}
+.interactiveTitle::after {
+    content: '>>>';
+    position: relative;
+    top: 4px;
+    width: 0;
+
+    text-decoration: none;
+    overflow: hidden;
+
+    display: inline-block;
+
+    transition: all 200ms ease-in-out;
+}
+.interactiveTitle:hover {
+    text-decoration: underline;
+}
+.interactiveTitle:hover::after {
+    width: 30pt;
+}
+
 #musicSource {
     width: 7rem;
     height: calc(2rem + 8px);
