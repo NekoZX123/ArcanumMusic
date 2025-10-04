@@ -6,7 +6,7 @@
     padding: 0 2rem;
 }
 #musicSearch > div {
-    margin: 1rem 0;
+    margin-top: 1rem;
 }
 
 /* 搜索框 */
@@ -120,5 +120,6 @@
 }
 
 #loadMoreButton {
-    margin: 1rem 0;
+    margin-top: 1rem;
+    margin-bottom: 3rem;
 }

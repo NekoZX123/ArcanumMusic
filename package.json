@@ -7,7 +7,7 @@
     },
     "description": "Arcanum Music",
     "private": true,
-    "version": "1.0.21",
+    "version": "1.1.8",
     "type": "module",
     "main": "app/app.js",
     "devtron": true,

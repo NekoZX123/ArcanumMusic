@@ -8,8 +8,8 @@ import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 
 const __dirname = fileURLToPath(import.meta.url);
 
-const environment = 'dev';
-// const environment = 'build-kosmos-internal';
+// const environment = 'dev';
+const environment = 'build-kyrios-internal';
 let tray;
 let mainWindow = null;
 
@@ -82,7 +82,7 @@ function createWindow() {
         skipTaskbar: false,
         alwaysOnTop: false,
         title: 'Arcanum Music',
-        icon: `${environment === 'dev' ? './public' : 'dist'}/appIcon/ArcanumMusic.png`,
+        icon: `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,
@@ -126,7 +126,7 @@ function newWindow(_, title, url) {
         resizable: true,
         focusable: true,
         title: title,
-        icon: `${environment === 'dev' ? './public' : 'dist'}/appIcon/ArcanumMusic.png`,
+        icon: `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true
@@ -404,10 +404,10 @@ app.whenReady().then(() => {
     createWindow();
 
     // 托盘图标
-    tray = new Tray(`${environment === 'dev' ? './public' : 'dist'}/appIcon/ArcanumMusic.png`);
+    tray = new Tray(`${environment === 'dev' ? './public' : `${app.getAppPath()}/dist`}/appIcon/AppIcon.ico`);
     const menu = Menu.buildFromTemplate([
         {
-            label: 'Exit',
+            label: '退出',
             type: 'normal',
             click: () => {
                 stopService();
