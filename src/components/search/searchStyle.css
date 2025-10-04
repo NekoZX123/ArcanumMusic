@@ -90,3 +90,35 @@
     flex-wrap: wrap;
     justify-content: center;
 }
+
+.listButton {
+    appearance: none;
+
+    width: 6rem;
+    height: 2.5rem;
+
+    background: var(--default-lightgrey);
+    border: none;
+    border-radius: 8px;
+
+    justify-content: center;
+    align-items: center;
+
+    transform: scale(1.0);
+    transition: all 200ms ease-in-out;
+}
+.listButton:hover {
+    background: var(--color-blue-light);
+    transform: scale(1.1);
+}
+.listButton > label {
+    color: var(--default-black);
+    transition: all 200ms ease-in-out;
+}
+.listButton:hover > label {
+    color: var(--color-blue-deep);
+}
+
+#loadMoreButton {
+    margin: 1rem 0;
+}

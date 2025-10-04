@@ -49,7 +49,7 @@ const requestData: { [type: string]: any } = {
         "hlposttag": "</span>",
         "s": "[keyword]",
         "type": "[type]",
-        "offset": "0",
+        "offset": "[pageIndex]",
         "total": "true",
         "limit": "30",
         "csrf_token": ""
@@ -160,6 +160,8 @@ const requestData: { [type: string]: any } = {
     }
 };
 
+const PAGE_SIZE = 30;
+
 // User-Agent (两种)
 const mobileUA = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36 Edg/139.0.0.0';
 const ncmDesktopUA = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36 Chrome/91.0.4472.164 NeteaseMusicDesktop/2.10.2.200154';
@@ -188,7 +190,7 @@ function getNeteaseSearchTypes() {
  * 
  * 附: moduleName 对应的 params 格式
  * - songLink: { songId: string } - 歌曲 ID
- * - search: { keyword: string, type: number } - 搜索关键词, 搜索类型
+ * - search: { keyword: string, type: number, pageIndex: number } - 搜索关键词, 搜索类型, 页码 (从 0 开始)
  * - songInfo: { songId: string } - 歌曲 ID
  * - lyrics: { songId: string } - 歌曲 ID
  * - songList: { listId: string } - 歌单 ID
@@ -223,6 +225,11 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
     // 替换参数
     Object.keys(params).forEach((key) => {
         if (moduleString.includes(`[${key}]`)) {
+            // 页码按照偏移量替换
+            if (key === 'pageIndex') {
+                const offsetValue = params[key] * PAGE_SIZE;
+                moduleString = moduleString.replace(new RegExp(`"\\[${key}\\]"`, 'g'), offsetValue.toString() || '');
+            }
             // 根据数据类型替换参数, 保证类型正确
             if (typeof params[key] === 'number') {
                 moduleString = moduleString.replace(new RegExp(`"\\[${key}\\]"`, 'g'), params[key].toString() || '');

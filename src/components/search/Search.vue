@@ -75,8 +75,9 @@ const requestFunc: Record<string, any> = {
     'kuwo': getKuwoResult,
     'kugou': getKugouResult
 }
-let currentPlatform = ref('multiplatform');
-let currentType = ref(0);
+const currentPlatform = ref('multiplatform');
+const currentType = ref(0);
+let pageIndex = 0;
 
 // 类型标签页顺序
 const typeArray = ['singles', 'songlists', 'albums', 'artists'];
@@ -92,7 +93,7 @@ function platformChange(tabInfo: { widgetId: string, current: number }) {
     currentPlatform.value = platform;
     currentType.value = 0;
 
-    typeChange({ widgetId: tabInfo.widgetId, current: currentType.value });
+    searchOnTypeChange({ widgetId: tabInfo.widgetId, current: currentType.value });
 }
 
 // 综合搜索
@@ -108,7 +109,7 @@ function getMultiplatformSearchTypes () {
 }
 
 // 单平台搜索
-function searchSinglePlatform(platform: string, keyword: string, type: string, isMultiplatform: boolean = false) {
+function searchSinglePlatform(platform: string, keyword: string, type: string, isMultiplatform: boolean = false, isNextPage: boolean = false) {
     const userData = getAccountInfo('all');
 
     const getType = typeGetters[platform];
@@ -125,7 +126,7 @@ function searchSinglePlatform(platform: string, keyword: string, type: string, i
         return;
     }
     
-    sendRequest('search', { keyword: keyword, type: searchType }, userData[platform].cookies)
+    sendRequest('search', { keyword: keyword, type: searchType, pageIndex: pageIndex }, userData[platform].cookies)
         .then((response: AxiosResponse) => {
             // console.log(response.data);
             const result = parseMusicData(response, platform, `search-${type}`);
@@ -141,7 +142,7 @@ function searchSinglePlatform(platform: string, keyword: string, type: string, i
                 }
 
                 // 非多平台搜索时清空容器
-                if (!isMultiplatform) {
+                if (!isMultiplatform && !isNextPage) {
                     container.innerHTML = '';
                 }
 
@@ -203,7 +204,12 @@ function searchMultiplatform(type: string) {
 }
 
 // 搜索类型改变时触发
-function typeChange(tabInfo: { widgetId: string, current: number }) {
+function searchOnTypeChange(tabInfo: { widgetId: string, current: number }, isNextPage: boolean = false) {
+    currentType.value = tabInfo.current;
+    
+    // 自动重置页码
+    if (!isNextPage) pageIndex = 0;
+    
     // 综合搜索判断
     if (currentPlatform.value === 'multiplatform') {
         searchMultiplatform(typeArray[tabInfo.current]);
@@ -221,8 +227,6 @@ function typeChange(tabInfo: { widgetId: string, current: number }) {
         console.error(`[Error] Index out of range (platformArray, index ${tabInfo.current})`);
         return;
     }
-    
-    currentType.value = tabInfo.current;
 
     // 获取搜索关键词
     const inputBar = document.getElementById('searchBar') as HTMLInputElement;
@@ -236,7 +240,14 @@ function typeChange(tabInfo: { widgetId: string, current: number }) {
         return;
     }
 
-    searchSinglePlatform(currentPlatform.value, keyword, type);
+    searchSinglePlatform(currentPlatform.value, keyword, type, false, isNextPage);
+}
+
+// 加载下一页
+function loadNextPage(_: MouseEvent) {
+    pageIndex ++;
+
+    searchOnTypeChange({ widgetId: '', current: currentType.value }, true);
 }
 
 onMounted(() => {
@@ -244,7 +255,7 @@ onMounted(() => {
     if (searchInput) {
         searchInput.addEventListener('keydown', (event: KeyboardEvent) => {
             if (event.key === 'Enter') {
-                typeChange({ widgetId: '', current: currentType.value });
+                searchOnTypeChange({ widgetId: '', current: currentType.value });
             }
         });
     }
@@ -262,7 +273,7 @@ onMounted(() => {
             <button id="searchClear" title="清空" @click="clearSearchBar">
                 <img src="/images/pageSwitcher/clear.svg"></img>
             </button>
-            <button id="searchConfirm" title="搜索" @click="() => {typeChange({ widgetId: '', current: currentType });}">
+            <button id="searchConfirm" title="搜索" @click="() => {searchOnTypeChange({ widgetId: '', current: currentType });}">
                 <img src="/images/pageSwitcher/search.svg"></img>
             </button>
         </div>
@@ -270,7 +281,7 @@ onMounted(() => {
         <!-- 内容 -->
         <TabWidget id="searchPlatform" :tabs="platformTabs" :scroll-on-click="false" :on-tab-switch="platformChange">
             <template #default>
-                <TabWidget id="searchType_multiplatform" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="typeChange">
+                <TabWidget id="searchType_multiplatform" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange">
                     <template #default>
                         <div class="musicBox singles" id="type-multiplatform-singles"></div>
                         <div class="musicBox songlists" id="type-multiplatform-songlists"></div>
@@ -279,7 +290,7 @@ onMounted(() => {
                     </template>
                 </TabWidget>
 
-                <TabWidget id="searchType_netease" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="typeChange">
+                <TabWidget id="searchType_netease" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange">
                     <template #default>
                         <div class="musicBox singles" id="type-netease-singles"></div>
                         <div class="musicBox songlists" id="type-netease-songlists"></div>
@@ -288,7 +299,7 @@ onMounted(() => {
                     </template>
                 </TabWidget>
 
-                <TabWidget id="searchType_qqmusic" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="typeChange">
+                <TabWidget id="searchType_qqmusic" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange">
                     <template #default>
                         <div class="musicBox singles" id="type-qqmusic-singles"></div>
                         <div class="musicBox songlists" id="type-qqmusic-songlists"></div>
@@ -297,7 +308,7 @@ onMounted(() => {
                     </template>
                 </TabWidget>
 
-                <TabWidget id="searchType_kuwo" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="typeChange">
+                <TabWidget id="searchType_kuwo" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange">
                     <template #default>
                         <div class="musicBox singles" id="type-kuwo-singles"></div>
                         <div class="musicBox songlists" id="type-kuwo-songlists"></div>
@@ -306,7 +317,7 @@ onMounted(() => {
                     </template>
                 </TabWidget>
                 
-                <TabWidget id="searchType_kugou" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="typeChange">
+                <TabWidget id="searchType_kugou" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange">
                     <template #default>
                         <div class="musicBox singles" id="type-kugou-singles"></div>
                         <div class="musicBox songlists" id="type-kugou-songlists"></div>
@@ -316,5 +327,10 @@ onMounted(() => {
                 </TabWidget>
             </template>
         </TabWidget>
+
+        <!-- 查看更多 (下一页) 按钮 -->
+        <button class="flex row listButton" id="loadMoreButton" @click="loadNextPage">
+            <label class="text small bold">查看更多</label>
+        </button>
     </div>
 </template>

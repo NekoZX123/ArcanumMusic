@@ -1202,7 +1202,7 @@ function parseData(data: any, platform: string, module: string, parentModule: st
             if (callChildParsers.includes(childJudgement)) {
                 isResultList = true;
                 const infoList = parseResult;
-                for (let i = 0; i < infoList.length; i++) {
+                for (let i = 0; i < infoList?.length || 0; i++) {
                     const infoData = infoList[i];
                     const parsedChild = parseData(infoData, platform, childJudgement, module);
                     resultList.push(parsedChild);

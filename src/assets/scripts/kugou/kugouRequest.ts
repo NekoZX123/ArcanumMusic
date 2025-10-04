@@ -55,7 +55,7 @@ const requestData: { [type: string]: any } = {
     },
     'search': {
         keyword: '[keyword]',
-        page: 1,
+        page: '[pageIndex]',
         pagesize: 30,
         bitrate: 0,
         isfuzzy: 0,
@@ -237,6 +237,11 @@ function getKugouSearchTypes() {
  */
 function getKugouResult(moduleName: KugouMusicModule, params: { [type: string]: any }, cookies: { KuGoo: string }) {
     let targetUrl = requestUrls[moduleName];
+
+    // 自动将搜索页码改为从 1 开始
+    if (Object.keys(params).includes('pageIndex') && moduleName === 'search') {
+        params.pageIndex ++;
+    }
 
     if (moduleName === 'search') { // 指定搜索类型
         targetUrl = targetUrl.replace('[type]', params.type);
