@@ -65,7 +65,7 @@ const requestData: any = {
                 "search_type": "[type]",
                 "query": "[keyword]",
                 "page_num": 1,
-                "num_per_page": 10
+                "num_per_page": 30
             }
         }
     ],
