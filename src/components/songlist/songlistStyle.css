@@ -37,7 +37,7 @@
     overflow-y: auto;
 }
 
-#playAllContent {
+.listButton {
     appearance: none;
 
     width: 6rem;
@@ -53,21 +53,21 @@
     transform: scale(1.0);
     transition: all 200ms ease-in-out;
 }
-#playAllContent:hover {
+.listButton:hover {
     background: var(--color-blue-light);
     transform: scale(1.1);
 }
-#playAllContent > img {
+.listButton > img {
     width: 1.8rem;
     height: 1.8rem;
 
     margin-right: 5px;
 }
-#playAllContent > label {
+.listButton > label {
     color: var(--default-black);
     transition: all 200ms ease-in-out;
 }
-#playAllContent:hover > label {
+.listButton:hover > label {
     color: var(--color-blue-deep);
 }
 

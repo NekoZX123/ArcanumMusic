@@ -1,80 +1,45 @@
-<script lang="ts">
-import { defineComponent, ref, computed, useSlots } from "vue";
+<script setup lang="ts">
+import { ref, computed, useSlots } from "vue";
 
 export interface TabItem {
     title: string;
     icon?: string;
 }
 
-/**
- * 标签页组件
- */
-const TabWidget =  defineComponent({
-    name: 'TabWidget',
-    props: {
-        id: {
-            type: String,
-            required: true
-        },
-        tabs: {
-            type: Array as () => TabItem[],
-            required: true,
-            validator: (value: unknown) =>
-                Array.isArray(value) && value.every(item =>
-                    typeof item === 'object' && 'title' in item
-                )
-        },
-        scrollOnClick: {
-            type: Boolean,
-            required: false,
-            default: false
-        },
-        useSmallTabs: {
-            type: Boolean,
-            required: false,
-            default: false
-        },
-        onTabSwitch: {
-            type: Function,
-            required: false,
-            default: () => {}
-        }
-    },
-    setup(props) {
-        const currentIndex = ref(0);
-        const slots = useSlots();
+interface Props {
+    id: string;
+    tabs: TabItem[];
+    scrollOnClick?: boolean;
+    useSmallTabs?: boolean;
+    onTabSwitch?: (args: { widgetId: string; current: number }) => void;
+}
+const props = defineProps<Props>();
 
-        // 获取所有标签页内容
-        const tabContents = computed(() => {
-            return slots.default?.() || [];
-        });
+const currentIndex = ref(0);
+const slots = useSlots();
 
-        // 切换标签页
-        const switchTab = (index: number) => {
-            currentIndex.value = index;
-
-            if (props.scrollOnClick) {
-                const container = document.querySelector(`#${props.id}`) as HTMLElement;
-                const pageElement = document.getElementById('pageContainer') as HTMLElement;
-                if (container && pageElement) {
-                    const offset = container.offsetTop - pageElement.scrollTop;
-                    pageElement.scrollTo({ top: offset, behavior: 'smooth' });
-                }
-            }
-
-            props.onTabSwitch({ widgetId: props.id, current: index });
-        };
-
-        return {
-            currentIndex,
-            tabContents,
-            switchTab
-        };
-    }
+// 获取所有标签页内容
+const tabContents = computed(() => {
+    return slots.default?.() || [];
 });
 
-export default TabWidget;
+// 切换标签页
+function switchTab(index: number) {
+    currentIndex.value = index;
 
+    if (props.scrollOnClick) {
+        const container = document.querySelector(`#${props.id}`) as HTMLElement | null;
+        const pageElement = document.getElementById('pageContainer') as HTMLElement | null;
+        if (container && pageElement) {
+            const offset = container.offsetTop - pageElement.scrollTop;
+            pageElement.scrollTo({ top: offset, behavior: 'smooth' });
+        }
+    }
+
+    if (typeof props.onTabSwitch === 'function') {
+        props.onTabSwitch({ widgetId: props.id, current: index });
+    }
+}
 </script>
 <template>
     <div :id="id" class="flex column tabsContainer">

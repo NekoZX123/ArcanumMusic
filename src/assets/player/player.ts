@@ -4,7 +4,7 @@ import { getListContent, getSongInfo, getSongLink } from "./songUtils.ts";
 
 // 时间格式化
 function timeFormat(timeSeconds: number) {
-    let secondNum = timeSeconds % 60;
+    let secondNum = Math.round(timeSeconds % 60);
     if (secondNum < 0) secondNum = 0;
     let minTemp = Math.floor(timeSeconds / 60);
     let minuteNum = minTemp % 60;
@@ -273,7 +273,8 @@ class Player {
     playAudio(songInfo: any, addToHistory: boolean = true) {
         console.log(`[Debug] Playing: ${JSON.stringify(songInfo)}`);
         songInfo = Object.assign({}, songInfo);
-        songInfo.id = songInfo.id.replace('new_', '').replace('playlist_', '');
+        songInfo.id = songInfo.id.replace('new_', '').replace('playlist_', '')
+            .replace('cutin_', '').replace('current_', '');
 
         const current = this.playlist.current;
         if (Object.keys(current).length !== 0 && addToHistory) this.playlist.history.unshift(current);
@@ -336,6 +337,14 @@ class Player {
 
             this.playStateImage = './images/player/pause.dark.svg';
             this.isPlaying = true;
+
+            // 更新歌词
+            const lyricsEvent = new CustomEvent('update-lyrics');
+            window.dispatchEvent(lyricsEvent);
+
+            // 更新动态背景
+            const backgroundEvent = new CustomEvent('update-background');
+            window.dispatchEvent(backgroundEvent);
         });
     }
     /**
@@ -489,6 +498,41 @@ class Player {
         else {
             this.playlist.waitList.push(songInfo);
         }
+    }
+
+    /**
+     * 从播放列表删除
+     * @param targetId 
+     */
+    playlistRemove(targetId: any) {
+        console.log(`[Debug] Remove from playlist: targetId = ${targetId}`);
+        // 目标为当前歌曲 - 切换下一首
+        if (targetId.includes('current_')) {
+            this.nextSong();
+            return;
+        }
+
+        const pureId = targetId.replace('new_', '').replace('playlist_', '')
+            .replace('cutin_', '').replace('current_', '');
+        
+        // 插队歌曲内匹配
+        if (targetId.includes('cutin_')) {
+            for (let i = 0; i < this.playlist.breakIn.length; i++) {
+                const songInfo = this.playlist.breakIn[i];
+                if (songInfo.id === pureId) {
+                    this.playlist.breakIn.splice(i, 1);
+                    break;
+                }
+            }
+            return;
+        }
+
+        // 普通队列内匹配
+        this.playlist.waitList.forEach((songInfo, index) => {
+            if (songInfo.id === pureId) {
+                this.playlist.waitList.splice(index, 1);
+            }
+        });
     }
 
     /**

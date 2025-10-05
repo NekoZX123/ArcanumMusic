@@ -1,7 +1,7 @@
 <script setup lang="tsx">
 import { defineComponent, onMounted } from 'vue';
 import { getPlayer } from '../player/player.ts';
-import { changePage } from '../utilities/pageSwitcher.ts';
+import { changePage, getCurrentPage, togglePlaylist } from '../utilities/pageSwitcher.ts';
 import { getSongInfo, getSongLink } from '../player/songUtils.ts';
 import { hideArtistSelect, showArtistSelect } from '../utilities/elementControl.ts';
 import { showNotify } from '../notifications/Notification.ts';
@@ -38,6 +38,14 @@ function playCurrentContent() {
     }
 }
 
+function jumpToSongInfo(songId: string) {
+    if (getCurrentPage() === 'playlist') {
+        togglePlaylist(undefined);
+    }
+
+    changePage('single', true, songId);
+}
+
 /**
  * 跳转至歌曲专辑
  * @param songId 歌曲 ID
@@ -45,6 +53,10 @@ function playCurrentContent() {
 function jumpToSongAlbum(songId: string) {
     const idParts = songId.split('-');
     const platform = idParts[1];
+
+    if (getCurrentPage() === 'playlist') {
+        togglePlaylist(undefined);
+    }
 
     getSongInfo(songId)
     .then((songInfo: any) => {
@@ -59,6 +71,10 @@ function jumpToSongAlbum(songId: string) {
  * @param songId 歌曲 ID
  */
 function jumpToSongArtist(songId: string) {
+    if (getCurrentPage() === 'playlist') {
+        togglePlaylist(undefined);
+    }
+
     getSongInfo(songId)
     .then((songInfo: any) => {
         const artists = songInfo.authorsObject;
@@ -96,6 +112,34 @@ function copyLink(songId: string) {
     });
 }
 
+/**
+ * 加载指定平台收藏歌曲
+ * @param platform 平台名称
+ */
+function sendFavReload(platform: string) {
+    const favReloadEvent = new CustomEvent('load-favourites', { detail: { platform: platform} });
+    window.dispatchEvent(favReloadEvent);
+}
+
+function sendRecommendReload(platform: string) {
+    const recommendReloadEvent = new CustomEvent('load-recommends', { detail: { platform: platform } });
+    window.dispatchEvent(recommendReloadEvent);
+}
+
+/**
+ * 根据参数加载指定平台收藏 / 推荐歌曲
+ * @param platform 平台名称
+ * @param type 类型
+ */
+function changeCollectionPlatform(platform: string, type: string) {
+    if (type === 'userFavourites') {
+        sendFavReload(platform);
+    }
+    else if (type === 'dailyRecommends') {
+        sendRecommendReload(platform);
+    }
+}
+
 onMounted(() => {
     console.log(`[Debug] Menu loaded with properties ${JSON.stringify(props)}`);
 });
@@ -115,7 +159,7 @@ onMounted(() => {
         </span>
         <span class="menuPart flex column">
             <MenuItem id="songInfo" icon="./images/menu/play.svg" text="查看歌曲信息" 
-                :on-click="() => {changePage('single', true, props.targetInfo.id)}" 
+                :on-click="() => {jumpToSongInfo(props.targetInfo.id)}" 
                 v-if="props.menuType === 'playlistItem'"></MenuItem>
             <MenuItem id="albumInfo" icon="./images/menu/album.svg" text="查看专辑" 
                 :on-click="() => {jumpToSongAlbum(props.targetInfo.id)}" 
@@ -131,21 +175,21 @@ onMounted(() => {
         </span>
         <span class="menuPart flex column">
             <MenuItem id="listRemove" icon="./images/menu/removeFromList.svg" text="从列表中删除" 
-                :on-click="() => {}" 
+                :on-click="() => {getPlayer()?.playlistRemove(props.targetInfo.id)}" 
                 v-if="props.menuType === 'playlistItem'"></MenuItem>
         </span>
         <span class="menuPart flex column">
             <MenuItem id="platform_netease" icon="./images/platforms/netease.png" text="网易云音乐" 
-                :on-click="() => {}" 
+                :on-click="() => {changeCollectionPlatform('netease', props.targetInfo.type)}" 
                 v-if="props.menuType === 'platformSelect'"></MenuItem>
             <MenuItem id="platform_qqmusic" icon="./images/platforms/qqmusic.png" text="QQ 音乐" 
-                :on-click="() => {}" 
+                :on-click="() => {changeCollectionPlatform('qqmusic', props.targetInfo.type)}" 
                 v-if="props.menuType === 'platformSelect'"></MenuItem>
             <MenuItem id="platform_kuwo" icon="./images/platforms/kuwo.png" text="酷我音乐" 
-                :on-click="() => {}" 
+                :on-click="() => {changeCollectionPlatform('kuwo', props.targetInfo.type)}" 
                 v-if="props.menuType === 'platformSelect'"></MenuItem>
             <MenuItem id="platform_kugou" icon="./images/platforms/kugou.png" text="酷狗音乐" 
-                :on-click="() => {}" 
+                :on-click="() => {changeCollectionPlatform('kugou', props.targetInfo.type)}" 
                 v-if="props.menuType === 'platformSelect'"></MenuItem>
         </span>
     </div>

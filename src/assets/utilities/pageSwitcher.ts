@@ -99,6 +99,12 @@ function changePage(pageId: page, pushStack: boolean = true, idParam?: any) {
         pageApp.mount('#pageContent');
     }
     currentPage = pageId;
+
+    // 自动回到顶端
+    const pageContainer = document.getElementById('pageContainer') as HTMLElement;
+    if (pageContainer) {
+        pageContainer.scrollTo({ top: 0 });
+    }
 }
 
 // 标签页点击切换页面
@@ -112,7 +118,7 @@ function onTabChange(event: any) {
 }
 
 // 切换播放列表
-function togglePlaylist(_: MouseEvent) {
+function togglePlaylist(_: MouseEvent | undefined) {
     let currentPage = getCurrentPage();
 
     if (currentPage === 'playlist') {

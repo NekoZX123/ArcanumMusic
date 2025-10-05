@@ -43,10 +43,10 @@ const requestUrls: { [type: string]: string } = {
 // 请求数据
 // 搜索数据
 const searchData: Record<string, string> = {
-    'singles': 'vipver=1&client=kt&ft=music&cluster=0&strategy=2012&encoding=utf8&rformat=json&mobi=1&issubtitle=1&show_copyright_off=1&pn=0&rn=30&all=[keyword]',
-    'songlists': 'key=[keyword]&pn=1&rn=30&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'albums': 'key=[keyword]&pn=1&rn=30&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'artists': 'key=[keyword]&pn=1&rn=30&httpsStatus=1&reqId=[uuid]&plat=web_www&from='
+    'singles': 'vipver=1&client=kt&ft=music&cluster=0&strategy=2012&encoding=utf8&rformat=json&mobi=1&issubtitle=1&show_copyright_off=1&pn=[pageIndex]&rn=30&all=[keyword]',
+    'songlists': 'key=[keyword]&pn=[pageIndex]&rn=30&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'albums': 'key=[keyword]&pn=[pageIndex]&rn=30&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'artists': 'key=[keyword]&pn=[pageIndex]&rn=30&httpsStatus=1&reqId=[uuid]&plat=web_www&from='
 };
 const requestData: { [type: string]: string } = {
     'songLink': 'mid=[songId]&type=music&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
@@ -97,7 +97,7 @@ function getKuwoSearchTypes() {
  * 
  * 附: moduleName 对应的 params 格式
  * - songLink: { songId: string } - 歌曲 ID
- * - search: { keyword: string, type: string } - 搜索关键词, 搜索类型
+ * - search: { keyword: string, type: string, pageIndex: number } - 搜索关键词, 搜索类型, 页码 (从 0 开始)
  * - songInfo: { songId: string } - 歌曲 ID
  * - lyrics: { songId: string } - 歌曲 ID
  * - songList: { listId: string } - 歌单 ID
@@ -119,6 +119,11 @@ function getKuwoResult(moduleName: KuwoMusicModule, params: { [type: string]: an
         const searchType = params['type'];
         targetUrl = searchLinks[searchType];
         moduleData = searchData[searchType];
+
+        // 自动将搜索页码改为从 1 开始
+        if (searchType !== 'singles') {
+            params.pageIndex ++;
+        }
     }
     if (!targetUrl || !moduleData) {
         throw new Error(`Module ${moduleName} not found in request data.`);
@@ -148,11 +153,12 @@ function getKuwoResult(moduleName: KuwoMusicModule, params: { [type: string]: an
     });
 
     // console.log(`[Kuwo Music] ${targetUrl}?${moduleData}`);
+    const referer = moduleName === 'search' ? 'https://www.kuwo.cn/' : ''
 
     const requestHeaders: { [type: string]: any } = {
         'Accept': 'application/json',
         'Cookie': cookieHeader,
-        // 'Referer': 'https://www.kuwo.cn', 
+        'Referer': referer, 
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 Edg/140.0.0.0'
     };
     if (!secretNotRequired.includes(moduleName)) {

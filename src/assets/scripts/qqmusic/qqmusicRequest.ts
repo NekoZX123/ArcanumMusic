@@ -64,8 +64,8 @@ const requestData: any = {
                 "searchid": 0,
                 "search_type": "[type]",
                 "query": "[keyword]",
-                "page_num": 1,
-                "num_per_page": 10
+                "page_num": "[pageIndex]",
+                "num_per_page": 30
             }
         }
     ],
@@ -320,7 +320,7 @@ function getQQmusicSearchTypes() {
  * 
  * 附: moduleName 对应的 params 格式
  * - songLink: { songMid: string } - 歌曲 ID
- * - search: { keyword: string, type: number } - 搜索关键词, 搜索类型
+ * - search: { keyword: string, type: number, pageIndex: number } - 搜索关键词, 搜索类型, 页码 (从 0 开始)
  * - songInfo: { songMid: string } - 歌曲 ID
  * - lyrics: { songMid: string } - 歌曲 ID
  * - songList: { listId: number } - 歌单 ID
@@ -340,6 +340,11 @@ function getQQmusicResult(moduleName: QQMusicModule, params: { [type: string]: a
     // 用户收藏歌单特判
     if (moduleName === 'userPlaylists') {
         return getQQmusicUserLists(cookies);
+    }
+
+    // 自动将搜索页码改为从 1 开始
+    if (Object.keys(params).includes('pageIndex') && moduleName === 'search') {
+        params.pageIndex ++;
     }
     
     const common = requestData.common;

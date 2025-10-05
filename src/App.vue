@@ -3,15 +3,15 @@ import { createApp, onMounted, ref } from 'vue';
 import Lyrics from './components/lyrics/Lyrics.vue';
 
 import { showNotify } from './assets/notifications/Notification.ts';
-// import { showPopup } from './assets/notifications/popup.tsx';
 import { createPlayer, getPlayer } from './assets/player/player.ts';
 import { initialize, pageBack, pageForward, togglePlaylist, changePage, updatePlaylistIcon } from './assets/utilities/pageSwitcher.ts';
 // import { testRequest } from './assets/utilities/requestTests.ts';
 import { PageButton } from './assets/widgets/pageSwitcher.tsx';
-import { showPopup } from './assets/notifications/popup.tsx';
 import { readAccountInfo } from './assets/utilities/accountManager.ts';
 import { hideArtistSelect, hideRightMenu } from './assets/utilities/elementControl.ts';
 import { loadConfig } from './assets/utilities/configLoader.ts';
+import { loadProxyPort } from './assets/utilities/proxyRequest.ts';
+import { showPopup } from './assets/notifications/popup.tsx';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -83,16 +83,47 @@ const targetPercentage = ref(0);
 const playTimeAdjustFlag = ref(false);
 
 // 播放进度调整
+// 开始调整
+function adjustPlayProgress(mouseX: number) {
+    const progressBar = document.getElementById('playProgress');
+    if (!progressBar) return;
+
+    // 移动播放进度提示
+    let tooltipX = mouseX;
+    if (tooltipX < 80) tooltipX = 80;
+    if (tooltipX > document.body.clientWidth - 80) tooltipX = document.body.clientWidth - 80;
+
+    progressTooltipOffset.value = `left: calc(${tooltipX}px - 4rem)`;
+
+    // 设置进度条宽度
+    const barRect = progressBar.getBoundingClientRect();
+    let deltaX = mouseX - barRect.left;
+    let progress = deltaX / progressBar.clientWidth;
+
+    // 防止范围溢出
+    if (progress < 0) progress = 0;
+    if (progress > 1) progress = 1;
+
+    // 设置播放进度文字
+    let playProgress = Math.round((getPlayer()?.duration || 0) * progress);
+    getPlayer()?.updateProgress(playProgress);
+    targetProgress = playProgress;
+    targetPercentage.value = progress * 100;
+}
 function startProgressAdjust(event: MouseEvent) {
     if (event.buttons === 1 && !playTimeAdjustFlag.value) {
         // 添加全局事件监听器
         showProgressTooltip();
-        document.addEventListener('mousemove', adjustPlayProgress);
+        document.addEventListener('mousemove', adjustOnMouseMove);
         playTimeAdjustFlag.value = true;
 
+        // 点击时同样调整进度
+        adjustPlayProgress(event.clientX);
+
+        // 结束调整
         const handleMouseUp = () => {
             hideProgressTooltip();
-            document.removeEventListener('mousemove', adjustPlayProgress);
+            document.removeEventListener('mousemove', adjustOnMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
             getPlayer()?.setProgress(targetProgress);
             playTimeAdjustFlag.value = false;
@@ -101,32 +132,13 @@ function startProgressAdjust(event: MouseEvent) {
         document.addEventListener('mouseup', handleMouseUp);
     }
 }
-function adjustPlayProgress(event: MouseEvent) {
+// 鼠标移动事件调整处理
+function adjustOnMouseMove(event: MouseEvent) {
     const progressBar = document.getElementById('playProgress');
     if (!progressBar) return;
 
     if (event.buttons === 1 && playTimeAdjustFlag.value) {
-        // 移动播放进度提示
-        let tooltipX = event.clientX;
-        if (tooltipX < 80) tooltipX = 80;
-        if (tooltipX > document.body.clientWidth - 80) tooltipX = document.body.clientWidth - 80;
-
-        progressTooltipOffset.value = `left: calc(${tooltipX}px - 4rem)`;
-
-        // 设置进度条宽度
-        const barRect = progressBar.getBoundingClientRect();
-        let deltaX = event.clientX - barRect.left;
-        let progress = deltaX / progressBar.clientWidth;
-
-        // 防止范围溢出
-        if (progress < 0) progress = 0;
-        if (progress > 1) progress = 1;
-
-        // 设置播放进度文字
-        let playProgress = Math.round((getPlayer()?.duration || 0) * progress);
-        getPlayer()?.updateProgress(playProgress);
-        targetProgress = playProgress;
-        targetPercentage.value = progress * 100;
+        adjustPlayProgress(event.clientX);
     }
 }
 
@@ -167,6 +179,7 @@ function togglePlaylistPanel(event: MouseEvent) {
 }
 
 // 切换歌词面板
+const lyricShowEvent = new CustomEvent('lyrics-background-anim');
 function showLyrics(_: MouseEvent) {
     const lyricsPanel = document.getElementById('lyricsArea');
     if (!lyricsPanel) return;
@@ -175,6 +188,7 @@ function showLyrics(_: MouseEvent) {
     setTimeout(() => {
         lyricsPanel.classList.add('show');
     }, 50);
+    window.dispatchEvent(lyricShowEvent);
 }
 
 // 长歌曲名称焦点滚动
@@ -211,20 +225,23 @@ onMounted(async () => {
     // 参考 / Reference: https://jixun.uk/posts/2024/qqmusic-zzc-sign/
     window.__qmfe_sign_check = 1;
 
+    // 加载代理端口
+    loadProxyPort();
+
+    // 加载配置文件
     loadConfig();
 
     // 测试通知
     setTimeout(() => showNotify('Notify1', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 2000);
 
     // 测试弹窗
-    const internalInfo = `[当前版本: v1.0.21 Kosmos (Internal)]<br/>
+    const internalInfo = `[当前版本: v1.1.8 Kyrios (Internal)]<br/>
     <br/>
     特别说明: <br/>
-    您所使用的是该应用首个Kosmos测试版本, 该版本可满足日常使用, 但暂未实现以下功能: <br/>
+    您所使用的是该应用的 Kyrios 体验版本, 该版本可满足日常使用, 但暂未实现以下功能: <br/>
     - 设置页面: 除开发者工具设定、本地用户头像及名称以外的功能<br/>
-    - 歌词页面: 动态背景<br/>
-    - 首页: 音乐电台<br/>
-    - 音乐库页面: 除网易云音乐外的用户收藏歌曲、酷我/酷狗用户歌单(暂未获取到API)<br/>
+    - 音乐库页面: 酷我 / 酷狗收藏歌曲、每日推荐、用户歌单(暂未获取到API)<br/>
+    - 右键菜单: 收藏功能
     <br/>
     您的用户数据均在本地加密储存, 我们只会在与音乐平台通信时使用这些数据, 您的数据不会被发送到其他服务器<br/>
     此版本仅供测试使用, 可能存在尚未发现的其他问题, 如有使用问题及改进建议可到 GitHub 项目页提出 Issue / Pull Request<br/>
@@ -338,7 +355,7 @@ onMounted(async () => {
         <!-- 播放器控制栏 -->
         <div class="flex column" id="playControlContainer">
             <div class="fluentProgress flex row" id="playProgress" 
-                @mousedown="startProgressAdjust" @mousemove="adjustPlayProgress">
+                @mousedown="startProgressAdjust" @mousemove="adjustOnMouseMove">
                 <div class="fluentFilled" id="playedCover" 
                     :style="`width: ${playTimeAdjustFlag ? targetPercentage : getPlayer()?.progressPercentage}%`"></div>
             </div>

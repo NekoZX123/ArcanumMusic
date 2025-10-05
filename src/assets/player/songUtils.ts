@@ -137,6 +137,7 @@ function getSongLyrics(songId: string) {
         }
         sendRequest('lyrics', idParams, userData[platform].cookies)
             .then((response: AxiosResponse) => {
+                // console.log(response.data);
                 const parsedLyrics = parseMusicData(response, platform, 'lyrics');
                 resolve(parsedLyrics);
             })

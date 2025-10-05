@@ -33,8 +33,8 @@ const dataParsers: Record<string, any> = {
             'lyrics': ['lrc', 'lyric'],
             'translation': ['tlyric', 'lyric'],
             '@postprocessors': {
-                'lyrics': (lyricText: string) => lyricText.split('\n'),
-                'translation': (lyricText: string) => lyricText.split('\n')
+                'lyrics': (lyricText: string) => lyricText?.split('\n'),
+                'translation': (lyricText: string) => lyricText?.split('\n')
             }
         },
         'search-singles': {
@@ -226,6 +226,21 @@ const dataParsers: Record<string, any> = {
             'listId': ['id'],
             'listName': ['name'],
             'listCover': ['coverImgUrl']
+        },
+        'dailyRecommends': {
+            'body': ['data'],
+            'songCount': null,
+            'tracks': ['recommend'],
+            'loadTracks': ['recommend'],
+            'songId': ['id'],
+            'songName': ['name'],
+            'songCover': ['album', 'picUrl'],
+            'songAuthors': ['artists'],
+            'songDuration': ['duration'],
+            '@postprocessors': {
+                'songAuthors': (authors: object[]) => formatAuthors(authors, 'netease'),
+                'songDuration': (duration: number) => Math.round(duration / 1000)
+            }
         }
     },
     'qqmusic': {
@@ -497,6 +512,7 @@ const dataParsers: Record<string, any> = {
             'songAuthors': ['ARTIST'],
             'songDuration': ['DURATION'],
             '@postprocessors' : {
+                'songDuration': (durationText: string) => parseInt(durationText),
                 'songAuthors': (authors: string) => formatAuthors(authors.split('&'), 'kuwo'),
                 'songCover': (short: string) => `https://img3.kuwo.cn/star/albumcover/${short}`
             }
@@ -691,7 +707,7 @@ const dataParsers: Record<string, any> = {
             'lyrics': ['data', 'lyrics'],
             'translation': ['data', 'lyrics'],
             '@postprocessors': {
-                'lyrics': (lyricText: string) => lyricText.split('\n'),
+                'lyrics': (lyricText: string) => lyricText?.split('\n'),
                 'translation': (_: any) => []
             }
         },
@@ -1007,6 +1023,11 @@ const targetFormats: Record<string, any> = {
     },
     'userPlaylists': {
         'lists': '@songList_brief'
+    },
+    'dailyRecommends': {
+        'tracks': [],
+        'loadTracks': '@song_brief',
+        'songCount': 0
     }
 }
 
@@ -1126,11 +1147,14 @@ function getAuthorObject(authorList: any[], platform: string) {
  */
 function parseDataByArray(data: any, parserList: string[]) {
     let object = data;
+
     if (parserList === undefined) console.log(data);
+
     for (let i = 0; i < parserList.length; i++) {
         const param = parserList[i];
         if (object === undefined) {
-            throw new Error(`[ERROR] Cannot parse data 'undefined' with key '${param}'`);
+            console.warn(`[Warning] Cannot parse data 'undefined' with key '${param}'`);
+            return null;
         }
         object = object[param];
     }
@@ -1178,7 +1202,7 @@ function parseData(data: any, platform: string, module: string, parentModule: st
             if (callChildParsers.includes(childJudgement)) {
                 isResultList = true;
                 const infoList = parseResult;
-                for (let i = 0; i < infoList.length; i++) {
+                for (let i = 0; i < infoList?.length || 0; i++) {
                     const infoData = infoList[i];
                     const parsedChild = parseData(infoData, platform, childJudgement, module);
                     resultList.push(parsedChild);
