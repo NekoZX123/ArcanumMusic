@@ -75,7 +75,7 @@ async function storeAccountInfo(platform: string) {
     
     // 存储登录信息
     const fileName = `${platform}.arca`;
-    const filePath = `${await window.electron.getAppDataLocal()}\\ArcanumMusic\\accounts\\${fileName}`;
+    const filePath = `${await window.electron.getAppData()}\\ArcanumMusic_data\\accounts\\${fileName}`;
 
     window.electron.writeLocalFile(filePath, cipherData);
 }
@@ -93,7 +93,7 @@ async function readAccountInfo(platform: string = 'all') {
     console.log(await cookieValidate);
 
     const fileName = `${platform}.arca`;
-    const filePath = `${await window.electron.getAppDataLocal()}\\ArcanumMusic\\accounts\\${fileName}`;
+    const filePath = `${await window.electron.getAppData()}\\ArcanumMusic_data\\accounts\\${fileName}`;
 
     const fileExist = await window.electron.isFileExist(filePath);
     if (!fileExist) return null;

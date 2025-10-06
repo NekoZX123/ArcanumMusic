@@ -1,7 +1,6 @@
 {
     "productName": "ArcanumMusic",
-    "appId": "moe.nekozx.arcanummusic",
-    "icon": "./public/AppIcon.ico",
+    "appId": "moe.nekozx123.arcanummusic",
     "files": [
         "./app/app.js",
         "./app/preload.mjs",
@@ -11,7 +10,16 @@
         "./dist"
     ],
     "directories": {
-        "output": "./build"
+        "output": "./build/output"
+    },
+    "win": {
+        "target": [
+            {
+                "target": "nsis",
+                "arch": ["x64", "ia32"]
+            }
+        ],
+        "icon": "./public/appIcon/AppIcon.ico"
     },
     "nsis": {
         "artifactName": "${productName}_${version}_Setup.${ext}",
@@ -19,5 +27,18 @@
         "uninstallDisplayName": "${productName}",
         "installerIcon": "./dist/appIcon/AppIcon.ico",
         "uninstallerIcon": "./dist/appIcon/AppIcon.ico"
+    },
+    "linux": {
+        "target": [
+            {
+                "target": "deb",
+                "arch": ["x64"]
+            },
+            {
+                "target": "AppImage",
+                "arch": ["x64"]
+            }
+        ],
+        "icon": "./public/appIcon/ArcanumMusic.png"
     }
 }

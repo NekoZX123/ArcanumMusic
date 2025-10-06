@@ -19,7 +19,7 @@ contextBridge.exposeInMainWorld(
         
         getAppConfig: () => ipcRenderer.invoke('getAppConfig'), // 获取应用配置
         getAppEnvironment: () => ipcRenderer.invoke('getAppEnvironment'), // 获取应用环境
-        getAppDataLocal: () => ipcRenderer.invoke('getAppDataLocal'), // 获取 %AppData%
+        getAppData: () => ipcRenderer.invoke('getAppData'), // 获取 %AppData%
         getAsarLocation: () => ipcRenderer.invoke('getAsarLocation'), // 获取 asar 文件位置
         getUserName: () => ipcRenderer.invoke('getUserName'), // 获取用户名
         

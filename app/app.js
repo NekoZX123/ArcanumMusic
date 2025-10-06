@@ -8,18 +8,18 @@ import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 
 const __dirname = fileURLToPath(import.meta.url);
 
-// const environment = 'dev';
-const environment = 'build-kyrios-internal';
+const environment = 'dev';
+// const environment = 'build-kyrios-internal';
 let tray;
 let mainWindow = null;
 
 // 获取应用配置
 async function getAppConfig() {
-    let prefix = getAppDataLocal();
-    let confPath = prefix + '\\ArcanumMusic\\settings.json';
+    let prefix = getAppData();
+    let confPath = prefix + '\\ArcanumMusic_data\\settings.json';
 
     let fileExist = await isFileExist(null, confPath);
-    // console.log(fileExist);
+    // console.log(confPath, fileExist);
     if (!fileExist) {
         let asarFolder = (environment === 'dev' ? 'public' : 'dist');
         let defaultPath = __dirname.replace('app\\app.js', `${asarFolder}/data/settings.json`);
@@ -43,8 +43,8 @@ async function getAppConfig() {
 
 // 创建 / 获取账号数据存放目录
 async function prepareAccountStorage() {
-    let prefix = getAppDataLocal();
-    let accountPath = prefix + '\\ArcanumMusic\\accounts\\accounts.json';
+    let prefix = getAppData();
+    let accountPath = prefix + '\\ArcanumMusic_data\\accounts\\accounts.json';
 
     let fileExist = await isFileExist(null, accountPath);
     if (!fileExist) {
@@ -142,8 +142,8 @@ function newWindow(_, title, url) {
 
 // 获取账号数据位置
 function getAccountDataLocation(platform) {
-    const appData = getAppDataLocal();
-    const location = `${appData}/ArcanumMusic/accounts/${platform}.arca`;
+    const appData = getAppData();
+    const location = `${appData}/ArcanumMusic_data/accounts/${platform}.arca`;
     return location;
 }
 // 检查 Cookie 是否过期
@@ -361,12 +361,11 @@ function moveWindow(_, x, y) {
     }
 }
 
-
-// 获取 %AppData%
-function getAppDataLocal() {
-    const roamingPath = app.getPath('appData');
-    // console.log(result);
-    return roamingPath.replace('Roaming', 'Local');
+/**
+ * 获取 %AppData%
+ */
+function getAppData(_) {
+    return app.getPath('appData');
 }
 
 app.whenReady().then(() => {
@@ -385,8 +384,8 @@ app.whenReady().then(() => {
 
     ipcMain.handle('getAppConfig', getAppConfig);
     ipcMain.handle('getAppEnvironment', () => environment);
-    ipcMain.handle('getAppDataLocal', getAppDataLocal);
-    ipcMain.handle('getAsarLocation', () => app.getAppPath());
+    ipcMain.handle('getAppData', () => getAppData());
+    ipcMain.handle('getAsarLocation', () => {console.log(app.getAppPath()); return app.getAppPath()});
     ipcMain.handle('getUserName', () => userInfo().username);
 
     ipcMain.handle('validateCookieExpiration', validateCookieExpiration);

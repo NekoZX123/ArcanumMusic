@@ -487,10 +487,10 @@ function saveChanges(_: MouseEvent) {
     settings = modifiedSettings;
     const settingsText =  JSON.stringify(modifiedSettings);
     
-    window.electron.getAppDataLocal()
+    window.electron.getAppData()
         .then((appDataPath: string) => {
             console.log(appDataPath);
-            const targetFile = `${appDataPath}\\ArcanumMusic\\settings.json`;
+            const targetFile = `${appDataPath}\\ArcanumMusic_data\\settings.json`;
 
             window.electron.writeLocalFile(targetFile, settingsText);
 

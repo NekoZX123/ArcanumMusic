@@ -15,7 +15,7 @@ export interface IElectronAPI {
     writeLocalFile: (path: String, content: String) => Promise,
 
     getAppConfig: () => Promise,
-    getAppDataLocal: () => Promise,
+    getAppData: () => Promise,
     getAppEnvironment: () => Promise,
     getAsarLocation: () => Promise,
     getUserName: () => Promise,
