@@ -5,7 +5,7 @@ console.log('preload.mjs loaded');
 contextBridge.exposeInMainWorld(
     'electron', 
     {
-        createWindow: (title, url) => ipcRenderer.invoke('newAppWindow', title, url), // 创建新窗口
+        createWindow: (title, url, options) => ipcRenderer.invoke('newAppWindow', title, url, options), // 创建新窗口
         minimizeWindow: () => ipcRenderer.invoke('minimizeWindow'), // 最小化主窗口
         toggleMaximize: () => ipcRenderer.invoke('maximizeWindow'), // 最大化 / 还原主窗口
         closeWindow: () => ipcRenderer.invoke('closeWindow'), // 关闭主窗口
@@ -28,6 +28,6 @@ contextBridge.exposeInMainWorld(
         deleteCookies: (platform) => ipcRenderer.invoke('deleteCookie', platform), // 清除指定平台 Cookies
 
         openExternal: (url) => ipcRenderer.invoke('openExternal', url), // 打开外部链接
-        copyToClipboard: (content) => ipcRenderer.invoke('copyContent', content) // 复制内容至剪贴板
+        copyToClipboard: (content) => ipcRenderer.invoke('copyContent', content), // 复制内容至剪贴板
     }
 );
