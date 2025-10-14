@@ -1,0 +1,87 @@
+#app {
+    background: transparent;
+}
+
+#desktopLyrics {
+    width: 100%;
+    height: 100%;
+
+    background: var(--transparent-grey);
+    border: none;
+    border-radius: 15px;
+
+    align-items: center;
+}
+
+/* 窗口标题栏 */
+#windowControlBar {
+    position: relative;
+    width: 100%;
+    height: 2rem;
+    top: 0;
+
+    background: transparent;
+    border-radius: 12px 12px 0 0;
+}
+
+#windowDragCaptions {
+    position: relative;
+    height: 2rem;
+
+    background: transparent;
+    border: none;
+    border-radius: 12px;
+
+    -webkit-app-region: drag;
+    flex: 1 0;
+}
+
+#captionsBarController {
+    width: 100%;
+    height: 2rem;
+
+    align-items: center;
+    justify-content: center;
+}
+#captionsBarController > button {
+    margin: 0 4px;
+}
+
+.playControl:hover {
+    background: var(--transparent-darkgrey);
+}
+
+#captionsMain {
+    width: 100%;
+    height: calc(100% - 4rem);
+
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 1rem;
+
+    overflow: hidden;
+}
+
+#currentLyricsBox {
+    max-width: 100%;
+
+    background: transparent;
+    border: none;
+    border-radius: 15px;
+
+    transition: all 300ms ease-in-out;
+
+    align-items: center;
+    justify-content: center;
+}
+#currentLyricsBox > ul {
+    color: var(--default-black);
+    text-shadow: 0 0 2px var(--transparent-darkgrey);
+
+    padding: 0;
+
+    transition: all 300ms ease-in-out;
+}
+#currentLyricsBox > ul {
+    margin: 0;
+}

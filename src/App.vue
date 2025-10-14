@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { createApp, onMounted, ref } from 'vue';
+import { createApp, onMounted, onUnmounted, ref } from 'vue';
 import Lyrics from './components/lyrics/Lyrics.vue';
 
 import { showNotify } from './assets/notifications/Notification.ts';
@@ -11,7 +11,6 @@ import { readAccountInfo } from './assets/utilities/accountManager.ts';
 import { hideArtistSelect, hideRightMenu } from './assets/utilities/elementControl.ts';
 import { loadConfig } from './assets/utilities/configLoader.ts';
 import { loadProxyPort } from './assets/utilities/proxyRequest.ts';
-import { showPopup } from './assets/notifications/popup.tsx';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -191,6 +190,53 @@ function showLyrics(_: MouseEvent) {
     window.dispatchEvent(lyricShowEvent);
 }
 
+// 切换桌面歌词
+const captionWindowOptions = {
+    width: 700,
+    height: 160,
+    minWidth: 600,
+    minHeight: 150,
+    frame: false,
+    transparent: true,
+    // resizable: true,
+    focusable: true,
+    maximizable: false,
+    fullscreenable: false
+};
+let captionWindowId = -1;
+function handleCaptionsClose() {
+    const captionsButton = document.getElementById('captions') as HTMLButtonElement;
+    if (!captionsButton) {
+        console.error(`[Error] Failed to get element #captions`);
+        return;
+    }
+
+    captionsButton.classList.remove('active');
+    window.electron.closeWindowById(captionWindowId);
+}
+async function toggleCaptions(_: MouseEvent) {
+    const captionsButton = document.getElementById('captions') as HTMLButtonElement;
+    if (!captionsButton) {
+        console.error(`[Error] Failed to get element #captions`);
+        return;
+    }
+
+    const isCaptionsOn = captionsButton.classList.contains('active');
+    if (isCaptionsOn) {
+        captionsButton.classList.remove('active');
+        window.electron.closeWindowById(captionWindowId);
+    }
+    else {
+        captionsButton.classList.add('active');
+        const captionWindowUrl = `${window.location.href}?isDesktopLyrics=true`
+        captionWindowId = await window.electron.createWindow(
+            'Arcanum Music - Desktop Lyrics',
+            captionWindowUrl,
+            captionWindowOptions
+        );
+    }
+}
+
 // 长歌曲名称焦点滚动
 function checkScrollAnimation(_: MouseEvent) {
     const nameContainer = document.getElementById('songNameContainer') as HTMLElement;
@@ -220,6 +266,26 @@ function limitAuthorsTextLength(authors: string) {
     return authors;
 }
 
+// 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
+const allowedIdentifiers = ['moe.nekozx.arcanummusic.desktoplyrics'];
+function handleStorageData (updateEvent: StorageEvent) {
+        if (updateEvent.key === 'playerSignal' && updateEvent.newValue) {
+            const eventObject = JSON.parse(updateEvent.newValue);
+            const eventName = eventObject.eventName;
+            if (!allowedIdentifiers.includes(eventObject.message)) {
+                console.error(`[Error] Unidentified identifier ${eventObject.message}`);
+                return;
+            }
+
+            if (eventName === 'previous-song')      getPlayer()?.previousSong();
+            if (eventName === 'toggle-play-pause')  getPlayer()?.togglePlayPause();
+            if (eventName === 'next-song')          getPlayer()?.nextSong();
+            if (eventName === 'toggle-repeat')      getPlayer()?.toggleRepeat();
+            if (eventName === 'toggle-shuffle')     getPlayer()?.toggleShuffle();
+            if (eventName === 'captions-close')     handleCaptionsClose();
+        }
+    }
+
 onMounted(async () => {
     // 绕过 QQ 音乐脚本环境监测
     // 参考 / Reference: https://jixun.uk/posts/2024/qqmusic-zzc-sign/
@@ -235,23 +301,23 @@ onMounted(async () => {
     setTimeout(() => showNotify('Notify1', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 2000);
 
     // 测试弹窗
-    const internalInfo = `[当前版本: v1.1.8 Kyrios (Internal)]<br/>
-    <br/>
-    特别说明: <br/>
-    您所使用的是该应用的 Kyrios 体验版本, 该版本可满足日常使用, 但暂未实现以下功能: <br/>
-    - 设置页面: 除开发者工具设定、本地用户头像及名称以外的功能<br/>
-    - 音乐库页面: 酷我 / 酷狗收藏歌曲、每日推荐、用户歌单(暂未获取到API)<br/>
-    - 右键菜单: 收藏功能
-    <br/>
-    您的用户数据均在本地加密储存, 我们只会在与音乐平台通信时使用这些数据, 您的数据不会被发送到其他服务器<br/>
-    此版本仅供测试使用, 可能存在尚未发现的其他问题, 如有使用问题及改进建议可到 GitHub 项目页提出 Issue / Pull Request<br/>
-    当应用出现问题影响使用时, 可按下 Ctrl + R 刷新应用<br/>
-    <br/>
-    made by NekoZX123
-    <br/>`;
-    showPopup('info', 'notice', 
-        '欢迎使用 Arcanum Music', internalInfo, 
-        [], (code: number) => {console.log(code)});
+    // const internalInfo = `[当前版本: v1.1.8 Kyrios (Internal)]<br/>
+    // <br/>
+    // 特别说明: <br/>
+    // 您所使用的是该应用的 Kyrios 体验版本, 该版本可满足日常使用, 但暂未实现以下功能: <br/>
+    // - 设置页面: 除开发者工具设定、本地用户头像及名称以外的功能<br/>
+    // - 音乐库页面: 酷我 / 酷狗收藏歌曲、每日推荐、用户歌单(暂未获取到API)<br/>
+    // - 右键菜单: 收藏功能
+    // <br/>
+    // 您的用户数据均在本地加密储存, 我们只会在与音乐平台通信时使用这些数据, 您的数据不会被发送到其他服务器<br/>
+    // 此版本仅供测试使用, 可能存在尚未发现的其他问题, 如有使用问题及改进建议可到 GitHub 项目页提出 Issue / Pull Request<br/>
+    // 当应用出现问题影响使用时, 可按下 Ctrl + R 刷新应用<br/>
+    // <br/>
+    // made by NekoZX123
+    // <br/>`;
+    // showPopup('info', 'notice', 
+    //     '欢迎使用 Arcanum Music', internalInfo, 
+    //     [], (code: number) => {console.log(code)});
 
     // 歌词面板挂载
     const lyrics = createApp(Lyrics);
@@ -278,6 +344,7 @@ onMounted(async () => {
     document.getElementById('pageContainer')?.addEventListener('scroll', (_) => hideRightMenu());
     
     // 设置触发器
+    // 播放器组件
     const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
     if (!playerElem) {
         console.error('[Error] Player element not found');
@@ -288,7 +355,14 @@ onMounted(async () => {
 
         getPlayer()?.checkNextSong('App.vue');
     });
+
+    // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
+    window.addEventListener('storage', handleStorageData);
 });
+onUnmounted(() => {
+    window.removeEventListener('storage', handleStorageData);
+})
+
 </script>
 
 <template>
@@ -386,17 +460,20 @@ onMounted(async () => {
 
                 <!-- 其他控制 / 歌词 -->
                 <div class="flex row" id="controlRightBar">
-                    <button class="playControl small" id="playlist" @click="togglePlaylistPanel">
+                    <button class="playControl small" id="captions" @click="toggleCaptions" title="桌面歌词">
+                        <img src="/images/player/caption.svg" id="captionState" alt="Toggle caption"/>
+                    </button>
+                    <button class="playControl small" id="playlist" @click="togglePlaylistPanel" title="播放列表">
                         <img src="/images/player/playlist.svg" id="playlistState" alt="Toggle playlist"/>
                     </button>
-                    <button class="playControl small" id="repeat" @click="getPlayer()?.toggleRepeat">
+                    <button class="playControl small" id="repeat" @click="getPlayer()?.toggleRepeat" title="循环播放">
                         <img :src="getPlayer()?.repeatStateImage" alt="Toggle repeat"/>
                     </button>
-                    <button class="playControl small" id="shuffle" @click="getPlayer()?.toggleShuffle">
+                    <button class="playControl small" id="shuffle" @click="getPlayer()?.toggleShuffle" title="随机播放">
                         <img :src="getPlayer()?.shuffleStateImage" alt="Toggle shuffle"/>
                     </button>
                     <span class="flex row">
-                        <img class="playControl small" :src="getPlayer()?.volumeLevel" @click="getPlayer()?.toggleMute"/>
+                        <img class="playControl small" :src="getPlayer()?.volumeLevel" @click="getPlayer()?.toggleMute" title="静音"/>
                         <div id="volumeAdjust" @mousemove="adjustVolume">
                             <div id="volumeBar">
                                 <div id="volumeFilled" :style="`width: ${getPlayer()?.volume}%`"></div>
@@ -404,7 +481,7 @@ onMounted(async () => {
                             <div class="text ultraSmall" id="volumeLabel" :style="`left: calc(${getPlayer()?.volume}% - 1.5rem)`">{{ getPlayer()?.volume }}%</div>
                         </div>
                     </span>
-                    <button class="playControl small" id="lyrics" @click="showLyrics">
+                    <button class="playControl small" id="lyrics" @click="showLyrics" title="显示歌词">
                         <img src="/images/player/expand.svg" alt="Expand lyrics"/>
                     </button>
                 </div>

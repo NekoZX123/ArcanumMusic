@@ -94,6 +94,7 @@ class Player {
         this.playedTimeText = '';
         this.progressPercentage = 0;
         this.playStateImage = './images/player/play.dark.svg';
+        this.syncPlayStateImage();
         this.isPlaying = false;
 
         this.volume = 100;
@@ -117,8 +118,10 @@ class Player {
 
         this.repeatState = 0;
         this.repeatStateImage = IMAGES_REPEAT[0];
+        this.syncRepeatStateImage();
         this.shuffleState = 0;
         this.shuffleStateImage = IMAGES_SHUFFLE[0];
+        this.syncShuffleStateImage();
 
         this.url = '';
     }
@@ -234,6 +237,7 @@ class Player {
 
         this.repeatState = state;
         this.repeatStateImage = IMAGES_REPEAT[state];
+        this.syncRepeatStateImage();
     }
     setShuffleState (state: number) {
         // console.log(`[Debug] Shuffle state: ${state}`);
@@ -244,6 +248,7 @@ class Player {
 
         this.shuffleState = state;
         this.shuffleStateImage = IMAGES_SHUFFLE[state];
+        this.syncShuffleStateImage();
     }
 
     /**
@@ -257,10 +262,12 @@ class Player {
         }
 
         this.playStateImage = playerElem.paused ? './images/player/pause.dark.svg' : './images/player/play.dark.svg';
+        this.syncPlayStateImage();
         if (playerElem.paused && this.url !== '') {
             playerElem.play();
             this.isPlaying = true;
-        } else {
+        }
+        else {
             playerElem.pause();
             this.isPlaying = false;
         }
@@ -302,7 +309,7 @@ class Player {
                 showNotify('songUrlNullError', 'critical', `无法播放 ${this.name}`, '获取播放链接失败');
                 if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0) {
                     this.togglePlayPause();
-                this.playStateImage = './images/player/play.dark.svg';
+                    this.playStateImage = './images/player/play.dark.svg';
                     return;
                 }
                 this.nextSong();
@@ -336,6 +343,7 @@ class Player {
             }
 
             this.playStateImage = './images/player/pause.dark.svg';
+            this.syncPlayStateImage();
             this.isPlaying = true;
 
             // 更新歌词
@@ -598,6 +606,19 @@ class Player {
 
             this.playByList(parsedTracks, hasDetail);
         });
+    }
+
+    syncPlayStateImage() {
+        this.updateStoredVariable('playState', this.playStateImage);
+    }
+    syncRepeatStateImage() {
+        this.updateStoredVariable('repeatState', this.repeatStateImage);
+    }
+    syncShuffleStateImage() {
+        this.updateStoredVariable('shuffleState', this.shuffleStateImage);
+    }
+    updateStoredVariable(key: string, content: string) {
+        window.localStorage.setItem(key, content);
     }
 }
 

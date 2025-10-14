@@ -1079,6 +1079,11 @@ a {
     border-radius: 8px;
 }
 
+/* 桌面歌词开关 */
+#captions.active {
+    background: var(--color-blue-light);
+}
+
 #controlRightBar > * {
     margin: 0 3px;
 }
