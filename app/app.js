@@ -65,7 +65,7 @@ async function prepareAccountStorage() {
 }
 
 // 创建主窗口
-function createWindow() {
+function createMainWindow() {
     prepareAccountStorage();
     const configLoad = getAppConfig();
 
@@ -96,6 +96,14 @@ function createWindow() {
     else {
         mainWindow.loadFile('dist/index.html');
     }
+
+    // 防止窗口残留
+    mainWindow.on('closed', () => {
+        const windowList = BrowserWindow.getAllWindows();
+        windowList.forEach((window) => {
+            if (window.id !== mainWindow.id) window.close();
+        });
+    });
     
     configLoad.then((config) => {
         const configObject = JSON.parse(config);
@@ -116,22 +124,34 @@ function createWindow() {
 }
 
 // 新建窗口
-function newWindow(_, title, url) {
-    let newAppWindow = new BrowserWindow({
-        width: 1000,
-        height: 600,
-        minWidth: 600,
-        minHeight: 400,
-        frame: true,
-        resizable: true,
-        focusable: true,
-        title: title,
-        icon: `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`,
-        webPreferences: {
+function newWindow(_, title, url, options) {
+    let windowConfig;
+    if (options) {
+        windowConfig = options;
+        windowConfig.icon = `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`;
+        windowConfig.webPreferences = {
             nodeIntegration: true,
             contextIsolation: true
-        }
-    });
+        };
+    }
+    else {
+        windowConfig = {
+            width: 1000,
+            height: 600,
+            minWidth: 600,
+            minHeight: 400,
+            frame: true,
+            resizable: true,
+            focusable: true,
+            title: title,
+            icon: `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`,
+            webPreferences: {
+                nodeIntegration: true,
+                contextIsolation: true
+            }
+        };
+    }
+    let newAppWindow = new BrowserWindow(windowConfig);
 
     newAppWindow.loadURL(url);
 
@@ -334,7 +354,13 @@ function toggleMaximize(_) {
     }
 }
 
-function closeWindow(_) {
+function closeAllWindows(_) {
+    // 先关闭所有非主窗口
+    const windowList = BrowserWindow.getAllWindows();
+    windowList.forEach((window) => {
+        if (window.id !== mainWindow.id) window.close();
+    });
+    
     if (mainWindow) {
         mainWindow.close();
     }
@@ -373,7 +399,7 @@ app.whenReady().then(() => {
     ipcMain.handle('newAppWindow', newWindow);
     ipcMain.handle('minimizeWindow', minimizeWindow);
     ipcMain.handle('maximizeWindow', toggleMaximize);
-    ipcMain.handle('closeWindow', closeWindow);
+    ipcMain.handle('closeWindow', closeAllWindows);
     ipcMain.handle('getWindowRect', getWindowRect);
     ipcMain.handle('moveWindow', moveWindow);
     ipcMain.handle('closeWindowById', closeWindowById);
@@ -393,14 +419,14 @@ app.whenReady().then(() => {
     ipcMain.handle('deleteCookie', deleteCookies);
 
     ipcMain.handle('openExternal', (_, url) => shell.openExternal(url));
-    ipcMain.handle('copyContent', (_, content) => clipboard.writeText(content))
+    ipcMain.handle('copyContent', (_, content) => clipboard.writeText(content));
 
     // 启动服务
     startService(environment);
     // startWebSocket();
 
     // 创建应用主窗口
-    createWindow();
+    createMainWindow();
 
     // 托盘图标
     tray = new Tray(`${environment === 'dev' ? './public' : `${app.getAppPath()}/dist`}/appIcon/AppIcon.ico`);
