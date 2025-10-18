@@ -47,6 +47,20 @@
     margin: 0 4px;
 }
 
+.verticleSplitLine {
+    width: 2px;
+    height: 100%;
+
+    background: var(--transparent-darkgrey);
+    border: none;
+    border-radius: 1px;
+
+    margin: 0 6px;
+    padding: 2px 0;
+
+    display: block;
+}
+
 .playControl:hover {
     background: var(--transparent-darkgrey);
 }

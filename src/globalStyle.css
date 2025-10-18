@@ -16,26 +16,32 @@
     --color-red-default: rgb(232, 66, 66);
     --color-red-light: rgb(255, 171, 171);
     --color-red-deep: rgb(202, 25, 25);
+    --color-red-transparent: rgba(253, 109, 109, 0.6);
 
     --color-orange-default: rgb(235, 118, 46);
     --color-orange-light: rgb(255, 187, 144);
     --color-orange-deep: rgb(191, 84, 17);
+    --color-orange-transparent: rgba(253, 142, 72, 0.6);
 
     --color-yellow-default: rgb(255, 245, 63);
     --color-yellow-light: rgb(255, 251, 172);
     --color-yellow-deep: rgb(211, 200, 0);
+    --color-yellow-transparent: rgba(255, 243, 23, 0.6);
 
     --color-green-default: rgb(50, 224, 104);
     --color-green-light: rgb(152, 242, 181);
     --color-green-deep: rgb(27, 141, 36);
+    --color-green-transparent: rgba(36, 248, 103, 0.6);
 
     --color-blue-default: rgb(19, 120, 236);
     --color-blue-light: rgb(190, 214, 243);
     --color-blue-deep: rgb(36, 92, 234);
+    --color-blue-transparent: rgba(79, 161, 255, 0.6);
 
     --color-purple-default: rgb(156, 76, 235);
     --color-purple-light: rgb(216, 176, 255);
     --color-purple-dark: rgb(84, 22, 146);
+    --color-purple-transparent: rgba(173, 65, 255, 0.6);
 
     --color-warning: rgb(230, 208, 18);
 
@@ -1078,10 +1084,11 @@ a {
 
     border-radius: 8px;
 }
-
-/* 桌面歌词开关 */
-#captions.active {
-    background: var(--color-blue-light);
+.playControl.active {
+    background: var(--color-blue-transparent);
+}
+.playControl.active:hover {
+    background: var(--color-blue-transparent);
 }
 
 #controlRightBar > * {

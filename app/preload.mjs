@@ -11,6 +11,7 @@ contextBridge.exposeInMainWorld(
         closeWindow: () => ipcRenderer.invoke('closeWindow'), // 关闭主窗口
         getWindowRect: () => ipcRenderer.invoke('getWindowRect'), // 获取主窗口位置大小
         moveWindow: (x, y) => ipcRenderer.invoke('moveWindow', x, y), // 移动主窗口位置
+        setAlwaysOnTop: (id, flag) => ipcRenderer.invoke('setAlwaysOnTop', id, flag), // 调整指定窗口是否置顶
         closeWindowById: (id) => ipcRenderer.invoke('closeWindowById', id), // 根据 ID 关闭非主窗口
 
         isFileExist: (path) => ipcRenderer.invoke('isFileExist', path), // 检查文件是否存在

@@ -131,7 +131,8 @@ function newWindow(_, title, url, options) {
         windowConfig.icon = `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`;
         windowConfig.webPreferences = {
             nodeIntegration: true,
-            contextIsolation: true
+            contextIsolation: true,
+            preload: __dirname.replace('app.js', 'preload.mjs')
         };
     }
     else {
@@ -147,7 +148,8 @@ function newWindow(_, title, url, options) {
             icon: `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`,
             webPreferences: {
                 nodeIntegration: true,
-                contextIsolation: true
+                contextIsolation: true,
+                preload: __dirname.replace('app.js', 'preload.mjs')
             }
         };
     }
@@ -354,6 +356,14 @@ function toggleMaximize(_) {
     }
 }
 
+// 调整指定窗口是否置顶
+function setWindowTopState(_, id, flag) {
+    const targetWindow = BrowserWindow.fromId(id);
+    if (targetWindow) {
+        targetWindow.setAlwaysOnTop(flag);
+    }
+}
+
 function closeAllWindows(_) {
     // 先关闭所有非主窗口
     const windowList = BrowserWindow.getAllWindows();
@@ -402,6 +412,7 @@ app.whenReady().then(() => {
     ipcMain.handle('closeWindow', closeAllWindows);
     ipcMain.handle('getWindowRect', getWindowRect);
     ipcMain.handle('moveWindow', moveWindow);
+    ipcMain.handle('setAlwaysOnTop', setWindowTopState);
     ipcMain.handle('closeWindowById', closeWindowById);
 
     ipcMain.handle('isFileExist', isFileExist);

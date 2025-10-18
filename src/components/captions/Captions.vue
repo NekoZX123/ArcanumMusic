@@ -58,6 +58,31 @@ function updateStorageData(updateEvent: StorageEvent) {
     }
 }
 
+function toggleWindowTop(_?: any) {
+    const alwaysOnTopButton = document.getElementById('toggleTop') as HTMLButtonElement;
+    if (!alwaysOnTopButton) {
+        console.error(`[Error] Failed to get element #toggleTop`);
+        return;
+    }
+
+    let windowIdString = window.localStorage.getItem('captionsWinId');
+    if (!windowIdString) {
+        console.warn(`[Warning] Unable to get current window ID`);
+        return;
+    }
+    const captionsWindowId = parseInt(windowIdString);
+
+    const isCaptionsOn = alwaysOnTopButton.classList.contains('active');
+    if (isCaptionsOn) {
+        alwaysOnTopButton.classList.remove('active');
+        window.electron.setAlwaysOnTop(captionsWindowId, false);
+    }
+    else {
+        alwaysOnTopButton.classList.add('active');
+        window.electron.setAlwaysOnTop(captionsWindowId, true);
+    }
+}
+
 /**
  * 向主窗口发送消息 (使用 localStorage 作为中间桥)
  * @param eventName 事件名称
@@ -90,6 +115,12 @@ onUnmounted(() => {
 
         <!-- 控制器 -->
         <div class="flex row" id="captionsBarController">
+            <button class="playControl small" id="toggleTop" title="窗口置顶" @click="toggleWindowTop">
+                <img src="/images/windowControl/alwaysTop.svg"></img>
+            </button>
+
+            <div class="verticleSplitLine"></div>
+
             <button class="playControl small" id="previousButton" title="上一首" 
                 @click="() => sendToMain('previous-song', windowIdentifier)">
                 <img src="/images/player/previous.svg"></img>
@@ -110,6 +141,9 @@ onUnmounted(() => {
                 @click="() => sendToMain('toggle-shuffle', windowIdentifier)">
                 <img :src="shuffleStateImage" alt="Toggle shuffle"/>
             </button>
+
+            <div class="verticleSplitLine"></div>
+
             <button class="playControl small" id="closeCaptions" title="关闭窗口"
                 @click="() => sendToMain('captions-close', windowIdentifier)">
                 <img src="/images/windowControl/close.svg" alt="Close window"></img>

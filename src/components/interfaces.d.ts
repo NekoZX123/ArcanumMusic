@@ -5,6 +5,7 @@ export interface IElectronAPI {
     minimizeWindow: () => Promise,
     toggleMaximize: () => Promise,
     closeWindow: () => Promise,
+    setAlwaysOnTop: (id, flag) => Promise,
     closeWindowById: (windowId: Number) => Promise,
     
     getWindowRect: () => Promise,

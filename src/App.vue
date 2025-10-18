@@ -198,8 +198,8 @@ const captionWindowOptions = {
     minHeight: 150,
     frame: false,
     transparent: true,
-    // resizable: true,
     focusable: true,
+    skipTaskbar: true,
     maximizable: false,
     fullscreenable: false
 };
@@ -225,6 +225,8 @@ async function toggleCaptions(_: MouseEvent) {
     if (isCaptionsOn) {
         captionsButton.classList.remove('active');
         window.electron.closeWindowById(captionWindowId);
+
+        window.localStorage.setItem('captionsWinId', '');
     }
     else {
         captionsButton.classList.add('active');
@@ -234,6 +236,8 @@ async function toggleCaptions(_: MouseEvent) {
             captionWindowUrl,
             captionWindowOptions
         );
+
+        window.localStorage.setItem('captionsWinId', captionWindowId.toString());
     }
 }
 
