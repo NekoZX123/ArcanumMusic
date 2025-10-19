@@ -34,6 +34,54 @@ function titlebarMouseUp() {
     isMoving = false;
 }
 
+// 歌词配色切换
+const themeList = ['default', 'dark', 'red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+let currentThemeId = 0;
+let styleText = `
+#currentLyricsBox > ul {
+    color: var(--default-white);
+    text-shadow:
+        0 0 3px var(--transparent-grey),
+        1px 1px 3px var(--transparent-darkgrey),
+        -1px -1px 2px var(--default-darkgrey);
+}
+`;
+function switchTheme(_: MouseEvent) {
+    currentThemeId ++;
+    if (currentThemeId >= themeList.length) currentThemeId = 0;
+    const themeName = themeList[currentThemeId];
+
+    let textColor = '--default-white';
+    let shadowColors: string[] = [];
+    if (themeName === 'default') {
+        textColor = '--default-white',
+        shadowColors = ['--transparent-grey', '--transparent-darkgrey', '--default-darkgrey'];
+    }
+    else if (themeName === 'dark') {
+        textColor = '--transparent-black',
+        shadowColors = ['--transparent-darkgrey', '--transparent-lightgrey', '--default-grey'];
+    }
+    else {
+        textColor = `--color-${themeName}-light`;
+        shadowColors = [
+            `--color-${themeName}-default`,
+            `--color-${themeName}-deep`,
+            `--color-${themeName}-ultradeep`
+        ];
+    }
+
+    styleText = `
+    #currentLyricsBox > ul {
+        color: var(${textColor});
+        text-shadow:
+            0 0 3px var(${shadowColors[0]}),
+            1px 1px 3px var(${shadowColors[1]}),
+            -1px -1px 2px var(${shadowColors[2]});
+    }
+    `;
+    lyricStyle.innerText = styleText;
+}
+
 const playStateImage = ref('./images/player/play.dark.svg');
 const repeatStateImage = ref('./images/player/repeat.svg');
 const shuffleStateImage = ref('./images/player/shuffle.svg');
@@ -93,9 +141,14 @@ function sendToMain(eventName: string, message?: any) {
     window.localStorage.setItem('playerSignal', JSON.stringify({eventName: eventName, message: message}));
 }
 
+let lyricStyle: HTMLElement;
 const windowIdentifier = 'moe.nekozx.arcanummusic.desktoplyrics';
 
 onMounted(() => {
+    lyricStyle = document.createElement('style');
+    document.body.appendChild(lyricStyle);
+    lyricStyle.innerText = styleText;
+
     window.addEventListener('storage', updateStorageData);
 
     console.log(`[Debug] Captions.vue loaded`);
@@ -117,6 +170,9 @@ onUnmounted(() => {
         <div class="flex row" id="captionsBarController">
             <button class="playControl small" id="toggleTop" title="窗口置顶" @click="toggleWindowTop">
                 <img src="/images/windowControl/alwaysTop.svg"></img>
+            </button>
+            <button class="playControl small" id="changeTheme" title="切换主题" @click="switchTheme">
+                <img src="/images/player/adjustTheme.svg"></img>
             </button>
 
             <div class="verticleSplitLine"></div>

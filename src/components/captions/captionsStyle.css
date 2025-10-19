@@ -77,8 +77,6 @@
 }
 
 #currentLyricsBox {
-    max-width: 100%;
-
     background: transparent;
     border: none;
     border-radius: 15px;
@@ -89,12 +87,22 @@
     justify-content: center;
 }
 #currentLyricsBox > ul {
-    color: var(--default-black);
-    text-shadow: 0 0 2px var(--transparent-darkgrey);
+    color: var(--default-white);
+    text-shadow:
+        0 0 3px var(--transparent-grey),
+        1px 1px 3px var(--transparent-darkgrey),
+        -1px -1px 2px var(--default-darkgrey);
 
+    margin: 4px 0;
     padding: 0;
 
-    transition: all 300ms ease-in-out;
+    overflow: hidden;
+}
+#currentLyricsBox > ul.large {
+    height: 30pt;
+}
+#currentLyricsBox > ul.medium {
+    height: 24pt;
 }
 #currentLyricsBox > ul {
     margin: 0;
