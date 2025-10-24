@@ -8,6 +8,7 @@
     --default-darkgrey: rgb(114, 114, 114);
     --default-grey: rgb(128, 128, 128);
     --default-lightgrey: rgb(225, 225, 225);
+    --transparent-black: rgba(36, 36, 36, 0.7);
     --transparent-white: rgba(245, 245, 245, 0.6);
     --transparent-darkgrey: rgba(114, 114, 114, 0.4);
     --transparent-grey: rgba(168, 168, 168, 0.4);
@@ -16,26 +17,38 @@
     --color-red-default: rgb(232, 66, 66);
     --color-red-light: rgb(255, 171, 171);
     --color-red-deep: rgb(202, 25, 25);
+    --color-red-ultradeep: rgb(85, 16, 16);
+    --color-red-transparent: rgba(253, 109, 109, 0.6);
 
     --color-orange-default: rgb(235, 118, 46);
     --color-orange-light: rgb(255, 187, 144);
     --color-orange-deep: rgb(191, 84, 17);
+    --color-orange-ultradeep: rgb(84, 45, 21);
+    --color-orange-transparent: rgba(253, 142, 72, 0.6);
 
     --color-yellow-default: rgb(255, 245, 63);
     --color-yellow-light: rgb(255, 251, 172);
     --color-yellow-deep: rgb(211, 200, 0);
+    --color-yellow-ultradeep: rgb(66, 63, 7);
+    --color-yellow-transparent: rgba(255, 243, 23, 0.6);
 
     --color-green-default: rgb(50, 224, 104);
     --color-green-light: rgb(152, 242, 181);
     --color-green-deep: rgb(27, 141, 36);
+    --color-green-ultradeep: rgb(4, 60, 22);
+    --color-green-transparent: rgba(36, 248, 103, 0.6);
 
     --color-blue-default: rgb(19, 120, 236);
     --color-blue-light: rgb(190, 214, 243);
     --color-blue-deep: rgb(36, 92, 234);
+    --color-blue-ultradeep: rgb(3, 40, 82);
+    --color-blue-transparent: rgba(79, 161, 255, 0.6);
 
     --color-purple-default: rgb(156, 76, 235);
     --color-purple-light: rgb(216, 176, 255);
-    --color-purple-dark: rgb(84, 22, 146);
+    --color-purple-deep: rgb(84, 22, 146);
+    --color-purple-ultradeep: rgb(32, 5, 59);
+    --color-purple-transparent: rgba(173, 65, 255, 0.6);
 
     --color-warning: rgb(230, 208, 18);
 
@@ -225,7 +238,6 @@ a {
     position: relative;
     width: 100%;
     height: calc(100vh - 2.5rem);
-    top: 2.5rem;
 }
 
 /* 页面切换 */
@@ -1077,6 +1089,12 @@ a {
     height: 2rem;
 
     border-radius: 8px;
+}
+.playControl.active {
+    background: var(--color-blue-transparent);
+}
+.playControl.active:hover {
+    background: var(--color-blue-transparent);
 }
 
 #controlRightBar > * {

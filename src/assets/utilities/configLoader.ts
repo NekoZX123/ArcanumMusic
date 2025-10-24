@@ -1,18 +1,10 @@
 // 设置文件位置
-const configLocation = '/ArcanumMusic/settings.json';
 var appConfig: any = undefined;
 
-// 获取应用配置存放位置
-async function getConfigPath() {
-    let prefix = await window.electron.getAppDataLocal();
-    return `${prefix}${configLocation}`;
-}
 // 设置文件判断 & 创建 / 读取
 function prepareSettings() {
     return new Promise<string>(async (resolve) => {
-        let configPath = await getConfigPath();
-
-        let configData = await window.electron.readLocalFile(configPath);
+        let configData = await window.electron.getAppConfig();
 
         resolve(configData);
     });

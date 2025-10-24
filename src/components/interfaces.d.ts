@@ -1,10 +1,11 @@
 // Electron API 声明
 
 export interface IElectronAPI {
-    createWindow: (title: String, url: String) => Promise,
+    createWindow: (title: String, url: String, options?: any) => Promise,
     minimizeWindow: () => Promise,
     toggleMaximize: () => Promise,
     closeWindow: () => Promise,
+    setAlwaysOnTop: (id, flag) => Promise,
     closeWindowById: (windowId: Number) => Promise,
     
     getWindowRect: () => Promise,
@@ -15,7 +16,7 @@ export interface IElectronAPI {
     writeLocalFile: (path: String, content: String) => Promise,
 
     getAppConfig: () => Promise,
-    getAppDataLocal: () => Promise,
+    getAppData: () => Promise,
     getAppEnvironment: () => Promise,
     getAsarLocation: () => Promise,
     getUserName: () => Promise,

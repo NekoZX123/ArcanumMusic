@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref, type Ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import './lyricsStyle.css';
 import { LyricsLine } from '../../assets/lyrics/Lyrics.tsx';
 import { getPlayer } from '../../assets/player/player.ts';
-import { getSongLyrics } from '../../assets/player/songUtils.ts';
-import { parseLyrics, type LyricData } from '../../assets/lyrics/lyricsParser.ts';
 import { getMainColors, ParticleManager } from '../../assets/utilities/colorUtils.ts';
+import { getLyricsData, setContainerId, updateCurrentLyrics, updateFocusedLyric } from '../../assets/lyrics/lyricsManager.ts';
 
 // const songData = ref(getPlayer());
 // 最大偏移回弹距离
@@ -146,93 +145,6 @@ function limitAuthorsTextLength(authors: string) {
     return authors;
 }
 
-const lyricLines: Ref<LyricData> = ref({
-    lyrics: [],
-    metaData: {}
-});
-/**
- * 更新歌词内容
- */
-function updateCurrentLyrics(_?: any) {
-    const songId = getPlayer()?.playlist.current.id;
-    if (!songId) return;
-    const platform = songId.split('-')[1];
-
-    // 重置歌词
-    lyricLines.value = {
-        lyrics: [],
-        metaData: {}
-    };
-
-    getSongLyrics(songId)
-    .then((lyricsInfo: any) => {
-
-        const parseResult = parseLyrics(lyricsInfo, platform);
-        if (!parseResult) {
-            console.error(`[Error] Failed to parse lyrics`);
-            return;
-        }
-        lyricLines.value = parseResult;
-
-        currentLyricIndex = -1;
-        updateFocusedLyric(0);
-    });
-}
-
-let currentLyricIndex = -1;
-const containerElement: Ref<HTMLElement | null> = ref(null);
-const lyricElements: Ref<any[]> = ref([]);
-/**
- * 获取当前焦点歌词
- * @param time 播放时间
- */
-function findLyricIndex(time: number) {
-    let start = 0, end = lyricLines.value.lyrics.length - 1;
-
-    while (start <= end) {
-        const mid = Math.floor((start + end) / 2);
-        const midTime = lyricLines.value.lyrics[mid].time;
-
-        if (midTime <= time) {
-            start = mid + 1;
-        }
-        else {
-            end = mid - 1;
-        }
-    }
-
-    return end;
-}
-/**
- * 更新当前焦点歌词
- */
-function updateFocusedLyric(time: number) {
-    const targetIndex = findLyricIndex(time);
-
-    if (targetIndex !== currentLyricIndex && lyricElements.value.length > 0 && targetIndex >= 0) {
-        // 更新样式
-        if (currentLyricIndex >= 0) {
-            // console.log(targetIndex, currentLyricIndex, lyricElements.value);
-            lyricElements.value[currentLyricIndex].classList.remove('focused');
-        }
-        lyricElements.value[targetIndex].classList.add('focused');
-
-        // 更新焦点索引
-        currentLyricIndex = targetIndex;
-
-        // 滚动至焦点位置
-        const activeElement = lyricElements.value[targetIndex];
-        if (activeElement) {
-            requestAnimationFrame(() => {
-                containerElement.value?.scrollTo({
-                    top: activeElement.offsetTop - containerElement.value.offsetHeight / 2,
-                    behavior: 'smooth'
-                });
-            });
-        }
-    }
-}
-
 let particleSystem: ParticleManager | null = null;
 const PARTICLES_COUNT = 3;
 /**
@@ -324,9 +236,7 @@ onMounted(() => {
     window.addEventListener('lyrics-background-anim', pendStartAnimation);
 
     // 歌词元素
-    const lyricsContainer = document.getElementById('lyricsContent') as HTMLElement;
-    containerElement.value = lyricsContainer;
-    lyricElements.value = lyricsContainer.children as any;
+    setContainerId('lyricsContent');
 
     // 光斑背景动效
     particleSystem = new ParticleManager(['rgb(144,202,249)', 'rgb(248,187,208)', 'rgb(144,150,249)']);
@@ -413,7 +323,7 @@ onMounted(() => {
             <!-- 歌词内容 -->
             <div class="flex column" id="lyricsContent">
                 <LyricsLine 
-                    v-for="lyricInfo in lyricLines.lyrics"
+                    v-for="lyricInfo in getLyricsData().lyrics"
                     :time="lyricInfo.time"
                     :content="lyricInfo.content"
                     :translation="lyricInfo.translation"

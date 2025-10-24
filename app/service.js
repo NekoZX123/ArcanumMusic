@@ -5,7 +5,7 @@ const express = require('express');
 const cors = require('cors');
 import axios from 'axios';
 const server = express();
-const port = 3000;
+let port = 3000;
 
 server.use(express.json());
 server.use(cors());
@@ -127,10 +127,10 @@ function startService(environment) {
         
     });
 
-    const port = environment === 'dev' ? 3001 : 3000;
+    port = environment === 'dev' ? 3001 : 3000;
     server.listen(port, () => {
         console.log(`[Arcanum Music - Service] Local proxy server running at http://localhost:${port}/`)
-    })
+    });
 }
 
 function stopService() {
