@@ -7,6 +7,7 @@
         "./app/fileManager.js",
         "./app/service.js",
         "./app/webSocket.js",
+        "./app/accountHelper.js",
         "./dist"
     ],
     "directories": {

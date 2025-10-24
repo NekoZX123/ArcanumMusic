@@ -238,7 +238,6 @@ a {
     position: relative;
     width: 100%;
     height: calc(100vh - 2.5rem);
-    top: 2.5rem;
 }
 
 /* 页面切换 */
