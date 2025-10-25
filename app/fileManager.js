@@ -18,7 +18,7 @@ async function isFileExist(event, path) {
 async function readLocalFile(event, path) {
     return new Promise((resolve) => {
         readFile(path, 'utf-8', (err, data) => {
-            if (err) {                
+            if (err) {
                 console.error(`[Error (code ${err.code})] ${err.message}`);
                 resolve(null);
             }
@@ -34,8 +34,8 @@ async function writeLocalFile(event, path, content) {
         if (!err) return;
 
         if (err.code.toString() === 'ENOENT') {
-            let parts = path.split('\\');
-            let dirPath = parts.splice(0, parts.length - 1).join('\\');
+            let parts = path.split('//');
+            let dirPath = parts.splice(0, parts.length - 1).join('/');
             mkdir(dirPath, (makeError) => {
                 if (!makeError) return;
 

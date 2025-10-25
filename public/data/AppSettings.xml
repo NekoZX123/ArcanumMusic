@@ -92,7 +92,7 @@
         <node id="iconContainer" title="">
             <image id="appIconLarge" src="./appIcon/ArcanumMusic.png"/>
             <label id="appName" text="Arcanum Music"/>
-            <label id="appVersion" text="version 1.2.1-Kyrios (Internal)"/>
+            <label id="appVersion" text="internal version (dev)"/>
             <label id="appAuthor" text="made by NekoZX123"/>
         </node>
         <node id="links" title="">

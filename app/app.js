@@ -9,23 +9,25 @@ import { deleteCookies, validateCookieExpiration, listenForCookie } from './acco
 
 const __dirname = fileURLToPath(import.meta.url);
 
-// const environment = 'dev';
-const environment = 'build-kyrios-internal';
+const environment = 'dev';
+// const environment = 'build-kyrios-internal';
 let tray;
 let mainWindow = null;
 
 // 获取应用配置
 async function getAppConfig() {
     let prefix = getAppData();
-    let confPath = prefix + '\\ArcanumMusic_data\\settings.json';
+    let confPath = prefix + '/ArcanumMusic_data/settings.json';
 
     let fileExist = await isFileExist(null, confPath);
     // console.log(confPath, fileExist);
     if (!fileExist) {
         let asarFolder = (environment === 'dev' ? 'public' : 'dist');
-        let defaultPath = __dirname.replace('app\\app.js', `${asarFolder}/data/settings.json`);
+        let defaultPath = __dirname
+            .replace('app/app.js', `${asarFolder}/data/settings.json`)
+            .replace('app\\app.js', `${asarFolder}/data/settings.json`);
 
-        let configDir = confPath.substring(0, confPath.lastIndexOf('\\'));
+        let configDir = confPath.substring(0, confPath.lastIndexOf('/'));
         await new Promise((resolve, reject) => {
             mkdir(configDir, { recursive: true }, (err) => {
                 if (err) {
@@ -45,11 +47,11 @@ async function getAppConfig() {
 // 创建 / 获取账号数据存放目录
 async function prepareAccountStorage() {
     let prefix = getAppData();
-    let accountPath = prefix + '\\ArcanumMusic_data\\accounts\\accounts.json';
+    let accountPath = prefix + '/ArcanumMusic_data/accounts/accounts.json';
 
     let fileExist = await isFileExist(null, accountPath);
     if (!fileExist) {
-        let configDir = accountPath.substring(0, accountPath.lastIndexOf('\\'));
+        let configDir = accountPath.substring(0, accountPath.lastIndexOf('/'));
         await new Promise((resolve, reject) => {
             mkdir(configDir, { recursive: true }, (err) => {
                 if (err) {

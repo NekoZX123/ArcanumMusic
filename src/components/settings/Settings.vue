@@ -490,7 +490,7 @@ function saveChanges(_: MouseEvent) {
     window.electron.getAppData()
         .then((appDataPath: string) => {
             console.log(appDataPath);
-            const targetFile = `${appDataPath}\\ArcanumMusic_data\\settings.json`;
+            const targetFile = `${appDataPath}/ArcanumMusic_data/settings.json`;
 
             window.electron.writeLocalFile(targetFile, settingsText);
 
@@ -502,16 +502,18 @@ onMounted(async () => {
     settingsContent = document.getElementById('settingsContent') as HTMLElement;
 
     // 获取设置页面
-    const pageReader = new XMLHttpRequest();
-    let appEnv = await window.electron.getAppEnvironment(), asarPath = '';
-    if (appEnv !== 'dev') {
-        asarPath = await window.electron.getAsarLocation();
+    let appEnv = await window.electron.getAppEnvironment();
+    let asarPath = await window.electron.getAsarLocation();
+    if (appEnv === 'dev') {
+        asarPath += '/public';
+    }
+    else {
         asarPath += '/dist';
     }
-    pageReader.open('GET', `${asarPath}/data/AppSettings.xml`, false);
-    pageReader.overrideMimeType('text/xml;charset=UTF-8');
-    pageReader.send(null);
-    settingsPage = pageReader.responseXML;
+    const pagePath = `${asarPath}/data/AppSettings.xml`;
+    const pageStructureString: string = await window.electron.readLocalFile(pagePath);
+    const parser = new DOMParser();
+    settingsPage = parser.parseFromString(pageStructureString, 'text/xml');
     // console.log(settingsPage);
 
     // 读取设置内容
