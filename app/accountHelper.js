@@ -1,12 +1,37 @@
 import { BrowserWindow, session } from 'electron';
+import { getAppData } from './globalUtils.js';
+import { writeLocalFile, isFileExist } from "./fileManager.js";
+import { mkdir } from "fs";
 
 // 用户账户相关操作
+
+// 创建 / 获取账号数据存放目录
+async function prepareAccountStorage() {
+    let prefix = getAppData();
+    let accountPath = prefix + '/ArcanumMusic_data/accounts/accounts.json';
+
+    let fileExist = await isFileExist(null, accountPath);
+    if (!fileExist) {
+        let configDir = accountPath.substring(0, accountPath.lastIndexOf('/'));
+        await new Promise((resolve, reject) => {
+            mkdir(configDir, { recursive: true }, (err) => {
+                if (err) {
+                    console.error('[Error] Directory creation failed: ', err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
+    return accountPath;
+}
 
 // 获取账号数据位置
 function getAccountDataLocation(platform) {
     const appData = getAppData();
-    const location = `${appData}/ArcanumMusic_data/accounts/${platform}.arca`;
-    return location;
+    return `${appData}/ArcanumMusic_data/accounts/${platform}.arca`;
 }
 // 检查 Cookie 是否过期
 const platformCookies = {
@@ -182,6 +207,7 @@ function listenForCookie(_, id, targets) {
 }
 
 export {
+    prepareAccountStorage,
     getAccountDataLocation,
     deleteCookies,
     validateCookieExpiration,

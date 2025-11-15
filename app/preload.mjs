@@ -19,6 +19,8 @@ contextBridge.exposeInMainWorld(
         writeLocalFile: (path, content) => ipcRenderer.invoke('writeLocalFile', path, content), // 写入本地文件
         
         getAppConfig: () => ipcRenderer.invoke('getAppConfig'), // 获取应用配置
+        getUserPreference: () => ipcRenderer.invoke('getPreference'), // 获取偏好设置
+        writeUserPreferences: (pref) => ipcRenderer.invoke('writePreference', pref), // 写入偏好设置
         getAppEnvironment: () => ipcRenderer.invoke('getAppEnvironment'), // 获取应用环境
         getAppData: () => ipcRenderer.invoke('getAppData'), // 获取 %AppData%
         getAsarLocation: () => ipcRenderer.invoke('getAsarLocation'), // 获取 asar 文件位置

@@ -264,7 +264,7 @@ onUnmounted(() => {
                             @click="changePage('songlist', true, userFavourites)">我喜欢的音乐</label>
                         <label class="text ultraSmall">共 {{ favLength }} 首</label>
                     </span>
-                    <button class="songlistPlay" id="userFavrourites_play" @click="getPlayer()?.playListId(userFavourites)">
+                    <button class="songlistPlay" id="userFavourites_play" @click="getPlayer()?.playListId(userFavourites)">
                         <img src="/images/player/play.svg" alt="Play"/>
                     </button>
                 </span>

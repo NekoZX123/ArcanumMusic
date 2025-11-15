@@ -7,13 +7,14 @@ import { HeadersText, NodeBlock, CheckBox, ColorPicker, Slider, TextInput, Dropb
 import './settingsStyle.css';
 import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
 import { showNotify } from '../../assets/notifications/Notification.ts';
+import {setConfig} from "../../assets/utilities/configLoader.ts";
 
 // 设置页面及内容
 let settingsPage, settings: any;
 
 /* 树形结构组件点击 */
 // 当前选中节点
-var currentPageId = '';
+let currentPageId = '';
 
 function setCurrentPage(pageId: string) {
     // console.log(`${currentPageId}; ${pageId}`);
@@ -67,7 +68,7 @@ function toggleExpand(event: any) {
 }
 
 // 创建页面
-var settingsContent: any; // 设置内容区域
+let settingsContent: any; // 设置内容区域
 const optionTypes = ['checkbox', 'colorpicker', 'slider', 'textinput', 'dropbox', 'account']; // 设置项目类型
 const decorationTypes = ['info', 'warning', 'image', 'link', 'label']; // 装饰元素类型
 
@@ -495,6 +496,9 @@ function saveChanges(_: MouseEvent) {
             window.electron.writeLocalFile(targetFile, settingsText);
 
             showNotify('arcanummusic.settings.filemodify', 'success', '设置已保存', '设置文件已保存');
+
+            // 重新加载设置文件
+            setConfig(modifiedSettings);
         });
 }
 
@@ -562,11 +566,11 @@ onMounted(async () => {
         <!-- 设置更改保存及丢弃 -->
         <div class="flex row" id="changesControl">
             <button class="changesOption" id="discardButton" @click="discardChanges">
-                <img src="/images/fileControl/discard.svg"></img>
+                <img src="/images/fileControl/discard.svg" alt="Discard"/>
                 <label class="text small bold">丢弃</label>
             </button>
             <button class="changesOption" id="saveButton" @click="saveChanges">
-                <img src="/images/fileControl/save.svg"></img>
+                <img src="/images/fileControl/save.svg" alt="Save"/>
                 <label class="text small bold">保存</label>
             </button>
         </div>

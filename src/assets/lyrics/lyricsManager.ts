@@ -70,6 +70,19 @@ function findLyricIndex(time: number) {
 
     return end;
 }
+
+let currentLyricObject = {
+    time: 0.0,
+    content: 'Arcanum Music',
+    translation: 'made by NekoZX123',
+};
+
+/**
+ * 同步焦点歌词
+ */
+function syncFocusedLyric() {
+    localStorage.setItem('currentLyrics', JSON.stringify(currentLyricObject));
+}
 /**
  * 更新当前焦点歌词
  */
@@ -86,8 +99,8 @@ function updateFocusedLyric(time: number) {
 
         // 更新焦点索引
         currentLyricIndex = targetIndex;
-        const currentLyricObject = lyricLines.lyrics[targetIndex];
-        localStorage.setItem('currentLyrics', JSON.stringify(currentLyricObject));
+        currentLyricObject = lyricLines.lyrics[targetIndex];
+        syncFocusedLyric();
 
         // 滚动至焦点位置
         const activeElement = lyricElements[targetIndex];
@@ -116,5 +129,6 @@ export {
     updateCurrentLyrics,
     getLyricsData,
     updateFocusedLyric,
+    syncFocusedLyric,
     setContainerId
 };

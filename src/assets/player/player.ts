@@ -14,7 +14,7 @@ function timeFormat(timeSeconds: number) {
     let minute = minuteNum < 10 ? `0${minuteNum}` : `${minuteNum}`;
     let hour = hourNum < 10 ? `0${hourNum}` : `${hourNum}`;
 
-    var result = '';
+    let result: string;
     if (hourNum > 0) {
         result = `${hour}:${minute}:${second}`;
     }
@@ -149,7 +149,7 @@ class Player {
         playerElem.currentTime = time;
 
         if (check) {
-            this.checkNextSong('setProgess');
+            this.checkNextSong('setProgress');
         }
     }
 
@@ -164,7 +164,7 @@ class Player {
         if (value < 0) value = 0;
         if (value > 100) value = 100;
 
-        let level = 0;
+        let level: number;
 
         if (value === 0) level = 1;
         else if (value > 0 && value <= 33) level = 2;
@@ -276,6 +276,7 @@ class Player {
     /**
      * 播放指定歌曲
      * @param songInfo 歌曲信息
+     * @param addToHistory
      */
     playAudio(songInfo: any, addToHistory: boolean = true) {
         console.log(`[Debug] Playing: ${JSON.stringify(songInfo)}`);

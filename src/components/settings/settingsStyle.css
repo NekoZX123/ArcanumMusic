@@ -206,7 +206,7 @@
     position: relative;
     width: calc(3rem + 6px);
     height: calc(1.5rem + 6px);
-    background: #FFFFFF;
+    background: #FCFCFC;
 
     border-style: solid;
     border-color: rgba(126, 126, 126, 0.3);
@@ -244,7 +244,7 @@
     position: relative;
     width: calc(3rem + 6px);
     height: calc(1.5rem + 6px);
-    background: #FFFFFF;
+    background: #FCFCFC;
     left: -3px;
 
     border-style: solid;
@@ -314,7 +314,7 @@
     position: relative;
     width: calc(10rem + 6px);
     height: calc(1.5rem + 6px);
-    background: #FFFFFF;
+    background: #FCFCFC;
     left: -3px;
 
     border-style: solid;
