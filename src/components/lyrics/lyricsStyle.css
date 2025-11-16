@@ -59,23 +59,29 @@
     width: 100%;
     height: calc(100vh - 5rem);
 
+    padding: 0 5%;
+
     justify-content: space-evenly;
     align-items: center;
 }
 
 #controller {
-    width: 30rem;
+    width: 40%;
 
     align-items: center;
 }
 
 /* 歌曲信息 */
 #songInfo {
+    width: 100%;
+    height: 60%;
+
     align-items: center;
+    justify-content: center;
 }
 #songCover {
-    width: 18rem;
-    height: 18rem;
+    width: 70%;
+    height: 70%;
 
     border: none;
     border-radius: 12px;
@@ -83,8 +89,12 @@
 
     margin: 1rem 0;
 }
+#playerInfo {
+    width: 100%;
+    height: 30%;
+}
 #lyricsPageSongNameContainer {
-    width: 13rem;
+    max-width: 15rem;
     height: 24pt;
 
     margin-left: 3px;
@@ -123,8 +133,11 @@
 }
 
 #playerInfo {
-    justify-content: space-between;
+    justify-content: space-evenly;
     align-items: center;
+}
+#playerInfo > * {
+    margin: 0 4px;
 }
 
 /* 音量调整 */
@@ -138,6 +151,8 @@
     border: none;
     border-radius: 1rem;
 
+    margin-right: 4px;
+
     transition: all 200ms ease-in-out;
 }
 #toggleMute > img {
@@ -147,6 +162,19 @@
 
     left: -2px;
     top: 2px;
+}
+#toggleMute::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 1px;
+    position: relative;
+    left: 50%;
+    top: 50%;
+    
+    box-shadow: 0 0 12px 4px var(--default-white);
+
+    z-index: -1;
 }
 #toggleMute:hover {
     background: var(--transparent-grey);
@@ -183,7 +211,9 @@
 
 /* 播放器控制 */
 #playerControl {
-    margin: 1rem 0;
+    width: 100%;
+    height: 40%;
+    margin: 8px 0;
 
     align-items: center
 }
@@ -228,14 +258,11 @@
 /* 歌词 */
 #lyricsContent {
     min-width: 30rem;
-    max-width: calc(100% - 30rem);
+    width: 55%;
     height: 100%;
 
     justify-content: left;
-
-    padding-top: 25%;
-    padding-bottom: 25%;
-    padding-right: 3rem;
+    margin-left: 5%;
 
     overflow-x: hidden;
     overflow-y: auto;

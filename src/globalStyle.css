@@ -1090,6 +1090,23 @@ a {
 
     border-radius: 8px;
 }
+.playControl.glow::before {
+    content: '';
+    position: relative;
+    display: inline-block;
+    left: 50%;
+    top: -40%;
+    
+    box-shadow: 0 0 18px 8px var(--default-white);
+
+    z-index: -1;
+}
+.playControl.large.glow::before {
+    box-shadow: 0 0 22px 10px var(--default-white);
+}
+.playControl.small.glow::before {
+    box-shadow: 0 0 12px 4px var(--default-white);
+}
 .playControl.active {
     background: var(--color-blue-transparent);
 }

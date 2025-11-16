@@ -302,19 +302,19 @@ onMounted(() => {
                     </span>
                     <!-- 播放控制器栏 -->
                     <span class="flex row" id="controlBar">
-                        <button class="playControl small" id="toggleRepeat" @click="getPlayer()?.toggleRepeat">
+                        <button class="playControl small glow" id="toggleRepeat" @click="getPlayer()?.toggleRepeat">
                             <img :src="getPlayer()?.repeatStateImage" alt="Toggle repeat"/>
                         </button>
-                        <button class="playControl" id="previous" @click="getPlayer()?.previousSong">
+                        <button class="playControl glow" id="previous" @click="getPlayer()?.previousSong">
                             <img src="/images/player/previous.svg" alt="Previous song"/>
                         </button>
-                        <button class="playControl large" id="playPause" @click="togglePlayPauseInLyrics">
+                        <button class="playControl large glow" id="playPause" @click="togglePlayPauseInLyrics">
                             <img :src="getPlayer()?.playStateImage" alt="Play / Pause"/>
                         </button>
-                        <button class="playControl" id="next" @click="getPlayer()?.nextSong">
+                        <button class="playControl glow" id="next" @click="getPlayer()?.nextSong">
                             <img src="/images/player/next.svg" alt="Next song"/>
                         </button>
-                        <button class="playControl small" id="toggleShuffle" @click="getPlayer()?.toggleShuffle">
+                        <button class="playControl small glow" id="toggleShuffle" @click="getPlayer()?.toggleShuffle">
                             <img :src="getPlayer()?.shuffleStateImage" alt="Toggle shuffle"/>
                         </button>
                     </span>
