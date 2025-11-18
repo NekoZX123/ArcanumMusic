@@ -407,7 +407,8 @@ onMounted(async () => {
     // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
     window.addEventListener('storage', handleStorageData);
 
-    window.addEventListener('beforeunload', savePreferences);
+    // 关闭窗口时保存偏好数据
+    window.addEventListener('close', savePreferences);
 });
 onUnmounted(() => {
     window.removeEventListener('storage', handleStorageData);
