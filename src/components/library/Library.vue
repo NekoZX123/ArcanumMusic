@@ -208,17 +208,21 @@ onMounted(() => {
 
     // 加载用户名称
     const config = getConfig();
-    if (config) {
-        const name = config.user.localInfo.user.userName;
-        const pic = config.user.localInfo.user.avatarLink;
-        userName.value = name;
-        userAvatar.value = pic;
-    }
+    const name = config.user.localInfo.user.userName;
+    const pic = config.user.localInfo.user.avatarLink;
+    userName.value = name;
+    userAvatar.value = pic;
 
     // 加载问候语
-    const choice = Math.floor(Math.random() * greetList.length);
-    greetings.value = greetList[choice];
-    greetingsEnd.value = greetSubfix[choice];
+    // 问候语启用状态
+    const isGrettingsEnabled = config.user.localInfo.greetings.useGreetings;
+    // 问候语语言
+    const greetingsLanguage = config.user.localInfo.greetings.greetingsText;
+    // console.log(isGrettingsEnabled, greetingsLanguage);
+
+    const choice = (greetingsLanguage === '0') ? Math.floor(Math.random() * greetList.length) : (parseInt(greetingsLanguage) - 1);
+    greetings.value = isGrettingsEnabled ? greetList[choice] : '';
+    greetingsEnd.value = isGrettingsEnabled ? greetSubfix[choice] : '\'s music';
 
     loadFavPreview('netease', userData.netease.cookies);
 
