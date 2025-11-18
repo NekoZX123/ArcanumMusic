@@ -16,7 +16,7 @@ import {
 import {PageButton} from './assets/widgets/pageSwitcher.tsx';
 import {readAccountInfo} from './assets/utilities/accountManager.ts';
 import {hideArtistSelect, hideRightMenu} from './assets/utilities/elementControl.ts';
-import {getPreference, loadConfig, loadPreference, writePreference} from './assets/utilities/configLoader.ts';
+import {getConfig, getPreference, loadConfig, loadPreference, writePreference} from './assets/utilities/configLoader.ts';
 import {loadProxyPort} from './assets/utilities/proxyRequest.ts';
 import {syncFocusedLyric} from './assets/lyrics/lyricsManager.ts';
 
@@ -376,6 +376,20 @@ onMounted(async () => {
         }
     });
     document.getElementById('pageContainer')?.addEventListener('scroll', (_) => hideRightMenu());
+
+    // 加载应用配置文件
+    const config = getConfig();
+    const startMinimized = config.generic.system.start.startMinimized;
+    if (startMinimized) { // 启动时最小化窗口判断
+        minimizeWindow();
+    }
+    const systemFrameFlag = config.generic.appearance.window.useSystemFrame;
+    if (systemFrameFlag) { // 使用系统窗口边框时隐藏自定义边框
+        const titleBar = document.getElementById('windowControlBar');
+        if (!titleBar) return;
+
+        titleBar.style.display = 'none';
+    }
 
     // 加载用户配置
     const userPreference = getPreference();

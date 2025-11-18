@@ -32,5 +32,6 @@ contextBridge.exposeInMainWorld(
 
         openExternal: (url) => ipcRenderer.invoke('openExternal', url), // 打开外部链接
         copyToClipboard: (content) => ipcRenderer.invoke('copyContent', content), // 复制内容至剪贴板
+        setAutoLaunch: (isEnabled) => ipcRenderer.invoke('setAutoLaunch', isEnabled), // 设置开启自启
     }
 );

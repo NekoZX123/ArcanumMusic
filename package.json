@@ -21,6 +21,7 @@
         "electron:build": "npm run build && electron-builder build --config electron-builder.json"
     },
     "dependencies": {
+        "auto-launch": "^5.0.6",
         "axios": "^1.7.9",
         "cors": "^2.8.5",
         "crypto-js": "^4.2.0",

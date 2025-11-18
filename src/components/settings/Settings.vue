@@ -490,6 +490,12 @@ function saveChanges(_: MouseEvent) {
     
     window.electron.getAppData()
         .then((appDataPath: string) => {
+            // 部分设置立即生效
+            // 开机自启
+            const autoLaunchFlag = settings.generic.system.start.startOnBoot;
+            window.electron.setAutoLaunch(autoLaunchFlag);
+
+            // 保存设置文件
             console.log(appDataPath);
             const targetFile = `${appDataPath}/ArcanumMusic_data/settings.json`;
 

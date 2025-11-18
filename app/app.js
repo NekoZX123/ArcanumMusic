@@ -1,6 +1,9 @@
 import { app, BrowserWindow, ipcMain, Menu, shell, Tray, clipboard } from 'electron';
 import { fileURLToPath } from 'url';
 import { userInfo } from 'os';
+import pkg from 'auto-launch';
+const AutoLaunch = pkg;
+
 import { startService, stopService } from './service.js';
 // import { startWebSocket } from './webSocket.js';
 import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
@@ -14,13 +17,40 @@ const environment = getEnvironment();
 let tray;
 let mainWindow = null;
 
+// 开机自启控制器
+const autoLauncher = new AutoLaunch({
+    name: 'Arcanum Music'
+});
+// 确保正确设置开机自启
+async function ensureAutoLaunchState(state) {
+    const isAutoLaunch = await autoLauncher.isEnabled();
+
+    if (state && !isAutoLaunch) { // 启用开机自启
+        console.log('[Debug] Auto launch enabled');
+        autoLauncher.enable();
+    }
+    if (!state && isAutoLaunch) { // 禁用开机自启
+        console.log('[Debug] Auto launch disabled');
+        autoLauncher.disable();
+    }
+}
+
 // 创建主窗口
 async function createMainWindow() {
     prepareAccountStorage();
-    const configLoad = getAppConfig();
+    const config = await getAppConfig();
+    const configObject = JSON.parse(config);
+
     const preferenceText = await getUserPreferences();
     const userPreferences = JSON.parse(preferenceText);
 
+    // 开机自启判断
+    const autoLaunchFlag = configObject.generic.system.start.startOnBoot;
+    ensureAutoLaunchState(autoLaunchFlag);
+    // 是否使用系统边框
+    const windowFrame = configObject.generic.appearance.window.useSystemFrame;
+
+    // 窗口偏好设置
     const windowOptions = userPreferences.window;
 
     // checkCookieExpired();
@@ -30,7 +60,7 @@ async function createMainWindow() {
         height: windowOptions.height,
         minWidth: 900,
         minHeight: 500,
-        frame: false,
+        frame: windowFrame,
         resizable: true,
         focusable: true,
         skipTaskbar: false,
@@ -55,7 +85,7 @@ async function createMainWindow() {
         mainWindow.loadFile('dist/index.html');
     }
 
-    // 防止窗口残留
+    // 关闭主窗口时防止窗口残留
     mainWindow.on('closed', () => {
         const windowList = BrowserWindow.getAllWindows();
         windowList.forEach((window) => {
@@ -63,22 +93,18 @@ async function createMainWindow() {
         });
     });
     
-    configLoad.then((config) => {
-        const configObject = JSON.parse(config);
+    if (configObject.developerOptions.application.devtoolsOnLaunched) { // 启动时打开开发者工具
+        mainWindow.webContents.openDevTools();
+    }
 
-        if (configObject.developerOptions.application.devtoolsOnLaunched) { // 启动时打开开发者工具
-            mainWindow.webContents.openDevTools();
-        }
-
-        if (!configObject.developerOptions.application.enableDevtoolsHotkey){ // 根据设置禁用 DevTools 快捷键
-            mainWindow.webContents.on('before-input-event', (event, input) => {
-                if (input.key === 'I' && input.control && input.shift && !input.meta && !input.alt) {
-                    console.log('[Debug] Due to user settings, DevTools launch request rejected');
-                    event.preventDefault();
-                }
-            });
-        }
-    });
+    if (!configObject.developerOptions.application.enableDevtoolsHotkey){ // 根据设置禁用 DevTools 快捷键
+        mainWindow.webContents.on('before-input-event', (event, input) => {
+            if (input.key === 'I' && input.control && input.shift && !input.meta && !input.alt) {
+                console.log('[Debug] Due to user settings, DevTools launch request rejected');
+                event.preventDefault();
+            }
+        });
+    }
 }
 
 // 新建窗口
@@ -217,6 +243,7 @@ app.whenReady().then(() => {
 
     ipcMain.handle('openExternal', (_, url) => shell.openExternal(url));
     ipcMain.handle('copyContent', (_, content) => clipboard.writeText(content));
+    ipcMain.handle('setAutoLaunch', (_, isEnabled) => ensureAutoLaunchState(isEnabled));
 
     // 启动服务
     startService(environment);
