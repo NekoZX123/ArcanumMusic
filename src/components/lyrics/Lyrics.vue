@@ -216,7 +216,7 @@ onMounted(() => {
     playerElem.addEventListener('timeupdate', () => {
         if (!playTimeAdjustFlag.value) getPlayer()?.updateProgress(Math.floor(playerElem.currentTime));
 
-        getPlayer()?.checkNextSong('Lyrics.vue');
+        getPlayer()?.checkNextSong();
     });
 
     // 监听歌曲文件变化

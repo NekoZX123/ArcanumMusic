@@ -33,7 +33,7 @@ function setConfig(config: any) {
         console.error(`[Error] Config not loaded, please call loadConfig() first`);
         return;
     }
-    appConfig = config || {};
+    appConfig = config;
 
     return appConfig;
 }

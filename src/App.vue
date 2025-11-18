@@ -401,7 +401,7 @@ onMounted(async () => {
     playerElem.addEventListener('timeupdate', () => {
         if (!playTimeAdjustFlag.value) getPlayer()?.updateProgress(Math.ceil(playerElem.currentTime));
 
-        getPlayer()?.checkNextSong('App.vue');
+        getPlayer()?.checkNextSong();
     });
 
     // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
@@ -412,14 +412,14 @@ onMounted(async () => {
 });
 onUnmounted(() => {
     window.removeEventListener('storage', handleStorageData);
-})
+});
 
 </script>
 
 <template>
     <div id="windowMain">
         <!-- 窗口标题栏 -->
-        <div class="flex row" id="windowControlBar" 
+        <div class="flex row" id="windowControlBar"
             @mousedown="titlebarMouseDown" @mousemove="titlebarMouseMove" @mouseup="titlebarMouseUp">
             <span class="flex row" id="windowDrag">
                 <img id="appIcon" src="/appIcon/ArcanumMusic.png" alt="Arcanum Music"/>

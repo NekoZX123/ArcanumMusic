@@ -149,7 +149,7 @@ class Player {
         playerElem.currentTime = time;
 
         if (check) {
-            this.checkNextSong('setProgress');
+            this.checkNextSong();
         }
     }
 
@@ -366,11 +366,11 @@ class Player {
     /**
      * 检查播放状态并切换下一首
      */
-    checkNextSong(caller?: any) {
+    checkNextSong() {
         // console.log(this.playedTime, this.duration);
         if (this.playedTime >= this.duration) {
             console.log(`[Debug] Song playing finished, changing to next song...`);
-            this.nextSong(caller);
+            this.nextSong();
         }
     }
 
@@ -427,8 +427,7 @@ class Player {
     /**
      * 播放下一首
      */
-    nextSong(caller?: any) {
-        console.log(caller);
+    nextSong() {
         // 末端曲目播放完成
         if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0 
             && this.repeatState === 0 && this.shuffleState === 0) {
