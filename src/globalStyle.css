@@ -13,6 +13,8 @@
     --transparent-darkgrey: rgba(114, 114, 114, 0.4);
     --transparent-grey: rgba(168, 168, 168, 0.4);
     --transparent-lightgrey: rgba(200, 200, 200, 0.4);
+    --background-light: rgb(245, 245, 245);
+    --background-dark: rgb(80, 80, 80);
 
     --color-red-default: rgb(232, 66, 66);
     --color-red-light: rgb(255, 171, 171);
@@ -59,6 +61,17 @@
 
     --gradient-background1: linear-gradient(120deg, var(--color-blue-default), var(--color-purple-default));
     --gradient-background2: linear-gradient(120deg, var(--color-green-default), var(--color-green-light));
+}
+/* 预设默认样式 */
+* {
+    --interface-foreground: var(--default-black);
+    --interface-background: var(--default-white);
+
+    --theme-color-default: var(--color-blue-default);
+    --theme-color-light: var(--color-blue-light);
+    --theme-color-deep: var(--color-blue-deep);
+    --theme-color-ultradeep: var(--color-blue-ultradeep);
+    --theme-color-transparent: var(--color-blue-transparent);
 }
 
 /* 元素样式 */
@@ -175,6 +188,8 @@ a {
 
     background: var(--default-white);
     /* border-radius: 1rem 1rem 0 0; */
+
+    transition: all 200ms ease-in-out;
 }
 
 #windowDrag {
@@ -238,6 +253,7 @@ a {
     position: relative;
     width: 100%;
     height: calc(100vh - 2.5rem);
+    top: 2.5rem;
 }
 
 /* 页面切换 */
@@ -256,7 +272,7 @@ a {
 #windowTop {
     position: relative;
     width: 100%;
-    height: 4rem;
+    height: 3rem;
 
     padding: 0 5rem;
 
@@ -344,7 +360,7 @@ a {
     height: 2rem;
 }
 .tabItem.current {
-    background: var(--color-blue-light);
+    background: var(--theme-color-light);
 }
 .tabItem:hover {
     background: var(--transparent-grey);
@@ -356,7 +372,7 @@ a {
     margin-right: 6px;
 }
 .tabItem.current > label {
-    color: var(--color-blue-deep);
+    color: var(--theme-color-deep);
 }
 /* 标签页切换动画 */
 .switchAnimation-enter-active, 
@@ -395,12 +411,12 @@ a {
 .pageButton:hover {
     width: 8rem;
 
-    background: var(--color-blue-light);
+    background: var(--theme-color-light);
 
     justify-content: flex-start;
 }
 .pageButton.current {
-    background: var(--color-blue-default);
+    background: var(--theme-color-default);
 }
 .pageButton > img {
     width: 3rem;
@@ -443,7 +459,7 @@ a {
 }
 #settings.current,
 #accounts.current {
-    background: var(--color-blue-default);
+    background: var(--theme-color-default);
 }
 #settings > img {
     width: 3rem;
@@ -520,7 +536,7 @@ a {
     width: calc(24rem - 12px);
     height: 100%;
 
-    background: var(--color-blue-light);
+    background: var(--theme-color-light);
     box-shadow: 0 4px 4px 2px var(--transparent-grey);
 
     padding: 0 6px;
@@ -546,7 +562,7 @@ a {
 }
 
 .songlistCard.exlarge .cardInfo {
-    color:var(--color-blue-deep);
+    color:var(--theme-color-deep);
 
     margin-left: 6px;
     margin-bottom: 6px;
@@ -599,7 +615,7 @@ a {
     height: 3rem;
     top: calc(100% - 3rem - 12px);
 
-    background: var(--color-blue-deep);
+    background: var(--theme-color-deep);
     border-radius: 1.5rem;
 }
 .songlistCard.exlarge .songlistPlay:hover {
@@ -611,7 +627,7 @@ a {
     height: 3rem;
     top: calc(100% - 3rem);
 
-    background: var(--color-blue-deep);
+    background: var(--theme-color-deep);
     border-radius: 1.5rem;
 }
 .songlistCard.large .songlistPlay:hover {
@@ -789,7 +805,7 @@ a {
     transition: all 200ms ease-in-out;
 }
 .songLine:hover {
-    background: var(--color-blue-light);
+    background: var(--theme-color-light);
 }
 .songLine > .songCover {
     width: calc(3rem - 12px);
@@ -865,7 +881,7 @@ a {
     margin-right: 6px;
 }
 .artistLine:hover {
-    background: var(--color-blue-light);
+    background: var(--theme-color-light);
 }
 
 /* 播放列表区域 */
@@ -961,7 +977,7 @@ a {
 .fluentFilled {
     width: 50%;
 
-    background: var(--color-blue-deep);
+    background: var(--theme-color-deep);
     border-radius: 3px;
 
     transition: border-radius 300ms ease;
@@ -1108,10 +1124,10 @@ a {
     box-shadow: 0 0 12px 4px var(--default-white);
 }
 .playControl.active {
-    background: var(--color-blue-transparent);
+    background: var(--theme-color-transparent);
 }
 .playControl.active:hover {
-    background: var(--color-blue-transparent);
+    background: var(--theme-color-transparent);
 }
 
 #controlRightBar > * {
@@ -1144,7 +1160,7 @@ a {
     transition: background 200ms ease-in-out;
 }
 #volumeAdjust:hover #volumeFilled {
-    background: var(--color-blue-default);
+    background: var(--theme-color-default);
 }
 #volumeAdjust > #volumeLabel {
     position: relative;
@@ -1376,7 +1392,7 @@ a {
 
     background: var(--default-white);
     border-style: solid;
-    border-color: var(--color-blue-default);
+    border-color: var(--theme-color-default);
     border-width: 3px;
     border-radius: 6px;
 
@@ -1385,7 +1401,7 @@ a {
     transition: all 200ms ease-in-out;
 }
 .popupButton:hover {
-    background: var(--color-blue-light);
+    background: var(--theme-color-light);
 }
 /* 按钮高亮 */
 .popupButton.red {
@@ -1506,7 +1522,7 @@ a {
     transition: all 200ms ease-in-out;
 }
 .menuItem:hover {
-    background: var(--color-blue-light);
+    background: var(--theme-color-light);
 }
 .menuIcon {
     width: 16pt;

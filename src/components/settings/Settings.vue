@@ -8,6 +8,7 @@ import './settingsStyle.css';
 import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
 import { showNotify } from '../../assets/notifications/Notification.ts';
 import {setConfig} from "../../assets/utilities/configLoader.ts";
+import { setControlBarTheme, setThemeColor, type colorThemeName } from '../../assets/utilities/themeControl.ts';
 
 // 设置页面及内容
 let settingsPage, settings: any;
@@ -494,6 +495,16 @@ function saveChanges(_: MouseEvent) {
             // 开机自启
             const autoLaunchFlag = settings.generic.system.start.startOnBoot;
             window.electron.setAutoLaunch(autoLaunchFlag);
+
+            // 颜色主题
+            const themeList: colorThemeName[] = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+            const colorIndex = settings.generic.appearance.colors.themeColor;
+            const themeColor = themeList[colorIndex];
+            setThemeColor(themeColor);
+
+            // 窗口标题栏显示主题色
+            const showColorInBorders = settings.generic.appearance.colors.showColorInBorders;
+            setControlBarTheme(showColorInBorders);
 
             // 保存设置文件
             console.log(appDataPath);

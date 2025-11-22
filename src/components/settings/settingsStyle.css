@@ -110,7 +110,7 @@
     height: 0;
     top: calc(1rem + 2px);
 
-    background: var(--color-blue-default);
+    background: var(--theme-color-default);
     border-radius: 2px;
 
     transition: all 200ms ease-in-out;
@@ -453,8 +453,8 @@
     transition: all 200ms ease-in-out;
 }
 .accountManage:hover {
-    background: var(--color-blue-light);
-    color: var(--color-blue-deep);
+    background: var(--theme-color-light);
+    color: var(--theme-color-deep);
 
     transform: scale(1.1);
 }
@@ -547,8 +547,8 @@
     transition: all 200ms ease-in-out;
 }
 .changesOption:hover {
-    background: var(--color-blue-light);
-    color: var(--color-blue-deep);
+    background: var(--theme-color-light);
+    color: var(--theme-color-deep);
 
     transform: scale(1.1);
 }
@@ -562,5 +562,5 @@
     transition: all 200ms ease-in-out;
 }
 .changesOption:hover > label {
-    color: var(--color-blue-deep);
+    color: var(--theme-color-deep);
 }

@@ -19,6 +19,7 @@ import {hideArtistSelect, hideRightMenu} from './assets/utilities/elementControl
 import {getConfig, getPreference, loadConfig, loadPreference, writePreference} from './assets/utilities/configLoader.ts';
 import {loadProxyPort} from './assets/utilities/proxyRequest.ts';
 import {syncFocusedLyric} from './assets/lyrics/lyricsManager.ts';
+import { initializeTheme, setControlBarTheme, type colorThemeName } from './assets/utilities/themeControl.ts';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -390,6 +391,14 @@ onMounted(async () => {
 
         titleBar.style.display = 'none';
     }
+    // 加载主题颜色
+    const themeList: colorThemeName[] = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+    const colorIndex = config.generic.appearance.colors.themeColor;
+    const themeColor = themeList[colorIndex];
+    initializeTheme(themeColor);
+    // 窗口标题栏显示主题色
+    const showColorInBorders = config.generic.appearance.colors.showColorInBorders;
+    setControlBarTheme(showColorInBorders);
 
     // 加载用户配置
     const userPreference = getPreference();

@@ -49,7 +49,7 @@
     opacity: 1;
 }
 #searchBarContainer:has(#searchBar:focus) {
-    background: var(--color-blue-light);
+    background: var(--theme-color-light);
 }
 #searchBarContainer > button {
     width: calc(3rem - 6px);
@@ -108,7 +108,7 @@
     transition: all 200ms ease-in-out;
 }
 .listButton:hover {
-    background: var(--color-blue-light);
+    background: var(--theme-color-light);
     transform: scale(1.1);
 }
 .listButton > label {
@@ -116,7 +116,7 @@
     transition: all 200ms ease-in-out;
 }
 .listButton:hover > label {
-    color: var(--color-blue-deep);
+    color: var(--theme-color-deep);
 }
 
 #loadMoreButton {

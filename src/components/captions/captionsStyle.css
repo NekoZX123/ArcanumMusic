@@ -14,7 +14,7 @@
 }
 
 /* 窗口标题栏 */
-#windowControlBar {
+#captionsControlBar {
     position: relative;
     width: 100%;
     height: 2rem;
