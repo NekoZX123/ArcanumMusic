@@ -43,7 +43,7 @@
     width: 6rem;
     height: 2.5rem;
 
-    background: var(--default-lightgrey);
+    background: var(--interface-background-grey);
     border: none;
     border-radius: 8px;
 
@@ -64,7 +64,7 @@
     margin-right: 5px;
 }
 .listButton > label {
-    color: var(--default-black);
+    color: var(--interface-foreground);
     transition: all 200ms ease-in-out;
 }
 .listButton:hover > label {

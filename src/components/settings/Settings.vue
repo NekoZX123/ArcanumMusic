@@ -8,7 +8,7 @@ import './settingsStyle.css';
 import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
 import { showNotify } from '../../assets/notifications/Notification.ts';
 import {setConfig} from "../../assets/utilities/configLoader.ts";
-import { setControlBarTheme, setThemeColor, type colorThemeName } from '../../assets/utilities/themeControl.ts';
+import { setControlBarTheme, setThemeColor, setWindowBackground, type colorThemeName } from '../../assets/utilities/themeControl.ts';
 
 // 设置页面及内容
 let settingsPage, settings: any;
@@ -496,11 +496,14 @@ function saveChanges(_: MouseEvent) {
             const autoLaunchFlag = settings.generic.system.start.startOnBoot;
             window.electron.setAutoLaunch(autoLaunchFlag);
 
-            // 颜色主题
+            // 颜色主题及深色模式
             const themeList: colorThemeName[] = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
             const colorIndex = settings.generic.appearance.colors.themeColor;
             const themeColor = themeList[colorIndex];
-            setThemeColor(themeColor);
+            const darkEnabled = parseInt(settings.generic.appearance.colors.darkMode);
+            const windowBackgroundMode: any = parseInt(settings.generic.appearance.colors.backgroundColor);
+            setThemeColor(themeColor, darkEnabled !== 0);
+            setWindowBackground(windowBackgroundMode);
 
             // 窗口标题栏显示主题色
             const showColorInBorders = settings.generic.appearance.colors.showColorInBorders;

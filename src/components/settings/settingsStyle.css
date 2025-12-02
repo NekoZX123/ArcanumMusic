@@ -79,7 +79,11 @@
     font-size: 12pt;
 }
 .optionBox > .optionName {
+    color: var(--interface-foreground);
+
     flex: 2 1;
+
+    transition: all 300ms ease-in-out;
 }
 
 /* 树形结构组件 */
@@ -164,7 +168,7 @@
     transform: rotateZ(90deg);
 }
 .nodeContent > .nodeLabel {
-    color: #000000;
+    color: var(--interface-foreground);
 
     padding-top: 0.25rem;
     padding-left: 0.25rem;
@@ -206,7 +210,7 @@
     position: relative;
     width: calc(3rem + 6px);
     height: calc(1.5rem + 6px);
-    background: #FCFCFC;
+    background: var(--interface-background);
 
     border-style: solid;
     border-color: rgba(126, 126, 126, 0.3);
@@ -227,7 +231,7 @@
     top: calc(0.15rem + 2px);
     left: calc(0.15rem + 3px);
 
-    background: #FCFCFC;
+    background: var(--interface-background);
     border-radius: 6px;
     box-shadow: 0 0 2px 0 #888888;
 
@@ -244,7 +248,7 @@
     position: relative;
     width: calc(3rem + 6px);
     height: calc(1.5rem + 6px);
-    background: #FCFCFC;
+    background: var(--interface-contrast-background);
     left: -3px;
 
     border-style: solid;
@@ -298,7 +302,7 @@
     width: 10rem;
     height: 6px;
 
-    background: linear-gradient(to right, #0088FF 0%, #0088FF var(--fill-percentage), #FFFFFF var(--fill-percentage));
+    background: linear-gradient(to right, #0088FF 0%, #0088FF var(--fill-percentage), var(--interface-contrast-background) var(--fill-percentage));
     border-style: solid;
     border-color: rgba(126, 126, 126, 0.3);
     border-width: 1px;
@@ -314,7 +318,8 @@
     position: relative;
     width: calc(10rem + 6px);
     height: calc(1.5rem + 6px);
-    background: #FCFCFC;
+    background: var(--interface-contrast-background);
+    color: var(--interface-foreground);
     left: -3px;
 
     border-style: solid;
@@ -339,12 +344,13 @@
 
 /* dropbox - 下拉选择 */
 .dropbox {
-    appearance: none;
+    /* appearance: none; */
 
     position: relative;
     width: calc(10rem + 6px);
     height: calc(1.5rem + 6px);
-    background: #FFFFFF;
+    background: var(--interface-background);
+    color: var(--interface-foreground);
     left: -3px;
 
     border-style: solid;
@@ -356,24 +362,9 @@
     padding: 0 3px;
 }
 .dropbox:focus {
-    outline-color: #0088FF;
+    outline-color: var(--theme-color-default);
     outline-width: 2px;
 }
-.dropbox::after {
-    content: '▼';
-    position: absolute;
-    width: 5px;
-    height: 5px;
-    top: calc(50% - 5px);
-    left: calc(100% - 12px);
-    color: #000000;
-}
-.dropbox > option {
-    background: #FFFFFF;
-
-    padding: 3px;
-}
-
 /* link - 链接 */
 .link {
     position: relative;
@@ -392,8 +383,7 @@
     position: relative;
 
     background: transparent;
-    color: black;
-
+    color: var(--interface-foreground);
     font-family: 'Source Code Pro', sans-serif;
     font-size: 12pt;
 }
@@ -429,7 +419,7 @@
     left: 4.5rem;
 
     border-style: solid;
-    border-color: var(--default-white);
+    border-color: var(--interface-background);
     border-width: 3px;
     border-radius: 1.5rem;
 }
@@ -461,6 +451,16 @@
 
 
 /* '关于' 页面 */
+#about_container label {
+    color: var(--interface-foreground);
+}
+#about_container a {
+    color: #0088FF;
+}
+/* 隐藏应用信息页面标题 */
+#about_container > span {
+    display: none;
+}
 #about.current {
     display: flex;
     flex-direction: column;
@@ -530,10 +530,10 @@
     width: 8rem;
     height: 3rem;
 
-    background: var(--default-lightgrey);
+    background: var(--interface-background-grey);
     border: none;
     border-radius: 8px;
-    color: var(--default-black);
+    color: var(--interface-foreground);
 
     margin: 0 6px;
 
@@ -557,10 +557,12 @@
     height: 3rem;
 }
 .changesOption > label {
-    color: var(--default-black);
+    color: var(--interface-foreground);
 
     transition: all 200ms ease-in-out;
 }
 .changesOption:hover > label {
     color: var(--theme-color-deep);
 }
+
+

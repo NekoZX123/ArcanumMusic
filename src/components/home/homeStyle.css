@@ -67,7 +67,7 @@
     background: var(--transparent-lightgrey);
     border: none;
     border-radius: 0.75rem;
-    box-shadow: 0 0 3px var(--default-lightgrey);
+    box-shadow: 0 0 3px var(--interface-background-grey);
 
     transition: all 200ms ease-in-out;
 }

@@ -3,19 +3,41 @@
     box-sizing: border-box;
     user-select: none;
 
+    /* 黑色 / 白色 */
     --default-black: rgb(36, 36, 36);
     --default-white: rgb(245, 245, 245);
+    
+    /* 灰色 */
     --default-darkgrey: rgb(114, 114, 114);
     --default-grey: rgb(128, 128, 128);
     --default-lightgrey: rgb(225, 225, 225);
+
+    /* 透明黑色 / 白色 */
     --transparent-black: rgba(36, 36, 36, 0.7);
     --transparent-white: rgba(245, 245, 245, 0.6);
+
+    /* 透明灰色 */
     --transparent-darkgrey: rgba(114, 114, 114, 0.4);
     --transparent-grey: rgba(168, 168, 168, 0.4);
     --transparent-lightgrey: rgba(200, 200, 200, 0.4);
-    --background-light: rgb(245, 245, 245);
-    --background-dark: rgb(80, 80, 80);
 
+    /* 背景色 */
+    --background-light: rgb(245, 245, 245);
+    --background-dark: rgb(54, 54, 54);
+
+    /* 次要灰色背景色 */
+    --background-grey-light: rgb(215, 215, 215);
+    --background-grey-dark: rgb(110, 110, 110);
+
+    /* 高对比度背景色 */
+    --backgruond-ultralight: rgb(252, 252, 252);
+    --background-ultradark: rgb(20, 20, 20);
+
+    /* 文本颜色 */
+    --text-black: rgb(36, 36, 36);
+    --text-white: rgb(245, 245, 245);
+
+    /* 主题颜色 */
     --color-red-default: rgb(232, 66, 66);
     --color-red-light: rgb(255, 171, 171);
     --color-red-deep: rgb(202, 25, 25);
@@ -52,20 +74,27 @@
     --color-purple-ultradeep: rgb(32, 5, 59);
     --color-purple-transparent: rgba(173, 65, 255, 0.6);
 
+    /* 警告色 */
     --color-warning: rgb(230, 208, 18);
 
+    /* 通知主题色 */
     --notify-info: rgba(167, 167, 167, 0.6);
     --notify-success: rgba(51, 252, 118, 0.6);
     --notify-warning: rgba(230, 208, 18, 0.6);
     --notify-critical: rgba(232, 66, 66, 0.6);
 
+    /* 默认渐变 */
     --gradient-background1: linear-gradient(120deg, var(--color-blue-default), var(--color-purple-default));
     --gradient-background2: linear-gradient(120deg, var(--color-green-default), var(--color-green-light));
 }
 /* 预设默认样式 */
 * {
-    --interface-foreground: var(--default-black);
-    --interface-background: var(--default-white);
+    --interface-foreground: var(--text-black);
+    --interface-background: var(--background-light);
+    --interface-foreground-grey: var(--default-grey);
+    --interface-background-grey: var(--background-grey-light);
+    --interface-transparent: var(--transparent-white);
+    --interface-contrast-background: var(--backgruond-ultralight);
 
     --theme-color-default: var(--color-blue-default);
     --theme-color-light: var(--color-blue-light);
@@ -109,7 +138,7 @@ a {
 
 /* 文本 */
 .text {
-    color: var(--default-black);
+    color: var(--interface-foreground);
     font-family: 'Consolas', 'Microsoft YaHei UI', sans-serif;
 }
 /* 粗体 */
@@ -166,9 +195,11 @@ a {
 .textInput {
     appearance: none;
 
-    background: var(--default-white);
+    background: var(--interface-background);
     border: none;
     border-radius: 6px;
+
+    transition: background 300ms ease-in-out;
 }
 
 
@@ -176,7 +207,15 @@ a {
     width: 100%;
     height: 100vh;
 
-    background: var(--default-white);
+    background: transparent;
+}
+
+#windowMain {
+    height: 100%;
+
+    background: var(--interface-background);
+
+    transition: all 300ms ease-in-out;
 }
 
 /* 窗口标题栏 */
@@ -186,10 +225,10 @@ a {
     height: 2.5rem;
     top: 0;
 
-    background: var(--default-white);
+    background: transparent;
     /* border-radius: 1rem 1rem 0 0; */
 
-    transition: all 200ms ease-in-out;
+    transition: all 300ms ease-in-out;
 }
 
 #windowDrag {
@@ -254,6 +293,8 @@ a {
     width: 100%;
     height: calc(100vh - 2.5rem);
     top: 2.5rem;
+
+    background: transparent;
 }
 
 /* 页面切换 */
@@ -342,7 +383,7 @@ a {
     height: 3rem;
 
     background: transparent;
-    color: var(--default-black);
+    color: var(--interface-foreground);
     font-weight: bold;
 
     border: none;
@@ -925,7 +966,7 @@ a {
     bottom: 6px;
     left: 4.3rem;
 
-    background: var(--transparent-white);
+    background: var(--interface-transparent);
     backdrop-filter: blur(4px);
     border: none;
     border-radius: 6px;
@@ -957,7 +998,7 @@ a {
 .fluentProgress {
     height: 6px;
 
-    background: var(--default-lightgrey);
+    background: var(--interface-background-grey);
     border: none;
     border-radius: 3px;
 
@@ -994,10 +1035,10 @@ a {
     height: 2rem;
     top: calc(100% - 7.5rem);
 
-    background: var(--transparent-white);
+    background: var(--interface-transparent);
     backdrop-filter: blur(4px);
     border-style: solid;
-    border-color: var(--default-lightgrey);
+    border-color: var(--interface-background-grey);
     border-width: 2px;
     border-radius: 4px;
 
@@ -1145,7 +1186,7 @@ a {
     height: 6px;
     top: calc(50% - 3px);
 
-    background: var(--default-lightgrey);
+    background: var(--interface-background-grey);
     border: none;
     border-radius: 3px;
 }
@@ -1153,7 +1194,7 @@ a {
     width: 50%;
     height: 6px;
 
-    background: var(--default-grey);
+    background: var(--interface-foreground-grey);
     border: none;
     border-radius: 3px;
 
@@ -1169,9 +1210,9 @@ a {
     top: -1.2rem;
     left: calc(100% - 1.5rem);
 
-    background: var(--transparent-white);
+    background: var(--interface-transparent);
     border-style: solid;
-    border-color: var(--default-lightgrey);
+    border-color: var(--interface-background-grey);
     border-width: 2px;
     border-radius: 6px;
 
@@ -1207,7 +1248,7 @@ a {
     width: 16rem;
     height: 4rem;
 
-    background: var(--default-white);
+    background: var(--interface-background);
     border: none;
     border-radius: 8px;
     box-shadow: 0 0 5px var(--transparent-grey);
@@ -1316,7 +1357,7 @@ a {
     max-width: 80%;
     max-height: 80%;
 
-    background: var(--default-white);
+    background: var(--interface-background);
     border: none;
     border-radius: 12px;
     box-shadow: 0 0 10px var(--transparent-grey);
@@ -1390,7 +1431,7 @@ a {
     width: 7rem;
     height: 3rem;
 
-    background: var(--default-white);
+    background: var(--interface-background);
     border-style: solid;
     border-color: var(--theme-color-default);
     border-width: 3px;
@@ -1475,7 +1516,7 @@ a {
     width: 100%;
     height: auto;
 
-    background: var(--transparent-white);
+    background: var(--interface-transparent);
     border-style: solid;
     border-color: var(--default-grey);
     border-width: 1px;
@@ -1494,7 +1535,7 @@ a {
     width: 100%;
     
     border-style: solid;
-    border-color: var(--default-lightgrey);
+    border-color: var(--interface-background-grey);
     border-width: 0;
     border-bottom-width: 1px;
 
@@ -1507,7 +1548,7 @@ a {
     height: 2.5rem;
 
     background: transparent;
-    color: var(--default-black);
+    color: var(--interface-foreground);
 
     border: none;
     border-radius: 8px;
@@ -1539,7 +1580,7 @@ a {
     left: calc(50% - 12rem);
     top: 10rem;
 
-    background: var(--default-white);
+    background: var(--interface-background);
     border: none;
     border-radius: 12px;
     box-shadow: 0 0 6px var(--transparent-darkgrey);

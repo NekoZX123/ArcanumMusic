@@ -1,3 +1,10 @@
+/**
+ * RGB 转 HSV
+ * @param r number - 红色
+ * @param g number - 绿色
+ * @param b number - 蓝色
+ * @returns { h: number, s: number, v: number } - 转换后的 HSV 颜色
+ */
 function rgb2hsv(r: number, g: number, b: number): { h: number, s: number, v: number } {
     // RGB 归一至 [0, 1]
     r /= 255; g /= 255; b /= 255;
@@ -18,20 +25,65 @@ function rgb2hsv(r: number, g: number, b: number): { h: number, s: number, v: nu
     return { h, s, v };
 }
 
+function parseRGBString(rgbString: string) {
+    const [r, g, b] = rgbString.replace('rgb(', '').replace(')', '').split(',')
+        .map((value) => parseInt(value));
+    
+    if ([r, g, b].includes(NaN)) {
+        console.error(`[Error] Failed to parse RGB string ${rgbString}`);
+        return null;
+    }
+
+    return {r, g, b};
+}
+
 const MAX_BRIGHTNESS = 0.90; // 最大明度
 const MIN_BRIGHTNESS = 0.10; // 最小明度
 const MIN_SATURATION = 0.20; // 最小饱和度
+const MAX_BRIGHTNESS_STRICT = 0.80 // 最大明度 (严格匹配模式)
+const MIN_BRIGHTNESS_STRICT = 0.20; // 最小明度 (严格匹配模式)
+const MIN_SATURATION_STRICT = 0.30; // 最小明度 (严格匹配模式)
 /**
  * 判断颜色是否适合作为背景主色
  * @param r RGB - R
  * @param g RGB - G
  * @param b RGB - B
+ * @param useStrict boolean - 是否启用严格模式
  * @returns boolean - 是否合适
  */
-function isProperColor(r: number, g: number, b: number) {
+function isProperColor(r: number, g: number, b: number, useStrict: boolean = false) {
     const { s, v } = rgb2hsv(r, g, b);
 
-    return v <= MAX_BRIGHTNESS && v >= MIN_BRIGHTNESS && s >= MIN_SATURATION;
+    const minBrightness = useStrict ? MIN_BRIGHTNESS_STRICT : MIN_BRIGHTNESS;
+    const maxBrightness = useStrict ? MAX_BRIGHTNESS_STRICT : MAX_BRIGHTNESS;
+    const minSaturation = useStrict ? MIN_SATURATION_STRICT : MIN_SATURATION;
+
+    return (v <= maxBrightness && v >= minBrightness && s >= minSaturation);
+}
+
+/**
+ * 调整颜色使其符合主题深浅
+ * @param rgbString RGB 字符串
+ * @param darkEnabled 深色模式启用状态
+ * @returns string | null - 调整过的 RGB 字符串 (若字符串不符合格式则返回 null)
+ */
+const COLOR_ADJUST_OFFSET = 50;
+function fitColorMode(rgbString: string, darkEnabled: boolean) {
+    const rgbObject = parseRGBString(rgbString);
+    if (!rgbObject) return;
+
+    if (darkEnabled) {
+        rgbObject.r = Math.max(rgbObject.r - COLOR_ADJUST_OFFSET, 0);
+        rgbObject.g = Math.max(rgbObject.g - COLOR_ADJUST_OFFSET, 0);
+        rgbObject.b = Math.max(rgbObject.b - COLOR_ADJUST_OFFSET, 0);
+    }
+    else {
+        rgbObject.r = Math.min(rgbObject.r + COLOR_ADJUST_OFFSET, 255);
+        rgbObject.g = Math.min(rgbObject.g + COLOR_ADJUST_OFFSET, 255);
+        rgbObject.b = Math.min(rgbObject.b + COLOR_ADJUST_OFFSET, 255);
+    }
+
+    return `rgb(${rgbObject.r},${rgbObject.g},${rgbObject.b})`;
 }
 
 class ParticleSpot {
@@ -222,8 +274,11 @@ const COLOR_STEP = 20;
 /**
  * 获取图片主色
  * @param imgUrl 图片链接
+ * @param count 需要提取的颜色数量
+ * @param useStrict 是否启用严格模式
+ * @returns Promise<string[]> 返回符合条件的颜色数组
  */
-function getMainColors(imgUrl: string, count: number = 3) {
+function getMainColors(imgUrl: string, count: number = 3, useStrict: boolean = false): Promise<string[]> | undefined {
     if (count > 10 || count < 1) {
         throw new Error(`getMainColors() received an unproper count value ${count}`);
     }
@@ -237,7 +292,7 @@ function getMainColors(imgUrl: string, count: number = 3) {
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
             if (!context) return;
-            
+
             canvas.width = img.width;
             canvas.height = img.height;
             context.drawImage(img, 0, 0);
@@ -248,48 +303,29 @@ function getMainColors(imgUrl: string, count: number = 3) {
 
             // 采样
             const colorMap = new Map<string, number>();
-            let fallbackColors: string[] = [];
-            for (let i = 0; i < pixels.length && fallbackColors.length < count; i += 4) {
-                const [r, g, b] = [pixels[i], pixels[i + 1], pixels[i + 2]];
-                if (isProperColor(r, g, b)) {
-                    const simplefiedColor = `${Math.floor(r/COLOR_STEP)*COLOR_STEP},${Math.floor(g/COLOR_STEP)*COLOR_STEP},${Math.floor(b/COLOR_STEP)*COLOR_STEP}`;
-                    if (!fallbackColors.includes(simplefiedColor)) {
-                        fallbackColors.push(simplefiedColor);
-                    }
-                }
-            }
-            fallbackColors.forEach(color => {
-                if (!colorMap.has(color)) {
-                    colorMap.set(color, 1);
-                }
-            });
-            const step = Math.max(1, Math.floor(pixels.length / 1000));
+            const step = Math.max(1, Math.floor(pixels.length / 500)); // 采样步长
 
-            // 获取颜色频率
             for (let i = 0; i < pixels.length; i += 4 * step) {
                 const [r, g, b] = [pixels[i], pixels[i + 1], pixels[i + 2]];
 
-                if (isProperColor(r, g, b)) {
+                if (isProperColor(r, g, b, useStrict)) {
                     // 简化颜色
-                    const simplefiedColor = `${Math.floor(r/COLOR_STEP)*COLOR_STEP},${Math.floor(g/COLOR_STEP)*COLOR_STEP},${Math.floor(b/COLOR_STEP)*COLOR_STEP}`;
-                    
+                    const simplefiedColor = `${Math.round(r / COLOR_STEP) * COLOR_STEP},${Math.round(g / COLOR_STEP) * COLOR_STEP},${Math.round(b / COLOR_STEP) * COLOR_STEP}`;
                     colorMap.set(simplefiedColor, (colorMap.get(simplefiedColor) || 0) + 1);
                 }
             }
 
-            // 按频率返回主要颜色
-            let mainColors: string[] = [];
-
+            // 按频率排序并返回主要颜色
             const sortedColors = Array.from(colorMap.entries())
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, count)
+                .sort((a, b) => b[1] - a[1]) // 按频率降序排序
                 .map(([color]) => color);
 
-            mainColors = sortedColors.map((color) => {
+            const mainColors = sortedColors.slice(0, count).map((color) => {
                 const [r, g, b] = color.split(',');
                 return `rgb(${r},${g},${b})`;
             });
 
+            console.info(`[Main Color Extraction Algorithm] Extracted colors: ${mainColors}`);
             resolve(mainColors);
         };
 
@@ -302,6 +338,7 @@ function getMainColors(imgUrl: string, count: number = 3) {
 export {
     rgb2hsv,
     isProperColor,
+    fitColorMode,
     getMainColors,
     ParticleSpot,
     ParticleManager

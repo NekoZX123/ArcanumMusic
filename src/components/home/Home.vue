@@ -89,6 +89,8 @@ onMounted(() => {
 
             getMainColors(imgUrl, 2)
             .then((colors: any) => {
+                if (colors.length < 2) colors[1] = colors[0];
+                
                 const [gradientColor1, gradientColor2] = colors;
 
                 const radioBox = document.getElementById('musicRadio');

@@ -43,7 +43,18 @@ class Player {
     // 当前歌曲信息
     name: string;
     authors: string;
-    coverUrl: string;
+    private _coverUrl: string;
+    get coverUrl(): string {
+        return this._coverUrl;
+    }
+    set coverUrl(value: string) {
+        if (this._coverUrl !== value) {
+            this._coverUrl = value;
+            // 封面链接改变事件
+            const event = new CustomEvent('cover-background-reload', { detail: value });
+            window.dispatchEvent(event);
+        }
+    }
 
     // 时间信息
     duration: number;
@@ -86,7 +97,7 @@ class Player {
 
         this.name = '未在播放';
         this.authors = '';
-        this.coverUrl = './images/player/testAlbum.png';
+        this._coverUrl = './images/player/testAlbum.png';
 
         this.playedTime = 0;
         this.duration = 1;
