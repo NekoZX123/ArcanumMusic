@@ -397,7 +397,9 @@ onMounted(async () => {
     const themeColor = themeList[colorIndex];
     const darkEnabled = parseInt(config.generic.appearance.colors.darkMode);
     const windowBackgroundMode: any = parseInt(config.generic.appearance.colors.backgroundColor);
-    initializeTheme(themeColor, darkEnabled !== 0);
+
+    initializeTheme(themeColor, darkEnabled);
+    
     setWindowBackground(windowBackgroundMode);
     // 窗口标题栏显示主题色
     const showColorInBorders = config.generic.appearance.colors.showColorInBorders;

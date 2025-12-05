@@ -43,9 +43,10 @@
     width: 6rem;
     height: 2.5rem;
 
-    background: var(--interface-background-grey);
+    background: var(--interface-transparent-grey);
     border: none;
     border-radius: 8px;
+    backdrop-filter: blur(4px);
 
     justify-content: center;
     align-items: center;

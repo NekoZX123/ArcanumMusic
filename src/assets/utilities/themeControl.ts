@@ -3,10 +3,17 @@ import { fitColorMode, getMainColors } from "./colorUtils";
 
 type colorThemeName = 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'purple';
 
-const themeConfig = {
+const themeConfig: { color: colorThemeName, darkState: number, darkEnabled: boolean, backgroundMode: windowBackgroundModeType } = {
     color: 'blue',
-    darkEnabled: false
+    darkState: 0,
+    darkEnabled: false,
+    backgroundMode: 0
 };
+
+const darkModeCheckList = window.matchMedia('(prefers-color-scheme:dark)');
+function handleSystemDarkModeChange(_: any) {
+    setThemeColor(themeConfig.color, themeConfig.darkState);
+}
 
 /**
  * 初始化主题控制器
@@ -14,7 +21,7 @@ const themeConfig = {
  * @param themeName 主题颜色
  * @param darkEnabled 是否启用深色模式
  */
-function initializeTheme(themeName: colorThemeName, darkEnabled: boolean) {
+function initializeTheme(themeName: colorThemeName, darkState: number) {
     const themeElement = document.getElementById('globalTheme');
     if (themeElement) {
         console.error('[Error] Theme controller already initialized');
@@ -25,7 +32,7 @@ function initializeTheme(themeName: colorThemeName, darkEnabled: boolean) {
     controller.id = 'globalTheme';
     document.head.appendChild(controller);
 
-    setThemeColor(themeName, darkEnabled);
+    setThemeColor(themeName, darkState);
 }
 
 /**
@@ -34,13 +41,28 @@ function initializeTheme(themeName: colorThemeName, darkEnabled: boolean) {
  * @param themeName 主题颜色
  * @param darkEnabled 是否启用深色模式
  */
-function setThemeColor(themeName: colorThemeName, darkEnabled: boolean) {
+function setThemeColor(themeName: colorThemeName, darkState: number) {
     const themeElement = document.getElementById('globalTheme');
     if (!themeElement) {
         console.error('[Error] Theme controller not initialized, please call initialize() first');
         return;
     }
 
+    let darkEnabled: boolean;
+    if (darkState === 2) { // 跟随系统
+        darkEnabled = darkModeCheckList.matches;
+        if (themeConfig.darkState !== 2) {
+            darkModeCheckList.addEventListener('change', handleSystemDarkModeChange);
+        }
+    }
+    else { // 用户指定
+        darkEnabled = darkState !== 0;
+        if (themeConfig.darkState === 2) {
+            darkModeCheckList.removeEventListener('change', handleSystemDarkModeChange);
+        }
+    }
+
+    console.log(`[Theme controller] darkState: ${darkEnabled}`);
     themeElement.innerHTML = `
     * {
         --interface-foreground: var(--text-${darkEnabled ? 'white' : 'black'});
@@ -48,6 +70,7 @@ function setThemeColor(themeName: colorThemeName, darkEnabled: boolean) {
         --interface-foreground-grey: var(--default-${darkEnabled ? 'lightgrey' : 'grey'});
         --interface-background-grey: var(--background-grey-${darkEnabled ? 'dark' : 'light'});
         --interface-transparent: var(--transparent-${darkEnabled ? 'black' : 'white'});
+        --interface-transparent-grey: var(--transparent-${darkEnabled ? 'dark' : 'light'}grey);
         --interface-contrast-background: var(----backgruond-ultra${darkEnabled ? 'dark' : 'light'});
 
         --theme-color-default: var(--color-${themeName}-default);
@@ -59,7 +82,11 @@ function setThemeColor(themeName: colorThemeName, darkEnabled: boolean) {
     `;
 
     themeConfig.color = themeName;
+    themeConfig.darkState = darkState;
     themeConfig.darkEnabled = darkEnabled;
+
+    // 更新背景
+    setWindowBackground(themeConfig.backgroundMode);
 }
 
 function setControlBarTheme(showThemeColor: boolean) {
@@ -131,6 +158,8 @@ function setWindowBackground(backgroundMode: windowBackgroundModeType) {
             coverHandlerListen = false;
         }
     }
+
+    themeConfig.backgroundMode = backgroundMode;
 }
 
 export {

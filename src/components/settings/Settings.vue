@@ -502,7 +502,9 @@ function saveChanges(_: MouseEvent) {
             const themeColor = themeList[colorIndex];
             const darkEnabled = parseInt(settings.generic.appearance.colors.darkMode);
             const windowBackgroundMode: any = parseInt(settings.generic.appearance.colors.backgroundColor);
-            setThemeColor(themeColor, darkEnabled !== 0);
+            
+            setThemeColor(themeColor, darkEnabled);
+
             setWindowBackground(windowBackgroundMode);
 
             // 窗口标题栏显示主题色

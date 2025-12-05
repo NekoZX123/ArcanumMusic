@@ -94,6 +94,7 @@
     --interface-foreground-grey: var(--default-grey);
     --interface-background-grey: var(--background-grey-light);
     --interface-transparent: var(--transparent-white);
+    --interface-transparent-grey: var(--transparent-lightgrey);
     --interface-contrast-background: var(--backgruond-ultralight);
 
     --theme-color-default: var(--color-blue-default);
