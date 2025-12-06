@@ -259,6 +259,7 @@ class ParticleManager {
 
     clearCanvas() {
         this.spots = [];
+        this.update();
     }
 
     destroy() {

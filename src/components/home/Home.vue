@@ -12,7 +12,7 @@ import { addSonglistCard, addSongCard, addArtistCard } from '../../assets/utilit
 import type { AxiosResponse } from 'axios';
 import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
 import { getPlayer } from '../../assets/player/player.ts';
-import { getMainColors } from '../../assets/utilities/colorUtils.ts';
+import { getMainColors } from '../../assets/effects/colorUtils.ts';
 
 // 默认滑动量
 const BOX_SCROLL_DISTANCE = 330;

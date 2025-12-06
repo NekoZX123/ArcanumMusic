@@ -8,7 +8,7 @@ import './settingsStyle.css';
 import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
 import { showNotify } from '../../assets/notifications/Notification.ts';
 import {setConfig} from "../../assets/utilities/configLoader.ts";
-import { setControlBarTheme, setThemeColor, setWindowBackground, type colorThemeName } from '../../assets/utilities/themeControl.ts';
+import { setControlBarTheme, setThemeColor, setWindowBackground, type colorThemeName } from '../../assets/effects/themeControl.ts';
 
 // 设置页面及内容
 let settingsPage, settings: any;

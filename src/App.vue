@@ -19,7 +19,7 @@ import {hideArtistSelect, hideRightMenu} from './assets/utilities/elementControl
 import {getConfig, getPreference, loadConfig, loadPreference, writePreference} from './assets/utilities/configLoader.ts';
 import {loadProxyPort} from './assets/utilities/proxyRequest.ts';
 import {syncFocusedLyric} from './assets/lyrics/lyricsManager.ts';
-import { initializeTheme, setControlBarTheme, setWindowBackground, type colorThemeName } from './assets/utilities/themeControl.ts';
+import { initializeTheme, setControlBarTheme, setWindowBackground, type colorThemeName } from './assets/effects/themeControl.ts';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -192,7 +192,7 @@ function togglePlaylistPanel(event: MouseEvent) {
 }
 
 // 切换歌词面板
-const lyricShowEvent = new CustomEvent('lyrics-background-anim');
+const lyricShowEvent = new CustomEvent('lyrics-launch');
 function showLyrics(_: MouseEvent) {
     const lyricsPanel = document.getElementById('lyricsArea');
     if (!lyricsPanel) return;

@@ -36,9 +36,9 @@
             </node>
             <node id="lyrics" title="歌词界面">
                 <dropbox id="lyricsBackground" text="歌词界面背景">
-                    <item id="0">跟随主题色</item>
-                    <item id="1">跟随播放的歌曲封面</item>
-                    <item id="2">跟随应用深色模式</item>
+                    <item id="0">模糊歌曲封面</item>
+                    <item id="1">歌曲封面取色 (动态)</item>
+                    <item id="2">跟随应用主题</item>
                 </dropbox>
                 <dropbox id="lyricsStyle" text="歌词样式">
                     <item id="0">应用内置样式</item>

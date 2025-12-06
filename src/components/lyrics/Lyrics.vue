@@ -3,8 +3,9 @@ import { onMounted, ref } from 'vue';
 import './lyricsStyle.css';
 import { LyricsLine } from '../../assets/lyrics/Lyrics.tsx';
 import { getPlayer } from '../../assets/player/player.ts';
-import { getMainColors, ParticleManager } from '../../assets/utilities/colorUtils.ts';
+import { getMainColors, ParticleManager } from '../../assets/effects/colorUtils.ts';
 import { getLyricsData, setContainerId, updateCurrentLyrics, updateFocusedLyric } from '../../assets/lyrics/lyricsManager.ts';
+import { getConfig } from '../../assets/utilities/configLoader.ts';
 
 // const songData = ref(getPlayer());
 // 最大偏移回弹距离
@@ -86,18 +87,15 @@ function hideLyrics(_: any) {
     const lyricsPanel = document.getElementById('lyricsArea');
     if (!lyricsPanel) return;
 
-    if (particleSystem) {
-        particleSystem.stopAnimation();
-    }
-
     lyricsPanel.classList.remove('show');
 
     setTimeout(() => {
+        stopAnimation();
+
         lyricsPanel.style.display = 'none;';
     }, 500);
 }
 
-// 音量调整
 // 音量调整
 function adjustVolume(event: MouseEvent) {
     const volumeBar = document.getElementById('lyricsPageVolumeBar');
@@ -145,12 +143,41 @@ function limitAuthorsTextLength(authors: string) {
     return authors;
 }
 
+// 模糊歌曲封面背景
+function loadBluredCoverBackground(_?: any) {
+    // 显示模糊遮罩层
+    const backgroundContainer = document.getElementById('backgroundContainer');
+    const backgroundCanvas = document.getElementById('dynamicBackground');
+    const backgroundBlurMask = document.getElementById('backgroundBlurMask');
+    if (!backgroundContainer || !backgroundCanvas || !backgroundBlurMask) return;
+    
+    backgroundCanvas.style.display = 'none';
+    backgroundBlurMask.style.display = 'block';
+
+    // 加载模糊背景
+    const coverUrl = getPlayer()?.coverUrl;
+    if (!coverUrl) return;
+    backgroundContainer.style.backgroundImage = `url(${coverUrl})`;
+}
+
+// 动态背景
 let particleSystem: ParticleManager | null = null;
 const PARTICLES_COUNT = 3;
 /**
  * 加载动态背景 (颜色根据歌曲封面提取)
  */
-async function loadMainColorBackground(_: any) {
+async function loadMainColorBackground(_?: any) {
+    // 显示画布层
+    const backgroundContainer = document.getElementById('backgroundContainer');
+    const backgroundCanvas = document.getElementById('dynamicBackground');
+    const backgroundBlurMask = document.getElementById('backgroundBlurMask');
+    if (!backgroundContainer || !backgroundCanvas || !backgroundBlurMask) return;
+    
+    backgroundBlurMask.style.display = 'none';
+    backgroundCanvas.style.display = 'block';
+    backgroundContainer.style.backgroundImage = 'transparent';
+
+    // 加载动态背景
     const coverUrl = getPlayer()?.coverUrl;
     if (coverUrl) {
         // 获取封面主色
@@ -177,11 +204,71 @@ async function loadMainColorBackground(_: any) {
 /**
  * 歌词面板显示时检测是否开始动画
  */
-function pendStartAnimation(_: any) {
+function pendStartAnimation(_?: any) {
     // 播放时开始动画
     if (getPlayer()?.isPlaying && particleSystem) {
         particleSystem.stopAnimation(); // 先停止已有动画
         particleSystem.startAnimation();
+    }
+}
+/**
+ * 停止动画
+ */
+function stopAnimation() {
+    if (particleSystem) {
+        particleSystem.destroy();
+        particleSystem = null;
+    }
+}
+
+function loadThemeColorBackground() {
+    // 显示模糊遮罩层
+    const backgroundContainer = document.getElementById('backgroundContainer');
+    const backgroundCanvas = document.getElementById('dynamicBackground');
+    const backgroundBlurMask = document.getElementById('backgroundBlurMask');
+    if (!backgroundContainer || !backgroundCanvas || !backgroundBlurMask) return;
+    
+    backgroundCanvas.style.display = 'none';
+    backgroundBlurMask.style.display = 'block';
+
+    backgroundContainer.style.backgroundImage = `
+    radial-gradient(circle at 15% 5%, var(--theme-color-default), transparent 15rem),
+    radial-gradient(circle at 80% 90%, var(--theme-color-deep), var(--theme-color-ultradeep) 20rem)
+    `;
+}
+
+/**
+ * 更新背景
+ */
+function updateBackground(_?: any) {
+    const config = getConfig();
+    if (!config) {
+        console.error(`[Error] Config not loaded`);
+        return;
+    }
+
+    const lyricsBackgroundType = parseInt(config.generic.appearance.lyrics.lyricsBackground);
+    if (lyricsBackgroundType === 0) { // 模糊歌曲封面
+        stopAnimation();
+
+        loadBluredCoverBackground();
+    }
+    else if (lyricsBackgroundType === 1) { // 歌曲封面取色 (动态)
+        // 光斑背景动效
+        particleSystem = new ParticleManager(['rgb(144,202,249)', 'rgb(248,187,208)', 'rgb(144,150,249)']);
+        particleSystem.createParticles();
+        particleSystem.update();
+
+        pendStartAnimation();
+        loadMainColorBackground();
+
+        // 监听动态背景更新及动画开始事件
+        window.addEventListener('beforeunload', stopAnimation);
+    }
+    else {
+        stopAnimation();
+
+        loadThemeColorBackground();
     }
 }
 
@@ -230,25 +317,15 @@ onMounted(() => {
     });
     observer.observe(playerElem, { attributes: true, attributeFilter: ['src'] });
 
-    // 监听歌词/背景更新/歌词面板显示事件
+    // 监听歌词事件
     window.addEventListener('update-lyrics', updateCurrentLyrics);
-    window.addEventListener('update-background', loadMainColorBackground);
-    window.addEventListener('lyrics-background-anim', pendStartAnimation);
 
     // 歌词元素
     setContainerId('lyricsContent');
 
-    // 光斑背景动效
-    particleSystem = new ParticleManager(['rgb(144,202,249)', 'rgb(248,187,208)', 'rgb(144,150,249)']);
-    particleSystem.createParticles();
-    particleSystem.update();
-
-    window.addEventListener('beforeunload', () => {
-        if (particleSystem) {
-            particleSystem.destroy();
-            particleSystem = null;
-        }
-    });
+    // 根据应用配置加载背景
+    window.addEventListener('update-background', updateBackground);
+    window.addEventListener('lyrics-launch', updateBackground);
 
     console.log('Lyrics.vue loaded');
 });
@@ -257,8 +334,9 @@ onMounted(() => {
 <template>
     <div class="flex column" id="lyricsPanel">
         <!-- 动态背景 -->
-        <div id="dynamicBackgroundContainer">
+        <div id="backgroundContainer">
             <canvas id="dynamicBackground"></canvas>
+            <div id="backgroundBlurMask"></div>
         </div>
         <!-- 面板顶栏 -->
         <div class="flex row" id="panelTop">

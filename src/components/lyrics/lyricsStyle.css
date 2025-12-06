@@ -4,19 +4,30 @@
     align-items: center;
 }
 
-/* 动态背景 */
-#dynamicBackgroundContainer{
+/* 背景 */
+#backgroundContainer{
     width: 100%;
     height: 100%;
     position: absolute;
 
-    background: transparent;
+    background-image: transparent;
+    background-size: cover;
+    background-position: center;
 
     z-index: -1;
 }
 #dynamicBackground {
     width: 100%;
     height: 100%;
+}
+#backgroundBlurMask {
+    width: 100%;
+    height: 100%;
+
+    background: transparent;
+    backdrop-filter: 
+        blur(24px)
+        brightness(0.85);
 }
 
 /* 顶栏 */
