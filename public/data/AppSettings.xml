@@ -45,7 +45,6 @@
                     <item id="1">仿Apple Music样式</item>
                     <item id="2">简约样式</item>
                 </dropbox>
-                <checkbox id="smoothScroll" text="启用平滑效果"/>
                 <checkbox id="lyricsGlow" text="启用歌词光效"/>
             </node>
         </page>

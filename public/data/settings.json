@@ -20,7 +20,6 @@
             "lyrics": {
                 "lyricsBackground": 1,
                 "lyricsStyle": 0,
-                "smoothScroll": true,
                 "lyricsGlow": true
             }
         }

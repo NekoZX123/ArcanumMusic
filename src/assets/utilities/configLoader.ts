@@ -24,6 +24,7 @@ async function loadConfig() {
     return appConfig;
 }
 
+const configChangeEvent = new CustomEvent('config-change');
 /**
  * 设置配置内容
  * @param config 配置文件内容
@@ -34,6 +35,8 @@ function setConfig(config: any) {
         return;
     }
     appConfig = config;
+
+    window.dispatchEvent(configChangeEvent);
 
     return appConfig;
 }

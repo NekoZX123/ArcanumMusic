@@ -298,13 +298,15 @@
 .lyricsBox > ul {
     color: var(--transparent-grey);
 
-    text-shadow: 0 0 2px var(--transparent-grey);
-
     transition: all 300ms ease-in-out;
+}
+.lyricsBox.glow > ul {
+    text-shadow: 0 0 2px var(--transparent-grey);
 }
 .lyricsBox.focused > ul {
     color: var(--default-white);
-
+}
+.lyricsBox.glow.focused > ul {
     text-shadow: 0 0 3px var(--default-white);
 }
 .lyricsBox > ul {

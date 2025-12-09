@@ -288,6 +288,9 @@ function togglePlayPauseInLyrics(_: MouseEvent) {
     }
 }
 
+// 歌词光效
+const lyricsGlow = ref(true);
+
 onMounted(() => {
     // 设置触发器
     const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
@@ -326,6 +329,12 @@ onMounted(() => {
     // 根据应用配置加载背景
     window.addEventListener('update-background', updateBackground);
     window.addEventListener('lyrics-launch', updateBackground);
+    
+    // 歌词光效
+    lyricsGlow.value = getConfig().generic.appearance.lyrics.lyricsGlow;
+    window.addEventListener('config-change', () => { // 同步设置变化
+        lyricsGlow.value = getConfig().generic.appearance.lyrics.lyricsGlow;
+    })
 
     console.log('Lyrics.vue loaded');
 });
@@ -405,6 +414,7 @@ onMounted(() => {
                     :time="lyricInfo.time"
                     :content="lyricInfo.content"
                     :translation="lyricInfo.translation"
+                    :glow-effect="lyricsGlow"
                 />
             </div>
         </div>

@@ -9,11 +9,16 @@ const LyricsLine = defineComponent({
             type: String,
             required: false,
             default: ''
+        },
+        glowEffect: {
+            type: Boolean,
+            required: false,
+            default: true
         }
     },
-    setup(props: { time:number, content: string, translation: string}) {
+    setup(props: { time: number, content: string, translation: string, glowEffect: boolean }) {
         return () => (
-            <span class="lyricsBox" onClick={() => getPlayer()?.setProgress(props.time)}>
+            <span class={`lyricsBox ${props.glowEffect ? 'glow' : ''}`} onClick={() => getPlayer()?.setProgress(props.time)}>
                 <ul class="text large bold">{props.content}</ul>
                 <ul class="text medium bold">{props.translation}</ul>
             </span>

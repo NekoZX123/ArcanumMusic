@@ -13,6 +13,7 @@ let lyricLines: Reactive<LyricData> = reactive({
     ],
     metaData: {}
 });
+
 /**
  * 更新歌词内容
  */
