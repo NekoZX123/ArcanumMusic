@@ -288,8 +288,22 @@ function togglePlayPauseInLyrics(_: MouseEvent) {
     }
 }
 
-// 歌词光效
+/**
+ * 更新歌词样式
+ * @param style 歌词样式 ID
+ */
+function updateLyricsStyle(style: number) {
+    if (style === 1) { // 加载 Apple Music 样式歌词
+        console.warn(`Apple Music style lyrics currently not supported`);
+    }
+    else { // 加载内置 / 简约样式
+        isLiteLyrics.value = style === 2;
+    }
+}
+
+// 歌词光效及样式
 const lyricsGlow = ref(true);
+const isLiteLyrics = ref(false);
 
 onMounted(() => {
     // 设置触发器
@@ -330,11 +344,22 @@ onMounted(() => {
     window.addEventListener('update-background', updateBackground);
     window.addEventListener('lyrics-launch', updateBackground);
     
+    // 读取配置
+    const lyricsOptions = getConfig().generic.appearance.lyrics;
+
     // 歌词光效
-    lyricsGlow.value = getConfig().generic.appearance.lyrics.lyricsGlow;
-    window.addEventListener('config-change', () => { // 同步设置变化
-        lyricsGlow.value = getConfig().generic.appearance.lyrics.lyricsGlow;
-    })
+    lyricsGlow.value = lyricsOptions.lyricsGlow;
+
+    // 歌词样式
+    const lyricsStyle = parseInt(lyricsOptions.lyricsStyle);
+    updateLyricsStyle(lyricsStyle);
+
+    // 同步设置变化
+    window.addEventListener('config-change', () => {
+        const lyricsOptions = getConfig().generic.appearance.lyrics;
+        lyricsGlow.value = lyricsOptions.lyricsGlow;
+        updateLyricsStyle(parseInt(lyricsOptions.lyricsStyle));
+    });
 
     console.log('Lyrics.vue loaded');
 });
@@ -415,6 +440,7 @@ onMounted(() => {
                     :content="lyricInfo.content"
                     :translation="lyricInfo.translation"
                     :glow-effect="lyricsGlow"
+                    :is-lite="isLiteLyrics"
                 />
             </div>
         </div>

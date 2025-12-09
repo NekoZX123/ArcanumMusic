@@ -71,7 +71,7 @@ function setThemeColor(themeName: colorThemeName, darkState: number) {
         --interface-background-grey: var(--background-grey-${darkEnabled ? 'dark' : 'light'});
         --interface-transparent: var(--transparent-${darkEnabled ? 'black' : 'white'});
         --interface-transparent-grey: var(--transparent-${darkEnabled ? 'dark' : 'light'}grey);
-        --interface-contrast-background: var(----backgruond-ultra${darkEnabled ? 'dark' : 'light'});
+        --interface-contrast-background: var(--backgruond-ultra${darkEnabled ? 'dark' : 'light'});
 
         --theme-color-default: var(--color-${themeName}-default);
         --theme-color-light: var(--color-${themeName}-light);
