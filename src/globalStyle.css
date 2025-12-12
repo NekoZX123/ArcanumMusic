@@ -89,19 +89,22 @@
 }
 /* 预设默认样式 */
 * {
-    --interface-foreground: var(--text-black);
-    --interface-background: var(--background-light);
-    --interface-foreground-grey: var(--default-grey);
-    --interface-background-grey: var(--background-grey-light);
-    --interface-transparent: var(--transparent-white);
-    --interface-transparent-grey: var(--transparent-lightgrey);
-    --interface-contrast-background: var(--backgruond-ultralight);
+    --interface-foreground: var(--text-black);                      /* 前景色 */
+    --interface-background: var(--background-light);                /* 背景色 */
+    --interface-foreground-grey: var(--default-grey);               /* 灰色前景色 */
+    --interface-background-grey: var(--background-grey-light);      /* 灰色背景色 */
+    --interface-transparent: var(--transparent-white);              /* 透明覆盖色 */
+    --interface-transparent-grey: var(--transparent-lightgrey);     /* 透明灰色覆盖色 */
+    --interface-contrast-background: var(--backgruond-ultralight);  /* 高对比度背景色 */
 
-    --theme-color-default: var(--color-blue-default);
-    --theme-color-light: var(--color-blue-light);
-    --theme-color-deep: var(--color-blue-deep);
-    --theme-color-ultradeep: var(--color-blue-ultradeep);
-    --theme-color-transparent: var(--color-blue-transparent);
+    --theme-color-default: var(--color-blue-default);               /* 默认主题色 */
+    --theme-background: var(--color-blue-light);                    /* 主题背景色 */
+    --theme-color-light: var(--color-blue-light);                   /* 浅主题色 */
+    --theme-color-deep: var(--color-blue-deep);                     /* 深主题色 */
+    --theme-color-ultradeep: var(--color-blue-ultradeep);           /* 低亮度主题色 */
+    --theme-color-transparent: var(--color-blue-transparent);       /* 透明主题色 */
+
+    --outline-darkmode-invert-filter: invert(0);                    /* 线框图深色模式反转滤镜 */
 }
 
 /* 元素样式 */
@@ -115,9 +118,13 @@ button {
     outline: none;
     -webkit-app-region: nodrag;
 }
-
+/* 去除链接默认下划线 */
 a {
     text-decoration: none;
+}
+/* 部分线框图片根据深色模式反转颜色 */
+img.outlineImage {
+    filter: var(--outline-darkmode-invert-filter);
 }
 
 /* 滚动条 */
@@ -453,7 +460,7 @@ a {
 .pageButton:hover {
     width: 8rem;
 
-    background: var(--theme-color-light);
+    background: var(--theme-background);
 
     justify-content: flex-start;
 }

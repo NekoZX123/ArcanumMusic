@@ -157,7 +157,7 @@ onMounted(() => {
                 <label class="text medium">{{ typeName }} by {{ listMetaData.author }}</label>
                 <label class="text ultraSmall" id="listDescription">{{ listMetaData.description }}</label>
                 <button class="flex row listButton" id="playAllContent" @click="playCurrentList">
-                    <img src="/images/player/play.dark.svg"></img>
+                    <img class="outlineImage" src="/images/player/play.dark.svg"></img>
                     <label class="text small bold">播放</label>
                 </button>
             </div>

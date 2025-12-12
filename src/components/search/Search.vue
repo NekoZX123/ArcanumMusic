@@ -271,10 +271,10 @@ onMounted(() => {
             <input id="searchBar" type="text" placeholder="搜索..."
                 @focusin="searchInFocus" @focusout="searchOutFocus"></input>
             <button id="searchClear" title="清空" @click="clearSearchBar">
-                <img src="/images/pageSwitcher/clear.svg"></img>
+                <img class="outlineImage" src="/images/pageSwitcher/clear.svg"></img>
             </button>
             <button id="searchConfirm" title="搜索" @click="() => {searchOnTypeChange({ widgetId: '', current: currentType });}">
-                <img src="/images/pageSwitcher/search.svg"></img>
+                <img class="outlineImage" src="/images/pageSwitcher/search.svg"></img>
             </button>
         </div>
 

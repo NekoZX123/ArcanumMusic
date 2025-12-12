@@ -74,10 +74,13 @@ function setThemeColor(themeName: colorThemeName, darkState: number) {
         --interface-contrast-background: var(--backgruond-ultra${darkEnabled ? 'dark' : 'light'});
 
         --theme-color-default: var(--color-${themeName}-default);
+        --theme-background: var(--color-${themeName}-${darkEnabled ? 'deep' : 'light'});
         --theme-color-light: var(--color-${themeName}-light);
         --theme-color-deep: var(--color-${themeName}-deep);
         --theme-color-ultradeep: var(--color-${themeName}-ultradeep);
         --theme-color-transparent: var(--color-${themeName}-transparent);
+
+        --outline-darkmode-invert-filter: invert(${darkEnabled ? '1' : '0'});
     }
     `;
 

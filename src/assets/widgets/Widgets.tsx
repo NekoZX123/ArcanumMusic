@@ -89,7 +89,7 @@ const SongCard = defineComponent({
                     <label class="text ultraSmall grey">{props.authors}</label>
                 </span>
                 <button class="songPlay" onClick={() => getPlayer()?.playNow(props)}>
-                    <img src="./images/player/play.dark.svg" alt="Play"/>
+                    <img class="outlineImage" src="./images/player/play.dark.svg" alt="Play"/>
                 </button>
             </span>
         );

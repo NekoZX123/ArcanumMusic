@@ -279,7 +279,7 @@ const COLOR_STEP = 20;
  * @param useStrict 是否启用严格模式
  * @returns Promise<string[]> 返回符合条件的颜色数组
  */
-function getMainColors(imgUrl: string, count: number = 3, useStrict: boolean = false): Promise<string[]> | undefined {
+function getMainColors(imgUrl: string, count: number = 3, useStrict: boolean = false): Promise<string[]> {
     if (count > 10 || count < 1) {
         throw new Error(`getMainColors() received an unproper count value ${count}`);
     }

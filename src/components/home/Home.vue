@@ -353,11 +353,11 @@ onMounted(() => {
         </div>
         <div class="flex row horizontalScroll">
             <button class="scrollerButton" @click="scrollLeft">
-                <img src="/images/arrows/left.svg"></img>
+                <img class="outlineImage" src="/images/arrows/left.svg"></img>
             </button>
             <div class="nowrapBox" id="songlistRecommends"></div>
             <button class="scrollerButton" @click="scrollRight">
-                <img src="/images/arrows/right.svg"></img>
+                <img class="outlineImage" src="/images/arrows/right.svg"></img>
             </button>
         </div>
         
@@ -382,11 +382,11 @@ onMounted(() => {
         </div>
         <div class="flex row horizontalScroll">
             <button class="scrollerButton" @click="scrollLeft">
-                <img src="/images/arrows/left.svg"></img>
+                <img class="outlineImage" src="/images/arrows/left.svg"></img>
             </button>
             <div class="flex row nowrapBox" id="artistRecommends"></div>
             <button class="scrollerButton" @click="scrollRight">
-                <img src="/images/arrows/right.svg"></img>
+                <img class="outlineImage" src="/images/arrows/right.svg"></img>
             </button>
         </div>
 
@@ -400,11 +400,11 @@ onMounted(() => {
         </div>
         <div class="flex row horizontalScroll">
             <button class="scrollerButton" @click="scrollLeft">
-                <img src="/images/arrows/left.svg"></img>
+                <img class="outlineImage" src="/images/arrows/left.svg"></img>
             </button>
             <div class="flex row nowrapBox" id="rankings"></div>
             <button class="scrollerButton" @click="scrollRight">
-                <img src="/images/arrows/right.svg"></img>
+                <img class="outlineImage" src="/images/arrows/right.svg"></img>
             </button>
         </div>
 
@@ -418,11 +418,11 @@ onMounted(() => {
         </div>
         <div class="flex row horizontalScroll">
             <button class="scrollerButton" @click="scrollLeft">
-                <img src="/images/arrows/left.svg"></img>
+                <img class="outlineImage" src="/images/arrows/left.svg"></img>
             </button>
             <div class="flex row nowrapBox" id="newAlbums"></div>
             <button class="scrollerButton" @click="scrollRight">
-                <img src="/images/arrows/right.svg"></img>
+                <img class="outlineImage" src="/images/arrows/right.svg"></img>
             </button>
         </div>
 

@@ -455,14 +455,14 @@ onUnmounted(() => {
             </span>
             <span id="windowOptions">
                 <button class="windowControl default" id="minimizeButton" @click="minimizeWindow">
-                    <img src="/images/windowControl/minimize.svg" alt="Minimize">
+                    <img class="outlineImage" src="/images/windowControl/minimize.svg" alt="Minimize">
                 </button>
                 <button class="windowControl default" id="maximizeButton" @click="toggleMaximize">
-                    <img :src="maxButtonSrc" alt="Maximize / Restore">
+                    <img class="outlineImage" :src="maxButtonSrc" alt="Maximize / Restore">
                 </button>
                 <button class="windowControl close" id="closeButton" 
                     @click="closeWindow" @mouseenter="closeHover" @mouseleave="closeUnHover">
-                    <img :src="closeButtonSrc" alt="Close">
+                    <img class="outlineImage" :src="closeButtonSrc" alt="Close">
                 </button>
             </span>
         </div>
@@ -472,10 +472,10 @@ onUnmounted(() => {
                 <!-- 前进 / 后退 -->
                 <div class="flex row" id="backForward">
                     <button class="pageControl" id="pageBack" @click="pageBack">
-                        <img src="/images/pageSwitcher/arrowLeft.svg" alt="Back"/>
+                        <img class="outlineImage" src="/images/pageSwitcher/arrowLeft.svg" alt="Back"/>
                     </button>
                     <button class="pageControl" id="pageForawrd" @click="pageForward">
-                        <img src="/images/pageSwitcher/arrowRight.svg" alt="Forward"/>
+                        <img class="outlineImage" src="/images/pageSwitcher/arrowRight.svg" alt="Forward"/>
                     </button>
                 </div>
 
@@ -483,11 +483,11 @@ onUnmounted(() => {
 
                 <!-- 设置 -->
                 <button class="pageButton" id="settings" title="设置" @click="(_: any) => {changePage('settings')}">
-                    <img src="/images/pageSwitcher/settings.svg" alt="Application settings"/>
+                    <img class="outlineImage" src="/images/pageSwitcher/settings.svg" alt="Application settings"/>
                 </button>
                 <!-- 账户 -->
                 <button class="pageButton" id="accounts" title="我的账户" @click="(_: any) => {changePage('accounts')}">
-                    <img src="/images/pageSwitcher/accounts.svg" alt="My accounts"/>
+                    <img class="outlineImage" src="/images/pageSwitcher/accounts.svg" alt="My accounts"/>
                 </button>
             </div>
 
@@ -527,32 +527,32 @@ onUnmounted(() => {
                 <!-- 播放控制 -->
                 <div class="flex row" id="playControl">
                     <button class="playControl" id="previousButton" @click="getPlayer()?.previousSong">
-                        <img src="/images/player/previous.svg" alt="Previous song"/>
+                        <img class="outlineImage" src="/images/player/previous.svg" alt="Previous song"/>
                     </button>
                     <button class="playControl large" id="playButton" @click="getPlayer()?.togglePlayPause">
-                        <img :src="getPlayer()?.playStateImage" alt="Play / Pause"/>
+                        <img class="outlineImage" :src="getPlayer()?.playStateImage" alt="Play / Pause"/>
                     </button>
                     <button class="playControl" id="nextButton" @click="getPlayer()?.nextSong">
-                        <img src="/images/player/next.svg" alt="Next song"/>
+                        <img class="outlineImage" src="/images/player/next.svg" alt="Next song"/>
                     </button>
                 </div>
 
                 <!-- 其他控制 / 歌词 -->
                 <div class="flex row" id="controlRightBar">
                     <button class="playControl small" id="captions" @click="toggleCaptions" title="桌面歌词">
-                        <img src="/images/player/caption.svg" id="captionState" alt="Toggle caption"/>
+                        <img class="outlineImage" src="/images/player/caption.svg" id="captionState" alt="Toggle caption"/>
                     </button>
                     <button class="playControl small" id="playlist" @click="togglePlaylistPanel" title="播放列表">
-                        <img src="/images/player/playlist.svg" id="playlistState" alt="Toggle playlist"/>
+                        <img class="outlineImage" src="/images/player/playlist.svg" id="playlistState" alt="Toggle playlist"/>
                     </button>
                     <button class="playControl small" id="repeat" @click="getPlayer()?.toggleRepeat" title="循环播放">
-                        <img :src="getPlayer()?.repeatStateImage" alt="Toggle repeat"/>
+                        <img class="outlineImage" :src="getPlayer()?.repeatStateImage" alt="Toggle repeat"/>
                     </button>
                     <button class="playControl small" id="shuffle" @click="getPlayer()?.toggleShuffle" title="随机播放">
-                        <img :src="getPlayer()?.shuffleStateImage" alt="Toggle shuffle"/>
+                        <img class="outlineImage" :src="getPlayer()?.shuffleStateImage" alt="Toggle shuffle"/>
                     </button>
                     <div class="flex row">
-                        <img class="playControl small" :src="getPlayer()?.volumeLevel" @click="getPlayer()?.toggleMute" title="静音" alt="mute"/>
+                        <img class="playControl small outlineImage" :src="getPlayer()?.volumeLevel" @click="getPlayer()?.toggleMute" title="静音" alt="mute"/>
                         <div id="volumeAdjust" @mousemove="adjustVolume">
                             <div id="volumeBar">
                                 <div id="volumeFilled" :style="`width: ${getPlayer()?.volume}%`"></div>
@@ -561,7 +561,7 @@ onUnmounted(() => {
                         </div>
                     </div>
                     <button class="playControl small" id="lyrics" @click="showLyrics" title="显示歌词">
-                        <img src="/images/player/expand.svg" alt="Expand lyrics"/>
+                        <img class="outlineImage" src="/images/player/expand.svg" alt="Expand lyrics"/>
                     </button>
                 </div>
             </div>
@@ -577,7 +577,7 @@ onUnmounted(() => {
             <div class="flex row" id="artistSelectTopBar">
                 <label class="text medium">请选择</label>
                 <button id="artistSelectClose" @click="hideArtistSelect">
-                    <img src="/images/windowControl/close.svg" alt="Close"/>
+                    <img class="outlineImage" src="/images/windowControl/close.svg" alt="Close"/>
                 </button>
             </div>
             <div id="artistSelectContent"></div>

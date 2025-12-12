@@ -572,7 +572,7 @@ onMounted(async () => {
                     <div class="treeNode expandable" id="initialNode">
                         <div class="nodeContent">
                             <i class="nodeExpandButton">
-                                <img src="/images/windowControl/treeExpand.svg" class="nodeExpandImage" alt="">
+                                <img src="/images/windowControl/treeExpand.svg" class="outlineImage nodeExpandImage" alt="">
                             </i>
                             <label class="nodeLabel">NodeLabel</label>
                         </div>
@@ -588,11 +588,11 @@ onMounted(async () => {
         <!-- 设置更改保存及丢弃 -->
         <div class="flex row" id="changesControl">
             <button class="changesOption" id="discardButton" @click="discardChanges">
-                <img src="/images/fileControl/discard.svg" alt="Discard"/>
+                <img class="outlineImage" src="/images/fileControl/discard.svg" alt="Discard"/>
                 <label class="text small bold">丢弃</label>
             </button>
             <button class="changesOption" id="saveButton" @click="saveChanges">
-                <img src="/images/fileControl/save.svg" alt="Save"/>
+                <img class="outlineImage" src="/images/fileControl/save.svg" alt="Save"/>
                 <label class="text small bold">保存</label>
             </button>
         </div>
