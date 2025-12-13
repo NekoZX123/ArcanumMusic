@@ -3,11 +3,12 @@
     "appId": "moe.nekozx123.arcanummusic",
     "files": [
         "./app/app.js",
-        "./app/preload.mjs",
-        "./app/fileManager.js",
-        "./app/service.js",
-        "./app/webSocket.js",
         "./app/accountHelper.js",
+        "./app/configHelper.js",
+        "./app/fileManager.js",
+        "./app/globalUtils.js",
+        "./app/preload.mjs",
+        "./app/service.js",
         "./dist"
     ],
     "directories": {
