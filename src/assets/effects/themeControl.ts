@@ -11,6 +11,7 @@ const themeConfig: { color: colorThemeName, darkState: number, darkEnabled: bool
 };
 
 const darkModeCheckList = window.matchMedia('(prefers-color-scheme:dark)');
+// 处理系统深色模式变化
 function handleSystemDarkModeChange(_: any) {
     setThemeColor(themeConfig.color, themeConfig.darkState);
 }
@@ -165,6 +166,13 @@ function setWindowBackground(backgroundMode: windowBackgroundModeType) {
     themeConfig.backgroundMode = backgroundMode;
 }
 
+/**
+ * 获取主题配置
+ */
+function getThemeConfig() {
+    return themeConfig;
+}
+
 export {
     type colorThemeName,
     type windowBackgroundModeType,
@@ -172,5 +180,6 @@ export {
     setThemeColor,
     setControlBarTheme,
     windowBackgroundMode,
-    setWindowBackground
-}
+    setWindowBackground,
+    getThemeConfig
+};

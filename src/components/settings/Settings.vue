@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { createApp, onMounted } from 'vue';
+import { createApp, onMounted, ref } from 'vue';
 
 import { AccountCard } from '../../assets/widgets/Account.tsx';
 import { HeadersText, NodeBlock, CheckBox, ColorPicker, Slider, TextInput, Dropbox } from '../../assets/widgets/Settings.tsx';
@@ -8,7 +8,7 @@ import './settingsStyle.css';
 import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
 import { showNotify } from '../../assets/notifications/Notification.ts';
 import {setConfig} from "../../assets/utilities/configLoader.ts";
-import { setControlBarTheme, setThemeColor, setWindowBackground, type colorThemeName } from '../../assets/effects/themeControl.ts';
+import { getThemeConfig, setControlBarTheme, setThemeColor, setWindowBackground, type colorThemeName } from '../../assets/effects/themeControl.ts';
 
 // 设置页面及内容
 let settingsPage, settings: any;
@@ -507,6 +507,8 @@ function saveChanges(_: MouseEvent) {
 
             setWindowBackground(windowBackgroundMode);
 
+            refreshModifyImage();
+
             // 窗口标题栏显示主题色
             const showColorInBorders = settings.generic.appearance.colors.showColorInBorders;
             setControlBarTheme(showColorInBorders);
@@ -522,6 +524,20 @@ function saveChanges(_: MouseEvent) {
             // 重新加载设置文件
             setConfig(modifiedSettings);
         });
+}
+
+// 保存 / 丢弃更改图片路径
+const saveButtonImage = ref('./images/fileControl/save.svg');
+const discardButtonImage = ref('./images/fileControl/discard.svg');
+
+/**
+ * 更新保存 / 丢弃更改图片路径
+ */
+function refreshModifyImage() {
+    const theme = getThemeConfig();
+
+    saveButtonImage.value = `./images/fileControl/save${theme.darkEnabled ? '.dark' : ''}.svg`;
+    discardButtonImage.value = `./images/fileControl/discard${theme.darkEnabled ? '.dark' : ''}.svg`;
 }
 
 onMounted(async () => {
@@ -559,6 +575,15 @@ onMounted(async () => {
         }
     });
 
+    // 保存 / 丢弃更改按钮图片
+    refreshModifyImage();
+
+    // 处理系统深色模式变化
+    const darkModeCheckList = window.matchMedia('(prefers-color-scheme:dark)');
+    darkModeCheckList.addEventListener('change', () => setTimeout(() => {
+        refreshModifyImage();
+    }, 100));
+
     console.log('Settings.vue loaded');
 });
 </script>
@@ -588,11 +613,11 @@ onMounted(async () => {
         <!-- 设置更改保存及丢弃 -->
         <div class="flex row" id="changesControl">
             <button class="changesOption" id="discardButton" @click="discardChanges">
-                <img class="outlineImage" src="/images/fileControl/discard.svg" alt="Discard"/>
+                <img :src="discardButtonImage" alt="Discard"/>
                 <label class="text small bold">丢弃</label>
             </button>
             <button class="changesOption" id="saveButton" @click="saveChanges">
-                <img class="outlineImage" src="/images/fileControl/save.svg" alt="Save"/>
+                <img :src="saveButtonImage" alt="Save"/>
                 <label class="text small bold">保存</label>
             </button>
         </div>
