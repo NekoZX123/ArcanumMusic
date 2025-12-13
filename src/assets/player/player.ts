@@ -366,13 +366,12 @@ class Player {
             const startPlaying = () => {
                 playerElem.play();
                 this.isPlaying = true;
+
+                this.playStateImage = './images/player/pause.dark.svg';
+                this.syncPlayStateImage();
             }
-            this.playStateImage = playerElem.paused ? './images/player/pause.dark.svg' : './images/player/play.dark.svg';
-            this.syncPlayStateImage();
-            if (playerElem.paused && this.url !== '') {
-                // 音频准备完成后才播放
-                playerElem.addEventListener('canplay', startPlaying, { once: true });
-            }
+            // 音频准备完成后播放
+            playerElem.addEventListener('canplay', startPlaying, { once: true });
             
             // 更新歌词
             const lyricsEvent = new CustomEvent('update-lyrics');
