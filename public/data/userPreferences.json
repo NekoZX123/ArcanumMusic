@@ -1,0 +1,13 @@
+{
+    "window": {
+        "width": 1000,
+        "height": 650,
+        "isMaximized": false
+    },
+    "player": {
+        "desktopLyrics": false,
+        "repeatState": 0,
+        "shuffleState": 0,
+        "volume": 100
+    }
+}

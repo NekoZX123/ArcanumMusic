@@ -14,7 +14,7 @@ function timeFormat(timeSeconds: number) {
     let minute = minuteNum < 10 ? `0${minuteNum}` : `${minuteNum}`;
     let hour = hourNum < 10 ? `0${hourNum}` : `${hourNum}`;
 
-    var result = '';
+    let result: string;
     if (hourNum > 0) {
         result = `${hour}:${minute}:${second}`;
     }
@@ -43,7 +43,18 @@ class Player {
     // 当前歌曲信息
     name: string;
     authors: string;
-    coverUrl: string;
+    private _coverUrl: string;
+    get coverUrl(): string {
+        return this._coverUrl;
+    }
+    set coverUrl(value: string) {
+        if (this._coverUrl !== value) {
+            this._coverUrl = value;
+            // 封面链接改变事件
+            const event = new CustomEvent('cover-background-reload', { detail: value });
+            window.dispatchEvent(event);
+        }
+    }
 
     // 时间信息
     duration: number;
@@ -86,7 +97,7 @@ class Player {
 
         this.name = '未在播放';
         this.authors = '';
-        this.coverUrl = './images/player/testAlbum.png';
+        this._coverUrl = './images/player/testAlbum.png';
 
         this.playedTime = 0;
         this.duration = 1;
@@ -149,7 +160,7 @@ class Player {
         playerElem.currentTime = time;
 
         if (check) {
-            this.checkNextSong('setProgess');
+            this.checkNextSong();
         }
     }
 
@@ -164,7 +175,7 @@ class Player {
         if (value < 0) value = 0;
         if (value > 100) value = 100;
 
-        let level = 0;
+        let level: number;
 
         if (value === 0) level = 1;
         else if (value > 0 && value <= 33) level = 2;
@@ -276,6 +287,7 @@ class Player {
     /**
      * 播放指定歌曲
      * @param songInfo 歌曲信息
+     * @param addToHistory
      */
     playAudio(songInfo: any, addToHistory: boolean = true) {
         console.log(`[Debug] Playing: ${JSON.stringify(songInfo)}`);
@@ -288,6 +300,7 @@ class Player {
 
         this.playlist.current = songInfo;
 
+        // 获取歌曲链接
         getSongLink(songInfo.id)
         .then((infoObject) => {
             const playInfo = {
@@ -342,10 +355,24 @@ class Player {
                 this.url = playInfo.url;
             }
 
-            this.playStateImage = './images/player/pause.dark.svg';
-            this.syncPlayStateImage();
-            this.isPlaying = true;
+            // 开始播放
+            const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+            if (!playerElem) {
+                console.error('[Error] Player element not found');
+                return;
+            }
 
+            // 设置播放按钮图片
+            const startPlaying = () => {
+                playerElem.play();
+                this.isPlaying = true;
+
+                this.playStateImage = './images/player/pause.dark.svg';
+                this.syncPlayStateImage();
+            }
+            // 音频准备完成后播放
+            playerElem.addEventListener('canplay', startPlaying, { once: true });
+            
             // 更新歌词
             const lyricsEvent = new CustomEvent('update-lyrics');
             window.dispatchEvent(lyricsEvent);
@@ -365,11 +392,11 @@ class Player {
     /**
      * 检查播放状态并切换下一首
      */
-    checkNextSong(caller?: any) {
+    checkNextSong() {
         // console.log(this.playedTime, this.duration);
         if (this.playedTime >= this.duration) {
             console.log(`[Debug] Song playing finished, changing to next song...`);
-            this.nextSong(caller);
+            this.nextSong();
         }
     }
 
@@ -426,8 +453,7 @@ class Player {
     /**
      * 播放下一首
      */
-    nextSong(caller?: any) {
-        console.log(caller);
+    nextSong() {
         // 末端曲目播放完成
         if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0 
             && this.repeatState === 0 && this.shuffleState === 0) {

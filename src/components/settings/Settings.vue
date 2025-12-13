@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { createApp, onMounted } from 'vue';
+import { createApp, onMounted, ref } from 'vue';
 
 import { AccountCard } from '../../assets/widgets/Account.tsx';
 import { HeadersText, NodeBlock, CheckBox, ColorPicker, Slider, TextInput, Dropbox } from '../../assets/widgets/Settings.tsx';
@@ -7,13 +7,15 @@ import { HeadersText, NodeBlock, CheckBox, ColorPicker, Slider, TextInput, Dropb
 import './settingsStyle.css';
 import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
 import { showNotify } from '../../assets/notifications/Notification.ts';
+import {setConfig} from "../../assets/utilities/configLoader.ts";
+import { getThemeConfig, setControlBarTheme, setThemeColor, setWindowBackground, type colorThemeName } from '../../assets/effects/themeControl.ts';
 
 // 设置页面及内容
 let settingsPage, settings: any;
 
 /* 树形结构组件点击 */
 // 当前选中节点
-var currentPageId = '';
+let currentPageId = '';
 
 function setCurrentPage(pageId: string) {
     // console.log(`${currentPageId}; ${pageId}`);
@@ -67,7 +69,7 @@ function toggleExpand(event: any) {
 }
 
 // 创建页面
-var settingsContent: any; // 设置内容区域
+let settingsContent: any; // 设置内容区域
 const optionTypes = ['checkbox', 'colorpicker', 'slider', 'textinput', 'dropbox', 'account']; // 设置项目类型
 const decorationTypes = ['info', 'warning', 'image', 'link', 'label']; // 装饰元素类型
 
@@ -489,29 +491,71 @@ function saveChanges(_: MouseEvent) {
     
     window.electron.getAppData()
         .then((appDataPath: string) => {
+            // 部分设置立即生效
+            // 开机自启
+            const autoLaunchFlag = settings.generic.system.start.startOnBoot;
+            window.electron.setAutoLaunch(autoLaunchFlag);
+
+            // 颜色主题及深色模式
+            const themeList: colorThemeName[] = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+            const colorIndex = settings.generic.appearance.colors.themeColor;
+            const themeColor = themeList[colorIndex];
+            const darkEnabled = parseInt(settings.generic.appearance.colors.darkMode);
+            const windowBackgroundMode: any = parseInt(settings.generic.appearance.colors.backgroundColor);
+            
+            setThemeColor(themeColor, darkEnabled);
+
+            setWindowBackground(windowBackgroundMode);
+
+            refreshModifyImage();
+
+            // 窗口标题栏显示主题色
+            const showColorInBorders = settings.generic.appearance.colors.showColorInBorders;
+            setControlBarTheme(showColorInBorders);
+
+            // 保存设置文件
             console.log(appDataPath);
-            const targetFile = `${appDataPath}\\ArcanumMusic_data\\settings.json`;
+            const targetFile = `${appDataPath}/ArcanumMusic_data/settings.json`;
 
             window.electron.writeLocalFile(targetFile, settingsText);
 
             showNotify('arcanummusic.settings.filemodify', 'success', '设置已保存', '设置文件已保存');
+
+            // 重新加载设置文件
+            setConfig(modifiedSettings);
         });
+}
+
+// 保存 / 丢弃更改图片路径
+const saveButtonImage = ref('./images/fileControl/save.svg');
+const discardButtonImage = ref('./images/fileControl/discard.svg');
+
+/**
+ * 更新保存 / 丢弃更改图片路径
+ */
+function refreshModifyImage() {
+    const theme = getThemeConfig();
+
+    saveButtonImage.value = `./images/fileControl/save${theme.darkEnabled ? '.dark' : ''}.svg`;
+    discardButtonImage.value = `./images/fileControl/discard${theme.darkEnabled ? '.dark' : ''}.svg`;
 }
 
 onMounted(async () => {
     settingsContent = document.getElementById('settingsContent') as HTMLElement;
 
     // 获取设置页面
-    const pageReader = new XMLHttpRequest();
-    let appEnv = await window.electron.getAppEnvironment(), asarPath = '';
-    if (appEnv !== 'dev') {
-        asarPath = await window.electron.getAsarLocation();
+    let appEnv = await window.electron.getAppEnvironment();
+    let asarPath = await window.electron.getAsarLocation();
+    if (appEnv === 'dev') {
+        asarPath += '/public';
+    }
+    else {
         asarPath += '/dist';
     }
-    pageReader.open('GET', `${asarPath}/data/AppSettings.xml`, false);
-    pageReader.overrideMimeType('text/xml;charset=UTF-8');
-    pageReader.send(null);
-    settingsPage = pageReader.responseXML;
+    const pagePath = `${asarPath}/data/AppSettings.xml`;
+    const pageStructureString: string = await window.electron.readLocalFile(pagePath);
+    const parser = new DOMParser();
+    settingsPage = parser.parseFromString(pageStructureString, 'text/xml');
     // console.log(settingsPage);
 
     // 读取设置内容
@@ -531,6 +575,15 @@ onMounted(async () => {
         }
     });
 
+    // 保存 / 丢弃更改按钮图片
+    refreshModifyImage();
+
+    // 处理系统深色模式变化
+    const darkModeCheckList = window.matchMedia('(prefers-color-scheme:dark)');
+    darkModeCheckList.addEventListener('change', () => setTimeout(() => {
+        refreshModifyImage();
+    }, 100));
+
     console.log('Settings.vue loaded');
 });
 </script>
@@ -544,7 +597,7 @@ onMounted(async () => {
                     <div class="treeNode expandable" id="initialNode">
                         <div class="nodeContent">
                             <i class="nodeExpandButton">
-                                <img src="/images/windowControl/treeExpand.svg" class="nodeExpandImage" alt="">
+                                <img src="/images/windowControl/treeExpand.svg" class="outlineImage nodeExpandImage" alt="">
                             </i>
                             <label class="nodeLabel">NodeLabel</label>
                         </div>
@@ -560,11 +613,11 @@ onMounted(async () => {
         <!-- 设置更改保存及丢弃 -->
         <div class="flex row" id="changesControl">
             <button class="changesOption" id="discardButton" @click="discardChanges">
-                <img src="/images/fileControl/discard.svg"></img>
+                <img :src="discardButtonImage" alt="Discard"/>
                 <label class="text small bold">丢弃</label>
             </button>
             <button class="changesOption" id="saveButton" @click="saveChanges">
-                <img src="/images/fileControl/save.svg"></img>
+                <img :src="saveButtonImage" alt="Save"/>
                 <label class="text small bold">保存</label>
             </button>
         </div>

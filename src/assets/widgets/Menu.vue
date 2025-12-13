@@ -16,7 +16,7 @@ const MenuItem = defineComponent({
     setup(props: { id: string, icon: string, text: string, onClick: Function }) {
         return () => (
             <button class="menuItem flex row" id={props.id} onClick={(event) => props.onClick(event)}>
-                <img class="menuIcon" src={props.icon}></img>
+                <img class="menuIcon outlineImage" src={props.icon}></img>
                 <label class="text ultraSmall menuText">{props.text}</label>
             </button>
         );

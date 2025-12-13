@@ -14,9 +14,10 @@
     width: 100%;
     height: 3rem;
 
-    background: var(--default-lightgrey);
+    background: var(--interface-transparent-grey);
     border: none;
     border-radius: 1.5rem;
+    backdrop-filter: blur(4px);
 
     padding-left: 1rem;
     padding-right: 3px;
@@ -32,13 +33,16 @@
 
     background: transparent;
     border: none;
-    color: var(--default-black);
+    color: var(--interface-foreground);
 
     font-size: 15pt;
 
     outline: none;
 
     flex: 1 0;
+}
+#searchBar::-webkit-input-placeholder {
+    color: var(--interface-foreground);
 }
 #searchClear {
     opacity: 0;
@@ -49,7 +53,7 @@
     opacity: 1;
 }
 #searchBarContainer:has(#searchBar:focus) {
-    background: var(--color-blue-light);
+    background: var(--theme-color-light);
 }
 #searchBarContainer > button {
     width: calc(3rem - 6px);
@@ -97,7 +101,7 @@
     width: 6rem;
     height: 2.5rem;
 
-    background: var(--default-lightgrey);
+    background: var(--interface-transparent-grey);
     border: none;
     border-radius: 8px;
 
@@ -108,15 +112,15 @@
     transition: all 200ms ease-in-out;
 }
 .listButton:hover {
-    background: var(--color-blue-light);
+    background: var(--theme-color-light);
     transform: scale(1.1);
 }
 .listButton > label {
-    color: var(--default-black);
+    color: var(--interface-foreground);
     transition: all 200ms ease-in-out;
 }
 .listButton:hover > label {
-    color: var(--color-blue-deep);
+    color: var(--theme-color-deep);
 }
 
 #loadMoreButton {

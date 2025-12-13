@@ -1,83 +1,66 @@
 import { app, BrowserWindow, ipcMain, Menu, shell, Tray, clipboard } from 'electron';
 import { fileURLToPath } from 'url';
-import { copyFileSync, mkdir } from 'fs';
 import { userInfo } from 'os';
+import pkg from 'auto-launch';
+const AutoLaunch = pkg;
+
 import { startService, stopService } from './service.js';
-import { startWebSocket } from './webSocket.js';
+// import { startWebSocket } from './webSocket.js';
 import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
-import { deleteCookies, validateCookieExpiration, listenForCookie } from './accountHelper.js';
+import { deleteCookies, validateCookieExpiration, listenForCookie, prepareAccountStorage } from './accountHelper.js';
+import { getAppData, getEnvironment } from './globalUtils.js';
+import { getAppConfig, getUserPreferences, writeUserPreferences } from "./configHelper.js";
 
 const __dirname = fileURLToPath(import.meta.url);
 
-// const environment = 'dev';
-const environment = 'build-kyrios-internal';
+const environment = getEnvironment();
 let tray;
 let mainWindow = null;
 
-// 获取应用配置
-async function getAppConfig() {
-    let prefix = getAppData();
-    let confPath = prefix + '\\ArcanumMusic_data\\settings.json';
+// 开机自启控制器
+const autoLauncher = new AutoLaunch({
+    name: 'Arcanum Music'
+});
+// 确保正确设置开机自启
+async function ensureAutoLaunchState(state) {
+    const isAutoLaunch = await autoLauncher.isEnabled();
 
-    let fileExist = await isFileExist(null, confPath);
-    // console.log(confPath, fileExist);
-    if (!fileExist) {
-        let asarFolder = (environment === 'dev' ? 'public' : 'dist');
-        let defaultPath = __dirname.replace('app\\app.js', `${asarFolder}/data/settings.json`);
-
-        let configDir = confPath.substring(0, confPath.lastIndexOf('\\'));
-        await new Promise((resolve, reject) => {
-            mkdir(configDir, { recursive: true }, (err) => {
-                if (err) {
-                    console.error('[Error] Directory creation failed: ', err);
-                    reject(err);
-                } else {
-                    copyFileSync(defaultPath, confPath);
-                    resolve();
-                }
-            });
-        });
+    if (state && !isAutoLaunch) { // 启用开机自启
+        console.log('[Debug] Auto launch enabled');
+        autoLauncher.enable();
     }
-
-    return await readLocalFile(null, confPath);
-}
-
-// 创建 / 获取账号数据存放目录
-async function prepareAccountStorage() {
-    let prefix = getAppData();
-    let accountPath = prefix + '\\ArcanumMusic_data\\accounts\\accounts.json';
-
-    let fileExist = await isFileExist(null, accountPath);
-    if (!fileExist) {
-        let configDir = accountPath.substring(0, accountPath.lastIndexOf('\\'));
-        await new Promise((resolve, reject) => {
-            mkdir(configDir, { recursive: true }, (err) => {
-                if (err) {
-                    console.error('[Error] Directory creation failed: ', err);
-                    reject(err);
-                } else {
-                    resolve();
-                }
-            });
-        });
+    if (!state && isAutoLaunch) { // 禁用开机自启
+        console.log('[Debug] Auto launch disabled');
+        autoLauncher.disable();
     }
-
-    return accountPath;
 }
 
 // 创建主窗口
-function createMainWindow() {
+async function createMainWindow() {
     prepareAccountStorage();
-    const configLoad = getAppConfig();
+    const config = await getAppConfig();
+    const configObject = JSON.parse(config);
+
+    const preferenceText = await getUserPreferences();
+    const userPreferences = JSON.parse(preferenceText);
+
+    // 开机自启判断
+    const autoLaunchFlag = configObject.generic.system.start.startOnBoot;
+    ensureAutoLaunchState(autoLaunchFlag);
+    // 是否使用系统边框
+    const windowFrame = configObject.generic.appearance.window.useSystemFrame;
+
+    // 窗口偏好设置
+    const windowOptions = userPreferences.window;
 
     // checkCookieExpired();
 
     mainWindow = new BrowserWindow({
-        width: 1000,
-        height: 650,
+        width: windowOptions.width,
+        height: windowOptions.height,
         minWidth: 900,
         minHeight: 500,
-        frame: false,
+        frame: windowFrame,
         resizable: true,
         focusable: true,
         skipTaskbar: false,
@@ -91,6 +74,10 @@ function createMainWindow() {
         }
     });
 
+    if (windowOptions.isMaximized) {
+        mainWindow.maximize();
+    }
+
     if (environment === 'dev') {
         mainWindow.loadURL('http://localhost:5173');
     }
@@ -98,7 +85,7 @@ function createMainWindow() {
         mainWindow.loadFile('dist/index.html');
     }
 
-    // 防止窗口残留
+    // 关闭主窗口时防止窗口残留
     mainWindow.on('closed', () => {
         const windowList = BrowserWindow.getAllWindows();
         windowList.forEach((window) => {
@@ -106,22 +93,18 @@ function createMainWindow() {
         });
     });
     
-    configLoad.then((config) => {
-        const configObject = JSON.parse(config);
+    if (configObject.developerOptions.application.devtoolsOnLaunched) { // 启动时打开开发者工具
+        mainWindow.webContents.openDevTools();
+    }
 
-        if (configObject.developerOptions.application.devtoolsOnLaunched) { // 启动时打开开发者工具
-            mainWindow.webContents.openDevTools();
-        }
-
-        if (!configObject.developerOptions.application.enableDevtoolsHotkey){ // 根据设置禁用 DevTools 快捷键
-            mainWindow.webContents.on('before-input-event', (event, input) => {
-                if (input.key === 'I' && input.control && input.shift && !input.meta && !input.alt) {
-                    console.log('[Debug] Due to user settings, DevTools launch request rejected');
-                    event.preventDefault();
-                }
-            });
-        }
-    });
+    if (!configObject.developerOptions.application.enableDevtoolsHotkey){ // 根据设置禁用 DevTools 快捷键
+        mainWindow.webContents.on('before-input-event', (event, input) => {
+            if (input.key === 'I' && input.control && input.shift && !input.meta && !input.alt) {
+                console.log('[Debug] Due to user settings, DevTools launch request rejected');
+                event.preventDefault();
+            }
+        });
+    }
 }
 
 // 新建窗口
@@ -217,11 +200,18 @@ function moveWindow(_, x, y) {
     }
 }
 
-/**
- * 获取 %AppData%
- */
-function getAppData(_) {
-    return app.getPath('appData');
+async function savePreferences(_, pref) {
+    const preference = pref;
+
+    const config = JSON.parse(await getAppConfig());
+    if (!config.generic.appearance.window.rememberSize) {
+        preference.window.width = 1000;
+        preference.window.height = 650;
+        preference.window.isMaximized = false;
+    }
+    // console.log(`[Debug] Preferences: ${JSON.stringify(preference)}`);
+
+    await writeUserPreferences(JSON.stringify(preference));
 }
 
 app.whenReady().then(() => {
@@ -240,6 +230,8 @@ app.whenReady().then(() => {
     ipcMain.handle('writeLocalFile', writeLocalFile);
 
     ipcMain.handle('getAppConfig', getAppConfig);
+    ipcMain.handle('getPreference', getUserPreferences);
+    ipcMain.handle('writePreference', savePreferences);
     ipcMain.handle('getAppEnvironment', () => environment);
     ipcMain.handle('getAppData', () => getAppData());
     ipcMain.handle('getAsarLocation', () => {console.log(app.getAppPath()); return app.getAppPath()});
@@ -251,6 +243,7 @@ app.whenReady().then(() => {
 
     ipcMain.handle('openExternal', (_, url) => shell.openExternal(url));
     ipcMain.handle('copyContent', (_, content) => clipboard.writeText(content));
+    ipcMain.handle('setAutoLaunch', (_, isEnabled) => ensureAutoLaunchState(isEnabled));
 
     // 启动服务
     startService(environment);

@@ -1,32 +1,36 @@
 // Electron API 声明
 
 export interface IElectronAPI {
-    createWindow: (title: String, url: String, options?: any) => Promise,
-    minimizeWindow: () => Promise,
-    toggleMaximize: () => Promise,
-    closeWindow: () => Promise,
-    setAlwaysOnTop: (id, flag) => Promise,
-    closeWindowById: (windowId: Number) => Promise,
+    createWindow: (title: String, url: String, options?: any) => Promise<number>,
+    minimizeWindow: () => Promise<void>,
+    toggleMaximize: () => Promise<boolean>,
+    closeWindow: () => Promise<void>,
+    setAlwaysOnTop: (id: number, flag: boolean) => Promise<void>,
+    closeWindowById: (windowId: Number) => Promise<void>,
     
-    getWindowRect: () => Promise,
-    moveWindow: (x: Number, y: Number) => Promise,
+    getWindowRect: () => Promise<{x: number, y: number, width: number, height: number}>,
+    moveWindow: (x: Number, y: Number) => Promise<void>,
 
-    isFileExist: (path: String) => Promise,
-    readLocalFile: (path: String) => Promise,
-    writeLocalFile: (path: String, content: String) => Promise,
+    isFileExist: (path: String) => Promise<boolean>,
+    readLocalFile: (path: String) => Promise<string>,
+    writeLocalFile: (path: String, content: String) => Promise<void>,
 
-    getAppConfig: () => Promise,
-    getAppData: () => Promise,
-    getAppEnvironment: () => Promise,
-    getAsarLocation: () => Promise,
-    getUserName: () => Promise,
+    getAppConfig: () => Promise<string>,
+    getUserPreference: () => Promise<string>,
+    writeUserPreferences: (pref: string) => Promise<void>,
+    
+    getAppData: () => Promise<string>,
+    getAppEnvironment: () => Promise<string>,
+    getAsarLocation: () => Promise<string>,
+    getUserName: () => Promise<string>,
 
-    listenCookie: (windowId: Number, targetCookies: String[]) => Promise,
-    validateCookie: (platform: string) => Promise,
-    deleteCookies: (platform: string) => Promise,
+    listenCookie: (windowId: Number, targetCookies: String[]) => Promise<any>,
+    validateCookie: (platform: string) => Promise<any>,
+    deleteCookies: (platform: string) => Promise<void>,
 
-    openExternal: (url: String) => Promise,
-    copyToClipboard: (content: String) => Promise
+    openExternal: (url: String) => Promise<void>,
+    copyToClipboard: (content: String) => Promise<void>,
+    setAutoLaunch: (isEnabled: boolean) => Promise<void>
 }
 
 declare global {

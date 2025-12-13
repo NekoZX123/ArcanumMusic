@@ -1,24 +1,33 @@
 #lyricsPanel {
     height: 100%;
 
-    /* background: linear-gradient(45deg, var(--color-blue-light), var(--color-green-light)); */
-
     align-items: center;
 }
 
-/* 动态背景 */
-#dynamicBackgroundContainer{
+/* 背景 */
+#backgroundContainer{
     width: 100%;
     height: 100%;
     position: absolute;
 
-    background: transparent;
+    background-image: transparent;
+    background-size: cover;
+    background-position: center;
 
     z-index: -1;
 }
 #dynamicBackground {
     width: 100%;
     height: 100%;
+}
+#backgroundBlurMask {
+    width: 100%;
+    height: 100%;
+
+    background: transparent;
+    backdrop-filter: 
+        blur(24px)
+        brightness(0.85);
 }
 
 /* 顶栏 */
@@ -59,23 +68,29 @@
     width: 100%;
     height: calc(100vh - 5rem);
 
+    padding: 0 5%;
+
     justify-content: space-evenly;
     align-items: center;
 }
 
 #controller {
-    width: 30rem;
+    width: 40%;
 
     align-items: center;
 }
 
 /* 歌曲信息 */
 #songInfo {
+    width: 100%;
+    height: 60%;
+
     align-items: center;
+    justify-content: center;
 }
 #songCover {
-    width: 18rem;
-    height: 18rem;
+    width: 70%;
+    height: 70%;
 
     border: none;
     border-radius: 12px;
@@ -83,8 +98,12 @@
 
     margin: 1rem 0;
 }
+#playerInfo {
+    width: 100%;
+    height: 30%;
+}
 #lyricsPageSongNameContainer {
-    width: 13rem;
+    max-width: 15rem;
     height: 24pt;
 
     margin-left: 3px;
@@ -123,8 +142,11 @@
 }
 
 #playerInfo {
-    justify-content: space-between;
+    justify-content: space-evenly;
     align-items: center;
+}
+#playerInfo > * {
+    margin: 0 4px;
 }
 
 /* 音量调整 */
@@ -138,6 +160,8 @@
     border: none;
     border-radius: 1rem;
 
+    margin-right: 4px;
+
     transition: all 200ms ease-in-out;
 }
 #toggleMute > img {
@@ -147,6 +171,19 @@
 
     left: -2px;
     top: 2px;
+}
+#toggleMute::before {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 1px;
+    position: relative;
+    left: 50%;
+    top: 50%;
+    
+    box-shadow: 0 0 12px 4px var(--default-white);
+
+    z-index: -1;
 }
 #toggleMute:hover {
     background: var(--transparent-grey);
@@ -183,7 +220,9 @@
 
 /* 播放器控制 */
 #playerControl {
-    margin: 1rem 0;
+    width: 100%;
+    height: 40%;
+    margin: 8px 0;
 
     align-items: center
 }
@@ -228,14 +267,11 @@
 /* 歌词 */
 #lyricsContent {
     min-width: 30rem;
-    max-width: calc(100% - 30rem);
+    width: 55%;
     height: 100%;
 
     justify-content: left;
-
-    padding-top: 25%;
-    padding-bottom: 25%;
-    padding-right: 3rem;
+    margin-left: 5%;
 
     overflow-x: hidden;
     overflow-y: auto;
@@ -244,6 +280,7 @@
     display: none;
 }
 
+/* 歌词容器框 */
 .lyricsBox {
     max-width: 100%;
 
@@ -254,23 +291,39 @@
     border: none;
     border-radius: 15px;
 
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
     transition: all 300ms ease-in-out;
 }
 .lyricsBox:hover {
     background: var(--transparent-grey);
 }
 .lyricsBox > ul {
-    color: var(--transparent-grey);
+    text-align: left;
 
-    text-shadow: 0 0 2px var(--transparent-grey);
+    margin: 2px 0;
+}
+.lyricsBox > ul {
+    color: var(--transparent-grey);
 
     transition: all 300ms ease-in-out;
 }
 .lyricsBox.focused > ul {
     color: var(--default-white);
-
+}
+/* 发光效果 */
+.lyricsBox.glow > ul {
+    text-shadow: 0 0 2px var(--transparent-grey);
+}
+.lyricsBox.glow.focused > ul {
     text-shadow: 0 0 3px var(--default-white);
 }
-.lyricsBox > ul {
-    margin: 0;
+/* 简约样式 */
+.lyricsBox.lite {
+    align-items: center;
+}
+.lyricsBox.lite > ul {
+    text-align: center;
 }

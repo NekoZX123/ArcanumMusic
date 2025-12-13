@@ -12,7 +12,7 @@ import { addSonglistCard, addSongCard, addArtistCard } from '../../assets/utilit
 import type { AxiosResponse } from 'axios';
 import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
 import { getPlayer } from '../../assets/player/player.ts';
-import { getMainColors } from '../../assets/utilities/colorUtils.ts';
+import { getMainColors } from '../../assets/effects/colorUtils.ts';
 
 // 默认滑动量
 const BOX_SCROLL_DISTANCE = 330;
@@ -89,6 +89,8 @@ onMounted(() => {
 
             getMainColors(imgUrl, 2)
             .then((colors: any) => {
+                if (colors.length < 2) colors[1] = colors[0];
+                
                 const [gradientColor1, gradientColor2] = colors;
 
                 const radioBox = document.getElementById('musicRadio');
@@ -351,11 +353,11 @@ onMounted(() => {
         </div>
         <div class="flex row horizontalScroll">
             <button class="scrollerButton" @click="scrollLeft">
-                <img src="/images/arrows/left.svg"></img>
+                <img class="outlineImage" src="/images/arrows/left.svg"></img>
             </button>
             <div class="nowrapBox" id="songlistRecommends"></div>
             <button class="scrollerButton" @click="scrollRight">
-                <img src="/images/arrows/right.svg"></img>
+                <img class="outlineImage" src="/images/arrows/right.svg"></img>
             </button>
         </div>
         
@@ -380,11 +382,11 @@ onMounted(() => {
         </div>
         <div class="flex row horizontalScroll">
             <button class="scrollerButton" @click="scrollLeft">
-                <img src="/images/arrows/left.svg"></img>
+                <img class="outlineImage" src="/images/arrows/left.svg"></img>
             </button>
             <div class="flex row nowrapBox" id="artistRecommends"></div>
             <button class="scrollerButton" @click="scrollRight">
-                <img src="/images/arrows/right.svg"></img>
+                <img class="outlineImage" src="/images/arrows/right.svg"></img>
             </button>
         </div>
 
@@ -398,11 +400,11 @@ onMounted(() => {
         </div>
         <div class="flex row horizontalScroll">
             <button class="scrollerButton" @click="scrollLeft">
-                <img src="/images/arrows/left.svg"></img>
+                <img class="outlineImage" src="/images/arrows/left.svg"></img>
             </button>
             <div class="flex row nowrapBox" id="rankings"></div>
             <button class="scrollerButton" @click="scrollRight">
-                <img src="/images/arrows/right.svg"></img>
+                <img class="outlineImage" src="/images/arrows/right.svg"></img>
             </button>
         </div>
 
@@ -416,11 +418,11 @@ onMounted(() => {
         </div>
         <div class="flex row horizontalScroll">
             <button class="scrollerButton" @click="scrollLeft">
-                <img src="/images/arrows/left.svg"></img>
+                <img class="outlineImage" src="/images/arrows/left.svg"></img>
             </button>
             <div class="flex row nowrapBox" id="newAlbums"></div>
             <button class="scrollerButton" @click="scrollRight">
-                <img src="/images/arrows/right.svg"></img>
+                <img class="outlineImage" src="/images/arrows/right.svg"></img>
             </button>
         </div>
 
@@ -437,7 +439,7 @@ onMounted(() => {
         <!-- 页面底部 -->
         <div class="flex column" id="pageFooter">
             <label class="text small grey" id="footerText">-----&nbsp;已到达页面底部&nbsp;-----</label>
-            <label class="text small grey">Arcanum Music v1.2.1-Kyrios (Internal)</label>
+            <label class="text small grey">Arcanum Music v1.6.5-Kyrios (Internal)</label>
             <label class="text small grey">Made by NekoZX123</label>
             <label class="text ultraSmall grey">Licensed under Apache-2.0 license</label>
             <label class="text ultraSmall grey">仅供学习交流使用, 不得用于商业用途</label>

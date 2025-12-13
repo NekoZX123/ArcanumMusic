@@ -161,7 +161,7 @@ onUnmounted(() => {
 <template>
     <div class="flex column" id="desktopLyrics">
         <!-- 窗口标题栏 -->
-        <div class="flex row" id="windowControlBar" 
+        <div class="flex row" id="captionsControlBar" 
             @mousedown="titlebarMouseDown" @mousemove="titlebarMouseMove" @mouseup="titlebarMouseUp">
             <span class="flex column" id="windowDragCaptions"></span>
         </div>

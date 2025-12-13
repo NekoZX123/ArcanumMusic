@@ -91,7 +91,7 @@
     transition: all 200ms ease-in-out;
 }
 #musicSource:hover {
-    background: var(--color-blue-light);
+    background: var(--theme-color-light);
 }
 
 #userLists {

@@ -633,11 +633,11 @@ onMounted(() => {
             </div>
             <div class="flex row" id="albums">
                 <button class="scrollerButton" @click="scrollLeft">
-                    <img src="/images/arrows/left.svg"></img>
+                    <img class="outlineImage" src="/images/arrows/left.svg"></img>
                 </button>
                 <div class="flex row artistWorksBox" id="hotAlbums"></div>
                 <button class="scrollerButton" @click="scrollRight">
-                    <img src="/images/arrows/right.svg"></img>
+                    <img class="outlineImage" src="/images/arrows/right.svg"></img>
                 </button>
             </div>
         </div>

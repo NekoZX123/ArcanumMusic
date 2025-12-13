@@ -20,7 +20,7 @@ const PageButton = defineComponent({
     setup(props: { id: string, icon: string, text: string }) {
         return () => (
             <button class="pageButton" id={props.id} onClick={onTabChange}>
-                <img class="pageSwitcherImg" src={props.icon}></img>
+                <img class="pageSwitcherImg outlineImage" src={props.icon}></img>
                 <label class="text small">{props.text}</label>
             </button>
         );

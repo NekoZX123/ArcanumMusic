@@ -51,7 +51,7 @@ onMounted(() => {
                 <span class="text ultraSmall">{{ props.content }}</span>
             </span>
             <span class="notifyClose">
-                <img src="/images/windowControl/close.svg" />
+                <img class="outlineImage" src="/images/windowControl/close.svg" />
             </span>
         </div>
         <div class="notifyCountDown">

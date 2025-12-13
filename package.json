@@ -2,14 +2,14 @@
     "name": "arcanummusic",
     "author": {
         "name": "NekoZX123",
-        "email": "guess@whoiam.qwq",
+        "email": "nekozx123@outlook.com",
         "url": "https://github.com/NekoZX123"
     },
     "description": "Arcanum Music",
     "homepage": "https://github.com/NekoZX123/ArcanumMusic",
     "license": "Apache-2.0",
     "private": true,
-    "version": "1.2.1",
+    "version": "1.6.5",
     "type": "module",
     "main": "app/app.js",
     "devtron": true,
@@ -21,16 +21,11 @@
         "electron:build": "npm run build && electron-builder build --config electron-builder.json"
     },
     "dependencies": {
+        "auto-launch": "^5.0.6",
         "axios": "^1.7.9",
         "cors": "^2.8.5",
-        "crypto-js": "^4.2.0",
-        "cryptojs": "^2.5.3",
         "express": "^4.21.2",
-        "node-fetch": "^3.3.2",
-        "uuid": "^11.1.0",
-        "vue": "^3.5.13",
-        "websocket": "^1.0.35",
-        "ws": "^8.18.3"
+        "node-fetch": "^3.3.2"
     },
     "devDependencies": {
         "@types/crypto-js": "^4.2.2",
