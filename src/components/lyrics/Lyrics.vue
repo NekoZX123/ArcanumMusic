@@ -277,14 +277,16 @@ function updateBackground(_?: any) {
  */
 function togglePlayPauseInLyrics(_: MouseEvent) {
     const musicPlayer = getPlayer();
-    if (!musicPlayer || !particleSystem) return;
+    if (!musicPlayer) return;
     musicPlayer.togglePlayPause();
 
-    if (musicPlayer.isPlaying) {
-        particleSystem.startAnimation();
-    }
-    else {
-        particleSystem.stopAnimation();
+    if (particleSystem) {
+        if (musicPlayer.isPlaying) {
+            particleSystem.startAnimation();
+        }
+        else {
+            particleSystem.stopAnimation();
+        }
     }
 }
 
