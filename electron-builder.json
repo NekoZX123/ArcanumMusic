@@ -41,6 +41,16 @@
                 "arch": ["x64"]
             }
         ],
-        "icon": "./public/appIcon/ArcanumMusic.png"
+        "icon": "./public/appIcon/ArcanumMusic.png",
+        "synopsis": "Arcanum Music - A multiplatform music application",
+        "category": "Audio;Music",
+        "desktop": {
+            "Name": "Arcanum Music",
+            "Icon": "./public/appIcon/ArcanumMusic.png",
+            "Comment": "A multiplatform music application",
+            "Type": "Application",
+            "Category": "Audio;Music",
+            "Keywords": "music;audio;arcanummusic"
+        }
     }
 }
