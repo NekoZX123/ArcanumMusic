@@ -301,11 +301,12 @@ function limitAuthorsTextLength(authors: string) {
 }
 
 // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
-const allowedIdentifiers = ['moe.nekozx.arcanummusic.desktoplyrics'];
+const allowedIdentifiers = ['moe.nekozx.arcanummusic.desktoplyrics', 'moe.nekozx.arcanummusic.contextmenu'];
 function handleStorageData (updateEvent: StorageEvent) {
     if (updateEvent.key === 'playerSignal' && updateEvent.newValue) {
         const eventObject = JSON.parse(updateEvent.newValue);
         const eventName = eventObject.eventName;
+        console.log(`[Debug] Event triggered: name = ${eventName}; content = ${eventObject.message}`);
         if (!allowedIdentifiers.includes(eventObject.message)) {
             console.error(`[Error] Unidentified identifier ${eventObject.message}`);
             return;
@@ -433,7 +434,8 @@ onMounted(async () => {
     });
 
     // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
-    window.addEventListener('storage', handleStorageData);
+    // 通过 `onstorage` 赋值以方便从 Electron 主进程调用
+    window.onstorage = handleStorageData;
 
     // 关闭窗口时保存偏好数据
     window.addEventListener('close', savePreferences);

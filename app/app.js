@@ -214,6 +214,22 @@ async function savePreferences(_, pref) {
     await writeUserPreferences(JSON.stringify(preference));
 }
 
+/**
+ * 向主窗口播放器发送消息 (通过 localStorage)
+ * @param {*} signal string - 消息名称
+ */
+function sendPlayerSignal(signal) {
+    if (!mainWindow) return;
+
+    // 仿制 Storage 对象
+    mainWindow.webContents.executeJavaScript(`
+    window.onstorage({
+        key: 'playerSignal', 
+        newValue: JSON.stringify({eventName: '${signal}', message: 'moe.nekozx.arcanummusic.contextmenu'})
+    });
+    `, true);
+}
+
 app.whenReady().then(() => {
     // 添加事件触发
     ipcMain.handle('newAppWindow', newWindow);
@@ -256,12 +272,37 @@ app.whenReady().then(() => {
     tray = new Tray(`${environment === 'dev' ? './public' : `${app.getAppPath()}/dist`}/appIcon/AppIcon.ico`);
     const menu = Menu.buildFromTemplate([
         {
+            label: '播放 / 暂停',
+            type: 'normal',
+            click: () => { sendPlayerSignal('toggle-play-pause'); }
+        },
+        {
+            label: '上一首',
+            type: 'normal',
+            click: () => { sendPlayerSignal('previous-song'); }
+        },
+        {
+            label: '下一首',
+            type: 'normal',
+            click: () => { sendPlayerSignal('next-song'); }
+        },
+        {
+            label: '循环播放',
+            type: 'normal',
+            click: () => { sendPlayerSignal('toggle-repeat'); }
+        },
+        {
+            label: '随机播放',
+            type: 'normal',
+            click: () => { sendPlayerSignal('toggle-shuffle'); }
+        },
+        {
+            type: 'separator'
+        },
+        {
             label: '退出',
             type: 'normal',
-            click: () => {
-                stopService();
-                app.quit();
-            }
+            click: () => { closeAllWindows(); }
         }
     ]);
     tray.setToolTip('Arcanum Music');
