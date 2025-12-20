@@ -220,7 +220,7 @@ onMounted(() => {
     const greetingsLanguage = config.user.localInfo.greetings.greetingsText;
     // console.log(isGrettingsEnabled, greetingsLanguage);
 
-    const choice = (greetingsLanguage === '0') ? Math.floor(Math.random() * greetList.length) : (parseInt(greetingsLanguage) - 1);
+    const choice = (parseInt(greetingsLanguage) === 0) ? Math.floor(Math.random() * greetList.length) : (parseInt(greetingsLanguage) - 1);
     greetings.value = isGrettingsEnabled ? greetList[choice] : '';
     greetingsEnd.value = isGrettingsEnabled ? greetSubfix[choice] : '\'s music';
 
