@@ -132,47 +132,66 @@ function setupPage(depth: string[], settingsObject: any) {
     }
 }
 
-// 读取当前设置
-function readCurrentSettings(depth: string[], originalSettings: any) {
-    let optionKeys = Object.keys(originalSettings);
-    let modifiedSettings: { [type: string]: any } = {};
+/**
+ * 根据页面元素读取设置
+ * @param pageElement 页面元素
+ */
+function readSettingsThroughPage(pageElement: HTMLElement) {
+    // 获取所有 <input/> <select/> 元素
+    const inputs = pageElement.getElementsByTagName('input');
+    const optionElems = [...inputs, ...pageElement.getElementsByTagName('select')];
 
-    for (let i = 0; i < optionKeys.length; i++) {
-        const optionKey = optionKeys[i];
-        const optionValue = originalSettings[optionKey];
+    const settingsObject: any = {};
 
-        depth.push(optionKey);
-        if (typeof optionValue !== 'object') {
-            let optionId = depth.join('.');
-            let element = document.getElementById(optionId) as HTMLInputElement;
-
-            if (!element) continue;
-
-            // 复选框 - 选中状态
-            if (element.getAttribute('type') === 'checkbox') {
-                modifiedSettings[optionKey] = element.checked;
+    function setSettingsValue(parseList: string[], value: any) {
+        let targetObject = settingsObject;
+        for (let i = 0; i < parseList.length - 1; i++) { // 设置对象结构
+            const key = parseList[i];
+            if (!targetObject[key]) {
+                targetObject[key] = {};
             }
-            // 颜色选择器 - 附加输入框
-            else if (element.classList.contains('colorpicker')) {
-                let colorInputBox = document.getElementById(`${optionId}_text`) as HTMLInputElement;
-                modifiedSettings[optionKey] = colorInputBox.value;
-            }
-            // 滑动条 - 附加输入框类型 & 范围限制
-            else if (element.classList.contains('slider')) {
-                let sliderInputBox = document.getElementById(`${optionId}_text`) as HTMLInputElement;
-                modifiedSettings[optionKey] = sliderInputBox.value;
-            }
-            else {
-                modifiedSettings[optionKey] = element.value;
-            }
+            targetObject = targetObject[key];
         }
-        else {
-            modifiedSettings[optionKey] = readCurrentSettings(depth, optionValue);
-        }
-        depth.pop();
+        targetObject[parseList[parseList.length - 1]] = value;
     }
 
-    return modifiedSettings;
+    optionElems.forEach((element) => {
+        const idParseList = element.id.split('.');
+
+        // 排除附属输入控件
+        if (element.classList.contains('affiliated')) {
+            return;
+        }
+
+        if (element.tagName === 'INPUT') {
+            if (element.type === 'checkbox') { // 复选框
+                const checked = element.checked;
+                setSettingsValue(idParseList, checked);
+            }
+            if (element.type === 'color') { // 颜色选择
+                const color = element.value;
+                setSettingsValue(idParseList, color);
+            }
+            if (element.type === 'range') { // 滑动条
+                const value = parseInt(element.value);
+                if (!value) {
+                    console.error(`[Error] Unknown value on slider detected: ${value} (${element.id})`);
+                    return;
+                }
+                setSettingsValue(idParseList, value);
+            }
+            if (element.type === 'text') { // 文本输入
+                const value = element.value;
+                setSettingsValue(idParseList, value);
+            }
+        }
+        if (element.tagName === 'SELECT') { // 下拉选择框
+            const index = parseInt(element.value);
+            setSettingsValue(idParseList, index);
+        }
+    });
+
+    return settingsObject;
 }
 
 // 设置页面结构
@@ -485,7 +504,13 @@ function discardChanges(_: MouseEvent) {
 }
 // 保存设置更改
 function saveChanges(_: MouseEvent) {
-    const modifiedSettings = readCurrentSettings([], settings);
+    const settingsContent = document.getElementById('settingsContent');
+    if (!settingsContent) {
+        console.error(`[Error] Failed to get settings content`);
+        return;
+    }
+
+    const modifiedSettings = readSettingsThroughPage(settingsContent);
     settings = modifiedSettings;
     const settingsText =  JSON.stringify(modifiedSettings);
     
