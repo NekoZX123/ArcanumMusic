@@ -1,5 +1,5 @@
 {
-    "name": "arcanummusic",
+    "name": "arcanum-music",
     "author": {
         "name": "NekoZX123",
         "email": "nekozx123@outlook.com",
@@ -9,7 +9,7 @@
     "homepage": "https://github.com/NekoZX123/ArcanumMusic",
     "license": "Apache-2.0",
     "private": true,
-    "version": "1.6.5",
+    "version": "1.6.6",
     "type": "module",
     "main": "app/app.js",
     "devtron": true,

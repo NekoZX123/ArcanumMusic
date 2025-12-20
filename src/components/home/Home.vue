@@ -439,7 +439,7 @@ onMounted(() => {
         <!-- 页面底部 -->
         <div class="flex column" id="pageFooter">
             <label class="text small grey" id="footerText">-----&nbsp;已到达页面底部&nbsp;-----</label>
-            <label class="text small grey">Arcanum Music v1.6.5-Kyrios (Internal)</label>
+            <label class="text small grey">Arcanum Music v1.6.6-Kyrios (Internal)</label>
             <label class="text small grey">Made by NekoZX123</label>
             <label class="text ultraSmall grey">Licensed under Apache-2.0 license</label>
             <label class="text ultraSmall grey">仅供学习交流使用, 不得用于商业用途</label>
