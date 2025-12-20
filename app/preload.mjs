@@ -8,7 +8,7 @@ contextBridge.exposeInMainWorld(
         createWindow: (title, url, options) => ipcRenderer.invoke('newAppWindow', title, url, options), // 创建新窗口
         minimizeWindow: () => ipcRenderer.invoke('minimizeWindow'), // 最小化主窗口
         toggleMaximize: () => ipcRenderer.invoke('maximizeWindow'), // 最大化 / 还原主窗口
-        closeWindow: () => ipcRenderer.invoke('closeWindow'), // 关闭主窗口
+        closeWindow: (hideToTrayFlag) => ipcRenderer.invoke('closeWindow', hideToTrayFlag), // 关闭主窗口
         getWindowRect: () => ipcRenderer.invoke('getWindowRect'), // 获取主窗口位置大小
         moveWindow: (x, y) => ipcRenderer.invoke('moveWindow', x, y), // 移动主窗口位置
         setAlwaysOnTop: (id, flag) => ipcRenderer.invoke('setAlwaysOnTop', id, flag), // 调整指定窗口是否置顶

@@ -4,7 +4,7 @@ export interface IElectronAPI {
     createWindow: (title: String, url: String, options?: any) => Promise<number>,
     minimizeWindow: () => Promise<void>,
     toggleMaximize: () => Promise<boolean>,
-    closeWindow: () => Promise<void>,
+    closeWindow: (hideToTrayFlag?: boolean) => Promise<void>,
     setAlwaysOnTop: (id: number, flag: boolean) => Promise<void>,
     closeWindowById: (windowId: Number) => Promise<void>,
     

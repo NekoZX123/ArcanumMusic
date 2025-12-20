@@ -17,6 +17,8 @@ const environment = getEnvironment();
 let tray;
 let mainWindow = null;
 
+let hideToTray = false;
+
 // 开机自启控制器
 const autoLauncher = new AutoLaunch({
     name: 'Arcanum Music'
@@ -43,6 +45,9 @@ async function createMainWindow() {
 
     const preferenceText = await getUserPreferences();
     const userPreferences = JSON.parse(preferenceText);
+
+    // 关闭主窗口时隐藏至托盘
+    hideToTray = configObject.generic.system.closeOptions.hideToTray;
 
     // 开机自启判断
     const autoLaunchFlag = configObject.generic.system.start.startOnBoot;
@@ -167,7 +172,10 @@ function setWindowTopState(_, id, flag) {
     }
 }
 
-function closeAllWindows(_) {
+/**
+ * 退出应用
+ */
+function quitApp(_) {
     // 先关闭所有非主窗口
     const windowList = BrowserWindow.getAllWindows();
     windowList.forEach((window) => {
@@ -176,6 +184,24 @@ function closeAllWindows(_) {
     
     if (mainWindow) {
         mainWindow.close();
+    }
+}
+
+/**
+ * 关闭主窗口
+ */
+function closeMainWindow(_, hideToTrayFlag) {
+    const hideToTrayIndicator = hideToTrayFlag !== undefined ? hideToTrayFlag : hideToTray;
+
+    console.log(`[Debug]\nhideToTray (Main) = ${hideToTray}\nhideToTray (Renderer) = ${hideToTrayFlag}\nhideToTray (Final) = ${hideToTrayIndicator}`);
+
+    if (hideToTrayIndicator) { // 隐藏至任务栏
+        if (mainWindow) {
+            mainWindow.hide();
+        }
+    }
+    else { // 退出应用
+        quitApp();
     }
 }
 
@@ -235,7 +261,7 @@ app.whenReady().then(() => {
     ipcMain.handle('newAppWindow', newWindow);
     ipcMain.handle('minimizeWindow', minimizeWindow);
     ipcMain.handle('maximizeWindow', toggleMaximize);
-    ipcMain.handle('closeWindow', closeAllWindows);
+    ipcMain.handle('closeWindow', closeMainWindow);
     ipcMain.handle('getWindowRect', getWindowRect);
     ipcMain.handle('moveWindow', moveWindow);
     ipcMain.handle('setAlwaysOnTop', setWindowTopState);
@@ -302,12 +328,15 @@ app.whenReady().then(() => {
         {
             label: '退出',
             type: 'normal',
-            click: () => { closeAllWindows(); }
+            click: () => { quitApp(); }
         }
     ]);
+    tray.on('click', () => {
+        if (mainWindow) mainWindow.show();
+    });
     tray.setToolTip('Arcanum Music');
     tray.setContextMenu(menu);
-})
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
