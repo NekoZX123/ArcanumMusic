@@ -17,6 +17,8 @@ const environment = getEnvironment();
 let tray;
 let mainWindow = null;
 
+let hideToTray = false;
+
 // 开机自启控制器
 const autoLauncher = new AutoLaunch({
     name: 'Arcanum Music'
@@ -44,6 +46,14 @@ async function createMainWindow() {
     const preferenceText = await getUserPreferences();
     const userPreferences = JSON.parse(preferenceText);
 
+    // 关闭主窗口时隐藏至托盘
+    if (configObject.generic.system.closeOptions) {
+        hideToTray = configObject.generic.system.closeOptions.hideToTray;
+    }
+    else {
+        hideToTray = false;
+    }
+
     // 开机自启判断
     const autoLaunchFlag = configObject.generic.system.start.startOnBoot;
     ensureAutoLaunchState(autoLaunchFlag);
@@ -54,6 +64,7 @@ async function createMainWindow() {
     const windowOptions = userPreferences.window;
 
     // checkCookieExpired();
+    const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
 
     mainWindow = new BrowserWindow({
         width: windowOptions.width,
@@ -66,7 +77,7 @@ async function createMainWindow() {
         skipTaskbar: false,
         alwaysOnTop: false,
         title: 'Arcanum Music',
-        icon: `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`,
+        icon: `${environment === 'dev' ? './' : appRootPath}/icons/AppIcon.ico`,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,
@@ -109,10 +120,12 @@ async function createMainWindow() {
 
 // 新建窗口
 function newWindow(_, title, url, options) {
+    const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
+
     let windowConfig;
     if (options) {
         windowConfig = options;
-        windowConfig.icon = `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`;
+        windowConfig.icon = `${environment === 'dev' ? './' : appRootPath}/icons/AppIcon.ico`;
         windowConfig.webPreferences = {
             nodeIntegration: true,
             contextIsolation: true,
@@ -129,7 +142,7 @@ function newWindow(_, title, url, options) {
             resizable: true,
             focusable: true,
             title: title,
-            icon: `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`,
+            icon: `${environment === 'dev' ? './' : appRootPath}/icons/AppIcon.ico`,
             webPreferences: {
                 nodeIntegration: true,
                 contextIsolation: true,
@@ -167,7 +180,10 @@ function setWindowTopState(_, id, flag) {
     }
 }
 
-function closeAllWindows(_) {
+/**
+ * 退出应用
+ */
+function quitApp(_) {
     // 先关闭所有非主窗口
     const windowList = BrowserWindow.getAllWindows();
     windowList.forEach((window) => {
@@ -176,6 +192,24 @@ function closeAllWindows(_) {
     
     if (mainWindow) {
         mainWindow.close();
+    }
+}
+
+/**
+ * 关闭主窗口
+ */
+function closeMainWindow(_, hideToTrayFlag) {
+    const hideToTrayIndicator = hideToTrayFlag !== undefined ? hideToTrayFlag : hideToTray;
+
+    console.log(`[Debug]\nhideToTray (Main) = ${hideToTray}\nhideToTray (Renderer) = ${hideToTrayFlag}\nhideToTray (Final) = ${hideToTrayIndicator}`);
+
+    if (hideToTrayIndicator) { // 隐藏至任务栏
+        if (mainWindow) {
+            mainWindow.hide();
+        }
+    }
+    else { // 退出应用
+        quitApp();
     }
 }
 
@@ -214,12 +248,28 @@ async function savePreferences(_, pref) {
     await writeUserPreferences(JSON.stringify(preference));
 }
 
+/**
+ * 向主窗口播放器发送消息 (通过 localStorage)
+ * @param {*} signal string - 消息名称
+ */
+function sendPlayerSignal(signal) {
+    if (!mainWindow) return;
+
+    // 仿制 Storage 对象
+    mainWindow.webContents.executeJavaScript(`
+    window.onstorage({
+        key: 'playerSignal', 
+        newValue: JSON.stringify({eventName: '${signal}', message: 'moe.nekozx.arcanummusic.contextmenu'})
+    });
+    `, true);
+}
+
 app.whenReady().then(() => {
     // 添加事件触发
     ipcMain.handle('newAppWindow', newWindow);
     ipcMain.handle('minimizeWindow', minimizeWindow);
     ipcMain.handle('maximizeWindow', toggleMaximize);
-    ipcMain.handle('closeWindow', closeAllWindows);
+    ipcMain.handle('closeWindow', closeMainWindow);
     ipcMain.handle('getWindowRect', getWindowRect);
     ipcMain.handle('moveWindow', moveWindow);
     ipcMain.handle('setAlwaysOnTop', setWindowTopState);
@@ -253,20 +303,49 @@ app.whenReady().then(() => {
     createMainWindow();
 
     // 托盘图标
-    tray = new Tray(`${environment === 'dev' ? './public' : `${app.getAppPath()}/dist`}/appIcon/AppIcon.ico`);
+    const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
+    tray = new Tray(`${environment === 'dev' ? './' : appRootPath}/icons/AppIcon.ico`);
     const menu = Menu.buildFromTemplate([
+        {
+            label: '播放 / 暂停',
+            type: 'normal',
+            click: () => { sendPlayerSignal('toggle-play-pause'); }
+        },
+        {
+            label: '上一首',
+            type: 'normal',
+            click: () => { sendPlayerSignal('previous-song'); }
+        },
+        {
+            label: '下一首',
+            type: 'normal',
+            click: () => { sendPlayerSignal('next-song'); }
+        },
+        {
+            label: '循环播放',
+            type: 'normal',
+            click: () => { sendPlayerSignal('toggle-repeat'); }
+        },
+        {
+            label: '随机播放',
+            type: 'normal',
+            click: () => { sendPlayerSignal('toggle-shuffle'); }
+        },
+        {
+            type: 'separator'
+        },
         {
             label: '退出',
             type: 'normal',
-            click: () => {
-                stopService();
-                app.quit();
-            }
+            click: () => { quitApp(); }
         }
     ]);
+    tray.on('click', () => {
+        if (mainWindow) mainWindow.show();
+    });
     tray.setToolTip('Arcanum Music');
     tray.setContextMenu(menu);
-})
+});
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {

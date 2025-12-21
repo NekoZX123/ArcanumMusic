@@ -7,6 +7,9 @@
                 <checkbox id="startOnBoot" text="开机自动启动"/>
                 <checkbox id="startMinimized" text="启动时最小化"/>
             </node>
+            <node id="closeOptions" title="窗口关闭操作">
+                <checkbox id="hideToTray" text="关闭窗口时隐藏窗口至标题栏"></checkbox>
+            </node>
         </page>
         <page id="appearance" name="外观">
             <node id="window" title="窗口">
@@ -91,7 +94,7 @@
         <node id="iconContainer" title="">
             <image id="appIconLarge" src="./appIcon/ArcanumMusic.png"/>
             <label id="appName" text="Arcanum Music"/>
-            <label id="appVersion" text="version 1.6.5-Kyrios (Internal)"/>
+            <label id="appVersion" text="version 1.6.7-Kyrios (Internal)"/>
             <label id="appAuthor" text="made by NekoZX123"/>
         </node>
         <node id="links" title="">

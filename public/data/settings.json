@@ -4,6 +4,9 @@
             "start": {
                 "startOnBoot": false,
                 "startMinimized": false
+            },
+            "closeOptions": {
+                "hideToTray": true
             }
         },
         "appearance": {

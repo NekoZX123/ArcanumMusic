@@ -20,6 +20,7 @@ import {getConfig, getPreference, loadConfig, loadPreference, writePreference} f
 import {loadProxyPort} from './assets/utilities/proxyRequest.ts';
 import {syncFocusedLyric} from './assets/lyrics/lyricsManager.ts';
 import { initializeTheme, setControlBarTheme, setWindowBackground, type colorThemeName } from './assets/effects/themeControl.ts';
+import { buttonTypes, showPopup } from './assets/notifications/popup.tsx';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -55,10 +56,50 @@ function closeHover() {
 function closeUnHover() {
     closeButtonSrc.value = './images/windowControl/close.svg';
 }
-function closeWindow() {
-    savePreferences();
+async function closeWindow() {
+    const appDataPath = await window.electron.getAppData();
+    const firstRunCheckPath = `${appDataPath}/ArcanumMusic_data/.notfirstrun`;
+    const notFirstRun = await window.electron.isFileExist(firstRunCheckPath);
 
-    window.electron.closeWindow();
+    console.log(notFirstRun);
+    if (!notFirstRun) { // 首次运行
+        showPopup(
+            'info', 'yesno', 
+            '窗口关闭时操作选择', 
+            '是否在关闭 Arcanum Music 主窗口时将应用隐藏至系统托盘菜单 ?',
+            ['', ''], async (code: number) => {
+                if (code === buttonTypes.BUTTON_CLOSE) return;
+
+                const hideToTray = code === buttonTypes.BUTTON_YES;
+
+                // 写入设置变更
+                const settings = getConfig();
+                settings.generic.system.closeOptions.hideToTray = hideToTray;
+                const settingsText = JSON.stringify(settings);
+
+                const targetFile = `${appDataPath}/ArcanumMusic_data/settings.json`;
+
+                window.electron.writeLocalFile(targetFile, settingsText);
+
+                // 储存 .notfirstrun 文件
+                window.electron.writeLocalFile(firstRunCheckPath, 'Not first run! Let me pass!');
+
+                // 保存用户配置并关闭窗口
+                savePreferences();
+
+                window.electron.closeWindow(hideToTray);
+            });
+    }
+    else { // 非首次运行
+        // 获取设置配置
+        const settings = getConfig();
+        const hideToTrayFlag = settings.generic.system.closeOptions.hideToTray;
+
+        // 保存用户配置并关闭窗口
+        savePreferences();
+
+        window.electron.closeWindow(hideToTrayFlag);
+    }
 }
 
 // 移动窗口
@@ -301,11 +342,12 @@ function limitAuthorsTextLength(authors: string) {
 }
 
 // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
-const allowedIdentifiers = ['moe.nekozx.arcanummusic.desktoplyrics'];
+const allowedIdentifiers = ['moe.nekozx.arcanummusic.desktoplyrics', 'moe.nekozx.arcanummusic.contextmenu'];
 function handleStorageData (updateEvent: StorageEvent) {
     if (updateEvent.key === 'playerSignal' && updateEvent.newValue) {
         const eventObject = JSON.parse(updateEvent.newValue);
         const eventName = eventObject.eventName;
+        console.log(`[Debug] Event triggered: name = ${eventName}; content = ${eventObject.message}`);
         if (!allowedIdentifiers.includes(eventObject.message)) {
             console.error(`[Error] Unidentified identifier ${eventObject.message}`);
             return;
@@ -433,7 +475,8 @@ onMounted(async () => {
     });
 
     // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
-    window.addEventListener('storage', handleStorageData);
+    // 通过 `onstorage` 赋值以方便从 Electron 主进程调用
+    window.onstorage = handleStorageData;
 
     // 关闭窗口时保存偏好数据
     window.addEventListener('close', savePreferences);
