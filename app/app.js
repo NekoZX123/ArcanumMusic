@@ -47,7 +47,12 @@ async function createMainWindow() {
     const userPreferences = JSON.parse(preferenceText);
 
     // 关闭主窗口时隐藏至托盘
-    hideToTray = configObject.generic.system.closeOptions.hideToTray;
+    if (configObject.generic.system.closeOptions) {
+        hideToTray = configObject.generic.system.closeOptions.hideToTray;
+    }
+    else {
+        hideToTray = false;
+    }
 
     // 开机自启判断
     const autoLaunchFlag = configObject.generic.system.start.startOnBoot;
@@ -59,6 +64,7 @@ async function createMainWindow() {
     const windowOptions = userPreferences.window;
 
     // checkCookieExpired();
+    const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
 
     mainWindow = new BrowserWindow({
         width: windowOptions.width,
@@ -71,7 +77,7 @@ async function createMainWindow() {
         skipTaskbar: false,
         alwaysOnTop: false,
         title: 'Arcanum Music',
-        icon: `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`,
+        icon: `${environment === 'dev' ? './' : appRootPath}/icons/AppIcon.ico`,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,
@@ -114,10 +120,12 @@ async function createMainWindow() {
 
 // 新建窗口
 function newWindow(_, title, url, options) {
+    const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
+
     let windowConfig;
     if (options) {
         windowConfig = options;
-        windowConfig.icon = `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`;
+        windowConfig.icon = `${environment === 'dev' ? './' : appRootPath}/icons/AppIcon.ico`;
         windowConfig.webPreferences = {
             nodeIntegration: true,
             contextIsolation: true,
@@ -134,7 +142,7 @@ function newWindow(_, title, url, options) {
             resizable: true,
             focusable: true,
             title: title,
-            icon: `${environment === 'dev' ? './public' : './dist'}/appIcon/AppIcon.ico`,
+            icon: `${environment === 'dev' ? './' : appRootPath}/icons/AppIcon.ico`,
             webPreferences: {
                 nodeIntegration: true,
                 contextIsolation: true,
@@ -295,7 +303,8 @@ app.whenReady().then(() => {
     createMainWindow();
 
     // 托盘图标
-    tray = new Tray(`${environment === 'dev' ? './public' : `${app.getAppPath()}/dist`}/appIcon/AppIcon.ico`);
+    const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
+    tray = new Tray(`${environment === 'dev' ? './' : appRootPath}/icons/AppIcon.ico`);
     const menu = Menu.buildFromTemplate([
         {
             label: '播放 / 暂停',
