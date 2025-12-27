@@ -182,7 +182,9 @@ async function loadMainColorBackground(_?: any) {
     if (coverUrl) {
         // 获取封面主色
         const colorList: any = await getMainColors(coverUrl, PARTICLES_COUNT);
-        if (!particleSystem) return;
+        if (!particleSystem) {
+            particleSystem = new ParticleManager(colorList);
+        }
 
         // 重置动画
         particleSystem.stopAnimation();
@@ -216,6 +218,7 @@ function pendStartAnimation(_?: any) {
  */
 function stopAnimation() {
     if (particleSystem) {
+        particleSystem.stopAnimation();
         particleSystem.destroy();
         particleSystem = null;
     }
@@ -255,10 +258,6 @@ function updateBackground(_?: any) {
     }
     else if (lyricsBackgroundType === 1) { // 歌曲封面取色 (动态)
         // 光斑背景动效
-        particleSystem = new ParticleManager(['rgb(144,202,249)', 'rgb(248,187,208)', 'rgb(144,150,249)']);
-        particleSystem.createParticles();
-        particleSystem.update();
-
         pendStartAnimation();
         loadMainColorBackground();
 
