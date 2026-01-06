@@ -9,7 +9,7 @@
     "homepage": "https://github.com/NekoZX123/ArcanumMusic",
     "license": "Apache-2.0",
     "private": true,
-    "version": "1.6.7",
+    "version": "1.7.0",
     "type": "module",
     "main": "app/app.js",
     "devtron": true,

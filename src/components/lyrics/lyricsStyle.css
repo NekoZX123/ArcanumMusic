@@ -321,6 +321,28 @@
 .lyricsBox.glow.focused > ul {
     text-shadow: 0 0 3px var(--default-white);
 }
+/* Apple Music 样式 */
+.lyricsBox.appleMusic {
+    align-items: left;
+
+    margin: 8px 0;
+
+    transition: background 400ms ease-in-out;
+}
+.lyricsBox.appleMusic > ul {
+    color: var(--default-white);
+    text-shadow: none;
+
+    font-family: 'Noto Sans', 'Roboto', 'Open Sans', sans-serif;
+    font-size: 20pt;
+    font-weight: 500;
+
+    opacity: 0.6;
+    transition: opacity 400ms ease, color 400ms ease;
+}
+.lyricsBox.appleMusic.focused > ul {
+    opacity: 1;
+}
 /* 简约样式 */
 .lyricsBox.lite {
     align-items: center;

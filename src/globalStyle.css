@@ -86,6 +86,9 @@
     /* 默认渐变 */
     --gradient-background1: linear-gradient(120deg, var(--color-blue-default), var(--color-purple-default));
     --gradient-background2: linear-gradient(120deg, var(--color-green-default), var(--color-green-light));
+
+    /* Apple Music 歌词半透明色 */
+    --applemusic-lyrics-color: rgba(245, 245, 245, 0.6);
 }
 /* 预设默认样式 */
 * {

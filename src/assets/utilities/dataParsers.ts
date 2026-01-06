@@ -32,9 +32,11 @@ const dataParsers: Record<string, any> = {
             'body': ['data'],
             'lyrics': ['lrc', 'lyric'],
             'translation': ['tlyric', 'lyric'],
+            'yrc': ['yrc', 'lyric'],
             '@postprocessors': {
                 'lyrics': (lyricText: string) => lyricText?.split('\n'),
-                'translation': (lyricText: string) => lyricText?.split('\n')
+                'translation': (lyricText: string) => lyricText?.split('\n'),
+                'yrc': (lyricText: string) => lyricText?.split('\n')
             }
         },
         'search-singles': {
@@ -268,7 +270,11 @@ const dataParsers: Record<string, any> = {
         'lyrics': {
             'body': ['data'],
             'lyrics': ['lyrics'],
-            'translation': ['translation']
+            'translation': ['translation'],
+            'yrc': ['lyrics'],
+            '@postprocessors': {
+                'yrc': (_: any) => []
+            }
         },
         'search-singles': {
             'body': ['data', 'req_1'],
@@ -502,6 +508,10 @@ const dataParsers: Record<string, any> = {
             'body': ['data'],
             'lyrics': ['data', 'lrclist'],
             'translation': ['data', 'lrclist'],
+            'yrc': ['data'],
+            '@postprocessors': {
+                'yrc': (_: any) => []
+            }
         },
         'search-singles': {
             'body': ['data'],
@@ -706,9 +716,11 @@ const dataParsers: Record<string, any> = {
             'body': ['data'],
             'lyrics': ['data', 'lyrics'],
             'translation': ['data', 'lyrics'],
+            'yrc': ['lyrics'],
             '@postprocessors': {
                 'lyrics': (lyricText: string) => lyricText?.split('\n'),
-                'translation': (_: any) => []
+                'translation': (_: any) => [],
+                'yrc': (_: any) => []
             }
         },
         'search-singles': {
@@ -915,7 +927,8 @@ const targetFormats: Record<string, any> = {
     },
     'lyrics': {
         'lyrics': [],
-        'translation': []
+        'translation': [],
+        'yrc': []
     },
     'search-singles': {
         'songList': '@song_brief'

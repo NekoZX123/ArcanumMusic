@@ -2,7 +2,9 @@ import { reactive, type Reactive } from "vue";
 import { getPlayer } from "../player/player";
 import { getSongLyrics } from "../player/songUtils";
 import { parseLyrics, type LyricData } from "./lyricsParser";
+import { smoothScroll } from "../effects/smoothScroll";
 
+let lyricsEffectMode = 0;
 let lyricLines: Reactive<LyricData> = reactive({
     lyrics: [
         {
@@ -13,6 +15,19 @@ let lyricLines: Reactive<LyricData> = reactive({
     ],
     metaData: {}
 });
+
+/**
+ * 初始化歌词控制器
+ * @param effectMode 歌词模式
+ */
+function initializeLyricsManager(effectMode: number) {
+    if (effectMode < 0 || effectMode > 2) {
+        console.error(`[Error] Unknown lyrics type: ${effectMode}`);
+        return;
+    }
+
+    lyricsEffectMode = effectMode;
+}
 
 /**
  * 更新歌词内容
@@ -30,6 +45,7 @@ function updateCurrentLyrics(_?: any) {
 
     getSongLyrics(songId)
     .then((lyricsInfo: any) => {
+        console.log(lyricsInfo);
 
         const parseResult = parseLyrics(lyricsInfo, platform);
         if (!parseResult) {
@@ -78,6 +94,19 @@ let currentLyricObject = {
     translation: 'made by NekoZX123',
 };
 
+// Apple Music 歌词动效常量
+// 间距增大 / 歌词滚动用时
+const amScrollTime = 300;
+// 间距增大单位量
+const amMarginDelta = 12;
+// 过冲效果时间 / 基本延迟 / 单位延迟变化
+const amOverflowTime = 300;
+const amOverflowDelayBase = 0;
+const amOverflowDelayDelta = 20;
+// 过冲位移量
+const amOverflowMargin = 3;
+// 恢复动画时长
+const amRestoreTime = 1000;
 /**
  * 同步焦点歌词
  */
@@ -107,10 +136,56 @@ function updateFocusedLyric(time: number) {
         const activeElement = lyricElements[targetIndex];
         if (activeElement) {
             requestAnimationFrame(() => {
-                containerElement?.scrollTo({
-                    top: activeElement.offsetTop - containerElement.offsetHeight / 2,
-                    behavior: 'smooth'
-                });
+                if (lyricsEffectMode === 1) { // Apple Music 样式歌词滚动效果
+                    const animationStartIndex = targetIndex + 1;
+                    const animationEndIndex = Math.min(lyricElements.length - 1, targetIndex + 5);
+
+                    // Step1: 增大歌词间距
+                    for (let i = animationStartIndex; i <= animationEndIndex; i++) {
+                        const line = lyricElements[i] as HTMLElement;
+                        const relativeIndex = i - targetIndex;
+
+                        // 增大间距
+                        line.style.transition = `transform ${amScrollTime}ms ease-out`;
+                        line.style.transitionDelay = `0`;
+                        line.style.transform = `translateY(${relativeIndex * amMarginDelta}px)`;
+                    }
+                    // Step2: 轻微过冲效果
+                    setTimeout(() => {
+                        for (let i = animationStartIndex; i <= animationEndIndex; i++) {
+                            const line = lyricElements[i] as HTMLElement;
+                            const relativeIndex = i - targetIndex;
+
+                            line.style.transition = `transform ${amOverflowTime}ms ease-out`;
+                            line.style.transitionDelay = `${amOverflowDelayBase + relativeIndex * amOverflowDelayDelta}ms`; // 每行延迟移动
+                            line.style.transform = `translateY(-${amOverflowMargin}px)`;
+                        }
+                    }, amScrollTime);
+                    // Step3: 缓慢恢复原位置
+                    // 恢复动画时长
+                    const restoreDelayTime = amScrollTime + 
+                        amOverflowDelayBase + 
+                        (animationEndIndex - targetIndex) * amOverflowDelayDelta + 
+                        amOverflowTime;
+                    setTimeout(() => {
+                        for (let i = animationStartIndex; i <= animationEndIndex; i++) {
+                            const line = lyricElements[i] as HTMLElement;
+
+                            line.style.transition = `transform ${amRestoreTime}ms ease-out`;
+                            line.style.transitionDelay = `0`;
+                            line.style.transform = `translateY(1px)`;
+                        }
+                    }, restoreDelayTime);
+                }
+
+                setTimeout(() => {
+                    if (!containerElement) return;
+                    const containerHeight = containerElement.offsetHeight;
+                    const elementTop = activeElement.offsetTop;
+                    const elementHeight = activeElement.offsetHeight;
+                    const scrollTarget = elementTop - (containerHeight / 3) + (elementHeight / 2);
+                    smoothScroll(containerElement, scrollTarget, amScrollTime + amOverflowTime / 2);
+                }, 0);
             });
         }
     }
@@ -127,6 +202,7 @@ function setContainerId(id: string) {
 }
 
 export {
+    initializeLyricsManager,
     updateCurrentLyrics,
     getLyricsData,
     updateFocusedLyric,

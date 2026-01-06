@@ -4,7 +4,7 @@ import './lyricsStyle.css';
 import { LyricsLine } from '../../assets/lyrics/Lyrics.tsx';
 import { getPlayer } from '../../assets/player/player.ts';
 import { getMainColors, ParticleManager } from '../../assets/effects/colorUtils.ts';
-import { getLyricsData, setContainerId, updateCurrentLyrics, updateFocusedLyric } from '../../assets/lyrics/lyricsManager.ts';
+import { getLyricsData, initializeLyricsManager, setContainerId, updateCurrentLyrics, updateFocusedLyric } from '../../assets/lyrics/lyricsManager.ts';
 import { getConfig } from '../../assets/utilities/configLoader.ts';
 
 // const songData = ref(getPlayer());
@@ -294,17 +294,16 @@ function togglePlayPauseInLyrics(_: MouseEvent) {
  * @param style 歌词样式 ID
  */
 function updateLyricsStyle(style: number) {
-    if (style === 1) { // 加载 Apple Music 样式歌词
-        console.warn(`Apple Music style lyrics currently not supported`);
+    if (style < 0 || style > 2) {
+        console.error(`[Error] Unknown lyrics type: ${style}`);
+        return;
     }
-    else { // 加载内置 / 简约样式
-        isLiteLyrics.value = style === 2;
-    }
+    lyricsEffectMode.value = style;
 }
 
 // 歌词光效及样式
 const lyricsGlow = ref(true);
-const isLiteLyrics = ref(false);
+const lyricsEffectMode = ref(0);
 
 onMounted(() => {
     // 设置触发器
@@ -353,6 +352,7 @@ onMounted(() => {
 
     // 歌词样式
     const lyricsStyle = parseInt(lyricsOptions.lyricsStyle);
+    initializeLyricsManager(lyricsStyle);
     updateLyricsStyle(lyricsStyle);
 
     // 同步设置变化
@@ -441,7 +441,7 @@ onMounted(() => {
                     :content="lyricInfo.content"
                     :translation="lyricInfo.translation"
                     :glow-effect="lyricsGlow"
-                    :is-lite="isLiteLyrics"
+                    :lyrics-mode="lyricsEffectMode"
                 />
             </div>
         </div>
