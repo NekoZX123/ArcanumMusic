@@ -53,6 +53,7 @@ async function createMainWindow() {
     else {
         hideToTray = false;
     }
+    console.log(`[Debug] Hide to tray state: ${hideToTray}`);
 
     // 开机自启判断
     const autoLaunchFlag = configObject.generic.system.start.startOnBoot;
@@ -96,12 +97,9 @@ async function createMainWindow() {
         mainWindow.loadFile('dist/index.html');
     }
 
-    // 关闭主窗口时防止窗口残留
-    mainWindow.on('closed', () => {
-        const windowList = BrowserWindow.getAllWindows();
-        windowList.forEach((window) => {
-            if (window.id !== mainWindow.id) window.close();
-        });
+    mainWindow.on('close', (event) => {
+        event.preventDefault();
+        mainWindow.hide();
     });
     
     if (configObject.developerOptions.application.devtoolsOnLaunched) { // 启动时打开开发者工具
@@ -190,9 +188,14 @@ function quitApp(_) {
         if (window.id !== mainWindow.id) window.close();
     });
     
+    // 关闭主窗口
     if (mainWindow) {
         mainWindow.close();
     }
+
+    // 停止服务并退出
+    stopService();
+    app.quit();
 }
 
 /**
@@ -348,8 +351,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        stopService();
-        app.quit();
+    if (!hideToTray) {
+        quitApp();
     }
 });
