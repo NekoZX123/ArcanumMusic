@@ -437,9 +437,7 @@ onMounted(() => {
             <div class="flex column" id="lyricsContent">
                 <LyricsLine 
                     v-for="lyricInfo in getLyricsData().lyrics"
-                    :time="lyricInfo.time"
-                    :content="lyricInfo.content"
-                    :translation="lyricInfo.translation"
+                    :lyrics-object="lyricInfo"
                     :glow-effect="lyricsGlow"
                     :lyrics-mode="lyricsEffectMode"
                 />
