@@ -39,6 +39,7 @@ var pageComponents: { [key: string]: any } = {
     'songlistCollections': SonglistCollections,
     'singleCollections': SingleCollections
 };
+const pagesWithIndicator = ['home', 'library', 'search'];
 const pageHighlights = ['home', 'library', 'search', 'settings', 'accounts'];
 
 let currentPage = '';
@@ -67,6 +68,43 @@ function changePage(pageId: page, pushStack: boolean = true, idParam?: any) {
     }
     if (pageHighlights.includes(pageId)) {
         newTab.classList.add('current');
+    }
+
+    // 指示器动画
+    function moveIndicator (currentTab: HTMLElement, newTab: HTMLElement) {
+        if (!currentTab) {
+            currentTab = document.getElementById(pagesWithIndicator[0]) as HTMLButtonElement;
+        }
+
+        const currentTop = currentTab.getBoundingClientRect().top;
+        const currentBottom = currentTab.getBoundingClientRect().bottom;
+        const newTop = newTab.getBoundingClientRect().top;
+        const newBottom = newTab.getBoundingClientRect().bottom;
+
+        // 获取指示器位置
+        const indicatorTop = Math.min(currentTop, newTop);
+        const indicatorBottom = Math.max(currentBottom, newBottom);
+
+        // 指示器动画
+        indicator.style.top = `calc(${indicatorTop}px - 2.5rem)`;
+        indicator.style.height = `${indicatorBottom - indicatorTop}px`;
+        setTimeout(() => {
+            indicator.style.top = `calc(${newTop}px - 2.5rem)`;
+            indicator.style.height = `4.5rem`;
+        }, 150);
+    }
+    const indicator = document.getElementById('pageIndicator') as HTMLElement;
+    if (pagesWithIndicator.includes(currentPage) && !pagesWithIndicator.includes(pageId)) { // 隐藏指示器
+        indicator.style.opacity = '0';
+    }
+    else if (pagesWithIndicator.includes(currentPage) && pagesWithIndicator.includes(pageId)) { // 移动指示器
+        moveIndicator(currentTab, newTab);
+    }
+    else if (!pagesWithIndicator.includes(currentPage) && pagesWithIndicator.includes(pageId)) { // 显示指示器
+        moveIndicator(currentTab, newTab);
+        setTimeout(() => {
+            indicator.style.opacity = '1';
+        }, 200);
     }
 
     if (appPageNames.includes(pageId)) {
