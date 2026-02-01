@@ -588,7 +588,7 @@ img.outlineImage {
     width: calc(24rem - 12px);
     height: 100%;
 
-    background: var(--theme-color-light);
+    background: var(--interface-background);
     box-shadow: 0 4px 4px 2px var(--transparent-grey);
 
     padding: 0 6px;
