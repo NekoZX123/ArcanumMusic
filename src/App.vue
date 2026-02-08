@@ -545,7 +545,6 @@ onUnmounted(() => {
                     <div id="pageContent"></div>
                     <div id="bottomBlock"></div>
                 </div>
-                <span id="pageIndicator"></span>
             </div>
         </div>
 
