@@ -39,6 +39,7 @@ var pageComponents: { [key: string]: any } = {
     'songlistCollections': SonglistCollections,
     'singleCollections': SingleCollections
 };
+const pageHighlights = ['home', 'library', 'search', 'settings', 'accounts'];
 
 let currentPage = '';
 let pageStack: page[] = []; // 页面堆栈
@@ -64,7 +65,9 @@ function changePage(pageId: page, pushStack: boolean = true, idParam?: any) {
     if (currentTab) {
         currentTab.classList.remove('current');
     }
-    newTab.classList.add('current');
+    if (pageHighlights.includes(pageId)) {
+        newTab.classList.add('current');
+    }
 
     if (appPageNames.includes(pageId)) {
         pageApp.unmount();

@@ -497,6 +497,10 @@ img.outlineImage {
     justify-content: center;
     align-items: center;
 }
+#settings.current,
+#accounts.current {
+    background: var(--theme-color-default);
+}
 #settings > img {
     width: 3rem;
     height: 3rem;
