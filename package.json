@@ -1,5 +1,5 @@
 {
-    "name": "arcanum-music",
+    "name": "arcanummusic",
     "author": {
         "name": "NekoZX123",
         "email": "nekozx123@outlook.com",
@@ -9,7 +9,7 @@
     "homepage": "https://github.com/NekoZX123/ArcanumMusic",
     "license": "Apache-2.0",
     "private": true,
-    "version": "1.7.0",
+    "version": "1.7.3",
     "type": "module",
     "main": "app/app.js",
     "devtron": true,
@@ -22,9 +22,9 @@
     },
     "dependencies": {
         "auto-launch": "^5.0.6",
-        "axios": "^1.7.9",
-        "cors": "^2.8.5",
-        "express": "^4.21.2",
+        "axios": "^1.13.5",
+        "cors": "^2.8.6",
+        "express": "^5.2.1",
         "node-fetch": "^3.3.2"
     },
     "devDependencies": {
@@ -33,17 +33,13 @@
         "@vitejs/plugin-vue": "^5.2.1",
         "@vitejs/plugin-vue-jsx": "^4.1.1",
         "@vue/tsconfig": "^0.7.0",
-        "axios": "^1.7.9",
         "concurrently": "^9.1.2",
         "cookie": "^1.0.2",
-        "cors": "^2.8.5",
         "crypto": "^1.0.1",
         "crypto-js": "^4.2.0",
         "cryptojs": "^2.5.3",
         "electron": "^38.2.1",
-        "electron-builder": "^25.1.8",
-        "express": "^4.21.2",
-        "node-fetch": "^3.3.2",
+        "electron-builder": "^26.6.0",
         "typescript": "~5.7.2",
         "uuid": "^11.1.0",
         "vite": "^6.4.1",

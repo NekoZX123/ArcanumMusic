@@ -1,6 +1,6 @@
 # Arcanum Music
 
-v1.6.7 (Kyrios Internal)
+v1.7.3 (Kyrios Internal)
 
 简洁美观的多平台音乐软件
 
@@ -14,15 +14,12 @@ made with TypeScript + Vue.js
 
 ## 问题修复
 
-- 完善了 Linux 环境下的应用打包配置
-- 修复了 Linux 环境下无法显示托盘图标的问题
-- 修复了问候语有时显示为 `undefined` 的问题
+- 修复了主窗口有时无法关闭的问题
 
 ## 新功能
 
-- 主窗口隐藏至系统托盘功能
-- 托盘右键菜单可控制播放器
-- 更新了设置文件储存方式
+- 添加了仿 Apple Music 样式歌词
+- 添加收藏卡片自适应深色主题功能
 
 ## 内测版本特别提示
 

@@ -24,14 +24,14 @@
                 "arch": ["x64", "ia32"]
             }
         ],
-        "icon": "./icons/AppIcon.ico"
+        "icon": "./icons/ArcanumMusic.ico"
     },
     "nsis": {
         "artifactName": "${productName}_${version}_Setup.${ext}",
         "shortcutName": "${productName}",
         "uninstallDisplayName": "${productName}",
-        "installerIcon": "./icons/AppIcon.ico",
-        "uninstallerIcon": "./icons/AppIcon.ico"
+        "installerIcon": "./icons/ArcanumMusic.ico",
+        "uninstallerIcon": "./icons/ArcanumMusic.ico"
     },
     "linux": {
         "target": [
@@ -44,16 +44,16 @@
                 "arch": ["x64"]
             }
         ],
-        "icon": "./icons/AppIcon.png",
+        "icon": "./icons/ArcanumMusic.png",
         "synopsis": "Arcanum Music - A multiplatform music application",
-        "category": "Audio;Music",
+        "category": "Audio",
         "desktop": {
-            "Name": "Arcanum Music",
-            "Icon": "./icons/AppIcon.png",
-            "Comment": "A multiplatform music application",
-            "Type": "Application",
-            "Category": "Audio;Music",
-            "Keywords": "music;audio;arcanummusic"
+            "entry": {
+                "Name": "ArcanumMusic",
+                "Comment": "Arcanum Music - A multiplatform music application",
+                "Terminal": false,
+                "Categories": "Audio;Music;"
+            }
         }
     }
 }
