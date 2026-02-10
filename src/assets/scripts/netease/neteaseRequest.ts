@@ -63,8 +63,9 @@ const requestData: { [type: string]: any } = {
     },
     "lyrics": {
         "id": "[songId]", 
-        "lv": -1, 
-        "tv": -1, 
+        "lv": -1, // 标准歌词
+        "tv": -1, // 翻译歌词
+        "yv": -1, // 逐字歌词
         "csrf_token": ""
     },
     "songList": {

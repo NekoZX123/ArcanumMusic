@@ -100,32 +100,6 @@ function startService(environment) {
             });
         });
     });
-    /**
-     * localhost:{srvPort}/proxyAudio/
-     * 本地回环代理音频数据获取服务器
-     */
-    server.get('/neteaseProxy/', async (req, res) => {
-        const { url } = req.query;
-        if (!url) {
-            res.status(400).send({ error: 'Missing url parameter' });
-            return;
-        }
-        let allowFlag = false;
-        const targetUrl = decodeURIComponent(url)
-        try {
-            const parsedUrl = new URL(targetUrl);
-            if (allowedHosts.includes(parsedUrl.hostname)) allowFlag = true;
-        } catch (error) {
-            res.status(400).send({ error: 'Invalid URL' });
-            return;
-        }
-        if (!allowFlag) {
-            res.status(403).send({ error: 'Proxy request to this host is not allowed' });
-            return;
-        }
-        console.log(`[Debug] Netease proxy: Receiving data from ${targetUrl}`);
-        
-    });
 
     port = environment === 'dev' ? 3001 : 3000;
     server.listen(port, () => {

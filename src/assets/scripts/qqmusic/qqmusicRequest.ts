@@ -85,7 +85,8 @@ const requestData: any = {
             "module": "music.musichallSong.PlayLyricInfo",
             "method": "GetPlayLyricInfo",
             "param": {
-                "songMID": "[songMid]"
+                "songMID": "[songMid]",
+                "lrcType": "4"
             }
         }
     ],

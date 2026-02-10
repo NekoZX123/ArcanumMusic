@@ -262,7 +262,7 @@ onUnmounted(() => {
                     @contextmenu="(event) => {
                         triggerRightMenu(event, { type: 'userFavourites' }, 'platformSelect');
                     }" 
-                    :style="`background-image: url('./images/library/favouritesBackground_${currentFavPlatform}.jpg')`">
+                    :style="`background-image: url('./images/library/favouritesBackground_${currentFavPlatform}.png')`">
                     <span class="cardInfo flex column">
                         <label class="text medium bold interactiveTitle"
                             @click="changePage('songlist', true, userFavourites)">我喜欢的音乐</label>

@@ -4,6 +4,7 @@ type LyricLineInfo = {
     time: number,
     content: string,
     translation: string
+    yrc?: string
 };
 type LyricData = {
     lyrics: LyricLineInfo[],
@@ -35,7 +36,7 @@ function formatLyricTime(time: string) {
     return resultTime;
 }
 
-type LyricsInfo = { lyrics: string[], translation: string[] };
+type LyricsInfo = { lyrics: string[], translation: string[], yrc?: string };
 /**
  * 格式化网易云音乐/QQ音乐/酷我音乐歌词
  * @param lyricsInfo 歌词信息
@@ -80,7 +81,8 @@ function parseLyricsCommon(lyricsInfo: LyricsInfo) {
         parsedLyrics.lyrics.push({
             time: formatLyricTime(prefix),
             content: lyricText,
-            translation: ''
+            translation: '',
+            yrc: undefined
         });
     }
     // 添加翻译
@@ -109,6 +111,13 @@ function parseLyricsCommon(lyricsInfo: LyricsInfo) {
         }
     }
     
+    // 检查并添加逐字歌词
+    if (lyricsInfo.yrc) {
+        for (let i = 0; i < lyricsInfo.yrc.length; i++) {
+            const yrcLine = lyricsInfo.yrc[i];
+            parsedLyrics.lyrics[i].yrc = yrcLine;
+        }
+    }
 
     return parsedLyrics;
 }
@@ -166,5 +175,6 @@ function parseLyrics(lyricsInfo: any, platform: string): LyricData | undefined {
 export {
     parseLyrics,
     parseLyricsCommon,
-    type LyricData
+    type LyricData,
+    type LyricLineInfo
 };

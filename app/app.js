@@ -1,6 +1,7 @@
-import { app, BrowserWindow, ipcMain, Menu, shell, Tray, clipboard } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, shell, Tray, clipboard, nativeImage } from 'electron';
 import { fileURLToPath } from 'url';
 import { userInfo } from 'os';
+import path from 'path';
 import pkg from 'auto-launch';
 const AutoLaunch = pkg;
 
@@ -18,6 +19,28 @@ let tray;
 let mainWindow = null;
 
 let hideToTray = false;
+
+// 调整应用根目录中的 `\` 为 `/`
+function resolveAppRootPath() {
+    return app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
+}
+
+// 获取应用图标目录
+function getIconPath() {
+    const platform = process.platform;
+    let ext = 'ico';
+    if (platform === 'linux') ext = 'png';
+    const base = resolveAppRootPath();
+    const iconPath = path.join(base, 'icons', `ArcanumMusic.${ext}`);
+    console.log(`[Debug] Icon path: ${iconPath}`);
+    return iconPath;
+}
+
+function loadIcon() {
+    const picture = getIconPath();
+    const img = nativeImage.createFromPath(picture);
+    if (!img.isEmpty()) return img;
+}
 
 // 开机自启控制器
 const autoLauncher = new AutoLaunch({
@@ -53,6 +76,7 @@ async function createMainWindow() {
     else {
         hideToTray = false;
     }
+    console.log(`[Debug] Hide to tray state: ${hideToTray}`);
 
     // 开机自启判断
     const autoLaunchFlag = configObject.generic.system.start.startOnBoot;
@@ -64,7 +88,7 @@ async function createMainWindow() {
     const windowOptions = userPreferences.window;
 
     // checkCookieExpired();
-    const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
+    app.setName('ArcanumMusic');
 
     mainWindow = new BrowserWindow({
         width: windowOptions.width,
@@ -77,7 +101,7 @@ async function createMainWindow() {
         skipTaskbar: false,
         alwaysOnTop: false,
         title: 'Arcanum Music',
-        icon: `${environment === 'dev' ? './' : appRootPath}/icons/AppIcon.ico`,
+        icon: loadIcon(),
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,
@@ -96,12 +120,9 @@ async function createMainWindow() {
         mainWindow.loadFile('dist/index.html');
     }
 
-    // 关闭主窗口时防止窗口残留
-    mainWindow.on('closed', () => {
-        const windowList = BrowserWindow.getAllWindows();
-        windowList.forEach((window) => {
-            if (window.id !== mainWindow.id) window.close();
-        });
+    mainWindow.on('close', (event) => {
+        event.preventDefault();
+        mainWindow.hide();
     });
     
     if (configObject.developerOptions.application.devtoolsOnLaunched) { // 启动时打开开发者工具
@@ -125,7 +146,7 @@ function newWindow(_, title, url, options) {
     let windowConfig;
     if (options) {
         windowConfig = options;
-        windowConfig.icon = `${environment === 'dev' ? './' : appRootPath}/icons/AppIcon.ico`;
+        windowConfig.icon = loadIcon();
         windowConfig.webPreferences = {
             nodeIntegration: true,
             contextIsolation: true,
@@ -142,7 +163,7 @@ function newWindow(_, title, url, options) {
             resizable: true,
             focusable: true,
             title: title,
-            icon: `${environment === 'dev' ? './' : appRootPath}/icons/AppIcon.ico`,
+            icon: loadIcon(),
             webPreferences: {
                 nodeIntegration: true,
                 contextIsolation: true,
@@ -190,9 +211,14 @@ function quitApp(_) {
         if (window.id !== mainWindow.id) window.close();
     });
     
+    // 关闭主窗口
     if (mainWindow) {
         mainWindow.close();
     }
+
+    // 停止服务并退出
+    stopService();
+    app.quit();
 }
 
 /**
@@ -304,7 +330,7 @@ app.whenReady().then(() => {
 
     // 托盘图标
     const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
-    tray = new Tray(`${environment === 'dev' ? './' : appRootPath}/icons/AppIcon.ico`);
+    tray = new Tray(loadIcon());
     const menu = Menu.buildFromTemplate([
         {
             label: '播放 / 暂停',
@@ -348,8 +374,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        stopService();
-        app.quit();
+    if (!hideToTray) {
+        quitApp();
     }
 });
