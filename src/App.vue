@@ -595,7 +595,7 @@ onUnmounted(() => {
                         <img class="outlineImage" :src="getPlayer()?.shuffleStateImage" alt="Toggle shuffle"/>
                     </button>
                     <div class="flex row">
-                        <img class="playControl small outlineImage" :src="getPlayer()?.volumeLevel" @click="getPlayer()?.toggleMute" title="静音" alt="mute"/>
+                        <img class="playControl small outlineImage" :src="`/images/player/volume_0${getPlayer()?.volumeLevel}.svg`" @click="getPlayer()?.toggleMute" title="静音" alt="mute"/>
                         <div id="volumeAdjust" @mousemove="adjustVolume">
                             <div id="volumeBar">
                                 <div id="volumeFilled" :style="`width: ${getPlayer()?.volume}%`"></div>

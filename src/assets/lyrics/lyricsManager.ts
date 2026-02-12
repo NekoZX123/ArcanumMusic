@@ -146,7 +146,7 @@ function updateFocusedLyric(time: number) {
                         const relativeIndex = i - targetIndex;
 
                         // 增大间距
-                        line.style.transition = `transform ${amScrollTime}ms ease-out`;
+                        line.style.transition = `transform ${amScrollTime}ms ease-out, background 400ms ease-in-out`;
                         line.style.transitionDelay = `0`;
                         line.style.transform = `translateY(${relativeIndex * amMarginDelta}px)`;
                     }
@@ -156,7 +156,7 @@ function updateFocusedLyric(time: number) {
                             const line = lyricElements[i] as HTMLElement;
                             const relativeIndex = i - targetIndex;
 
-                            line.style.transition = `transform ${amOverflowTime}ms ease-out`;
+                            line.style.transition = `transform ${amOverflowTime}ms ease-out, background 400ms ease-in-out`;
                             line.style.transitionDelay = `${amOverflowDelayBase + relativeIndex * amOverflowDelayDelta}ms`; // 每行延迟移动
                             line.style.transform = `translateY(-${amOverflowMargin}px)`;
                         }
@@ -171,7 +171,7 @@ function updateFocusedLyric(time: number) {
                         for (let i = animationStartIndex; i <= animationEndIndex; i++) {
                             const line = lyricElements[i] as HTMLElement;
 
-                            line.style.transition = `transform ${amRestoreTime}ms ease-out`;
+                            line.style.transition = `transform ${amRestoreTime}ms ease-out, background 400ms ease-in-out`;
                             line.style.transitionDelay = `0`;
                             line.style.transform = `translateY(1px)`;
                         }

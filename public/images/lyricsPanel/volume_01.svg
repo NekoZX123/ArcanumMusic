@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_1" data-name="图层_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 500">
+  <!-- Generator: Adobe Illustrator 29.4.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 152)  -->
+  <g opacity=".8">
+    <rect x="35.12" y="149.9" width="140" height="200.19" rx="45" ry="45" fill="#f8f8f8"/>
+    <path d="M206.07,406.25l-53.23-39.77c-12.92-9.65-21.92-28.98-21.92-44.53v-143.89c0-15.55,9-34.88,21.92-44.53l53.23-39.77c28.85-21.56,58.82-18.74,58.82,12.36v287.77c0,31.1-29.97,33.91-58.82,12.36Z" fill="#f8f8f8"/>
+  </g>
+  <g opacity=".8">
+    <rect x="300" y="225" width="180" height="50" rx="25" ry="25" transform="translate(-62.55 349) rotate(-45)" fill="#f8f8f8"/>
+    <rect x="300" y="225" width="180" height="50" rx="25" ry="25" transform="translate(291 -202.55) rotate(45)" fill="#f8f8f8"/>
+  </g>
+</svg>

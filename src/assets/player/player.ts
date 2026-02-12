@@ -29,7 +29,9 @@ const neteaseCdnPostfix = 'music.126.net';
 
 // 循环 / 随机播放图片链接常量池
 const IMAGES_REPEAT = ['./images/player/repeat.svg', './images/player/repeat.on.svg', './images/player/repeatSingle.svg'];
+const IMAGES_REPEAT_TRANSPARENT = ['./images/lyricsPanel/repeat.svg', './images/lyricsPanel/repeat.on.svg', './images/lyricsPanel/repeatSingle.svg'];
 const IMAGES_SHUFFLE = ['./images/player/shuffle.svg', './images/player/shuffle.on.svg'];
+const IMAGES_SHUFFLE_TRANSPARENT = ['./images/lyricsPanel/shuffle.svg', './images/lyricsPanel/shuffle.on.svg'];
 
 class Player {
     // 播放列表信息
@@ -63,11 +65,12 @@ class Player {
     playedTimeText: string;
     progressPercentage: number;
     playStateImage: string;
+    playStateImageTransparent: string;
     isPlaying: boolean;
 
     // 音量信息
     volume: number;
-    volumeLevel: string;
+    volumeLevel: number;
     volumeBarIds: string[];
     isMuted: boolean;
     latestVolume: number;
@@ -76,9 +79,11 @@ class Player {
     // 循环播放: 0 => 不循环; 1 => 列表循环; 2 => 单曲循环
     repeatState: number;
     repeatStateImage: string;
+    repeatStateImageTransparent: string;
     // 随机播放: 0 => 不随机; 1 => 随机;
     shuffleState: number;
     shuffleStateImage: string;
+    shuffleStateImageTransparent: string;
 
     // 播放链接
     url: string;
@@ -105,11 +110,12 @@ class Player {
         this.playedTimeText = '';
         this.progressPercentage = 0;
         this.playStateImage = './images/player/play.dark.svg';
+        this.playStateImageTransparent = './images/lyricsPanel/play.svg';
         this.syncPlayStateImage();
         this.isPlaying = false;
 
         this.volume = 100;
-        this.volumeLevel = './images/player/volume_04.svg';
+        this.volumeLevel = 4;
         this.volumeBarIds = volumeBarIds;
         this.isMuted = false;
         this.latestVolume = 100;
@@ -129,9 +135,11 @@ class Player {
 
         this.repeatState = 0;
         this.repeatStateImage = IMAGES_REPEAT[0];
+        this.repeatStateImageTransparent = './images/lyricsPanel/repeat.svg';
         this.syncRepeatStateImage();
         this.shuffleState = 0;
         this.shuffleStateImage = IMAGES_SHUFFLE[0];
+        this.shuffleStateImageTransparent = './images/lyricsPanel/shuffle.svg';
         this.syncShuffleStateImage();
 
         this.url = '';
@@ -185,7 +193,7 @@ class Player {
         if (this.isMuted) this.isMuted = false;
 
         this.volume = value;
-        this.volumeLevel = `./images/player/volume_0${level}.svg`;
+        this.volumeLevel = level;
         playerElem.volume = value / 100;
 
         let volumeBarStyle = document.getElementById('globalVolumeFill');
@@ -248,6 +256,7 @@ class Player {
 
         this.repeatState = state;
         this.repeatStateImage = IMAGES_REPEAT[state];
+        this.repeatStateImageTransparent = IMAGES_REPEAT_TRANSPARENT[state];
         this.syncRepeatStateImage();
     }
     setShuffleState (state: number) {
@@ -259,6 +268,7 @@ class Player {
 
         this.shuffleState = state;
         this.shuffleStateImage = IMAGES_SHUFFLE[state];
+        this.shuffleStateImageTransparent = IMAGES_SHUFFLE_TRANSPARENT[state];
         this.syncShuffleStateImage();
     }
 
@@ -273,6 +283,7 @@ class Player {
         }
 
         this.playStateImage = playerElem.paused ? './images/player/pause.dark.svg' : './images/player/play.dark.svg';
+        this.playStateImageTransparent = playerElem.paused ? './images/lyricsPanel/pause.svg' : './images/lyricsPanel/play.svg';
         this.syncPlayStateImage();
         if (playerElem.paused && this.url !== '') {
             playerElem.play();
@@ -323,6 +334,7 @@ class Player {
                 if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0) {
                     this.togglePlayPause();
                     this.playStateImage = './images/player/play.dark.svg';
+                    this.playStateImageTransparent = './images/lyricsPanel/play.svg';
                     return;
                 }
                 this.nextSong();
@@ -368,6 +380,7 @@ class Player {
                 this.isPlaying = true;
 
                 this.playStateImage = './images/player/pause.dark.svg';
+                this.playStateImageTransparent = './images/lyricsPanel/pause.svg';
                 this.syncPlayStateImage();
             }
             // 音频准备完成后播放
