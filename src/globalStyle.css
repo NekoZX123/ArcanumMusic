@@ -785,7 +785,7 @@ img.outlineImage {
 .songCard > .songInfo {
     align-items: flex-start;
 }
-.songInfo > label {
+.songCard > .songInfo > label {
     width: 10rem;
     height: 16pt;
     overflow: hidden;
