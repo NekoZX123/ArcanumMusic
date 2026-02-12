@@ -4,7 +4,7 @@ import './lyricsStyle.css';
 import { LyricsLine } from '../../assets/lyrics/Lyrics.tsx';
 import { getPlayer } from '../../assets/player/player.ts';
 import { getMainColors, ParticleManager } from '../../assets/effects/colorUtils.ts';
-import { getLyricsData, initializeLyricsManager, setContainerId, updateCurrentLyrics, updateFocusedLyric } from '../../assets/lyrics/lyricsManager.ts';
+import { getLyricsData, setEffectMode, setContainerId, updateCurrentLyrics, updateFocusedLyric } from '../../assets/lyrics/lyricsManager.ts';
 import { getConfig } from '../../assets/utilities/configLoader.ts';
 
 // const songData = ref(getPlayer());
@@ -299,6 +299,7 @@ function updateLyricsStyle(style: number) {
         return;
     }
     lyricsEffectMode.value = style;
+    setEffectMode(style);
 }
 
 // 歌词光效及样式
@@ -352,7 +353,7 @@ onMounted(() => {
 
     // 歌词样式
     const lyricsStyle = parseInt(lyricsOptions.lyricsStyle);
-    initializeLyricsManager(lyricsStyle);
+    setEffectMode(lyricsStyle);
     updateLyricsStyle(lyricsStyle);
 
     // 同步设置变化
@@ -436,7 +437,8 @@ onMounted(() => {
             <!-- 歌词内容 -->
             <div class="flex column" id="lyricsContent">
                 <LyricsLine 
-                    v-for="lyricInfo in getLyricsData().lyrics"
+                    v-for="(lyricInfo, idx) in getLyricsData().lyrics"
+                    :key="`${lyricsEffectMode}-${idx}`"
                     :lyrics-object="lyricInfo"
                     :glow-effect="lyricsGlow"
                     :lyrics-mode="lyricsEffectMode"

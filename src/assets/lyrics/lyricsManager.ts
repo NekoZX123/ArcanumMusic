@@ -17,10 +17,10 @@ let lyricLines: Reactive<LyricData> = reactive({
 });
 
 /**
- * 初始化歌词控制器
+ * 设置歌词滚动效果类型
  * @param effectMode 歌词模式
  */
-function initializeLyricsManager(effectMode: number) {
+function setEffectMode(effectMode: number) {
     if (effectMode < 0 || effectMode > 2) {
         console.error(`[Error] Unknown lyrics type: ${effectMode}`);
         return;
@@ -202,7 +202,7 @@ function setContainerId(id: string) {
 }
 
 export {
-    initializeLyricsManager,
+    setEffectMode,
     updateCurrentLyrics,
     getLyricsData,
     updateFocusedLyric,
