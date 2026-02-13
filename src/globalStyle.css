@@ -1170,6 +1170,13 @@ img.outlineImage {
     background: var(--theme-color-transparent);
 }
 
+/* 静音按钮 */
+#volumeLevel {
+    border-radius: 8px;
+
+    margin-right: 3px;
+}
+
 #controlRightBar > * {
     margin: 0 3px;
 }

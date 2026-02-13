@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="_图层_1" data-name="图层_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 500">
   <!-- Generator: Adobe Illustrator 29.4.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 152)  -->
-  <rect x="100" y="230" width="300" height="40" rx="20" ry="20" transform="translate(-103.55 250) rotate(-45)" fill="#3e7df9"/>
-  <rect x="100" y="230" width="300" height="40" rx="20" ry="20" transform="translate(250 -103.55) rotate(45)" fill="#3e7df9"/>
-  <rect x="323" y="138" width="120" height="40" rx="20" ry="20" fill="#3e7df9"/>
-  <rect x="323" y="323" width="120" height="40" rx="20" ry="20" fill="#3e7df9"/>
-  <rect x="56" y="323" width="120" height="40" rx="20" ry="20" fill="#3e7df9"/>
-  <rect x="56" y="138" width="120" height="40" rx="20" ry="20" fill="#3e7df9"/>
   <g>
-    <path d="M384.29,93.06c-3.84,0-7.68,1.46-10.61,4.39-5.86,5.86-5.86,15.36,0,21.21l49.5,49.5c2.93,2.93,6.77,4.39,10.61,4.39s7.68-1.46,10.61-4.39c5.86-5.86,5.86-15.36,0-21.21l-49.5-49.5c-2.93-2.93-6.77-4.39-10.61-4.39h0Z" fill="#3e7df9"/>
-    <path d="M433.71,143.44c-3.84,0-7.68,1.46-10.61,4.39l-49.5,49.5c-5.86,5.86-5.86,15.36,0,21.21h0c2.93,2.93,6.77,4.39,10.61,4.39s7.68-1.46,10.61-4.39l49.5-49.5c5.86-5.86,5.86-15.36,0-21.21-2.93-2.93-6.77-4.39-10.61-4.39h0Z" fill="#3e7df9"/>
+    <rect x="96.03" y="230.02" width="300" height="50" rx="25" ry="25" transform="translate(-108.27 248.66) rotate(-45)" fill="#3e7df9"/>
+    <rect x="310.75" y="140.76" width="150" height="50" rx="25" ry="25" fill="#3e7df9"/>
+    <rect x="47.12" y="318.79" width="130" height="50" rx="25" ry="25" fill="#3e7df9"/>
+    <rect x="351" y="166.77" width="120" height="50" rx="25" ry="25" transform="translate(-15.22 346.79) rotate(-45)" fill="#3e7df9"/>
+    <rect x="386.08" y="81.11" width="50" height="120" rx="25" ry="25" transform="translate(20.62 332) rotate(-45)" fill="#3e7df9"/>
   </g>
   <g>
-    <path d="M383.29,278.06c-3.84,0-7.68,1.46-10.61,4.39h0c-5.86,5.86-5.86,15.36,0,21.21l49.5,49.5c2.93,2.93,6.77,4.39,10.61,4.39s7.68-1.46,10.61-4.39h0c5.86-5.86,5.86-15.36,0-21.21l-49.5-49.5c-2.93-2.93-6.77-4.39-10.61-4.39h0Z" fill="#3e7df9"/>
-    <path d="M432.71,328.44c-3.84,0-7.68,1.46-10.61,4.39l-49.5,49.5c-5.86,5.86-5.86,15.36,0,21.21h0c2.93,2.93,6.77,4.39,10.61,4.39s7.68-1.46,10.61-4.39l49.5-49.5c5.86-5.86,5.86-15.36,0-21.21-2.93-2.93-6.77-4.39-10.61-4.39h0Z" fill="#3e7df9"/>
+    <rect x="88.08" y="219.98" width="300" height="50" rx="25" ry="25" transform="translate(242.96 -96.6) rotate(45)" fill="#3e7df9"/>
+    <rect x="302.8" y="309.24" width="150" height="50" rx="25" ry="25" fill="#3e7df9"/>
+    <rect x="39.18" y="131.21" width="130" height="50" rx="25" ry="25" fill="#3e7df9"/>
+    <rect x="378.06" y="248.23" width="50" height="120" rx="25" ry="25" transform="translate(-99.9 375.28) rotate(-45)" fill="#3e7df9"/>
+    <rect x="343.13" y="333.89" width="120" height="50" rx="25" ry="25" transform="translate(-135.7 390.17) rotate(-45)" fill="#3e7df9"/>
   </g>
 </svg>

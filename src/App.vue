@@ -261,35 +261,24 @@ const captionWindowOptions = {
 // 桌面歌词窗口 ID
 let captionWindowId = -1;
 let isCaptionsOn: boolean = false;
+const desktopLyricsImage = ref('/images/player/desktopLyrics.svg');
 // 桌面歌词窗口关闭处理
 function handleCaptionsClose() {
-    const captionsButton = document.getElementById('captions') as HTMLButtonElement;
-    if (!captionsButton) {
-        console.error(`[Error] Failed to get element #captions`);
-        return;
-    }
-
-    captionsButton.classList.remove('active');
+    desktopLyricsImage.value = '/images/player/desktopLyrics.svg';
     window.electron.closeWindowById(captionWindowId);
 
     isCaptionsOn = false;
 }
 // 切换桌面歌词显示状态
 async function toggleCaptions(_?: MouseEvent) {
-    const captionsButton = document.getElementById('captions') as HTMLButtonElement;
-    if (!captionsButton) {
-        console.error(`[Error] Failed to get element #captions`);
-        return;
-    }
-
     if (isCaptionsOn) {
-        captionsButton.classList.remove('active');
+        desktopLyricsImage.value = '/images/player/desktopLyrics.svg';
         await window.electron.closeWindowById(captionWindowId);
 
         window.localStorage.setItem('captionsWinId', '');
     }
     else {
-        captionsButton.classList.add('active');
+        desktopLyricsImage.value = '/images/player/desktopLyrics.on.svg';
         const captionWindowUrl = `${window.location.href}?isDesktopLyrics=true`
         // 启动桌面歌词
         captionWindowId = await window.electron.createWindow(
@@ -583,7 +572,7 @@ onUnmounted(() => {
                 <!-- 其他控制 / 歌词 -->
                 <div class="flex row" id="controlRightBar">
                     <button class="playControl small" id="captions" @click="toggleCaptions" title="桌面歌词">
-                        <img class="outlineImage" src="/images/player/caption.svg" id="captionState" alt="Toggle caption"/>
+                        <img class="outlineImage" :src="desktopLyricsImage" id="captionState" alt="Toggle caption"/>
                     </button>
                     <button class="playControl small" id="playlist" @click="togglePlaylistPanel" title="播放列表">
                         <img class="outlineImage" src="/images/player/playlist.svg" id="playlistState" alt="Toggle playlist"/>
@@ -595,7 +584,7 @@ onUnmounted(() => {
                         <img class="outlineImage" :src="getPlayer()?.shuffleStateImage" alt="Toggle shuffle"/>
                     </button>
                     <div class="flex row">
-                        <img class="playControl small outlineImage" :src="`/images/player/volume_0${getPlayer()?.volumeLevel}.svg`" @click="getPlayer()?.toggleMute" title="静音" alt="mute"/>
+                        <img id="volumeLevel" class="playControl small outlineImage" :src="`/images/player/volume_0${getPlayer()?.volumeLevel}.svg`" @click="getPlayer()?.toggleMute" title="静音" alt="toggleMute"/>
                         <div id="volumeAdjust" @mousemove="adjustVolume">
                             <div id="volumeBar">
                                 <div id="volumeFilled" :style="`width: ${getPlayer()?.volume}%`"></div>

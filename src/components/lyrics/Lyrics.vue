@@ -377,7 +377,7 @@ onMounted(() => {
         <!-- 面板顶栏 -->
         <div class="flex row" id="panelTop">
             <button id="lyricsHide" @click="hideLyrics">
-                <img src="/images/player/expand.svg" alt="Hide lyrics"/>
+                <img src="/images/lyricsPanel/hide.svg" alt="Hide lyrics"/>
             </button>
         </div>
         <!-- 主面板 -->
