@@ -106,6 +106,8 @@ function updateStorageData(updateEvent: StorageEvent) {
     }
 }
 
+let isCaptionsOn = false;
+const alwaysOnTopImage = ref('./images/windowControl/alwaysTop.svg');
 function toggleWindowTop(_?: any) {
     const alwaysOnTopButton = document.getElementById('toggleTop') as HTMLButtonElement;
     if (!alwaysOnTopButton) {
@@ -120,15 +122,15 @@ function toggleWindowTop(_?: any) {
     }
     const captionsWindowId = parseInt(windowIdString);
 
-    const isCaptionsOn = alwaysOnTopButton.classList.contains('active');
     if (isCaptionsOn) {
-        alwaysOnTopButton.classList.remove('active');
+        alwaysOnTopImage.value = './images/windowControl/alwaysTop.svg';
         window.electron.setAlwaysOnTop(captionsWindowId, false);
     }
     else {
-        alwaysOnTopButton.classList.add('active');
+        alwaysOnTopImage.value = './images/windowControl/alwaysTop.on.svg';
         window.electron.setAlwaysOnTop(captionsWindowId, true);
     }
+    isCaptionsOn = !isCaptionsOn;
 }
 
 /**
@@ -169,10 +171,10 @@ onUnmounted(() => {
         <!-- 控制器 -->
         <div class="flex row" id="captionsBarController">
             <button class="playControl small" id="toggleTop" title="窗口置顶" @click="toggleWindowTop">
-                <img src="/images/windowControl/alwaysTop.svg"></img>
+                <img :src="alwaysOnTopImage"></img>
             </button>
             <button class="playControl small" id="changeTheme" title="切换主题" @click="switchTheme">
-                <img src="/images/player/adjustTheme.svg"></img>
+                <img src="/images/lyricsPanel/adjustTheme.svg"></img>
             </button>
 
             <div class="verticleSplitLine"></div>
