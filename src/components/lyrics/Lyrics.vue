@@ -179,6 +179,7 @@ async function loadMainColorBackground(_?: any) {
 
     // 加载动态背景
     const coverUrl = getPlayer()?.coverUrl;
+    console.log(`coverUrl: ${coverUrl}`);
     if (coverUrl) {
         // 获取封面主色
         const colorList: any = await getMainColors(coverUrl, PARTICLES_COUNT);
@@ -344,6 +345,7 @@ onMounted(() => {
     // 根据应用配置加载背景
     window.addEventListener('update-background', updateBackground);
     window.addEventListener('lyrics-launch', updateBackground);
+    window.addEventListener('config-change', updateBackground);
     
     // 读取配置
     const lyricsOptions = getConfig().generic.appearance.lyrics;
