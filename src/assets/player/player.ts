@@ -111,7 +111,7 @@ class Player {
         this.progressPercentage = 0;
         this.playStateImage = './images/player/play.dark.svg';
         this.playStateImageTransparent = './images/lyricsPanel/play.svg';
-        this.syncPlayStateImage();
+        this.updateStoredVariable('playState', '');
         this.isPlaying = false;
 
         this.volume = 100;
@@ -136,11 +136,12 @@ class Player {
         this.repeatState = 0;
         this.repeatStateImage = IMAGES_REPEAT[0];
         this.repeatStateImageTransparent = './images/lyricsPanel/repeat.svg';
-        this.syncRepeatStateImage();
+        this.updateStoredVariable('playState', '');
+
         this.shuffleState = 0;
         this.shuffleStateImage = IMAGES_SHUFFLE[0];
         this.shuffleStateImageTransparent = './images/lyricsPanel/shuffle.svg';
-        this.syncShuffleStateImage();
+        this.updateStoredVariable('shuffleState', '');
 
         this.url = '';
     }
@@ -677,6 +678,7 @@ function createPlayer(volumeBarIds?: string[]) {
     }
 
     player = new Player(volumeBarIds);
+
     playerReactive = reactive(player);
 
     return playerReactive;

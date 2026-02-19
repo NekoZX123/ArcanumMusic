@@ -151,6 +151,15 @@ onMounted(() => {
     document.body.appendChild(lyricStyle);
     lyricStyle.innerText = styleText;
 
+    // 加载 localStorage 中的歌词和状态
+    const storedLyrics = window.localStorage.getItem('currentLyrics');
+    if (storedLyrics) {
+        currentLyrics.value = JSON.parse(storedLyrics);
+    }
+    playStateImage.value = window.localStorage.getItem('playState') || './images/lyricsPanel/play.dark.svg';
+    repeatStateImage.value = window.localStorage.getItem('repeatState') || './images/lyricsPanel/repeat.svg';
+    shuffleStateImage.value = window.localStorage.getItem('shuffleState') || './images/lyricsPanel/shuffle.svg';
+
     window.addEventListener('storage', updateStorageData);
 
     console.log(`[Debug] Captions.vue loaded`);
