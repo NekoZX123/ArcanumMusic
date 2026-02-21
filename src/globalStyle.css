@@ -497,6 +497,10 @@ img.outlineImage {
     justify-content: center;
     align-items: center;
 }
+#settings:hover,
+#accounts:hover {
+    background: var(--transparent-grey);
+}
 #settings.current,
 #accounts.current {
     background: var(--theme-color-default);

@@ -1,16 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="_图层_1" data-name="图层_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 500">
   <!-- Generator: Adobe Illustrator 29.4.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 152)  -->
-  <defs>
-    <style>
-      .st0 {
-        fill: none;
-        stroke: #202428;
-        stroke-miterlimit: 10;
-        stroke-width: 10px;
-      }
-    </style>
-  </defs>
-  <path class="st0" d="M307.68,120.1h-115.36c-10.72,0-20.62,5.72-25.98,15l-57.68,99.9c-5.36,9.28-5.36,20.72,0,30l57.68,99.9c5.36,9.28,15.26,15,25.98,15h115.36c10.72,0,20.62-5.72,25.98-15l57.68-99.9c5.36-9.28,5.36-20.72,0-30l-57.68-99.9c-5.36-9.28-15.26-15-25.98-15Z"/>
-  <circle class="st0" cx="250.5" cy="250.5" r="90"/>
+  <path d="M309.72,106.56h-119.44c-14.29,0-27.5,7.62-34.64,20l-59.72,103.44c-7.15,12.38-7.15,27.62,0,40l59.72,103.44c7.15,12.38,20.35,20,34.64,20h119.44c14.29,0,27.5-7.62,34.64-20l59.72-103.44c7.15-12.38,7.15-27.62,0-40l-59.72-103.44c-7.15-12.38-20.35-20-34.64-20Z" fill="none" stroke="#202428" stroke-miterlimit="10" stroke-width="30"/>
+  <circle cx="250.5" cy="250.5" r="80" fill="none" stroke="#202428" stroke-miterlimit="10" stroke-width="30"/>
 </svg>

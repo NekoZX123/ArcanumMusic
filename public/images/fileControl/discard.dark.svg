@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="_图层_1" data-name="图层_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 500">
   <!-- Generator: Adobe Illustrator 29.4.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 152)  -->
-  <rect x="100" y="384.02" width="300" height="10" rx="5" ry="5" fill="#eaeff4"/>
-  <rect x="130.4" y="200.58" width="300" height="50" rx="10" ry="10" transform="translate(-77.38 264.34) rotate(-45)" fill="none" stroke="#eaeff4" stroke-miterlimit="10" stroke-width="10"/>
-  <rect x="360.86" y="105.12" width="30" height="50" rx="10" ry="10" transform="translate(18.08 303.88) rotate(-45)" fill="none" stroke="#eaeff4" stroke-miterlimit="10" stroke-width="10"/>
-  <path d="M137.95,382.91l45.91-23.17c6.08-3.07,7.38-11.18,2.57-16l-22.74-22.74c-4.82-4.82-12.93-3.51-16,2.57l-23.17,45.91c-4.35,8.61,4.82,17.78,13.43,13.43Z" fill="none" stroke="#eaeff4" stroke-miterlimit="10" stroke-width="10"/>
-  <rect x="227.82" y="316.85" width="200" height="10" rx="5" ry="5" transform="translate(-131.56 326.07) rotate(-45)" fill="#f4462f"/>
-  <rect x="227.82" y="316.85" width="200" height="10" rx="5" ry="5" transform="translate(323.6 -137.54) rotate(45)" fill="#f4462f"/>
+  <path d="M375,185.95v174.07c0,22.09-17.91,40-40,40h-170c-22.09,0-40-17.91-40-40v-220c0-22.09,17.91-40,40-40h109.66s19.72-1.45,34.95,11.54l56.46,47.5s8.93,10.75,8.93,26.89Z" fill="none" stroke="#efefef" stroke-miterlimit="10" stroke-width="25"/>
+  <g>
+    <rect x="224.75" y="311.02" width="150" height="25" rx="12.5" ry="12.5" transform="translate(-140.97 306.71) rotate(-45)" fill="#f33"/>
+    <rect x="224.75" y="311.02" width="150" height="25" rx="12.5" ry="12.5" transform="translate(282.94 764.24) rotate(-135)" fill="#f33"/>
+  </g>
 </svg>
