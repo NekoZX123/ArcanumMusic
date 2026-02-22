@@ -397,7 +397,7 @@ onMounted(() => {
                         </div>
                         <div class="flex row" id="volumeInLyrics">
                             <button id="toggleMute" @click="getPlayer()?.toggleMute">
-                                <img :src="`/images/lyricsPanel/volume_0${getPlayer()?.volumeLevel}.svg`"/>
+                                <img :src="`./images/lyricsPanel/volume_0${getPlayer()?.volumeLevel}.svg`"/>
                             </button>
                             <div id="lyricsPageVolumeFilled" @mousemove="adjustVolume">
                                 <div id="lyricsPageVolumeBar">

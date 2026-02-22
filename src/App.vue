@@ -261,10 +261,10 @@ const captionWindowOptions = {
 // 桌面歌词窗口 ID
 let captionWindowId = -1;
 let isCaptionsOn: boolean = false;
-const desktopLyricsImage = ref('/images/player/desktopLyrics.svg');
+const desktopLyricsImage = ref('./images/player/desktopLyrics.svg');
 // 桌面歌词窗口关闭处理
 function handleCaptionsClose() {
-    desktopLyricsImage.value = '/images/player/desktopLyrics.svg';
+    desktopLyricsImage.value = './images/player/desktopLyrics.svg';
     window.electron.closeWindowById(captionWindowId);
 
     isCaptionsOn = false;
@@ -272,13 +272,13 @@ function handleCaptionsClose() {
 // 切换桌面歌词显示状态
 async function toggleCaptions(_?: MouseEvent) {
     if (isCaptionsOn) {
-        desktopLyricsImage.value = '/images/player/desktopLyrics.svg';
+        desktopLyricsImage.value = './images/player/desktopLyrics.svg';
         await window.electron.closeWindowById(captionWindowId);
 
         window.localStorage.setItem('captionsWinId', '');
     }
     else {
-        desktopLyricsImage.value = '/images/player/desktopLyrics.on.svg';
+        desktopLyricsImage.value = './images/player/desktopLyrics.on.svg';
         const captionWindowUrl = `${window.location.href}?isDesktopLyrics=true`
         // 启动桌面歌词
         captionWindowId = await window.electron.createWindow(
@@ -584,7 +584,7 @@ onUnmounted(() => {
                         <img class="outlineImage" :src="getPlayer()?.shuffleStateImage" alt="Toggle shuffle"/>
                     </button>
                     <div class="flex row">
-                        <img id="volumeLevel" class="playControl small outlineImage" :src="`/images/player/volume_0${getPlayer()?.volumeLevel}.svg`" @click="getPlayer()?.toggleMute" title="静音" alt="toggleMute"/>
+                        <img id="volumeLevel" class="playControl small outlineImage" :src="`./images/player/volume_0${getPlayer()?.volumeLevel}.svg`" @click="getPlayer()?.toggleMute" title="静音" alt="toggleMute"/>
                         <div id="volumeAdjust" @mousemove="adjustVolume">
                             <div id="volumeBar">
                                 <div id="volumeFilled" :style="`width: ${getPlayer()?.volume}%`"></div>
