@@ -73,17 +73,14 @@
 
     <page id="developerOptions" name="开发者选项">
         <warning type="critical">
-            警告: 开发者选项可能导致应用不稳定甚至崩溃, 
+            开发者选项可能导致应用不稳定甚至崩溃, 
             也可能在操作不当的情况下存在隐含的其他风险。
             开发者不推荐您更改这些选项中的任何内容, 
             也不会对任何使用开发者选项不当而造成的损失负责。
             如果您要继续, 请选择 '是'
         </warning>
-        <warning type="normal">警告: 不要在您不知道自己在做什么的情况下更改这些选项</warning>
+        <warning type="normal">以下设置项仅供开发使用</warning>
 
-        <node id="account" title="账号">
-            <checkbox id="useDebugAccounts" text="使用调试账户信息"/>
-        </node>
         <node id="application" title="应用">
             <checkbox id="enableDevtoolsHotkey" text="启用开发者工具快捷键 Ctrl+Shift+I"/>
             <checkbox id="devtoolsOnLaunched" text="应用启动时打开开发者工具"/>
