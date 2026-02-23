@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_图层_1" data-name="图层_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 500">
+  <!-- Generator: Adobe Illustrator 29.4.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 152)  -->
+  <g opacity=".8">
+    <rect x="35.12" y="149.9" width="140" height="200.19" rx="45" ry="45" fill="#f8f8f8"/>
+    <path d="M206.07,406.25l-53.23-39.77c-12.92-9.65-21.92-28.98-21.92-44.53v-143.89c0-15.55,9-34.88,21.92-44.53l53.23-39.77c28.85-21.56,58.82-18.74,58.82,12.36v287.77c0,31.1-29.97,33.91-58.82,12.36Z" fill="#f8f8f8"/>
+  </g>
+  <g opacity=".8">
+    <path d="M314.05,221.3c17.67,17.67,17.8,46.13.29,63.64" fill="none" stroke="#f8f8f8" stroke-miterlimit="10" stroke-width="40"/>
+    <circle cx="314.02" cy="221.27" r="20" fill="#f8f8f8"/>
+    <circle cx="314.02" cy="285.27" r="20" fill="#f8f8f8"/>
+  </g>
+  <g opacity=".8">
+    <path d="M356.76,186.52c36.62,36.62,36.62,95.87,0,132.49" fill="none" stroke="#f8f8f8" stroke-miterlimit="10" stroke-width="40"/>
+    <circle cx="356.02" cy="186.27" r="20" fill="#f8f8f8"/>
+    <circle cx="356.02" cy="320.27" r="20" fill="#f8f8f8"/>
+  </g>
+  <g opacity=".5">
+    <path d="M402.02,144.2c58.63,58.63,58.63,153.51,0,212.13" fill="none" stroke="#f8f8f8" stroke-miterlimit="10" stroke-width="40"/>
+    <circle cx="402.02" cy="144.27" r="20" fill="#f8f8f8"/>
+    <circle cx="402.02" cy="356.27" r="20" fill="#f8f8f8"/>
+  </g>
+</svg>

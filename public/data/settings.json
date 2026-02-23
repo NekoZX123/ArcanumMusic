@@ -31,7 +31,7 @@
         "localInfo": {
             "user": {
                 "avatarLink": "./images/library/defaultAvatar.svg",
-                "userName": "User"
+                "userName": "默认用户"
             },
             "greetings": {
                 "useGreetings": true,
@@ -40,9 +40,6 @@
         }
     },
     "developerOptions": {
-        "account": {
-            "useDebugAccounts": false
-        },
         "application": {
             "enableDevtoolsHotkey": false,
             "devtoolsOnLaunched": false

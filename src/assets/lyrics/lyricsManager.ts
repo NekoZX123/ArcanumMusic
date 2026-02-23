@@ -17,10 +17,10 @@ let lyricLines: Reactive<LyricData> = reactive({
 });
 
 /**
- * 初始化歌词控制器
+ * 设置歌词滚动效果类型
  * @param effectMode 歌词模式
  */
-function initializeLyricsManager(effectMode: number) {
+function setEffectMode(effectMode: number) {
     if (effectMode < 0 || effectMode > 2) {
         console.error(`[Error] Unknown lyrics type: ${effectMode}`);
         return;
@@ -146,7 +146,7 @@ function updateFocusedLyric(time: number) {
                         const relativeIndex = i - targetIndex;
 
                         // 增大间距
-                        line.style.transition = `transform ${amScrollTime}ms ease-out`;
+                        line.style.transition = `transform ${amScrollTime}ms ease-out, background 400ms ease-in-out`;
                         line.style.transitionDelay = `0`;
                         line.style.transform = `translateY(${relativeIndex * amMarginDelta}px)`;
                     }
@@ -156,7 +156,7 @@ function updateFocusedLyric(time: number) {
                             const line = lyricElements[i] as HTMLElement;
                             const relativeIndex = i - targetIndex;
 
-                            line.style.transition = `transform ${amOverflowTime}ms ease-out`;
+                            line.style.transition = `transform ${amOverflowTime}ms ease-out, background 400ms ease-in-out`;
                             line.style.transitionDelay = `${amOverflowDelayBase + relativeIndex * amOverflowDelayDelta}ms`; // 每行延迟移动
                             line.style.transform = `translateY(-${amOverflowMargin}px)`;
                         }
@@ -171,7 +171,7 @@ function updateFocusedLyric(time: number) {
                         for (let i = animationStartIndex; i <= animationEndIndex; i++) {
                             const line = lyricElements[i] as HTMLElement;
 
-                            line.style.transition = `transform ${amRestoreTime}ms ease-out`;
+                            line.style.transition = `transform ${amRestoreTime}ms ease-out, background 400ms ease-in-out`;
                             line.style.transitionDelay = `0`;
                             line.style.transform = `translateY(1px)`;
                         }
@@ -202,7 +202,7 @@ function setContainerId(id: string) {
 }
 
 export {
-    initializeLyricsManager,
+    setEffectMode,
     updateCurrentLyrics,
     getLyricsData,
     updateFocusedLyric,

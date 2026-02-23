@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 500">
-  <!-- Generator: Adobe Illustrator 28.7.1, SVG Export Plug-In . SVG Version: 1.2.0 Build 142)  -->
-  <g>
-    <g id="_图层_1" data-name="图层_1">
-      <rect x="33.69" y="225.13" width="266.5" height="50" rx="25" ry="25" transform="translate(-121.73 165.82) rotate(-40)"/>
-      <rect x="199.81" y="224.87" width="266.5" height="50" rx="25" ry="25" transform="translate(427.59 655.37) rotate(-140)"/>
-    </g>
-  </g>
+<svg id="_图层_1" data-name="图层_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 500">
+  <!-- Generator: Adobe Illustrator 29.4.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 152)  -->
+  <rect x="13.32" y="217.02" width="294.31" height="66.26" rx="30" ry="30" transform="translate(-123.25 161.68) rotate(-40)" fill="#1c1c1c"/>
+  <rect x="192.37" y="216.72" width="294.31" height="66.26" rx="30" ry="30" transform="translate(439.01 659.49) rotate(-140)" fill="#1c1c1c"/>
 </svg>

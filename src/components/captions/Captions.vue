@@ -94,18 +94,21 @@ function updateStorageData(updateEvent: StorageEvent) {
     if (updateEvent.key === 'currentLyrics' && updateEvent.newValue) {
         const lyrics = JSON.parse(updateEvent.newValue);
         currentLyrics.value = Object.assign({}, lyrics);
+        requestAnimationFrame(adjustFontSize);
     }
     if (updateEvent.key === 'playState' && updateEvent.newValue) {
-        playStateImage.value = updateEvent.newValue || './images/player/play.dark.svg';
+        playStateImage.value = updateEvent.newValue;
     }
     if (updateEvent.key === 'repeatState' && updateEvent.newValue) {
-        repeatStateImage.value = updateEvent.newValue || './images/player/repeat.svg';
+        repeatStateImage.value = updateEvent.newValue;
     }
     if (updateEvent.key === 'shuffleState' && updateEvent.newValue) {
-        shuffleStateImage.value = updateEvent.newValue || './images/player/shuffle.svg';
+        shuffleStateImage.value = updateEvent.newValue;
     }
 }
 
+let isCaptionsOn = false;
+const alwaysOnTopImage = ref('./images/windowControl/alwaysTop.svg');
 function toggleWindowTop(_?: any) {
     const alwaysOnTopButton = document.getElementById('toggleTop') as HTMLButtonElement;
     if (!alwaysOnTopButton) {
@@ -120,15 +123,15 @@ function toggleWindowTop(_?: any) {
     }
     const captionsWindowId = parseInt(windowIdString);
 
-    const isCaptionsOn = alwaysOnTopButton.classList.contains('active');
     if (isCaptionsOn) {
-        alwaysOnTopButton.classList.remove('active');
+        alwaysOnTopImage.value = './images/windowControl/alwaysTop.svg';
         window.electron.setAlwaysOnTop(captionsWindowId, false);
     }
     else {
-        alwaysOnTopButton.classList.add('active');
+        alwaysOnTopImage.value = './images/windowControl/alwaysTop.on.svg';
         window.electron.setAlwaysOnTop(captionsWindowId, true);
     }
+    isCaptionsOn = !isCaptionsOn;
 }
 
 /**
@@ -144,12 +147,51 @@ function sendToMain(eventName: string, message?: any) {
 let lyricStyle: HTMLElement;
 const windowIdentifier = 'moe.nekozx.arcanummusic.desktoplyrics';
 
+// 限制歌词字体大小
+function adjustFontSize() {
+    const lyricsBox = document.getElementById('currentLyricsBox');
+    if (!lyricsBox) return;
+
+    const ulElements = Array.from(lyricsBox.querySelectorAll('ul')) as HTMLElement[];
+    ulElements.forEach((ul, index) => {
+        // 选择初始 pt 大小
+        const basePt = index === 0 ? 24 : 18;
+
+        // pt -> px
+        let fontSizePx = Math.round(basePt * 96 / 72);
+        ul.style.fontSize = `${fontSizePx}px`;
+
+        // 逐步缩小字号
+        const minFontPx = 12;
+        while (fontSizePx > minFontPx && ul.scrollWidth > lyricsBox.clientWidth) {
+            fontSizePx -= 1;
+            ul.style.fontSize = `${fontSizePx}px`;
+        }
+    });
+}
+
+onUnmounted(() => {
+    window.removeEventListener('resize', adjustFontSize);
+});
+
 onMounted(() => {
     lyricStyle = document.createElement('style');
     document.body.appendChild(lyricStyle);
     lyricStyle.innerText = styleText;
 
+    // 加载 localStorage 中的歌词和状态
+    const storedLyrics = window.localStorage.getItem('currentLyrics');
+    if (storedLyrics) {
+        currentLyrics.value = JSON.parse(storedLyrics);
+    }
+    playStateImage.value = window.localStorage.getItem('playState') || './images/lyricsPanel/play.dark.svg';
+    repeatStateImage.value = window.localStorage.getItem('repeatState') || './images/lyricsPanel/repeat.svg';
+    shuffleStateImage.value = window.localStorage.getItem('shuffleState') || './images/lyricsPanel/shuffle.svg';
+
     window.addEventListener('storage', updateStorageData);
+
+    window.addEventListener('resize', adjustFontSize);
+    adjustFontSize();
 
     console.log(`[Debug] Captions.vue loaded`);
 });
@@ -169,10 +211,10 @@ onUnmounted(() => {
         <!-- 控制器 -->
         <div class="flex row" id="captionsBarController">
             <button class="playControl small" id="toggleTop" title="窗口置顶" @click="toggleWindowTop">
-                <img src="/images/windowControl/alwaysTop.svg"></img>
+                <img :src="alwaysOnTopImage"></img>
             </button>
             <button class="playControl small" id="changeTheme" title="切换主题" @click="switchTheme">
-                <img src="/images/player/adjustTheme.svg"></img>
+                <img src="/images/lyricsPanel/adjustTheme.svg"></img>
             </button>
 
             <div class="verticleSplitLine"></div>

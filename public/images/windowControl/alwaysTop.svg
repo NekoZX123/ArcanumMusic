@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg id="_图层_1" data-name="图层_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 500">
   <!-- Generator: Adobe Illustrator 29.4.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 152)  -->
-  <rect x="70" y="66.67" width="360" height="40" rx="20" ry="20" fill="#232d30"/>
-  <path d="M237.82,96.61l-155.23,119.21c-15.15,11.64-6.92,35.86,12.18,35.86h310.46c19.11,0,27.33-24.23,12.18-35.86l-155.23-119.21c-7.18-5.52-17.18-5.52-24.36,0Z" fill="#232d30"/>
-  <rect x="180" y="213.33" width="140" height="240" rx="20" ry="20" fill="#232d30"/>
+  <rect x="50" y="49.67" width="400" height="70" rx="35" ry="35" fill="#1c1c1c"/>
+  <path d="M231.73,125.87l-152.1,116.8c-22.73,17.45-10.39,53.79,18.27,53.79h304.2c28.66,0,41-36.34,18.27-53.79l-152.1-116.8c-10.78-8.28-25.77-8.28-36.54,0Z" fill="#1c1c1c"/>
+  <rect x="180" y="245.14" width="140" height="205.19" rx="35" ry="35" fill="#1c1c1c"/>
 </svg>

@@ -153,9 +153,6 @@ onMounted(() => {
             <MenuItem id="playNext" icon="./images/menu/addToList.svg" text="下一首播放" 
                 :on-click="() => {getPlayer()?.playlistAdd(props.targetInfo, true)}" 
                 v-if="props.menuType === 'song'"></MenuItem>
-            <MenuItem id="likeControl" icon="./images/menu/addToFavourites.svg" text="收藏" 
-                :on-click="() => {console.log(`[Debug] Add to favourites: ${JSON.stringify(props.targetInfo)}`)}" 
-                v-if="props.menuType !== 'platformSelect'"></MenuItem>
         </span>
         <span class="menuPart flex column">
             <MenuItem id="songInfo" icon="./images/menu/play.svg" text="查看歌曲信息" 

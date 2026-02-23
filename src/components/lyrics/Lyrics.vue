@@ -4,7 +4,7 @@ import './lyricsStyle.css';
 import { LyricsLine } from '../../assets/lyrics/Lyrics.tsx';
 import { getPlayer } from '../../assets/player/player.ts';
 import { getMainColors, ParticleManager } from '../../assets/effects/colorUtils.ts';
-import { getLyricsData, initializeLyricsManager, setContainerId, updateCurrentLyrics, updateFocusedLyric } from '../../assets/lyrics/lyricsManager.ts';
+import { getLyricsData, setEffectMode, setContainerId, updateCurrentLyrics, updateFocusedLyric } from '../../assets/lyrics/lyricsManager.ts';
 import { getConfig } from '../../assets/utilities/configLoader.ts';
 
 // const songData = ref(getPlayer());
@@ -179,6 +179,7 @@ async function loadMainColorBackground(_?: any) {
 
     // 加载动态背景
     const coverUrl = getPlayer()?.coverUrl;
+    console.log(`coverUrl: ${coverUrl}`);
     if (coverUrl) {
         // 获取封面主色
         const colorList: any = await getMainColors(coverUrl, PARTICLES_COUNT);
@@ -299,6 +300,7 @@ function updateLyricsStyle(style: number) {
         return;
     }
     lyricsEffectMode.value = style;
+    setEffectMode(style);
 }
 
 // 歌词光效及样式
@@ -343,6 +345,7 @@ onMounted(() => {
     // 根据应用配置加载背景
     window.addEventListener('update-background', updateBackground);
     window.addEventListener('lyrics-launch', updateBackground);
+    window.addEventListener('config-change', updateBackground);
     
     // 读取配置
     const lyricsOptions = getConfig().generic.appearance.lyrics;
@@ -352,7 +355,7 @@ onMounted(() => {
 
     // 歌词样式
     const lyricsStyle = parseInt(lyricsOptions.lyricsStyle);
-    initializeLyricsManager(lyricsStyle);
+    setEffectMode(lyricsStyle);
     updateLyricsStyle(lyricsStyle);
 
     // 同步设置变化
@@ -376,7 +379,7 @@ onMounted(() => {
         <!-- 面板顶栏 -->
         <div class="flex row" id="panelTop">
             <button id="lyricsHide" @click="hideLyrics">
-                <img src="/images/player/expand.svg" alt="Hide lyrics"/>
+                <img src="/images/lyricsPanel/hide.svg" alt="Hide lyrics"/>
             </button>
         </div>
         <!-- 主面板 -->
@@ -394,7 +397,7 @@ onMounted(() => {
                         </div>
                         <div class="flex row" id="volumeInLyrics">
                             <button id="toggleMute" @click="getPlayer()?.toggleMute">
-                                <img :src="getPlayer()?.volumeLevel"/>
+                                <img :src="`./images/lyricsPanel/volume_0${getPlayer()?.volumeLevel}.svg`"/>
                             </button>
                             <div id="lyricsPageVolumeFilled" @mousemove="adjustVolume">
                                 <div id="lyricsPageVolumeBar">
@@ -415,20 +418,20 @@ onMounted(() => {
                     </span>
                     <!-- 播放控制器栏 -->
                     <span class="flex row" id="controlBar">
-                        <button class="playControl small glow" id="toggleRepeat" @click="getPlayer()?.toggleRepeat">
-                            <img :src="getPlayer()?.repeatStateImage" alt="Toggle repeat"/>
+                        <button class="playControl small" id="toggleRepeat" @click="getPlayer()?.toggleRepeat">
+                            <img :src="getPlayer()?.repeatStateImageTransparent" alt="Toggle repeat"/>
                         </button>
-                        <button class="playControl glow" id="previous" @click="getPlayer()?.previousSong">
-                            <img src="/images/player/previous.svg" alt="Previous song"/>
+                        <button class="playControl" id="previous" @click="getPlayer()?.previousSong">
+                            <img src="/images/lyricsPanel/previous.svg" alt="Previous song"/>
                         </button>
-                        <button class="playControl large glow" id="playPause" @click="togglePlayPauseInLyrics">
-                            <img :src="getPlayer()?.playStateImage" alt="Play / Pause"/>
+                        <button class="playControl large" id="playPause" @click="togglePlayPauseInLyrics">
+                            <img :src="getPlayer()?.playStateImageTransparent" alt="Play / Pause"/>
                         </button>
-                        <button class="playControl glow" id="next" @click="getPlayer()?.nextSong">
-                            <img src="/images/player/next.svg" alt="Next song"/>
+                        <button class="playControl" id="next" @click="getPlayer()?.nextSong">
+                            <img src="/images/lyricsPanel/next.svg" alt="Next song"/>
                         </button>
-                        <button class="playControl small glow" id="toggleShuffle" @click="getPlayer()?.toggleShuffle">
-                            <img :src="getPlayer()?.shuffleStateImage" alt="Toggle shuffle"/>
+                        <button class="playControl small" id="toggleShuffle" @click="getPlayer()?.toggleShuffle">
+                            <img :src="getPlayer()?.shuffleStateImageTransparent" alt="Toggle shuffle"/>
                         </button>
                     </span>
                 </div>
@@ -436,7 +439,8 @@ onMounted(() => {
             <!-- 歌词内容 -->
             <div class="flex column" id="lyricsContent">
                 <LyricsLine 
-                    v-for="lyricInfo in getLyricsData().lyrics"
+                    v-for="(lyricInfo, idx) in getLyricsData().lyrics"
+                    :key="`${lyricsEffectMode}-${idx}`"
                     :lyrics-object="lyricInfo"
                     :glow-effect="lyricsGlow"
                     :lyrics-mode="lyricsEffectMode"

@@ -39,10 +39,10 @@ function parseRGBString(rgbString: string) {
 
 const MAX_BRIGHTNESS = 0.90; // 最大明度
 const MIN_BRIGHTNESS = 0.10; // 最小明度
-const MIN_SATURATION = 0.20; // 最小饱和度
+const MIN_SATURATION = 0.10; // 最小饱和度
 const MAX_BRIGHTNESS_STRICT = 0.80 // 最大明度 (严格匹配模式)
 const MIN_BRIGHTNESS_STRICT = 0.20; // 最小明度 (严格匹配模式)
-const MIN_SATURATION_STRICT = 0.30; // 最小明度 (严格匹配模式)
+const MIN_SATURATION_STRICT = 0.20; // 最小明度 (严格匹配模式)
 /**
  * 判断颜色是否适合作为背景主色
  * @param r RGB - R
@@ -289,45 +289,108 @@ function getMainColors(imgUrl: string, count: number = 3, useStrict: boolean = f
         img.crossOrigin = 'anonymous';
 
         img.onload = () => {
-            // 创建画布并绘制图片
+            // 缩放到较小尺寸以加速处理，同时保持宽高比
+            const MAX_DIM = 200;
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
-            if (!context) return;
+            if (!context) return reject(new Error('Canvas context unavailable'));
 
-            canvas.width = img.width;
-            canvas.height = img.height;
-            context.drawImage(img, 0, 0);
+            let w = img.width;
+            let h = img.height;
+            if (Math.max(w, h) > MAX_DIM) {
+                const scale = MAX_DIM / Math.max(w, h);
+                w = Math.max(1, Math.round(w * scale));
+                h = Math.max(1, Math.round(h * scale));
+            }
+            canvas.width = w;
+            canvas.height = h;
+            context.drawImage(img, 0, 0, w, h);
 
-            // 获取图片像素数据
-            const imgData = context.getImageData(0, 0, canvas.width, canvas.height);
+            const imgData = context.getImageData(0, 0, w, h);
             const pixels = imgData.data;
 
-            // 采样
+            // 采样控制：目标样本数限定以控制速度与准确度
+            const totalPixels = w * h;
+            const TARGET_SAMPLES = 1200; // 经验值：1200 个样本够用
+            const sampleStep = Math.max(1, Math.floor(totalPixels / TARGET_SAMPLES));
+
             const colorMap = new Map<string, number>();
-            const step = Math.max(1, Math.floor(pixels.length / 500)); // 采样步长
 
-            for (let i = 0; i < pixels.length; i += 4 * step) {
-                const [r, g, b] = [pixels[i], pixels[i + 1], pixels[i + 2]];
+            // 遍历像素并计数（量化到 COLOR_STEP）
+            for (let pi = 0; pi < totalPixels; pi += sampleStep) {
+                const i = pi * 4;
+                const r = pixels[i];
+                const g = pixels[i + 1];
+                const b = pixels[i + 2];
+                const a = pixels[i + 3];
 
-                if (isProperColor(r, g, b, useStrict)) {
-                    // 简化颜色
-                    const simplefiedColor = `${Math.round(r / COLOR_STEP) * COLOR_STEP},${Math.round(g / COLOR_STEP) * COLOR_STEP},${Math.round(b / COLOR_STEP) * COLOR_STEP}`;
-                    colorMap.set(simplefiedColor, (colorMap.get(simplefiedColor) || 0) + 1);
+                // 忽略透明或近透明像素
+                if (a !== undefined && a < 125) continue;
+
+                if (!isProperColor(r, g, b, useStrict)) continue;
+
+                const qr = Math.round(r / COLOR_STEP) * COLOR_STEP;
+                const qg = Math.round(g / COLOR_STEP) * COLOR_STEP;
+                const qb = Math.round(b / COLOR_STEP) * COLOR_STEP;
+                const key = `${qr},${qg},${qb}`;
+                colorMap.set(key, (colorMap.get(key) || 0) + 1);
+            }
+
+            if (colorMap.size === 0) {
+                // 无候选色时回退：降低筛选标准，尝试更多像素
+                for (let pi = 0; pi < totalPixels; pi++) {
+                    const i = pi * 4;
+                    const r = pixels[i];
+                    const g = pixels[i + 1];
+                    const b = pixels[i + 2];
+                    const a = pixels[i + 3];
+                    if (a !== undefined && a < 125) continue;
+                    const qr = Math.round(r / COLOR_STEP) * COLOR_STEP;
+                    const qg = Math.round(g / COLOR_STEP) * COLOR_STEP;
+                    const qb = Math.round(b / COLOR_STEP) * COLOR_STEP;
+                    const key = `${qr},${qg},${qb}`;
+                    colorMap.set(key, (colorMap.get(key) || 0) + 1);
                 }
             }
 
-            // 按频率排序并返回主要颜色
-            const sortedColors = Array.from(colorMap.entries())
-                .sort((a, b) => b[1] - a[1]) // 按频率降序排序
-                .map(([color]) => color);
+            // 根据频率排序
+            const sorted = Array.from(colorMap.entries())
+                .sort((a, b) => b[1] - a[1])
+                .map(([key]) => key);
 
-            const mainColors = sortedColors.slice(0, count).map((color) => {
-                const [r, g, b] = color.split(',');
-                return `rgb(${r},${g},${b})`;
-            });
+            // 选择颜色并确保色相上有一定分离度以避免过于相近的颜色
+            const chosen: string[] = [];
+            const hueList: number[] = [];
+            const MIN_HUE_DIFF = 0.08; // 约 30°
 
-            console.info(`[Main Color Extraction Algorithm] Extracted colors: ${mainColors}`);
-            resolve(mainColors);
+            for (let i = 0; i < sorted.length && chosen.length < count; i++) {
+                const [rs, gs, bs] = sorted[i].split(',').map((v) => parseInt(v, 10));
+                const { h } = rgb2hsv(rs, gs, bs);
+
+                // 检查与已选颜色色相差异
+                let ok = true;
+                for (const eh of hueList) {
+                    const diff = Math.abs(h - eh);
+                    const dh = Math.min(diff, 1 - diff);
+                    if (dh < MIN_HUE_DIFF) { ok = false; break; }
+                }
+                if (!ok) continue;
+
+                hueList.push(h);
+                chosen.push(`rgb(${rs},${gs},${bs})`);
+            }
+
+            // 若不足，直接补齐前 N 个频率最高的颜色
+            if (chosen.length < count) {
+                for (let i = 0; i < sorted.length && chosen.length < count; i++) {
+                    const [rs, gs, bs] = sorted[i].split(',').map((v) => parseInt(v, 10));
+                    const candidate = `rgb(${rs},${gs},${bs})`;
+                    if (!chosen.includes(candidate)) chosen.push(candidate);
+                }
+            }
+
+            console.info(`[Main Color Extraction Algorithm] Extracted colors: ${chosen}`);
+            resolve(chosen);
         };
 
         img.onerror = () => reject(new Error('Failed to load image resource'));

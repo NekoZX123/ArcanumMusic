@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="_图层_1" data-name="图层_1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
-  <rect x="62.5" y="190" width="100" height="120" rx="20" ry="20"/>
-  <path d="M211.5,362.02l-71.11-49.78c-5.14-3.6-8.89-10.24-8.89-15.18v-94.09c0-4.95,3.75-11.59,8.89-15.18l71.11-49.78c19.87-13.91,40-17.97,40-5.6v235.23c0,12.37-20.13,8.31-40-5.6Z"/>
-  <rect x="279.5" y="237.5" width="150" height="30" rx="15" ry="15" transform="translate(-74.71 324.62) rotate(-45)"/>
-  <rect x="278.88" y="238.03" width="150" height="30" rx="15" ry="15" transform="translate(282.57 -176.12) rotate(45)"/>
+<svg id="_图层_1" data-name="图层_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 500 500">
+  <!-- Generator: Adobe Illustrator 29.4.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 152)  -->
+  <g>
+    <rect x="35.07" y="149.9" width="140" height="200.19" rx="45" ry="45" fill="#1c1c1c"/>
+    <path d="M206.01,406.25l-53.23-39.77c-12.92-9.65-21.92-28.98-21.92-44.53v-143.89c0-15.55,9-34.88,21.92-44.53l53.23-39.77c28.85-21.56,58.82-18.74,58.82,12.36v287.77c0,31.1-29.97,33.91-58.82,12.36Z" fill="#1c1c1c"/>
+  </g>
+  <g>
+    <rect x="299.95" y="225" width="180" height="50" rx="25" ry="25" transform="translate(-62.56 348.96) rotate(-45)" fill="#1c1c1c"/>
+    <rect x="299.95" y="225" width="180" height="50" rx="25" ry="25" transform="translate(290.99 -202.51) rotate(45)" fill="#1c1c1c"/>
+  </g>
 </svg>

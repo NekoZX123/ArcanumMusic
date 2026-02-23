@@ -497,6 +497,10 @@ img.outlineImage {
     justify-content: center;
     align-items: center;
 }
+#settings:hover,
+#accounts:hover {
+    background: var(--transparent-grey);
+}
 #settings.current,
 #accounts.current {
     background: var(--theme-color-default);
@@ -785,7 +789,7 @@ img.outlineImage {
 .songCard > .songInfo {
     align-items: flex-start;
 }
-.songInfo > label {
+.songCard > .songInfo > label {
     width: 10rem;
     height: 16pt;
     overflow: hidden;
@@ -1168,6 +1172,13 @@ img.outlineImage {
 }
 .playControl.active:hover {
     background: var(--theme-color-transparent);
+}
+
+/* 静音按钮 */
+#volumeLevel {
+    border-radius: 8px;
+
+    margin-right: 3px;
 }
 
 #controlRightBar > * {
