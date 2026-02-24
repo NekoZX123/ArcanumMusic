@@ -88,9 +88,6 @@ function setThemeColor(themeName: colorThemeName, darkState: number) {
     themeConfig.color = themeName;
     themeConfig.darkState = darkState;
     themeConfig.darkEnabled = darkEnabled;
-
-    // 更新背景
-    setWindowBackground(themeConfig.backgroundMode);
 }
 
 function setControlBarTheme(showThemeColor: boolean) {
@@ -134,23 +131,22 @@ function setWindowBackground(backgroundMode: windowBackgroundModeType) {
     const windowMain = document.getElementById('windowMain');
     if (!windowMain) return;
 
-    const coverChangeHandler = (_: any) => {
-        setBackgroundBasedOnCover();
-    }
-
+    console.log(`[Debug] Window background mode = ${backgroundMode}`);
     if (backgroundMode === windowBackgroundMode.FOLLOW_THEME) { // 跟随颜色主题
         const darkModeText = themeConfig.darkEnabled ? 'dark' : 'light';
         const themeModeText = themeConfig.darkEnabled ? 'ultradeep' : 'light';
         windowMain.style.background = `radial-gradient(at 5% 5%, var(--theme-color-${themeModeText}) 15rem, var(--background-${darkModeText}))`;
     
         if (coverHandlerListen) {
-            window.removeEventListener('cover-background-reload', coverChangeHandler);
+            window.removeEventListener('cover-background-reload', setBackgroundBasedOnCover);
             coverHandlerListen = false;
         }
     }
     if (backgroundMode === windowBackgroundMode.FOLLOW_SONG_COVER) { // 跟随歌曲封面
-        coverHandlerListen = true;
-        window.addEventListener('cover-background-reload', coverChangeHandler);
+        if (!coverHandlerListen) {
+            coverHandlerListen = true;
+            window.addEventListener('cover-background-reload', setBackgroundBasedOnCover);
+        }
 
         setBackgroundBasedOnCover();
     }
@@ -158,7 +154,7 @@ function setWindowBackground(backgroundMode: windowBackgroundModeType) {
         windowMain.style.background = `var(--background-${themeConfig.darkEnabled ? 'dark' : 'light'})`;
 
         if (coverHandlerListen) {
-            window.removeEventListener('cover-background-reload', coverChangeHandler);
+            window.removeEventListener('cover-background-reload', setBackgroundBasedOnCover);
             coverHandlerListen = false;
         }
     }
