@@ -314,7 +314,7 @@ class Player {
 
         // 获取歌曲链接
         getSongLink(songInfo.id)
-        .then((infoObject) => {
+        .then(async (infoObject) => {
             const playInfo = {
                 ...songInfo,
                 ...Object.assign({}, infoObject)
@@ -341,28 +341,31 @@ class Player {
                 this.nextSong();
                 return;
             }
-            if (playInfo.url.includes(neteaseCdnPostfix)) {
-                // const audioChunks: BlobPart[] = [];
-                // const ws =  new WebSocket('ws://127.0.0.1:3001');
 
-                // ws.onmessage = (event) => {
-                //     audioChunks.push(event.data);
-                // };
-                // ws.onclose = (_) => {
-                //     const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
-                //     const audioUrl = URL.createObjectURL(audioBlob);
-                //     console.log(`[Debug] Audio blob URL: ${audioUrl}`);
-                //     this.url = audioUrl;
-                // };
+            const debugCheckNeteaseCdn = false;
+            if (playInfo.url.includes(neteaseCdnPostfix) && debugCheckNeteaseCdn) {
+                const audioChunks: BlobPart[] = [];
+                const ws =  new WebSocket('ws://127.0.0.1:3003');
 
-                // ws.onopen = () => {
-                //     ws.send(playInfo.url);
-                // };
-                const idParts = playInfo.id.split('-');
-                const musicId = idParts[2];
-                const fallbackUrl = `https://music.163.com/song/media/outer/url?id=${musicId}.mp3`;
-                console.log(`[Debug] Play URL: ${fallbackUrl}`);
-                this.url = fallbackUrl;
+                ws.onmessage = (event) => {
+                    audioChunks.push(event.data);
+                };
+                ws.onclose = (_) => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    console.log(`[Debug] Audio blob URL: ${audioUrl}`);
+                    this.url = audioUrl;
+                };
+
+                ws.onopen = () => {
+                    ws.send(playInfo.url);
+                };
+                
+                // const idParts = playInfo.id.split('-');
+                // const musicId = idParts[2];
+                // const fallbackUrl = `https://music.163.com/song/media/outer/url?id=${musicId}.mp3`;
+                // console.log(`[Debug] Play URL: ${fallbackUrl}`);
+                // this.url = fallbackUrl;
             }
             else {
                 this.url = playInfo.url;

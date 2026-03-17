@@ -9,7 +9,8 @@ type neteaseEncryptedData = {
 
 // 请求链接
 const requestUrls: { [type: string]: string } = {
-    'songLink': 'https://music.163.com/weapi/song/enhance/player/url/v1?csrf_token=',
+    // 'songLink': 'https://interfacepc.music.163.com/api/song/enhance/player/url/v1?csrf_token=',
+    'songLink': 'https://music.163.com/weapi/song/enhance/download/url/v1?csrf_token=',
     'search': 'https://music.163.com/weapi/cloudsearch/get/web?csrf_token=',
     'songInfo': 'https://music.163.com/weapi/song/detail',
     'lyrics': 'https://music.163.com/weapi/song/lyric?csrf_token=',
@@ -40,8 +41,8 @@ const searchTypes: Record<string, number> = {
 const requestData: { [type: string]: any } = {
     "songLink": {
         "ids": "[[songId]]",
-        "level": "jymaster",
-        "encodeType": "aac",
+        "level": "lossless",
+        "encodeType": "flac",
         "csrf_token": ""
     },
     "search": {
@@ -165,7 +166,7 @@ const PAGE_SIZE = 30;
 
 // User-Agent (两种)
 const mobileUA = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36 Edg/139.0.0.0';
-const ncmDesktopUA = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36 Chrome/91.0.4472.164 NeteaseMusicDesktop/2.10.2.200154';
+const ncmDesktopUA = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36 Chrome/91.0.4472.164 NeteaseMusicDesktop/3.1.28.205001';
 const mobileModuleList: NeteaseMusicModule[] = ['artist', 'artistSongs', 'hotList', 'recommendSong', 'rankings', 'newSong', 'newAlbum'];
 
 type NeteaseMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
@@ -241,11 +242,11 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
         }
     });
     const moduleParams = moduleString;
+    console.log(moduleParams);
 
     const requestParams: neteaseEncryptedData = getNeteaseEncrypt(moduleParams);
     const cookieHeader = `MUSIC_U=${cookies.MUSIC_U}`;
     let userAgent = mobileModuleList.includes(moduleName) ? mobileUA : ncmDesktopUA;
-    const referer = moduleName === 'songLink' ? 'https://music.163.com/' : 'http://127.0.0.1:5173/';
 
     // console.log(`[Netease Music]\n URL: ${targetUrl};\n Data: ${moduleParams};`);
 
@@ -256,8 +257,7 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
             'Cookie': cookieHeader,
-            'User-Agent': userAgent,
-            'Referer': referer
+            'User-Agent': userAgent
         },
         {
             'params': requestParams.encText,
