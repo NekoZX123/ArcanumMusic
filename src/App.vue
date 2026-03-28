@@ -292,6 +292,7 @@ async function toggleCaptions(_?: MouseEvent) {
         // 同步播放状态及焦点歌词
         const player = getPlayer();
         setTimeout(() => {
+            player?.syncSongInfo();
             player?.syncPlayStateImage();
             player?.syncRepeatStateImage();
             player?.syncShuffleStateImage();
@@ -368,6 +369,15 @@ async function savePreferences() {
     preferences.player.volume = getPlayer()?.volume;
 
     writePreference(preferences);
+}
+
+// 复制歌名至剪贴板
+function copySongName() {
+    const songName = getPlayer()?.name;
+    if (!songName) return;
+
+    window.electron.copyToClipboard(songName);
+    showNotify('copySucceed', 'success', '复制成功', '歌曲名称已复制至剪贴板', 1000);
 }
 
 onMounted(async () => {
@@ -550,7 +560,7 @@ onUnmounted(() => {
                     <img class="currentSongCover" :src="getPlayer()?.coverUrl" alt="Song cover"/>
                     <span class="flex column">
                         <span id="songNameContainer" @mouseenter="checkScrollAnimation" @mouseleave="resetScroll">
-                            <label class="text small bold" id="currentSongName">{{ getPlayer()?.name }}</label>
+                            <label class="text small bold" id="currentSongName" @click="copySongName">{{ getPlayer()?.name }}</label>
                         </span>
                         <label class="text ultraSmall" id="currentSongAuthors">{{ limitAuthorsTextLength(getPlayer()?.authors || '') }}</label>
                     </span>

@@ -329,6 +329,9 @@ class Player {
             this.updateDuration(playInfo.duration);
             this.updateProgress(0);
             this.setProgress(0, false);
+
+            this.syncSongInfo();
+
             // 设置播放链接
             if (!playInfo.url) {
                 showNotify('songUrlNullError', 'critical', `无法播放 ${this.name}`, '获取播放链接失败');
@@ -648,6 +651,20 @@ class Player {
         });
     }
 
+    syncSongInfo() {
+        const current = this.playlist.current;
+        const playInfo = {
+            id: current.id,
+            name: this.name,
+            authors: this.authors,
+            coverUrl: this.coverUrl,
+            duration: this.duration,
+            url: this.url
+        };
+
+        const playInfoStr = JSON.stringify(playInfo);
+        window.localStorage.setItem('currentSongInfo', playInfoStr);
+    }
     syncPlayStateImage() {
         this.updateStoredVariable('playState', this.playStateImage);
     }
