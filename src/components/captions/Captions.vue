@@ -82,16 +82,32 @@ function switchTheme(_: MouseEvent) {
     lyricStyle.innerText = styleText;
 }
 
+// 歌曲信息
+const currentSongInfo = ref({
+    name: '',
+    authors: '',
+    coverUrl: '',
+    duration: 0,
+    url: ''
+});
+// 播放状态、循环状态、随机状态图片
 const playStateImage = ref('./images/player/play.dark.svg');
 const repeatStateImage = ref('./images/player/repeat.svg');
 const shuffleStateImage = ref('./images/player/shuffle.svg');
+// 当前歌词
 const currentLyrics = ref({
     time: 0.0,
     content: 'Arcanum Music',
     translation: 'made by NekoZX123'
 });
 function updateStorageData(updateEvent: StorageEvent) {
-    if (updateEvent.key === 'currentLyrics' && updateEvent.newValue) {
+    if (updateEvent.key === 'currentSongInfo' && updateEvent.newValue) { // 更新歌曲元数据
+        const songInfoStr = updateEvent.newValue;
+        const songInfo = JSON.parse(songInfoStr);
+
+        currentSongInfo.value = Object.assign({}, songInfo);
+    }
+    if (updateEvent.key === 'currentLyrics' && updateEvent.newValue) { // 更新当前歌词
         const lyrics = JSON.parse(updateEvent.newValue);
         currentLyrics.value = Object.assign({}, lyrics);
         requestAnimationFrame(adjustFontSize);
@@ -170,6 +186,27 @@ function adjustFontSize() {
     });
 }
 
+// 切换控制面板状态
+let controlShow = false;
+function toggleControlPanel() {
+    const lyricsBox = document.getElementById('currentLyricsBox');
+    const controlPanel = document.getElementById('captionsControl');
+    const controlButton = document.getElementById('expandControl');
+    if (!controlPanel || !controlButton || !lyricsBox) return;
+
+    if (controlShow) {
+        controlPanel.classList.remove('expanded');
+        controlButton.classList.remove('expanded');
+        lyricsBox.classList.remove('controlExpanded');
+    }
+    else {
+        controlPanel.classList.add('expanded');
+        controlButton.classList.add('expanded');
+        lyricsBox.classList.add('controlExpanded');
+    }
+    controlShow = !controlShow;
+}
+
 onUnmounted(() => {
     window.removeEventListener('resize', adjustFontSize);
 });
@@ -179,6 +216,11 @@ onMounted(() => {
     document.body.appendChild(lyricStyle);
     lyricStyle.innerText = styleText;
 
+    // 加载 localStorage 中的歌曲信息
+    const storedSongInfo = window.localStorage.getItem('currentSongInfo');
+    if (storedSongInfo) {
+        currentSongInfo.value = JSON.parse(storedSongInfo);
+    }
     // 加载 localStorage 中的歌词和状态
     const storedLyrics = window.localStorage.getItem('currentLyrics');
     if (storedLyrics) {
@@ -201,55 +243,70 @@ onUnmounted(() => {
 
 </script>
 <template>
-    <div class="flex column" id="desktopLyrics">
+    <div class="flex row" id="desktopLyrics">
         <!-- 窗口标题栏 -->
         <div class="flex row" id="captionsControlBar" 
             @mousedown="titlebarMouseDown" @mousemove="titlebarMouseMove" @mouseup="titlebarMouseUp">
             <span class="flex column" id="windowDragCaptions"></span>
         </div>
 
-        <!-- 控制器 -->
-        <div class="flex row" id="captionsBarController">
-            <button class="playControl small" id="toggleTop" title="窗口置顶" @click="toggleWindowTop">
-                <img :src="alwaysOnTopImage"></img>
-            </button>
-            <button class="playControl small" id="changeTheme" title="切换主题" @click="switchTheme">
-                <img src="/images/lyricsPanel/adjustTheme.svg"></img>
-            </button>
+        <!-- 控制面板 -->
+        <div class="flex row" id="captionsControl">
+            <img :src="currentSongInfo.coverUrl" alt="Current Song Cover" id="captionsSongCover"/>
+            <div class="flex column" id="captionsSongInfo">
+                <span class="text medium bold">{{ currentSongInfo.name }}</span>
+                <span class="text small">{{ currentSongInfo.authors }}</span>
 
-            <div class="verticleSplitLine"></div>
+                <div class="flex row" id="playbackControl">
+                    <div class="flex row controlButtonGroup">
+                        <button class="playControl small" id="repeat" title="循环播放"
+                            @click="() => sendToMain('toggle-repeat', windowIdentifier)">
+                            <img :src="repeatStateImage" alt="Toggle repeat"/>
+                        </button>
+                        <button class="playControl" id="previousButton" title="上一首" 
+                            @click="() => sendToMain('previous-song', windowIdentifier)">
+                            <img src="/images/player/previous.svg"/>
+                        </button>
+                        <button class="playControl" id="playPauseButton" title="播放 / 暂停"
+                            @click="() => sendToMain('toggle-play-pause', windowIdentifier)">
+                            <img :src="playStateImage"/>
+                        </button>
+                        <button class="playControl" id="nextButton" title="下一首"
+                            @click="() => sendToMain('next-song', windowIdentifier)">
+                            <img src="/images/player/next.svg"/>
+                        </button>
+                        <button class="playControl small" id="shuffle" title="随机播放"
+                            @click="() => sendToMain('toggle-shuffle', windowIdentifier)">
+                            <img :src="shuffleStateImage" alt="Toggle shuffle"/>
+                        </button>
+                    </div>
 
-            <button class="playControl small" id="previousButton" title="上一首" 
-                @click="() => sendToMain('previous-song', windowIdentifier)">
-                <img src="/images/player/previous.svg"></img>
-            </button>
-            <button class="playControl small" id="playPauseButton" title="播放 / 暂停"
-                @click="() => sendToMain('toggle-play-pause', windowIdentifier)">
-                <img :src="playStateImage"></img>
-            </button>
-            <button class="playControl small" id="nextButton" title="下一首"
-                @click="() => sendToMain('next-song', windowIdentifier)">
-                <img src="/images/player/next.svg"></img>
-            </button>
-            <button class="playControl small" id="repeat" title="循环播放"
-                @click="() => sendToMain('toggle-repeat', windowIdentifier)">
-                <img :src="repeatStateImage" alt="Toggle repeat"/>
-            </button>
-            <button class="playControl small" id="shuffle" title="随机播放"
-                @click="() => sendToMain('toggle-shuffle', windowIdentifier)">
-                <img :src="shuffleStateImage" alt="Toggle shuffle"/>
-            </button>
+                    <div class="verticleSplitline"></div>
 
-            <div class="verticleSplitLine"></div>
+                    <div class="flex row controlButtonGroup">
+                        <button class="playControl small" id="toggleTop" title="窗口置顶" @click="toggleWindowTop">
+                            <img :src="alwaysOnTopImage"/>
+                        </button>
 
-            <button class="playControl small" id="closeCaptions" title="关闭窗口"
-                @click="() => sendToMain('captions-close', windowIdentifier)">
-                <img src="/images/windowControl/close.svg" alt="Close window"></img>
-            </button>
+                        <button class="playControl small" id="changeTheme" title="切换主题" @click="switchTheme">
+                            <img src="/images/lyricsPanel/adjustTheme.svg"/>
+                        </button>
+
+                        <button class="playControl small" id="closeCaptions" title="关闭窗口"
+                            @click="() => sendToMain('captions-close', windowIdentifier)">
+                            <img src="/images/windowControl/close.svg" alt="Close window"/>
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
+        <button class="flex row" id="expandControl" title="展开控制器" @click="toggleControlPanel">
+            <img src="/images/arrows/right.svg" alt="Expand Control"/>
+        </button>
+
         <!-- 歌词内容 -->
-        <div class="flex column" id="captionsMain">
+        <div class="flex row" id="captionsMain">
             <span class="flex column" id="currentLyricsBox">
                 <ul class="text large bold">{{ currentLyrics.content }}</ul>
                 <ul class="text medium bold">{{ currentLyrics.translation }}</ul>

@@ -9,6 +9,7 @@ type neteaseEncryptedData = {
 
 // 请求链接
 const requestUrls: { [type: string]: string } = {
+    // 'songLink': 'https://interfacepc.music.163.com/api/song/enhance/player/url/v1?csrf_token=',
     'songLink': 'https://music.163.com/weapi/song/enhance/player/url/v1?csrf_token=',
     'search': 'https://music.163.com/weapi/cloudsearch/get/web?csrf_token=',
     'songInfo': 'https://music.163.com/weapi/song/detail',
