@@ -292,6 +292,7 @@ async function toggleCaptions(_?: MouseEvent) {
         // 同步播放状态及焦点歌词
         const player = getPlayer();
         setTimeout(() => {
+            player?.syncSongInfo();
             player?.syncPlayStateImage();
             player?.syncRepeatStateImage();
             player?.syncShuffleStateImage();
