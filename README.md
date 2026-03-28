@@ -1,6 +1,6 @@
 # Arcanum Music
 
-v1.7.13 (Kyrios Internal)
+v1.8.0 (Kyrios Internal)
 
 简洁美观的多平台音乐软件
 
