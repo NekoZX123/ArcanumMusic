@@ -1,5 +1,7 @@
 # Arcanum Music
 
+[![Linux.do](https://img.shields.io/badge/Linux.do-community-0EA5E9?logo=discourse&logoColor=white)](https://linux.do)
+
 v1.8.0 (Kyrios Internal)
 
 简洁美观的多平台音乐软件
@@ -11,6 +13,8 @@ v1.8.0 (Kyrios Internal)
 由 @NekoZX123 用心制作
 
 made with TypeScript + Vue.js
+
+*感谢 Linux.do 社区对本项目的支持*
 
 ## Linux 安装与兼容性说明
 
