@@ -36,6 +36,25 @@
     flex: 1 0;
 }
 
+#windowControlGroup {
+    width: calc(6rem + 24px);
+
+    align-items: center;
+
+    transform: translateY(0);
+    transition: all 200ms ease-in-out;
+}
+#windowControlGroup.expanded {
+    transform: translateY(-100%);
+}
+#windowControlGroup > button {
+    width: 2rem;
+    height: 2rem;
+    margin-left: 6px;
+
+    -webkit-app-region: no-drag;
+}
+
 #captionsControl {
     position: absolute;
     width: 100%;
@@ -72,8 +91,40 @@
     justify-content: center;
     flex: 1;
 }
+#captionsSongInfo > span {
+    height: 20pt;
+}
 #captionsSongInfo > div {
     align-items: center;
+}
+
+/* 进度条 */
+#progressDesktopLyrics {
+    width: 18rem;
+    height: 2rem;
+}
+#progressDesktopLyrics > * {
+    margin: 0 3px;
+}
+#desktopLyricsProgressBar {
+    width: 12rem;
+    height: 6px;
+
+    background: var(--transparent-grey);
+    border: none;
+    border-radius: 3px;
+
+    display: block;
+
+    transition: all 200ms ease-in-out;
+}
+#desktopLyricsProgressDone {
+    height: 100%;
+
+    background: var(--default-white);
+    border-radius: 3px;
+
+    display: block;
 }
 
 #playbackControl {

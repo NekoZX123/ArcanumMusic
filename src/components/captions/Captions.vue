@@ -2,6 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import './captionsStyle.css';
 import '../../globalStyle.css';
+import { timeFormat } from '../../assets/utilities/timeFormat.ts';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -106,6 +107,9 @@ function updateStorageData(updateEvent: StorageEvent) {
         const songInfo = JSON.parse(songInfoStr);
 
         currentSongInfo.value = Object.assign({}, songInfo);
+
+        songDuration.value = songInfo.duration;
+        durationText.value = timeFormat(songInfo.duration);
     }
     if (updateEvent.key === 'currentLyrics' && updateEvent.newValue) { // 更新当前歌词
         const lyrics = JSON.parse(updateEvent.newValue);
@@ -161,7 +165,7 @@ function sendToMain(eventName: string, message?: any) {
 }
 
 let lyricStyle: HTMLElement;
-const windowIdentifier = 'moe.nekozx.arcanummusic.desktoplyrics';
+const windowIdentifier = 'moe.nekozx123.arcanummusic.desktoplyrics';
 
 // 限制歌词字体大小
 function adjustFontSize() {
@@ -187,29 +191,27 @@ function adjustFontSize() {
 }
 
 // 切换控制面板状态
-let controlShow = false;
+let controlShow = ref(false);
 function toggleControlPanel() {
-    const lyricsBox = document.getElementById('currentLyricsBox');
-    const controlPanel = document.getElementById('captionsControl');
-    const controlButton = document.getElementById('expandControl');
-    if (!controlPanel || !controlButton || !lyricsBox) return;
-
-    if (controlShow) {
-        controlPanel.classList.remove('expanded');
-        controlButton.classList.remove('expanded');
-        lyricsBox.classList.remove('controlExpanded');
-    }
-    else {
-        controlPanel.classList.add('expanded');
-        controlButton.classList.add('expanded');
-        lyricsBox.classList.add('controlExpanded');
-    }
-    controlShow = !controlShow;
+    controlShow.value = !controlShow.value;
 }
 
-onUnmounted(() => {
-    window.removeEventListener('resize', adjustFontSize);
-});
+// 更新播放进度
+let progressUpdateInterval: number | null = null;
+const songDuration = ref(0);
+const durationText = ref('00:00');
+const currentProgress = ref(0);
+const progressText = ref('00:00');
+const progressPercentage = ref(0);
+async function updateSongProgress() {
+    const progressStr = await window.electron.readData('songProgress', windowIdentifier);
+    if (progressStr) {
+        currentProgress.value = parseFloat(progressStr);
+        progressText.value = timeFormat(currentProgress.value);
+
+        progressPercentage.value = currentProgress.value / songDuration.value * 100;
+    }
+}
 
 onMounted(() => {
     lyricStyle = document.createElement('style');
@@ -220,6 +222,9 @@ onMounted(() => {
     const storedSongInfo = window.localStorage.getItem('currentSongInfo');
     if (storedSongInfo) {
         currentSongInfo.value = JSON.parse(storedSongInfo);
+
+        songDuration.value = currentSongInfo.value.duration;
+        durationText.value = timeFormat(songDuration.value);
     }
     // 加载 localStorage 中的歌词和状态
     const storedLyrics = window.localStorage.getItem('currentLyrics');
@@ -230,15 +235,23 @@ onMounted(() => {
     repeatStateImage.value = window.localStorage.getItem('repeatState') || './images/lyricsPanel/repeat.svg';
     shuffleStateImage.value = window.localStorage.getItem('shuffleState') || './images/lyricsPanel/shuffle.svg';
 
+    // 监听 localStorage 变化以更新歌词和歌曲信息
     window.addEventListener('storage', updateStorageData);
 
+    // 监听窗口大小变化以调整歌词字体大小
     window.addEventListener('resize', adjustFontSize);
     adjustFontSize();
+
+    // 定期更新播放进度
+    progressUpdateInterval = setInterval(updateSongProgress, 200);
 
     console.log(`[Debug] Captions.vue loaded`);
 });
 onUnmounted(() => {
     window.removeEventListener('storage', updateStorageData);
+    window.removeEventListener('resize', adjustFontSize);
+
+    clearInterval(progressUpdateInterval!);
 });
 
 </script>
@@ -248,14 +261,36 @@ onUnmounted(() => {
         <div class="flex row" id="captionsControlBar" 
             @mousedown="titlebarMouseDown" @mousemove="titlebarMouseMove" @mouseup="titlebarMouseUp">
             <span class="flex column" id="windowDragCaptions"></span>
+            <div :class="`flex row ${controlShow ? 'expanded' : ''}`" id="windowControlGroup">
+                <button class="playControl small" id="toggleTop" title="窗口置顶" @click="toggleWindowTop">
+                    <img :src="alwaysOnTopImage"/>
+                </button>
+
+                <button class="playControl small" id="changeTheme" title="切换主题" @click="switchTheme">
+                    <img src="/images/lyricsPanel/adjustTheme.svg"/>
+                </button>
+
+                <button class="playControl small" id="closeCaptions" title="关闭窗口"
+                    @click="() => sendToMain('captions-close', windowIdentifier)">
+                    <img src="/images/windowControl/close.svg" alt="Close window"/>
+                </button>
+            </div>
         </div>
 
         <!-- 控制面板 -->
-        <div class="flex row" id="captionsControl">
+        <div :class="`flex row ${controlShow ? 'expanded' : ''}`" id="captionsControl">
             <img :src="currentSongInfo.coverUrl" alt="Current Song Cover" id="captionsSongCover"/>
             <div class="flex column" id="captionsSongInfo">
                 <span class="text medium bold">{{ currentSongInfo.name }}</span>
                 <span class="text small">{{ currentSongInfo.authors }}</span>
+                
+                <div class="flex row" id="progressDesktopLyrics">
+                    <label class="text ultraSmall">{{ progressText }}</label>
+                    <span class="flex row" id="desktopLyricsProgressBar">
+                        <span id="desktopLyricsProgressDone" :style="`width: ${progressPercentage}%`"></span>
+                    </span>
+                    <label class="text ultraSmall">{{ durationText }}</label>
+                </div>
 
                 <div class="flex row" id="playbackControl">
                     <div class="flex row controlButtonGroup">
@@ -282,32 +317,17 @@ onUnmounted(() => {
                     </div>
 
                     <div class="verticleSplitline"></div>
-
-                    <div class="flex row controlButtonGroup">
-                        <button class="playControl small" id="toggleTop" title="窗口置顶" @click="toggleWindowTop">
-                            <img :src="alwaysOnTopImage"/>
-                        </button>
-
-                        <button class="playControl small" id="changeTheme" title="切换主题" @click="switchTheme">
-                            <img src="/images/lyricsPanel/adjustTheme.svg"/>
-                        </button>
-
-                        <button class="playControl small" id="closeCaptions" title="关闭窗口"
-                            @click="() => sendToMain('captions-close', windowIdentifier)">
-                            <img src="/images/windowControl/close.svg" alt="Close window"/>
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
 
-        <button class="flex row" id="expandControl" title="展开控制器" @click="toggleControlPanel">
+        <button :class="`flex row ${controlShow ? 'expanded' : ''}`" id="expandControl" title="展开控制器" @click="toggleControlPanel">
             <img src="/images/arrows/right.svg" alt="Expand Control"/>
         </button>
 
         <!-- 歌词内容 -->
         <div class="flex row" id="captionsMain">
-            <span class="flex column" id="currentLyricsBox">
+            <span :class="`flex column ${controlShow ? 'controlExpanded' : ''}`" id="currentLyricsBox">
                 <ul class="text large bold">{{ currentLyrics.content }}</ul>
                 <ul class="text medium bold">{{ currentLyrics.translation }}</ul>
             </span>

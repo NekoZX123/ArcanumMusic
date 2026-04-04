@@ -11,6 +11,7 @@ import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 import { deleteCookies, validateCookieExpiration, listenForCookie, prepareAccountStorage } from './accountHelper.js';
 import { getAppData, getEnvironment } from './globalUtils.js';
 import { getAppConfig, getUserPreferences, writeUserPreferences } from "./configHelper.js";
+import { readData, writeData } from './dataBridge.js';
 
 const __dirname = fileURLToPath(import.meta.url);
 
@@ -285,13 +286,14 @@ function sendPlayerSignal(signal) {
     mainWindow.webContents.executeJavaScript(`
     window.onstorage({
         key: 'playerSignal', 
-        newValue: JSON.stringify({eventName: '${signal}', message: 'moe.nekozx.arcanummusic.contextmenu'})
+        newValue: JSON.stringify({eventName: '${signal}', message: 'moe.nekozx123.arcanummusic.contextmenu'})
     });
     `, true);
 }
 
 app.whenReady().then(() => {
     // 添加事件触发
+    // 窗口操作
     ipcMain.handle('newAppWindow', newWindow);
     ipcMain.handle('minimizeWindow', minimizeWindow);
     ipcMain.handle('maximizeWindow', toggleMaximize);
@@ -301,10 +303,16 @@ app.whenReady().then(() => {
     ipcMain.handle('setAlwaysOnTop', setWindowTopState);
     ipcMain.handle('closeWindowById', closeWindowById);
 
+    // 文件操作
     ipcMain.handle('isFileExist', isFileExist);
     ipcMain.handle('readLocalFile', readLocalFile);
     ipcMain.handle('writeLocalFile', writeLocalFile);
 
+    // 主进程数据操作
+    ipcMain.handle('dataRead', (_, key, identifier) => readData(key, identifier));
+    ipcMain.handle('dataWrite', (_, key, value, identifier) => writeData(key, value, identifier));
+
+    // 用户数据操作
     ipcMain.handle('getAppConfig', getAppConfig);
     ipcMain.handle('getPreference', getUserPreferences);
     ipcMain.handle('writePreference', savePreferences);
@@ -313,10 +321,12 @@ app.whenReady().then(() => {
     ipcMain.handle('getAsarLocation', () => {console.log(app.getAppPath()); return app.getAppPath()});
     ipcMain.handle('getUserName', () => userInfo().username);
 
+    // 账号操作
     ipcMain.handle('validateCookieExpiration', validateCookieExpiration);
     ipcMain.handle('listenCookie', listenForCookie);
     ipcMain.handle('deleteCookie', deleteCookies);
 
+    // 其他操作
     ipcMain.handle('openExternal', (_, url) => shell.openExternal(url));
     ipcMain.handle('copyContent', (_, content) => clipboard.writeText(content));
     ipcMain.handle('setAutoLaunch', (_, isEnabled) => ensureAutoLaunchState(isEnabled));

@@ -17,6 +17,9 @@ contextBridge.exposeInMainWorld(
         isFileExist: (path) => ipcRenderer.invoke('isFileExist', path), // 检查文件是否存在
         readLocalFile: (path) => ipcRenderer.invoke('readLocalFile', path), // 读取本地文件
         writeLocalFile: (path, content) => ipcRenderer.invoke('writeLocalFile', path, content), // 写入本地文件
+
+        readData: (key, identifier) => ipcRenderer.invoke('dataRead', key, identifier), // 读取主进程数据
+        writeData: (key, value, identifier) => ipcRenderer.invoke('dataWrite', key, value, identifier), // 写入主进程数据
         
         getAppConfig: () => ipcRenderer.invoke('getAppConfig'), // 获取应用配置
         getUserPreference: () => ipcRenderer.invoke('getPreference'), // 获取偏好设置

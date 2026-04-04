@@ -332,7 +332,7 @@ function limitAuthorsTextLength(authors: string) {
 }
 
 // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
-const allowedIdentifiers = ['moe.nekozx.arcanummusic.desktoplyrics', 'moe.nekozx.arcanummusic.contextmenu'];
+const allowedIdentifiers = ['moe.nekozx123.arcanummusic.desktoplyrics', 'moe.nekozx123.arcanummusic.contextmenu'];
 function handleStorageData (updateEvent: StorageEvent) {
     if (updateEvent.key === 'playerSignal' && updateEvent.newValue) {
         const eventObject = JSON.parse(updateEvent.newValue);
