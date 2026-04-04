@@ -1,6 +1,6 @@
 # Arcanum Music
 
-v1.7.13 (Kyrios Internal)
+v1.8.0 (Kyrios Internal)
 
 简洁美观的多平台音乐软件
 
@@ -25,3 +25,7 @@ made with TypeScript + Vue.js
 ## 内测版本特别提示
 
 当前应用为内测版本, 可能存在部分问题. 当出现问题影响使用时, 可使用 Ctrl + R 刷新应用
+
+---
+
+感谢 linux.do 对本项目的支持
