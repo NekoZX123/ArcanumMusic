@@ -1,54 +1,103 @@
-<script setup lang="ts">
-import {createApp, onMounted, onUnmounted, ref} from 'vue';
+﻿<script setup lang="ts">
+import { RouterView, useRoute } from 'vue-router';
+import { createApp, computed, onMounted, onUnmounted, ref, watch } from 'vue';
+
 import Lyrics from './components/lyrics/Lyrics.vue';
 
-import {showNotify} from './assets/notifications/Notification.ts';
-import {createPlayer, getPlayer} from './assets/player/player.ts';
+import { showNotify } from './assets/notifications/Notification.ts';
+import { createPlayer, getPlayer } from './assets/player/player.ts';
 import {
-  changePage,
-  initialize,
-  pageBack,
-  pageForward,
-  togglePlaylist,
-  updatePlaylistIcon
+    changePage,
+    initialize,
+    pageBack,
+    pageForward,
+    togglePlaylist
 } from './assets/utilities/pageSwitcher.ts';
-// import { testRequest } from './assets/utilities/requestTests.ts';
-import {PageButton} from './assets/widgets/pageSwitcher.tsx';
-import {readAccountInfo} from './assets/utilities/accountManager.ts';
-import {hideArtistSelect, hideRightMenu} from './assets/utilities/elementControl.ts';
-import {getConfig, getPreference, loadConfig, loadPreference, writePreference} from './assets/utilities/configLoader.ts';
-import {loadProxyPort} from './assets/utilities/proxyRequest.ts';
-import {syncFocusedLyric} from './assets/lyrics/lyricsManager.ts';
+import { readAccountInfo } from './assets/utilities/accountManager.ts';
+import { hideArtistSelect, hideRightMenu } from './assets/utilities/elementControl.ts';
+import { getConfig, getPreference, loadConfig, loadPreference, writePreference } from './assets/utilities/configLoader.ts';
+import { loadProxyPort } from './assets/utilities/proxyRequest.ts';
+import { syncFocusedLyric } from './assets/lyrics/lyricsManager.ts';
+import { runtime } from './runtime';
 import { initializeTheme, setControlBarTheme, setWindowBackground, type colorThemeName } from './assets/effects/themeControl.ts';
 import { buttonTypes, showPopup } from './assets/notifications/popup.tsx';
 
-/* 窗口移动功能 */
+const route = useRoute();
+const capabilities = runtime.getCapabilities();
+const appReady = ref(false);
+const viewportWidth = ref(window.innerWidth);
+const currentPageName = computed(() => String(route.name || ''));
+const currentPageTitle = computed(() => String(route.meta.label || 'Arcanum Music'));
+const showWindowControls = ref(capabilities.windowControls);
+const showHostedProxyWarning = computed(() => !runtime.isElectron() && !capabilities.hostedProxy);
+const isMobileViewport = computed(() => viewportWidth.value < 768);
+const isTabletViewport = computed(() => viewportWidth.value >= 768 && viewportWidth.value < 900);
+const playlistImage = computed(() => currentPageName.value === 'playlist'
+    ? '/images/player/playlist.on.svg'
+    : '/images/player/playlist.svg');
+
+const primaryTabs = [
+    { id: 'home', label: '首页', icon: '/images/pageSwitcher/home.svg' },
+    { id: 'library', label: '音乐库', icon: '/images/pageSwitcher/library.svg' },
+    { id: 'search', label: '搜索', icon: '/images/pageSwitcher/search.svg' }
+] as const;
+const mobileTabs = [
+    ...primaryTabs,
+    { id: 'playlist', label: '队列', icon: '/images/player/playlist.svg' }
+] as const;
+const NAVIGATION_ICON_SCALE_DEFAULT = 100;
+
 let startX = 0;
 let startY = 0;
 let isMoving = false;
+let winMaximumState = false;
+let clickHandler: ((event: MouseEvent) => void) | undefined;
+let scrollHandler: (() => void) | undefined;
+let audioElement: HTMLAudioElement | null = null;
+let audioTimeUpdateHandler: (() => void) | undefined;
 
-// 最小化窗口
+function navigateTo(pageId: string) {
+    changePage(pageId as any);
+}
+
+function handleViewportResize() {
+    viewportWidth.value = window.innerWidth;
+}
+
+function getNavigationIconScaleValue() {
+    const rawValue = Number(getConfig()?.generic?.appearance?.navigation?.iconScale ?? NAVIGATION_ICON_SCALE_DEFAULT);
+    if (!Number.isFinite(rawValue)) {
+        return NAVIGATION_ICON_SCALE_DEFAULT;
+    }
+
+    return Math.min(120, Math.max(80, rawValue));
+}
+
+function applyNavigationIconScale() {
+    const scale = getNavigationIconScaleValue() / 100;
+    const rootStyle = document.documentElement.style;
+
+    rootStyle.setProperty('--nav-icon-size', `${(3 * scale).toFixed(3)}rem`);
+    rootStyle.setProperty('--nav-top-action-icon-size', `${(2 * scale).toFixed(3)}rem`);
+    rootStyle.setProperty('--mobile-tab-icon-size', `${(1.8 * scale).toFixed(3)}rem`);
+}
+
 function minimizeWindow() {
-    window.electron.minimizeWindow();
+    runtime.minimizeWindow();
 }
 
-// 最大化 / 还原窗口
 const maxButtonSrc = ref('./images/windowControl/maximize.svg');
-let winMaximumState: boolean = false;
 async function toggleMaximize() {
-    winMaximumState = await window.electron.toggleMaximize();
-
-    if (winMaximumState) {
-        maxButtonSrc.value = maxButtonSrc.value.replace('maximize.svg', 'restore.svg');
-    }
-    else {
-        maxButtonSrc.value = maxButtonSrc.value.replace('restore.svg', 'maximize.svg');
+    if (!capabilities.windowControls) {
+        return;
     }
 
-    winMaximumState = !winMaximumState;
+    winMaximumState = await runtime.toggleMaximize();
+    maxButtonSrc.value = winMaximumState
+        ? './images/windowControl/restore.svg'
+        : './images/windowControl/maximize.svg';
 }
 
-// 关闭当前窗口
 const closeButtonSrc = ref('./images/windowControl/close.svg');
 function closeHover() {
     closeButtonSrc.value = './images/windowControl/close.hover.svg';
@@ -57,69 +106,79 @@ function closeUnHover() {
     closeButtonSrc.value = './images/windowControl/close.svg';
 }
 async function closeWindow() {
-    const appDataPath = await window.electron.getAppData();
-    const firstRunCheckPath = `${appDataPath}/ArcanumMusic_data/.notfirstrun`;
-    const notFirstRun = await window.electron.isFileExist(firstRunCheckPath);
+    if (!capabilities.windowControls) {
+        return;
+    }
 
-    console.log(notFirstRun);
-    if (!notFirstRun) { // 首次运行
+    if (!capabilities.tray) {
+        await savePreferences();
+        await runtime.closeWindow(false);
+        return;
+    }
+
+    const appDataPath = await runtime.getAppData();
+    const firstRunCheckPath = `${appDataPath}/ArcanumMusic_data/.notfirstrun`;
+    const notFirstRun = await runtime.isFileExist(firstRunCheckPath);
+
+    if (!notFirstRun) {
         showPopup(
-            'info', 'yesno', 
-            '窗口关闭时操作选择', 
-            '是否在关闭 Arcanum Music 主窗口时将应用隐藏至系统托盘菜单 ?',
-            ['', ''], async (code: number) => {
-                if (code === buttonTypes.BUTTON_CLOSE) return;
+            'info',
+            'yesno',
+            '窗口关闭时操作选择',
+            '是否在关闭 Arcanum Music 主窗口时将应用隐藏到系统托盘？',
+            ['', ''],
+            async (code: number) => {
+                if (code === buttonTypes.BUTTON_CLOSE) {
+                    return;
+                }
 
                 const hideToTray = code === buttonTypes.BUTTON_YES;
-
-                // 写入设置变更
                 const settings = getConfig();
                 settings.generic.system.closeOptions.hideToTray = hideToTray;
                 const settingsText = JSON.stringify(settings);
-
                 const targetFile = `${appDataPath}/ArcanumMusic_data/settings.json`;
 
-                window.electron.writeLocalFile(targetFile, settingsText);
-
-                // 储存 .notfirstrun 文件
-                window.electron.writeLocalFile(firstRunCheckPath, 'Not first run! Let me pass!');
-
-                // 保存用户配置并关闭窗口
-                savePreferences();
-
-                window.electron.closeWindow(hideToTray);
-            });
+                await runtime.writeLocalFile(targetFile, settingsText);
+                await runtime.writeLocalFile(firstRunCheckPath, 'Not first run! Let me pass!');
+                await savePreferences();
+                await runtime.closeWindow(hideToTray);
+            }
+        );
+        return;
     }
-    else { // 非首次运行
-        // 获取设置配置
-        const settings = getConfig();
-        const hideToTrayFlag = settings.generic.system.closeOptions.hideToTray;
 
-        // 保存用户配置并关闭窗口
-        savePreferences();
-
-        window.electron.closeWindow(hideToTrayFlag);
-    }
+    const settings = getConfig();
+    const hideToTrayFlag = settings.generic.system.closeOptions.hideToTray;
+    await savePreferences();
+    await runtime.closeWindow(hideToTrayFlag);
 }
 
-// 移动窗口
-async function titlebarMouseDown(event: any) {
-    let e = document.elementFromPoint(event.x, event.y);
-    if (!e) return;
-    if (e.id === 'windowControlBar' && event.buttons === 1) {
+function titlebarMouseDown(event: MouseEvent) {
+    if (!capabilities.windowControls || event.buttons !== 1) {
+        return;
+    }
+
+    const target = document.elementFromPoint(event.x, event.y) as HTMLElement | null;
+    if (!target) {
+        return;
+    }
+
+    if (target.closest('#windowDrag')) {
         startX = event.x;
         startY = event.y;
         isMoving = true;
     }
 }
 
-async function titlebarMouseMove(event: any) {
-    if (event.buttons === 1 && isMoving) {
-        let currentX = event.x - startX;
-        let currentY = event.y - startY;
-        let winRect = await window.electron.getWindowRect();
-        window.electron.moveWindow(winRect.x + currentX, winRect.y + currentY);
+async function titlebarMouseMove(event: MouseEvent) {
+    if (!capabilities.windowControls || event.buttons !== 1 || !isMoving) {
+        return;
     }
+
+    const currentX = event.x - startX;
+    const currentY = event.y - startY;
+    const winRect = await runtime.getWindowRect();
+    await runtime.moveWindow(winRect.x + currentX, winRect.y + currentY);
 }
 
 function titlebarMouseUp() {
@@ -128,115 +187,105 @@ function titlebarMouseUp() {
     isMoving = false;
 }
 
-// 当前音乐信息
-// 创建播放器
 createPlayer(['lyricsVolume']);
 const progressTooltipOffset = ref('left: 0');
 let targetProgress = 0;
 const targetPercentage = ref(0);
 const playTimeAdjustFlag = ref(false);
 
-// 播放进度调整
-// 开始调整
 function adjustPlayProgress(mouseX: number) {
     const progressBar = document.getElementById('playProgress');
-    if (!progressBar) return;
+    if (!progressBar) {
+        return;
+    }
 
-    // 移动播放进度提示
     let tooltipX = mouseX;
-    if (tooltipX < 80) tooltipX = 80;
-    if (tooltipX > document.body.clientWidth - 80) tooltipX = document.body.clientWidth - 80;
+    if (tooltipX < 80) {
+        tooltipX = 80;
+    }
+    if (tooltipX > document.body.clientWidth - 80) {
+        tooltipX = document.body.clientWidth - 80;
+    }
 
     progressTooltipOffset.value = `left: calc(${tooltipX}px - 4rem)`;
 
-    // 设置进度条宽度
     const barRect = progressBar.getBoundingClientRect();
-    let deltaX = mouseX - barRect.left;
-    let progress = deltaX / progressBar.clientWidth;
+    let progress = (mouseX - barRect.left) / progressBar.clientWidth;
+    if (progress < 0) {
+        progress = 0;
+    }
+    if (progress > 1) {
+        progress = 1;
+    }
 
-    // 防止范围溢出
-    if (progress < 0) progress = 0;
-    if (progress > 1) progress = 1;
-
-    // 设置播放进度文字
-    let playProgress = Math.round((getPlayer()?.duration || 0) * progress);
+    const playProgress = Math.round((getPlayer()?.duration || 0) * progress);
     getPlayer()?.updateProgress(playProgress);
     targetProgress = playProgress;
     targetPercentage.value = progress * 100;
 }
+
 function startProgressAdjust(event: MouseEvent) {
-    if (event.buttons === 1 && !playTimeAdjustFlag.value) {
-        // 添加全局事件监听器
-        showProgressTooltip();
-        document.addEventListener('mousemove', adjustOnMouseMove);
-        playTimeAdjustFlag.value = true;
-
-        // 点击时同样调整进度
-        adjustPlayProgress(event.clientX);
-
-        // 结束调整
-        const handleMouseUp = () => {
-            hideProgressTooltip();
-            document.removeEventListener('mousemove', adjustOnMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
-            getPlayer()?.setProgress(targetProgress);
-            playTimeAdjustFlag.value = false;
-        };
-
-        document.addEventListener('mouseup', handleMouseUp);
+    if (event.buttons !== 1 || playTimeAdjustFlag.value) {
+        return;
     }
-}
-// 鼠标移动事件调整处理
-function adjustOnMouseMove(event: MouseEvent) {
-    const progressBar = document.getElementById('playProgress');
-    if (!progressBar) return;
 
+    showProgressTooltip();
+    document.addEventListener('mousemove', adjustOnMouseMove);
+    playTimeAdjustFlag.value = true;
+    adjustPlayProgress(event.clientX);
+
+    const handleMouseUp = () => {
+        hideProgressTooltip();
+        document.removeEventListener('mousemove', adjustOnMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        getPlayer()?.setProgress(targetProgress);
+        playTimeAdjustFlag.value = false;
+    };
+
+    document.addEventListener('mouseup', handleMouseUp);
+}
+
+function adjustOnMouseMove(event: MouseEvent) {
     if (event.buttons === 1 && playTimeAdjustFlag.value) {
         adjustPlayProgress(event.clientX);
     }
 }
 
-function showProgressTooltip(_: any = undefined) {
-    let tooltip = document.getElementById('progressTooltip');
-    if (tooltip) {
-        tooltip.classList.add('show');
-    }
-}
-function hideProgressTooltip(_: any = undefined) {
-    let tooltip = document.getElementById('progressTooltip');
-    if (tooltip) {
-        tooltip.classList.remove('show');
-    }
+function showProgressTooltip() {
+    document.getElementById('progressTooltip')?.classList.add('show');
 }
 
-// 音量调整
+function hideProgressTooltip() {
+    document.getElementById('progressTooltip')?.classList.remove('show');
+}
+
 function adjustVolume(event: MouseEvent) {
     const volumeBar = document.getElementById('volumeBar');
-    if (!volumeBar) return;
-
-    if (event.buttons === 1) {
-        // 设置音量条宽度
-        let deltaX = event.clientX - volumeBar.getBoundingClientRect().left;
-        let volume = Math.round(deltaX / volumeBar.clientWidth * 100);
-
-        // 防止范围溢出
-        if (volume < 0) volume = 0;
-        if (volume > 100) volume = 100;
-
-        getPlayer()?.setVolume(volume);
+    if (!volumeBar || event.buttons !== 1) {
+        return;
     }
+
+    let volume = Math.round((event.clientX - volumeBar.getBoundingClientRect().left) / volumeBar.clientWidth * 100);
+    if (volume < 0) {
+        volume = 0;
+    }
+    if (volume > 100) {
+        volume = 100;
+    }
+
+    getPlayer()?.setVolume(volume);
 }
 
-// 切换播放列表
 function togglePlaylistPanel(event: MouseEvent) {
     togglePlaylist(event);
 }
 
-// 切换歌词面板
 const lyricShowEvent = new CustomEvent('lyrics-launch');
-function showLyrics(_: MouseEvent) {
+function showLyrics() {
     const lyricsPanel = document.getElementById('lyricsArea');
-    if (!lyricsPanel) return;
+    if (!lyricsPanel) {
+        return;
+    }
 
     lyricsPanel.style.display = 'block';
     setTimeout(() => {
@@ -245,7 +294,6 @@ function showLyrics(_: MouseEvent) {
     window.dispatchEvent(lyricShowEvent);
 }
 
-// 切换桌面歌词
 const captionWindowOptions = {
     width: 700,
     height: 160,
@@ -258,112 +306,111 @@ const captionWindowOptions = {
     maximizable: false,
     fullscreenable: false
 };
-// 桌面歌词窗口 ID
-let captionWindowId = -1;
-let isCaptionsOn: boolean = false;
-const desktopLyricsImage = ref('./images/player/desktopLyrics.svg');
-// 桌面歌词窗口关闭处理
-function handleCaptionsClose() {
-    desktopLyricsImage.value = './images/player/desktopLyrics.svg';
-    window.electron.closeWindowById(captionWindowId);
 
+let captionWindowId = -1;
+let isCaptionsOn = false;
+const desktopLyricsImage = ref('./images/player/desktopLyrics.svg');
+
+async function handleCaptionsClose() {
+    desktopLyricsImage.value = './images/player/desktopLyrics.svg';
+    if (captionWindowId !== -1) {
+        await runtime.closeWindowById(captionWindowId);
+    }
     isCaptionsOn = false;
 }
-// 切换桌面歌词显示状态
-async function toggleCaptions(_?: MouseEvent) {
-    if (isCaptionsOn) {
-        desktopLyricsImage.value = './images/player/desktopLyrics.svg';
-        await window.electron.closeWindowById(captionWindowId);
 
-        window.localStorage.setItem('captionsWinId', '');
-    }
-    else {
-        desktopLyricsImage.value = './images/player/desktopLyrics.on.svg';
-        const captionWindowUrl = `${window.location.href}?isDesktopLyrics=true`
-        // 启动桌面歌词
-        captionWindowId = await window.electron.createWindow(
-            'Arcanum Music - Desktop Lyrics',
-            captionWindowUrl,
-            captionWindowOptions
-        );
-
-        window.localStorage.setItem('captionsWinId', captionWindowId.toString());
-
-        // 同步播放状态及焦点歌词
-        const player = getPlayer();
-        setTimeout(() => {
-            player?.syncSongInfo();
-            player?.syncPlayStateImage();
-            player?.syncRepeatStateImage();
-            player?.syncShuffleStateImage();
-            syncFocusedLyric();
-        }, 150);
-    }
-
-    isCaptionsOn = !isCaptionsOn;
-}
-
-// 长歌曲名称焦点滚动
-function checkScrollAnimation(_: MouseEvent) {
-    const nameContainer = document.getElementById('songNameContainer') as HTMLElement;
-    const nameContent = document.getElementById('currentSongName') as HTMLElement;
-    
-    if (nameContainer.scrollWidth > nameContainer.offsetWidth && !nameContent.classList.contains('autoScroll')) {
-        nameContent.classList.add(`autoScroll`);
-    }
-}
-// 重置滚动动画
-function resetScroll(_: MouseEvent) {
-    const nameContent = document.getElementById('currentSongName') as HTMLElement;
-    nameContent.classList.remove('autoScroll');
-}
-
-// 限制歌手文字长度
-function limitAuthorsTextLength(authors: string) {
-    const authorsContent = document.getElementById('currentSongAuthors') as HTMLElement;
-    if (!authorsContent) {
+async function toggleCaptions() {
+    if (!capabilities.desktopLyricsWindow) {
+        showNotify('desktop-lyrics-unavailable', 'info', '桌面歌词不可用', '当前运行环境不支持独立桌面歌词窗口', 3000);
         return;
     }
 
+    if (isCaptionsOn) {
+        desktopLyricsImage.value = './images/player/desktopLyrics.svg';
+        await runtime.closeWindowById(captionWindowId);
+        window.localStorage.setItem('captionsWinId', '');
+        isCaptionsOn = false;
+        return;
+    }
+
+    desktopLyricsImage.value = './images/player/desktopLyrics.on.svg';
+    const captionWindowUrl = `${window.location.href.split('#')[0].split('?')[0]}?isDesktopLyrics=true`;
+    captionWindowId = await runtime.createWindow('Arcanum Music - Desktop Lyrics', captionWindowUrl, captionWindowOptions);
+    window.localStorage.setItem('captionsWinId', captionWindowId.toString());
+
+    const player = getPlayer();
+    setTimeout(() => {
+        player?.syncSongInfo();
+        player?.syncPlayStateImage();
+        player?.syncRepeatStateImage();
+        player?.syncShuffleStateImage();
+        syncFocusedLyric();
+    }, 150);
+
+    isCaptionsOn = true;
+}
+
+function checkScrollAnimation() {
+    const nameContainer = document.getElementById('songNameContainer') as HTMLElement | null;
+    const nameContent = document.getElementById('currentSongName') as HTMLElement | null;
+    if (nameContainer && nameContent && nameContainer.scrollWidth > nameContainer.offsetWidth && !nameContent.classList.contains('autoScroll')) {
+        nameContent.classList.add('autoScroll');
+    }
+}
+
+function resetScroll() {
+    document.getElementById('currentSongName')?.classList.remove('autoScroll');
+}
+
+function limitAuthorsTextLength(authors: string) {
+    if (authors.length > 24 && isMobileViewport.value) {
+        return `${authors.substring(0, 24)}...`;
+    }
     if (authors.length > 15) {
-      return `${authors.substring(0, 15)}...`;
+        return `${authors.substring(0, 15)}...`;
     }
     return authors;
 }
 
-// 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
 const allowedIdentifiers = ['moe.nekozx.arcanummusic.desktoplyrics', 'moe.nekozx.arcanummusic.contextmenu'];
-function handleStorageData (updateEvent: StorageEvent) {
-    if (updateEvent.key === 'playerSignal' && updateEvent.newValue) {
-        const eventObject = JSON.parse(updateEvent.newValue);
-        const eventName = eventObject.eventName;
-        console.log(`[Debug] Event triggered: name = ${eventName}; content = ${eventObject.message}`);
-        if (!allowedIdentifiers.includes(eventObject.message)) {
-            console.error(`[Error] Unidentified identifier ${eventObject.message}`);
-            return;
-        }
-
-        if (eventName === 'previous-song')      getPlayer()?.previousSong();    // 上一曲
-        if (eventName === 'toggle-play-pause')  getPlayer()?.togglePlayPause(); // 播放 / 暂停
-        if (eventName === 'next-song')          getPlayer()?.nextSong();        // 下一曲
-        if (eventName === 'toggle-repeat')      getPlayer()?.toggleRepeat();    // 切换循环播放状态
-        if (eventName === 'toggle-shuffle')     getPlayer()?.toggleShuffle();   // 切换随机播放状态
-        if (eventName === 'captions-close')     handleCaptionsClose();          // 处理桌面歌词关闭事件
+function handleStorageData(updateEvent: StorageEvent) {
+    if (updateEvent.key !== 'playerSignal' || !updateEvent.newValue) {
+        return;
     }
+
+    const eventObject = JSON.parse(updateEvent.newValue);
+    if (!allowedIdentifiers.includes(eventObject.message)) {
+        return;
+    }
+
+    const eventName = eventObject.eventName;
+    if (eventName === 'previous-song') getPlayer()?.previousSong();
+    if (eventName === 'toggle-play-pause') getPlayer()?.togglePlayPause();
+    if (eventName === 'next-song') getPlayer()?.nextSong();
+    if (eventName === 'toggle-repeat') getPlayer()?.toggleRepeat();
+    if (eventName === 'toggle-shuffle') getPlayer()?.toggleShuffle();
+    if (eventName === 'captions-close') handleCaptionsClose();
 }
 
-// 保存用户配置
 async function savePreferences() {
-    let preferences = getPreference();
+    const preferences = getPreference();
+    if (!preferences) {
+        return;
+    }
 
-    // 窗口属性
-    const windowRect = await window.electron.getWindowRect();
-    preferences.window.width = windowRect.width;
-    preferences.window.height = windowRect.height;
-    preferences.window.isMaximized = winMaximumState;
+    if (capabilities.windowControls) {
+        const windowRect = await runtime.getWindowRect();
+        preferences.window.width = windowRect.width;
+        preferences.window.height = windowRect.height;
+        preferences.window.isMaximized = winMaximumState;
+    }
+    else {
+        preferences.window.width = window.innerWidth;
+        preferences.window.height = window.innerHeight;
+        preferences.window.isMaximized = false;
+    }
 
-    // 播放器属性
-    preferences.player.desktopLyrics = isCaptionsOn;
+    preferences.player.desktopLyrics = capabilities.desktopLyricsWindow ? isCaptionsOn : false;
     preferences.player.repeatState = getPlayer()?.repeatState;
     preferences.player.shuffleState = getPlayer()?.shuffleState;
     preferences.player.volume = getPlayer()?.volume;
@@ -371,194 +418,249 @@ async function savePreferences() {
     writePreference(preferences);
 }
 
-// 复制歌名至剪贴板
-function copySongName() {
+async function copySongName() {
     const songName = getPlayer()?.name;
-    if (!songName) return;
-
-    window.electron.copyToClipboard(songName);
-    showNotify('copySucceed', 'success', '复制成功', '歌曲名称已复制至剪贴板', 1000);
-}
-
-onMounted(async () => {
-    // 绕过 QQ 音乐脚本环境监测
-    // 参考 / Reference: https://jixun.uk/posts/2024/qqmusic-zzc-sign/
-    window.__qmfe_sign_check = 1;
-
-    // 加载代理端口
-    loadProxyPort();
-
-    // 加载配置文件
-    await loadConfig();
-    await loadPreference();
-
-    // 测试通知
-    setTimeout(() => showNotify('Notify1', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 2000);
-
-    // 歌词面板挂载
-    const lyrics = createApp(Lyrics);
-    lyrics.mount('#lyricsArea');
-
-    const lyricsArea = document.getElementById('lyricsArea');
-    if (lyricsArea) lyricsArea.style.display = 'none;';
-
-    // 读取账户信息
-    await readAccountInfo('all');
-
-    // 加载初始页面
-    updatePlaylistIcon();
-    setTimeout(() => {
-        initialize();
-    }, 300);
-
-    // 设置点击 / 滚动时隐藏右键菜单
-    window.addEventListener('click', (event) => {
-        if (event.button === 0) {
-            hideRightMenu();
-        }
-    });
-    document.getElementById('pageContainer')?.addEventListener('scroll', (_) => hideRightMenu());
-
-    // 加载应用配置文件
-    const config = getConfig();
-    const startMinimized = config.generic.system.start.startMinimized;
-    if (startMinimized) { // 启动时最小化窗口判断
-        minimizeWindow();
-    }
-    const systemFrameFlag = config.generic.appearance.window.useSystemFrame;
-    if (systemFrameFlag) { // 使用系统窗口边框时隐藏自定义边框
-        const titleBar = document.getElementById('windowControlBar');
-        if (!titleBar) return;
-
-        titleBar.style.display = 'none';
-    }
-    // 加载主题颜色及深色模式
-    const themeList: colorThemeName[] = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
-    const colorIndex = config.generic.appearance.colors.themeColor;
-    const themeColor = themeList[colorIndex];
-    const darkEnabled = parseInt(config.generic.appearance.colors.darkMode);
-    const windowBackgroundMode: any = parseInt(config.generic.appearance.colors.backgroundColor);
-
-    initializeTheme(themeColor, darkEnabled);
-    
-    setWindowBackground(windowBackgroundMode);
-    // 窗口标题栏显示主题色
-    const showColorInBorders = config.generic.appearance.colors.showColorInBorders;
-    setControlBarTheme(showColorInBorders);
-
-    // 加载用户配置
-    const userPreference = getPreference();
-    const player = getPlayer();
-    console.log(`[Debug] Preferences: ${JSON.stringify(userPreference)}`);
-    if (userPreference.player.isMaximized) { // 窗口最大化
-        toggleMaximize();
-    }
-    player?.setRepeatState(userPreference.player.repeatState); // 循环播放状态
-    player?.setShuffleState(userPreference.player.shuffleState); // 随机播放状态
-    player?.setVolume(userPreference.player.volume); // 音量
-    if (userPreference.player.desktopLyrics) { // 桌面歌词
-        toggleCaptions();
-    }
-    
-    // 设置触发器
-    // 播放器组件
-    const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
-    if (!playerElem) {
-        console.error('[Error] Player element not found');
+    if (!songName) {
         return;
     }
-    playerElem.addEventListener('timeupdate', () => {
-        if (!playTimeAdjustFlag.value) getPlayer()?.updateProgress(Math.ceil(playerElem.currentTime));
 
-        getPlayer()?.checkNextSong();
-    });
+    await runtime.copyText(songName);
+    showNotify('copySucceed', 'success', '复制成功', '歌曲名称已复制到剪贴板', 1000);
+}
 
-    // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
-    // 通过 `onstorage` 赋值以方便从 Electron 主进程调用
-    window.onstorage = handleStorageData;
+async function bootApplication() {
+    window.__qmfe_sign_check = 1;
 
-    // 关闭窗口时保存偏好数据
-    window.addEventListener('close', savePreferences);
+    try {
+        loadProxyPort();
+        await loadConfig();
+        await loadPreference();
+        await readAccountInfo('all');
+        applyNavigationIconScale();
+
+        const lyrics = createApp(Lyrics);
+        lyrics.mount('#lyricsArea');
+        const lyricsArea = document.getElementById('lyricsArea');
+        if (lyricsArea) {
+            lyricsArea.style.display = 'none';
+        }
+
+        initialize();
+
+        clickHandler = (event: MouseEvent) => {
+            if (event.button === 0) {
+                hideRightMenu();
+            }
+        };
+        window.addEventListener('click', clickHandler);
+
+        scrollHandler = () => hideRightMenu();
+        document.getElementById('pageContainer')?.addEventListener('scroll', scrollHandler);
+
+        const config = getConfig();
+        if (config.generic.system.start.startMinimized && capabilities.windowControls) {
+            minimizeWindow();
+        }
+
+        const systemFrameFlag = config.generic.appearance.window.useSystemFrame;
+        showWindowControls.value = capabilities.windowControls && !systemFrameFlag;
+
+        const themeList: colorThemeName[] = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+        const colorIndex = config.generic.appearance.colors.themeColor;
+        const themeColor = themeList[colorIndex];
+        const darkEnabled = parseInt(config.generic.appearance.colors.darkMode);
+        const windowBackgroundMode: any = parseInt(config.generic.appearance.colors.backgroundColor);
+
+        initializeTheme(themeColor, darkEnabled);
+        setWindowBackground(windowBackgroundMode);
+        setControlBarTheme(config.generic.appearance.colors.showColorInBorders);
+
+        const preferences = getPreference();
+        if (capabilities.windowControls && preferences.window.isMaximized) {
+            await toggleMaximize();
+        }
+
+        const player = getPlayer();
+        player?.setRepeatState(preferences.player.repeatState);
+        player?.setShuffleState(preferences.player.shuffleState);
+        player?.setVolume(preferences.player.volume);
+        if (capabilities.desktopLyricsWindow && preferences.player.desktopLyrics) {
+            await toggleCaptions();
+        }
+
+        audioElement = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement | null;
+        audioTimeUpdateHandler = () => {
+            if (!playTimeAdjustFlag.value) {
+                getPlayer()?.updateProgress(Math.ceil(audioElement?.currentTime || 0));
+            }
+            getPlayer()?.checkNextSong();
+        };
+        audioElement?.addEventListener('timeupdate', audioTimeUpdateHandler);
+
+        window.addEventListener('storage', handleStorageData);
+        window.onstorage = handleStorageData;
+        window.addEventListener('beforeunload', savePreferences);
+        window.addEventListener('resize', handleViewportResize);
+        window.addEventListener('config-change', applyNavigationIconScale);
+
+        setTimeout(() => showNotify('Notify1', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 1200);
+        if (showHostedProxyWarning.value) {
+            showNotify(
+                'web-proxy-warning',
+                'warning',
+                '移动基础版已启用',
+                '当前构建仅包含移动基础能力，不含线上数据代理；配置 VITE_PROXY_BASE_URL 后可启用完整 Web/PWA 请求与账号能力。',
+                5000
+            );
+        }
+    }
+    catch (error: any) {
+        console.error(error);
+        showNotify('boot-failed', 'critical', '启动失败', error?.message || '应用初始化失败', 5000);
+    }
+    finally {
+        appReady.value = true;
+    }
+}
+
+watch(() => route.fullPath, () => {
+    document.getElementById('pageContainer')?.scrollTo({ top: 0 });
 });
+
+onMounted(async () => {
+    await bootApplication();
+});
+
 onUnmounted(() => {
     window.removeEventListener('storage', handleStorageData);
-});
+    if (window.onstorage === handleStorageData) {
+        window.onstorage = null;
+    }
+    window.removeEventListener('beforeunload', savePreferences);
+    window.removeEventListener('resize', handleViewportResize);
+    window.removeEventListener('config-change', applyNavigationIconScale);
 
+    if (clickHandler) {
+        window.removeEventListener('click', clickHandler);
+    }
+    if (scrollHandler) {
+        document.getElementById('pageContainer')?.removeEventListener('scroll', scrollHandler);
+    }
+    if (audioElement && audioTimeUpdateHandler) {
+        audioElement.removeEventListener('timeupdate', audioTimeUpdateHandler);
+    }
+});
 </script>
 
 <template>
     <div id="windowMain">
-        <!-- 窗口标题栏 -->
-        <div class="flex row" id="windowControlBar"
-            @mousedown="titlebarMouseDown" @mousemove="titlebarMouseMove" @mouseup="titlebarMouseUp">
+        <div
+            v-if="showWindowControls"
+            class="flex row"
+            id="windowControlBar"
+            @mousedown="titlebarMouseDown"
+            @mousemove="titlebarMouseMove"
+            @mouseup="titlebarMouseUp"
+        >
             <span class="flex row" id="windowDrag">
                 <img id="appIcon" src="/appIcon/ArcanumMusic.png" alt="Arcanum Music"/>
                 <label class="text small">Arcanum Music</label>
             </span>
             <span id="windowOptions">
                 <button class="windowControl default" id="minimizeButton" @click="minimizeWindow">
-                    <img class="outlineImage" src="/images/windowControl/minimize.svg" alt="Minimize">
+                    <img class="outlineImage" src="/images/windowControl/minimize.svg" alt="Minimize"/>
                 </button>
                 <button class="windowControl default" id="maximizeButton" @click="toggleMaximize">
-                    <img class="outlineImage" :src="maxButtonSrc" alt="Maximize / Restore">
+                    <img class="outlineImage" :src="maxButtonSrc" alt="Maximize / Restore"/>
                 </button>
-                <button class="windowControl close" id="closeButton" 
-                    @click="closeWindow" @mouseenter="closeHover" @mouseleave="closeUnHover">
-                    <img class="outlineImage" :src="closeButtonSrc" alt="Close">
+                <button
+                    class="windowControl close"
+                    id="closeButton"
+                    @click="closeWindow"
+                    @mouseenter="closeHover"
+                    @mouseleave="closeUnHover"
+                >
+                    <img class="outlineImage" :src="closeButtonSrc" alt="Close"/>
                 </button>
             </span>
         </div>
 
-        <div id="appMain">
+        <div id="appMain" :class="{ webShell: !showWindowControls, mobileShell: isMobileViewport, tabletShell: isTabletViewport }">
             <div class="flex row" id="windowTop">
-                <!-- 前进 / 后退 -->
                 <div class="flex row" id="backForward">
                     <button class="pageControl" id="pageBack" @click="pageBack">
                         <img class="outlineImage" src="/images/pageSwitcher/arrowLeft.svg" alt="Back"/>
                     </button>
-                    <button class="pageControl" id="pageForawrd" @click="pageForward">
+                    <button class="pageControl" id="pageForward" @click="pageForward">
                         <img class="outlineImage" src="/images/pageSwitcher/arrowRight.svg" alt="Forward"/>
                     </button>
                 </div>
 
+                <label class="text small bold" id="mobileRouteTitle">{{ currentPageTitle }}</label>
                 <div id="topBarSpace"></div>
 
-                <!-- 设置 -->
-                <button class="pageButton" id="settings" title="设置" @click="(_: any) => {changePage('settings')}">
-                    <img class="outlineImage" src="/images/pageSwitcher/settings.svg" alt="Application settings"/>
-                </button>
-                <!-- 账户 -->
-                <button class="pageButton" id="accounts" title="我的账户" @click="(_: any) => {changePage('accounts')}">
-                    <img class="outlineImage" src="/images/pageSwitcher/accounts.svg" alt="My accounts"/>
-                </button>
+                <div class="flex row" id="topActions">
+                    <button
+                        class="pageButton topAction"
+                        id="accounts"
+                        title="我的账号"
+                        :class="{ current: currentPageName === 'accounts' }"
+                        @click="() => navigateTo('accounts')"
+                    >
+                        <img class="outlineImage" src="/images/pageSwitcher/accounts.svg" alt="My accounts"/>
+                    </button>
+                    <button
+                        class="pageButton topAction"
+                        id="settings"
+                        title="设置"
+                        :class="{ current: currentPageName === 'settings' }"
+                        @click="() => navigateTo('settings')"
+                    >
+                        <img class="outlineImage" src="/images/pageSwitcher/settings.svg" alt="Application settings"/>
+                    </button>
+                </div>
             </div>
 
-            <!-- 页面内容 -->
-            <div class="flex row">
+            <div class="flex row" id="workspaceShell">
                 <div class="flex column" id="pageSelector">
-                    <PageButton id="home" icon="./images/pageSwitcher/home.svg" text="首页"></PageButton>
-                    <PageButton id="library" icon="./images/pageSwitcher/library.svg" text="音乐库"></PageButton>
-                    <PageButton id="search" icon="./images/pageSwitcher/search.svg" text="搜索"></PageButton>
+                    <button
+                        v-for="tab in primaryTabs"
+                        :key="tab.id"
+                        class="pageButton"
+                        :class="{ current: currentPageName === tab.id }"
+                        :id="tab.id"
+                        @click="() => navigateTo(tab.id)"
+                    >
+                        <img class="pageSwitcherImg outlineImage" :src="tab.icon" :alt="tab.label"/>
+                        <label class="text">{{ tab.label }}</label>
+                    </button>
                 </div>
+
                 <div id="pageContainer">
-                    <div id="pageContent"></div>
-                    <div id="bottomBlock"></div>
+                    <div v-if="showHostedProxyWarning" class="text small" id="proxyWarningBanner">
+                        当前构建仅包含移动基础能力，尚未配置线上代理。
+                    </div>
+                    <div v-if="!appReady" id="appBooting" class="flex column">
+                        <label class="text medium bold">正在初始化 Arcanum Music...</label>
+                    </div>
+                    <div v-else id="pageContent">
+                        <RouterView />
+                    </div>
+                    <div id="bottomBlock" :class="{ mobile: isMobileViewport }"></div>
                 </div>
             </div>
         </div>
 
-        <!-- 播放器控制栏 -->
-        <div class="flex column" id="playControlContainer">
-            <div class="fluentProgress flex row" id="playProgress" 
-                @mousedown="startProgressAdjust" @mousemove="adjustOnMouseMove">
-                <div class="fluentFilled" id="playedCover" 
-                    :style="`width: ${playTimeAdjustFlag ? targetPercentage : getPlayer()?.progressPercentage}%`"></div>
+        <div class="flex column" id="playControlContainer" :class="{ mobile: isMobileViewport, tablet: isTabletViewport && !isMobileViewport }">
+            <div class="fluentProgress flex row" id="playProgress" @mousedown="startProgressAdjust" @mousemove="adjustOnMouseMove">
+                <div class="fluentFilled" id="playedCover" :style="`width: ${playTimeAdjustFlag ? targetPercentage : getPlayer()?.progressPercentage}%`"></div>
             </div>
             <div class="flex row" id="playControlBar">
-                <!-- 当前歌曲信息 -->
                 <div class="flex row" id="currentSong">
-                    <img class="currentSongCover" :src="getPlayer()?.coverUrl" alt="Song cover"/>
-                    <span class="flex column">
+                    <button class="currentSongCoverButton" @click="showLyrics" title="显示歌词">
+                        <img class="currentSongCover" :src="getPlayer()?.coverUrl" alt="Song cover"/>
+                    </button>
+                    <span class="flex column songMeta">
                         <span id="songNameContainer" @mouseenter="checkScrollAnimation" @mouseleave="resetScroll">
                             <label class="text small bold" id="currentSongName" @click="copySongName">{{ getPlayer()?.name }}</label>
                         </span>
@@ -566,35 +668,46 @@ onUnmounted(() => {
                     </span>
                 </div>
 
-                <!-- 播放控制 -->
                 <div class="flex row" id="playControl">
-                    <button class="playControl" id="previousButton" @click="getPlayer()?.previousSong">
+                    <button class="playControl" id="previousButton" @click="() => getPlayer()?.previousSong()">
                         <img class="outlineImage" src="/images/player/previous.svg" alt="Previous song"/>
                     </button>
-                    <button class="playControl large" id="playButton" @click="getPlayer()?.togglePlayPause">
+                    <button class="playControl large" id="playButton" @click="() => getPlayer()?.togglePlayPause()">
                         <img class="outlineImage" :src="getPlayer()?.playStateImage" alt="Play / Pause"/>
                     </button>
-                    <button class="playControl" id="nextButton" @click="getPlayer()?.nextSong">
+                    <button class="playControl" id="nextButton" @click="() => getPlayer()?.nextSong()">
                         <img class="outlineImage" src="/images/player/next.svg" alt="Next song"/>
                     </button>
                 </div>
 
-                <!-- 其他控制 / 歌词 -->
                 <div class="flex row" id="controlRightBar">
-                    <button class="playControl small" id="captions" @click="toggleCaptions" title="桌面歌词">
+                    <button
+                        v-if="capabilities.desktopLyricsWindow"
+                        class="playControl small"
+                        id="captions"
+                        @click="toggleCaptions"
+                        title="桌面歌词"
+                    >
                         <img class="outlineImage" :src="desktopLyricsImage" id="captionState" alt="Toggle caption"/>
                     </button>
                     <button class="playControl small" id="playlist" @click="togglePlaylistPanel" title="播放列表">
-                        <img class="outlineImage" src="/images/player/playlist.svg" id="playlistState" alt="Toggle playlist"/>
+                        <img class="outlineImage" :src="playlistImage" id="playlistState" alt="Toggle playlist"/>
                     </button>
-                    <button class="playControl small" id="repeat" @click="getPlayer()?.toggleRepeat" title="循环播放">
+                    <button class="playControl small" id="repeat" @click="() => getPlayer()?.toggleRepeat()" title="循环播放">
                         <img class="outlineImage" :src="getPlayer()?.repeatStateImage" alt="Toggle repeat"/>
                     </button>
-                    <button class="playControl small" id="shuffle" @click="getPlayer()?.toggleShuffle" title="随机播放">
+                    <button class="playControl small" id="shuffle" @click="() => getPlayer()?.toggleShuffle()" title="随机播放">
                         <img class="outlineImage" :src="getPlayer()?.shuffleStateImage" alt="Toggle shuffle"/>
                     </button>
-                    <div class="flex row">
-                        <img id="volumeLevel" class="playControl small outlineImage" :src="`./images/player/volume_0${getPlayer()?.volumeLevel}.svg`" @click="getPlayer()?.toggleMute" title="静音" alt="toggleMute"/>
+                    <div class="flex row" id="volumeControl">
+                        <img
+                            id="volumeLevel"
+                            class="playControl small outlineImage"
+                            :src="`./images/player/volume_0${getPlayer()?.volumeLevel}.svg`"
+                            @click="() => getPlayer()?.toggleMute()"
+                            title="静音"
+                            alt="Toggle mute"
+                        />
                         <div id="volumeAdjust" @mousemove="adjustVolume">
                             <div id="volumeBar">
                                 <div id="volumeFilled" :style="`width: ${getPlayer()?.volume}%`"></div>
@@ -609,12 +722,21 @@ onUnmounted(() => {
             </div>
         </div>
 
-        <!-- 通知区域 -->
-        <div class="notifyArea flex column" id="notifyArea"></div>
+        <div v-if="isMobileViewport" class="flex row" id="mobileTabBar">
+            <button
+                v-for="tab in mobileTabs"
+                :key="tab.id"
+                class="pageButton mobileTab"
+                :class="{ current: currentPageName === tab.id }"
+                @click="() => navigateTo(tab.id)"
+            >
+                <img class="outlineImage" :src="tab.icon" :alt="tab.label"/>
+                <label class="text">{{ tab.label }}</label>
+            </button>
+        </div>
 
-        <!-- 弹出窗口 -->
+        <div class="notifyArea flex column" id="notifyArea"></div>
         <div class="flex column" id="popupArea"></div>
-        <!-- 歌手选择弹窗 -->
         <div class="flex column" id="artistSelect">
             <div class="flex row" id="artistSelectTopBar">
                 <label class="text medium">请选择</label>
@@ -625,18 +747,250 @@ onUnmounted(() => {
             <div id="artistSelectContent"></div>
         </div>
 
-        <!-- 播放进度标签 -->
         <div class="text ultraSmall flex column" id="progressTooltip" :style="progressTooltipOffset">
             {{ `${getPlayer()?.playedTimeText} / ${getPlayer()?.durationText}` }}
         </div>
 
-        <!-- 歌词面板 -->
         <div id="lyricsArea"></div>
-
-        <!-- 播放器 -->
         <audio id="arcanummusic-playcontrol" :src="getPlayer()?.url" controls></audio>
-
-        <!-- 右键菜单 -->
         <div id="rightClickMenuContainer"></div>
     </div>
 </template>
+
+<style>
+#appMain.webShell {
+    top: 0;
+    height: calc(100vh - 4.5rem);
+}
+
+#workspaceShell {
+    width: 100%;
+    height: calc(100% - 3rem);
+}
+
+#pageContent {
+    min-height: 100%;
+}
+
+#appBooting {
+    min-height: 16rem;
+    align-items: center;
+    justify-content: center;
+}
+
+#proxyWarningBanner {
+    background: rgba(255, 196, 0, 0.18);
+    border: 1px solid rgba(255, 196, 0, 0.45);
+    border-radius: 0.75rem;
+    margin: 0.75rem 0.75rem 0;
+    padding: 0.75rem 0.9rem;
+}
+
+#mobileRouteTitle {
+    display: none;
+    min-width: 0;
+    text-align: center;
+}
+
+#topActions {
+    gap: 0.35rem;
+}
+
+.pageButton.topAction {
+    width: 3rem;
+    height: 3rem;
+    margin: 0;
+    border-radius: 1.5rem;
+}
+
+.pageButton.topAction > img {
+    width: var(--nav-top-action-icon-size);
+    height: var(--nav-top-action-icon-size);
+}
+
+.pageButton.topAction > label {
+    display: none;
+}
+
+.currentSongCoverButton {
+    appearance: none;
+    background: transparent;
+    border: none;
+    border-radius: 0.6rem;
+    padding: 0;
+    margin-right: 6px;
+    cursor: pointer;
+
+    transition: transform 150ms ease-in-out;
+}
+
+.currentSongCoverButton:hover {
+    transform: scale(1.03);
+}
+
+.currentSongCoverButton .currentSongCover {
+    margin-right: 0;
+}
+
+#bottomBlock.mobile {
+    height: 10rem;
+}
+
+#playControlContainer.tablet {
+    width: calc(100% - 5rem);
+    left: 2.5rem;
+}
+
+#mobileTabBar {
+    position: fixed;
+    left: 0.5rem;
+    right: 0.5rem;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 0.35rem);
+    height: 4rem;
+    padding: 0.25rem;
+    background: var(--interface-transparent);
+    backdrop-filter: blur(12px);
+    border-radius: 1rem;
+    box-shadow: 0 0 10px var(--transparent-grey);
+    justify-content: space-between;
+    z-index: 120;
+}
+
+.mobileTab {
+    flex: 1 1 0;
+    width: auto;
+    height: 3.35rem;
+    margin: 0;
+    border-radius: 0.9rem;
+    justify-content: center;
+}
+
+.mobileTab > img {
+    width: var(--mobile-tab-icon-size);
+    height: var(--mobile-tab-icon-size);
+}
+
+.mobileTab > label {
+    font-size: 0.72rem;
+}
+
+#playControlContainer.mobile {
+    width: calc(100% - 1rem);
+    left: 0.5rem;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 4.7rem);
+    border-radius: 1rem;
+}
+
+#playControlContainer.mobile #playControlBar {
+    padding: 0 0.85rem;
+    gap: 0.5rem;
+}
+
+#playControlContainer.mobile #currentSong {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+#playControlContainer.mobile .songMeta {
+    min-width: 0;
+}
+
+#playControlContainer.mobile #songNameContainer {
+    width: auto;
+    max-width: 100%;
+}
+
+#playControlContainer.mobile #currentSongAuthors {
+    display: none;
+}
+
+#playControlContainer.mobile #playControl {
+    position: static;
+    left: auto;
+}
+
+#playControlContainer.mobile #controlRightBar {
+    margin-left: auto;
+}
+
+#playControlContainer.mobile #captions,
+#playControlContainer.mobile #repeat,
+#playControlContainer.mobile #shuffle,
+#playControlContainer.mobile #volumeControl {
+    display: none;
+}
+
+#playControlContainer.mobile .currentSongCover {
+    width: 2.75rem;
+    height: 2.75rem;
+}
+
+@media (max-width: 899px) {
+    #windowTop {
+        padding: 0 1rem;
+        gap: 0.75rem;
+    }
+
+    #playControlContainer {
+        width: calc(100% - 2rem);
+        left: 1rem;
+    }
+}
+
+@media (max-width: 767px) {
+    body {
+        overflow: auto;
+    }
+
+    #windowControlBar {
+        display: none;
+    }
+
+    #appMain {
+        top: 0;
+        height: calc(100vh - 9.5rem);
+    }
+
+    #workspaceShell {
+        height: calc(100vh - 12.5rem);
+    }
+
+    #pageSelector {
+        display: none;
+    }
+
+    #pageContainer {
+        width: 100%;
+        left: 0;
+        height: calc(100vh - 12.5rem);
+        padding: 0 0.35rem;
+    }
+
+    #windowTop {
+        position: sticky;
+        top: 0;
+        z-index: 80;
+        padding: 0.4rem 0.85rem;
+        background: color-mix(in srgb, var(--interface-background) 82%, transparent);
+        backdrop-filter: blur(10px);
+    }
+
+    #mobileRouteTitle {
+        display: block;
+        flex: 1 1 auto;
+    }
+
+    #topBarSpace {
+        display: none;
+    }
+
+    #backForward .pageControl {
+        width: 2.6rem;
+        height: 2.6rem;
+    }
+
+    #playControlContainer.mobile #lyrics {
+        display: inline-flex;
+    }
+}
+</style>

@@ -18,14 +18,19 @@
         "build": "vue-tsc -b && vite build",
         "preview": "vite preview",
         "electron:dev": "concurrently vite \"electron .\"",
-        "electron:build": "npm run build && electron-builder build --config electron-builder.json"
+        "electron:build": "npm run build && electron-builder build --config electron-builder.json",
+        "server:start": "node server/index.js"
     },
     "dependencies": {
         "auto-launch": "^5.0.6",
         "axios": "^1.14.0",
         "cors": "^2.8.6",
         "express": "^5.2.1",
-        "node-fetch": "^3.3.2"
+        "node-fetch": "^3.3.2",
+        "vite-plugin-pwa": "^1.2.0",
+        "vue": "^3.5.32",
+        "vue-router": "^5.0.4",
+        "workbox-window": "^7.4.0"
     },
     "devDependencies": {
         "@types/crypto-js": "^4.2.2",

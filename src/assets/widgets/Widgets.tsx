@@ -54,13 +54,13 @@ const SonglistCard = defineComponent({
             <span class="songlistCard medium" id={props.id} 
                 onClick={(_) => changePage('songlist', true, props.id)} 
                 onContextmenu={(event) => handleSongListRightClick(event, props)}>
-                <span class="flex column">
+                <span class="songCoverFrame">
                     <img class="songCover" src={props.coverUrl} alt="Playlist cover"/>
-                    <label class="text small">{props.name}</label>
+                    <button class="songlistPlatform" id={`${props.id}_platform`}>
+                        <img src={platformIcon} alt={`From ${platformName}`}/>
+                    </button>
                 </span>
-                <button class="songlistPlatform" id={`${props.id}_platform`}>
-                    <img src={platformIcon} alt={`From ${platformName}`}/>
-                </button>
+                <label class="text small">{props.name}</label>
             </span>
         );
     },

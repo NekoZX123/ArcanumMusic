@@ -36,7 +36,7 @@ export interface IElectronAPI {
 declare global {
     interface Window {
         __qmfe_sign_check: any,
-        electron: IElectronAPI
+        electron?: IElectronAPI
     }
 }
 

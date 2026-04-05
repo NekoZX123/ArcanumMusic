@@ -108,7 +108,37 @@
 }
 
 .musicBox.userLists {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--songlist-grid-min-size), 1fr));
+    gap: var(--songlist-grid-gap);
+
+    align-items: start;
+}
+
+@media (max-width: 767px) {
+    #musicLibrary {
+        padding: 0 0.75rem 7rem;
+    }
+
+    #userInfo {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    #userFavouritesPreview,
+    #recommendContainer {
+        width: 100%;
+        height: auto;
+        max-height: 18rem;
+    }
+
+    #playlistSourceTabs {
+        padding: 0;
+        justify-content: center;
+    }
+
+    .musicBox.userLists {
+        grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+    }
 }

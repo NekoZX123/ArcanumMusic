@@ -22,7 +22,13 @@
     gap: 1.5rem;
 }
 .collectionsContent.songlist {
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--songlist-grid-min-size), 1fr));
+    gap: var(--songlist-grid-gap);
+    justify-content: stretch;
+}
+.collectionsContent.songlist > .songlistContainer.medium {
+    width: 100%;
 }
 .collectionsContent.single {
     gap: 6px;

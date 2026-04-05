@@ -94,6 +94,15 @@
     flex-wrap: wrap;
     justify-content: center;
 }
+.musicBox.songlists {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--songlist-grid-min-size), 1fr));
+    gap: var(--songlist-grid-gap);
+    justify-content: stretch;
+}
+.musicBox.songlists > .songlistContainer.medium {
+    width: 100%;
+}
 
 .listButton {
     appearance: none;
@@ -126,4 +135,31 @@
 #loadMoreButton {
     margin-top: 1rem;
     margin-bottom: 3rem;
+}
+
+@media (max-width: 767px) {
+    #musicSearch {
+        padding: 0 0.75rem 7rem;
+    }
+
+    #searchBarContainer {
+        padding-left: 0.75rem;
+    }
+
+    #searchBar {
+        font-size: 1rem;
+    }
+
+    #searchSourceContainer {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .musicBox {
+        gap: 0.75rem;
+    }
+
+    .musicBox.songlists {
+        grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+    }
 }

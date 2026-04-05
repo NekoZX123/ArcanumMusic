@@ -37,3 +37,26 @@
 
     padding-left: 2rem;
 }
+
+@media (max-width: 767px) {
+    #singlePage {
+        padding: 0.75rem 0.75rem 7rem;
+    }
+
+    #singleInfo {
+        padding: 0.75rem 0;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    #singleCover {
+        width: 10rem;
+        height: 10rem;
+        margin-right: 0;
+    }
+
+    #content {
+        padding-left: 0;
+    }
+}

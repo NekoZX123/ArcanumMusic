@@ -1,6 +1,7 @@
 import { reactive } from "vue";
 import { showNotify } from "../notifications/Notification.ts";
 import { getListContent, getSongInfo, getSongLink } from "./songUtils.ts";
+import { runtime } from "../../runtime";
 
 // 时间格式化
 function timeFormat(timeSeconds: number) {
@@ -364,8 +365,8 @@ class Player {
                 const idParts = playInfo.id.split('-');
                 const musicId = idParts[2];
                 const fallbackUrl = `https://music.163.com/song/media/outer/url?id=${musicId}.mp3`;
-                console.log(`[Debug] Play URL: ${fallbackUrl}`);
-                this.url = fallbackUrl;
+                this.url = runtime.isElectron() ? playInfo.url : fallbackUrl;
+                console.log(`[Debug] Play URL: ${this.url}`);
             }
             else {
                 this.url = playInfo.url;

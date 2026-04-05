@@ -566,3 +566,70 @@
 }
 
 
+
+@media (max-width: 899px) {
+    #settingsTabs {
+        width: 13rem;
+    }
+
+    #settingsContent {
+        width: calc(100% - 14rem);
+        left: 13rem;
+    }
+}
+
+@media (max-width: 767px) {
+    #musicSettings {
+        height: auto;
+        min-height: 100%;
+        align-items: stretch;
+        padding: 0 0.25rem 8rem;
+    }
+
+    #musicSettings > .flex.column > .flex.row {
+        flex-direction: column;
+    }
+
+    #settingsTabs {
+        position: sticky;
+        top: 3.75rem;
+        width: 100%;
+        height: auto;
+        padding-right: 0;
+        background: color-mix(in srgb, var(--interface-background) 86%, transparent);
+        backdrop-filter: blur(10px);
+        z-index: 20;
+    }
+
+    #settingsContent {
+        width: 100%;
+        height: auto;
+        left: 0;
+        margin-top: 0.75rem;
+    }
+
+    .contentPage {
+        padding: 0.5rem;
+    }
+
+    .optionBox {
+        width: 100%;
+        margin: 0.85rem 0;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    #changesControl {
+        position: fixed;
+        left: 0.5rem;
+        right: 0.5rem;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 5.25rem);
+        width: auto;
+        justify-content: center;
+        padding: 0.5rem;
+        border-radius: 1rem;
+        background: var(--interface-transparent);
+        backdrop-filter: blur(10px);
+        z-index: 120;
+    }
+}
