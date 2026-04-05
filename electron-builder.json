@@ -48,6 +48,11 @@
         ],
         "icon": "icons/linux",
         "synopsis": "Arcanum Music - A multiplatform music application",
-        "category": "Audio"
+        "category": "Audio",
+        "desktop": {
+            "entry": {
+                "Icon": "arcanummusic"
+            }
+        }
     }
 }
