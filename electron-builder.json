@@ -34,6 +34,7 @@
         "uninstallerIcon": "./icons/ArcanumMusic.ico"
     },
     "linux": {
+        "executableName": "arcanummusic",
         "target": [
             {
                 "target": "deb",
@@ -50,6 +51,7 @@
         "desktop": {
             "entry": {
                 "Name": "ArcanumMusic",
+                "Icon": "arcanummusic",
                 "Comment": "Arcanum Music - A multiplatform music application",
                 "Terminal": false,
                 "Categories": "Audio;Music;"
