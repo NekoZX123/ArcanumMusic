@@ -1,30 +1,32 @@
-﻿import express from 'express';
+import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
 
-export const allowedHosts = [
-    'music.163.com',
-    'm701.music.126.net',
-    'm704.music.126.net',
-    'm801.music.126.net',
-    'm804.music.126.net',
-    'interface.music.163.com',
-    'u6.y.qq.com',
-    'c6.y.qq.com',
-    'ws6.stream.qqmusic.qq.com',
-    'aqqmusic.tc.qq.com',
-    'kuwo.cn',
-    'www.kuwo.cn',
-    'searchlist.kuwo.cn',
-    'wapi.kuwo.cn',
-    'lv-sycdn.kuwo.cn',
-    'wwwapi.kugou.com',
-    'complexsearch.kugou.com',
-    'm3ws.kugou.com',
-    'gateway.kugou.com',
-    'm.kugou.com',
-    'webfs.kugou.com'
-];
+const allowedOrigins = new Map([
+    ['music.163.com', 'https://music.163.com'],
+    ['m701.music.126.net', 'https://m701.music.126.net'],
+    ['m704.music.126.net', 'https://m704.music.126.net'],
+    ['m801.music.126.net', 'https://m801.music.126.net'],
+    ['m804.music.126.net', 'https://m804.music.126.net'],
+    ['interface.music.163.com', 'https://interface.music.163.com'],
+    ['u6.y.qq.com', 'https://u6.y.qq.com'],
+    ['c6.y.qq.com', 'https://c6.y.qq.com'],
+    ['ws6.stream.qqmusic.qq.com', 'https://ws6.stream.qqmusic.qq.com'],
+    ['aqqmusic.tc.qq.com', 'https://aqqmusic.tc.qq.com'],
+    ['kuwo.cn', 'https://kuwo.cn'],
+    ['www.kuwo.cn', 'https://www.kuwo.cn'],
+    ['searchlist.kuwo.cn', 'https://searchlist.kuwo.cn'],
+    ['wapi.kuwo.cn', 'https://wapi.kuwo.cn'],
+    ['lv-sycdn.kuwo.cn', 'https://lv-sycdn.kuwo.cn'],
+    ['wwwapi.kugou.com', 'https://wwwapi.kugou.com'],
+    ['complexsearch.kugou.com', 'https://complexsearch.kugou.com'],
+    ['m3ws.kugou.com', 'https://m3ws.kugou.com'],
+    ['gateway.kugou.com', 'https://gateway.kugou.com'],
+    ['m.kugou.com', 'https://m.kugou.com'],
+    ['webfs.kugou.com', 'https://webfs.kugou.com']
+]);
+
+export const allowedHosts = Array.from(allowedOrigins.keys());
 
 export const platformCookieFields = {
     netease: ['MUSIC_U'],
@@ -41,6 +43,8 @@ const platformHostMap = {
 };
 
 const sessionStore = new Map();
+const allowedMethods = new Set(['GET', 'POST']);
+const blockedHeaderNames = new Set(['host', 'content-length']);
 
 function normalizePlatform(platform) {
     const normalized = String(platform || '').trim();
@@ -79,10 +83,27 @@ function getCookieHeader(cookies = {}) {
         .join('; ');
 }
 
+function sanitizeProxyHeaders(headers = {}) {
+    if (!headers || typeof headers !== 'object' || Array.isArray(headers)) {
+        return {};
+    }
+
+    return Object.entries(headers).reduce((result, [key, value]) => {
+        const normalizedKey = String(key).toLowerCase();
+        if (blockedHeaderNames.has(normalizedKey) || value === undefined || value === null) {
+            return result;
+        }
+
+        result[key] = value;
+        return result;
+    }, {});
+}
+
 function detectPlatformFromUrl(link) {
     try {
         const parsedUrl = new URL(link);
-        return Object.entries(platformHostMap).find(([, hosts]) => hosts.includes(parsedUrl.hostname))?.[0] || null;
+        const hostname = parsedUrl.hostname.toLowerCase();
+        return Object.entries(platformHostMap).find(([, hosts]) => hosts.includes(hostname))?.[0] || null;
     }
     catch {
         return null;
@@ -112,21 +133,54 @@ export async function proxyRequest(link, method, headers = {}, body = null, resp
     try {
         parsedUrl = new URL(link);
     }
-    catch (error) {
+    catch {
         throw new Error(`Invalid proxy url: ${link}`);
     }
 
-    if (!allowedHosts.includes(parsedUrl.hostname)) {
+    const protocol = parsedUrl.protocol.toLowerCase();
+    const hostname = parsedUrl.hostname.toLowerCase();
+    const safeOrigin = allowedOrigins.get(hostname);
+    const safeMethod = String(method || 'GET').toUpperCase();
+
+    if (!['http:', 'https:'].includes(protocol)) {
+        throw new Error(`Proxy protocol ${protocol} is not allowed`);
+    }
+
+    if (!safeOrigin) {
         throw new Error(`Proxy request to ${link} is not allowed`);
     }
 
+    if (parsedUrl.username || parsedUrl.password) {
+        throw new Error('Proxy credentials are not allowed in the target URL');
+    }
+
+    if (!allowedMethods.has(safeMethod)) {
+        throw new Error(`Proxy method ${safeMethod} is not allowed`);
+    }
+
     const response = await axios({
-        url: link,
-        method,
-        headers,
+        url: `${safeOrigin}${parsedUrl.pathname}${parsedUrl.search}`,
+        method: safeMethod,
+        headers: sanitizeProxyHeaders(headers),
         data: body,
         responseType,
-        validateStatus: () => true
+        validateStatus: () => true,
+        maxRedirects: 5,
+        beforeRedirect: (options) => {
+            const redirectHost = String(options.hostname || '').toLowerCase();
+            const redirectProtocol = String(options.protocol || '').toLowerCase();
+
+            if (!['http:', 'https:'].includes(redirectProtocol) || !allowedOrigins.has(redirectHost)) {
+                throw new Error(`Proxy redirect to ${redirectProtocol}//${redirectHost} is not allowed`);
+            }
+
+            if (options.headers) {
+                delete options.headers.host;
+                delete options.headers.Host;
+                delete options.headers['content-length'];
+                delete options.headers['Content-Length'];
+            }
+        }
     });
 
     return {
@@ -220,7 +274,7 @@ export function createArcanumService(options = {}) {
             const sessionState = getSessionState(sessionId);
             res.json(sessionState.platforms[platform] || getLoggedOutStatus());
         }
-        catch (error) {
+        catch {
             res.status(400).json(getLoggedOutStatus());
         }
     });
@@ -250,7 +304,7 @@ export function createArcanumService(options = {}) {
             delete sessionState.platforms[platform];
             res.json({ ok: true, platform, loggedIn: false });
         }
-        catch (error) {
+        catch {
             res.status(400).json({ ok: false, loggedIn: false });
         }
     });
