@@ -89,6 +89,12 @@
 
     /* Apple Music 歌词半透明色 */
     --applemusic-lyrics-color: rgba(245, 245, 245, 0.6);
+    --nav-icon-size: 3rem;
+    --nav-top-action-icon-size: 2rem;
+    --mobile-tab-icon-size: 1.8rem;
+    --songlist-card-size: 9.5rem;
+    --songlist-grid-min-size: 8.75rem;
+    --songlist-grid-gap: 1rem;
 }
 /* 预设默认样式 */
 * {
@@ -466,8 +472,8 @@ img.outlineImage {
     background: var(--theme-color-default);
 }
 .pageButton > img {
-    width: 3rem;
-    height: 3rem;
+    width: var(--nav-icon-size);
+    height: var(--nav-icon-size);
 
     border: none;
     border-radius: 1.5rem;
@@ -505,24 +511,24 @@ img.outlineImage {
 #accounts.current {
     background: var(--theme-color-default);
 }
-#settings > img {
-    width: 3rem;
-    height: 3rem;
+#settings > img,
+#accounts > img {
+    width: var(--nav-top-action-icon-size);
+    height: var(--nav-top-action-icon-size);
 }
 
 /* 歌单卡片 */
 .songlistContainer.medium {
-    width: 10rem;
-    height: 13rem;
+    width: var(--songlist-card-size);
+    height: auto;
 
-    margin: 0 3px;
-    padding: 0 3px;
-    padding-top: 3px;
+    margin: 0;
+    padding: 0;
 
     border: none;
     border-radius: 12px;
 
-    align-items: center;
+    align-items: stretch;
 
     transition: all 200ms ease-in-out;
 }
@@ -554,6 +560,11 @@ img.outlineImage {
 }
 .songlistCard.medium {
     cursor: pointer;
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
 }
 
 .songlistCard.midlarge > img {
@@ -562,11 +573,18 @@ img.outlineImage {
 
     border-radius: 8px;
 }
-.songlistCard.medium img {
-    width: calc(10rem - 12px);
-    height: calc(10rem - 12px);
+.songlistCard.medium .songCoverFrame {
+    position: relative;
+    width: 100%;
+}
+.songlistCard.medium img.songCover {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
 
     border-radius: 8px;
+
+    display: block;
 }
 
 /* 歌单标题区域 */
@@ -633,10 +651,16 @@ img.outlineImage {
     justify-content: space-between;
 }
 .songlistCard.medium label {
-    width: 9rem;
-    height: 34pt;
+    width: 100%;
+    min-height: 2.6rem;
+    height: auto;
 
     overflow: hidden;
+    line-height: 1.35;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 
     justify-content: flex-start;
 }
@@ -693,18 +717,18 @@ img.outlineImage {
 
 /* 歌单来源示意 */
 .songlistCard.medium .songlistPlatform {
-    position: relative;
+    position: absolute;
     width: 2rem;
     height: 2rem;
-    left: calc(7rem - 12px);
-    top: calc(-6rem + 6px);
+    right: 0.45rem;
+    bottom: 0.45rem;
 
     background: transparent;
     border: none;
     border-radius: 1.5rem;
     box-shadow: 0 4px 4px var(--transparent-grey);
 
-    margin: 6px;
+    margin: 0;
 
     transition: all 150ms ease-in-out;
 
@@ -953,6 +977,16 @@ img.outlineImage {
     display: flex;
 }
 /* 类型选择器 */
+.musicBox.songlists {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--songlist-grid-min-size), 1fr));
+    gap: var(--songlist-grid-gap);
+
+    align-items: start;
+}
+.musicBox.songlists > .songlistContainer.medium {
+    width: 100%;
+}
 .musicBox.types {
     align-items: center;
     justify-content: center;

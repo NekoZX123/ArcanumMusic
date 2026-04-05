@@ -56,7 +56,7 @@ onMounted(() => {
                             return;
                         }
 
-                        const songId = `songlist-${platform}-${songDetail.songId}`;
+                        const songId = `music-${platform}-${songDetail.songId}`;
                         const songName = songDetail.songName;
                         const songCover = songDetail.songCover;
                         const songAuthors = songDetail.songAuthors;

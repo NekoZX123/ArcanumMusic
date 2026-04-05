@@ -248,7 +248,7 @@ async function setPageStructure(depth: string[], node: any) {
                 min: node.getAttribute('min'),
                 max: node.getAttribute('max'),
                 unit: node.getAttribute('unit'),
-                value: node.getAttribute('min'),
+                value: node.getAttribute('value') || node.getAttribute('min'),
             };
             createApp(Slider, widgetProps).mount(targetElement);
         }

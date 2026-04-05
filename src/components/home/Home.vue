@@ -13,6 +13,7 @@ import type { AxiosResponse } from 'axios';
 import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
 import { getPlayer } from '../../assets/player/player.ts';
 import { getMainColors } from '../../assets/effects/colorUtils.ts';
+import { getConfig } from '../../assets/utilities/configLoader.ts';
 
 // 默认滑动量
 const BOX_SCROLL_DISTANCE = 330;
@@ -48,6 +49,21 @@ const requestFunc: Record<string, any> = {
     'kuwo': getKuwoResult,
     'kugou': getKugouResult
 }
+const homeSourceFilterList = ['all', 'netease', 'qqmusic', 'kuwo', 'kugou'] as const;
+
+function getHomeSourceFilter() {
+    const filterIndex = Number(getConfig()?.generic?.appearance?.home?.recommendationSource ?? 0);
+    return homeSourceFilterList[filterIndex] || 'all';
+}
+
+function resolveHomePlatforms(supportedPlatforms: string[]) {
+    const currentFilter = getHomeSourceFilter();
+    if (currentFilter === 'all') {
+        return supportedPlatforms;
+    }
+
+    return supportedPlatforms.includes(currentFilter) ? [currentFilter] : [];
+}
 
 function playNeteaseRadio(_: MouseEvent) {
     const userData = getAccountInfo('all');
@@ -74,6 +90,8 @@ function playNeteaseRadio(_: MouseEvent) {
 
 onMounted(() => {
     const userData = getAccountInfo('all');
+    const preferredPlatforms = resolveHomePlatforms(Object.keys(requestFunc));
+    const albumPlatforms = resolveHomePlatforms(['netease', 'qqmusic']);
 
     // 获取每日推荐封面
     getNeteaseResult('songList', { listId: '3136952023' }, userData.netease.cookies)
@@ -117,7 +135,8 @@ onMounted(() => {
     if (!hotListContainer) {
         hotListContainer = document.getElementById('songlistRecommends') as HTMLElement;
     }
-    Object.keys(requestFunc).forEach((platform: string) => {
+    hotListContainer.innerHTML = '';
+    preferredPlatforms.forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
         sendRequest('hotList', {}, userData[platform].cookies)
             .then((response: AxiosResponse)=> {
@@ -142,8 +161,9 @@ onMounted(() => {
     if (!recommendSongContainer) {
         recommendSongContainer = document.getElementById('singleRecommends') as HTMLElement;
     }
+    recommendSongContainer.innerHTML = '';
     const loadedRecommendSongs: string[] = [];
-    Object.keys(requestFunc).forEach((platform: string) => {
+    preferredPlatforms.forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
         sendRequest('recommendSong', {}, userData[platform].cookies)
             .then((response: AxiosResponse) => {
@@ -162,7 +182,7 @@ onMounted(() => {
                         }
                     }
 
-                    const songId = `songlist-${platform}-${songDetail.songId}`;
+                    const songId = `music-${platform}-${songDetail.songId}`;
                     const songName = songDetail.songName;
                     const songCover = songDetail.songCover;
                     const songAuthors = songDetail.songAuthors;
@@ -179,8 +199,9 @@ onMounted(() => {
     if (!recommendArtistContainer) {
         recommendArtistContainer = document.getElementById('artistRecommends') as HTMLElement;
     }
+    recommendArtistContainer.innerHTML = '';
     const loadedArtists: string[] = [];
-    Object.keys(requestFunc).forEach((platform: string) => {
+    preferredPlatforms.forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
         sendRequest('recommendArtist', {}, userData[platform].cookies)
             .then((response: AxiosResponse) => {
@@ -241,7 +262,8 @@ onMounted(() => {
     if (!newAlbumContainer) {
         newAlbumContainer = document.getElementById('newAlbums') as HTMLElement;
     }
-    ['netease', 'qqmusic'].forEach((platform: string) => {
+    newAlbumContainer.innerHTML = '';
+    albumPlatforms.forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
         sendRequest('newAlbum', {}, userData[platform].cookies)
             .then((response: AxiosResponse) => {
@@ -268,8 +290,9 @@ onMounted(() => {
     if (!newSinglesContainer) {
         newSinglesContainer = document.getElementById('newSingles') as HTMLElement;
     }
+    newSinglesContainer.innerHTML = '';
     const loadedSongs: string[] = [];
-    Object.keys(requestFunc).forEach((platform: string) => {
+    preferredPlatforms.forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
         sendRequest('newSong', {}, userData[platform].cookies)
             .then((response: AxiosResponse) => {

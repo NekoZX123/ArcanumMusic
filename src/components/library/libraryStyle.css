@@ -108,9 +108,11 @@
 }
 
 .musicBox.userLists {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--songlist-grid-min-size), 1fr));
+    gap: var(--songlist-grid-gap);
+
+    align-items: start;
 }
 
 @media (max-width: 767px) {
@@ -137,6 +139,6 @@
     }
 
     .musicBox.userLists {
-        justify-content: center;
+        grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
     }
 }

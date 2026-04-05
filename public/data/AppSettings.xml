@@ -50,6 +50,18 @@
                 </dropbox>
                 <checkbox id="lyricsGlow" text="启用歌词光效"/>
             </node>
+            <node id="navigation" title="&#23548;&#33322;">
+                <slider id="iconScale" text="&#23548;&#33322;&#22270;&#26631;&#22823;&#23567;" min="80" max="120" unit="%" value="100"/>
+            </node>
+            <node id="home" title="&#39318;&#39029;&#20869;&#23481;">
+                <dropbox id="recommendationSource" text="&#25512;&#33616;&#20869;&#23481;&#27468;&#28304;">
+                    <item id="0">&#20840;&#37096;&#24179;&#21488;</item>
+                    <item id="1">&#32593;&#26131;&#20113;&#38899;&#20048;</item>
+                    <item id="2">&#81;&#81;&#32;&#38899;&#20048;</item>
+                    <item id="3">&#37239;&#25105;&#38899;&#20048;</item>
+                    <item id="4">&#37239;&#29399;&#38899;&#20048;</item>
+                </dropbox>
+            </node>
         </page>
     </pagebox>
 

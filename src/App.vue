@@ -45,6 +45,7 @@ const mobileTabs = [
     ...primaryTabs,
     { id: 'playlist', label: '队列', icon: '/images/player/playlist.svg' }
 ] as const;
+const NAVIGATION_ICON_SCALE_DEFAULT = 100;
 
 let startX = 0;
 let startY = 0;
@@ -61,6 +62,24 @@ function navigateTo(pageId: string) {
 
 function handleViewportResize() {
     viewportWidth.value = window.innerWidth;
+}
+
+function getNavigationIconScaleValue() {
+    const rawValue = Number(getConfig()?.generic?.appearance?.navigation?.iconScale ?? NAVIGATION_ICON_SCALE_DEFAULT);
+    if (!Number.isFinite(rawValue)) {
+        return NAVIGATION_ICON_SCALE_DEFAULT;
+    }
+
+    return Math.min(120, Math.max(80, rawValue));
+}
+
+function applyNavigationIconScale() {
+    const scale = getNavigationIconScaleValue() / 100;
+    const rootStyle = document.documentElement.style;
+
+    rootStyle.setProperty('--nav-icon-size', `${(3 * scale).toFixed(3)}rem`);
+    rootStyle.setProperty('--nav-top-action-icon-size', `${(2 * scale).toFixed(3)}rem`);
+    rootStyle.setProperty('--mobile-tab-icon-size', `${(1.8 * scale).toFixed(3)}rem`);
 }
 
 function minimizeWindow() {
@@ -417,6 +436,7 @@ async function bootApplication() {
         await loadConfig();
         await loadPreference();
         await readAccountInfo('all');
+        applyNavigationIconScale();
 
         const lyrics = createApp(Lyrics);
         lyrics.mount('#lyricsArea');
@@ -481,6 +501,7 @@ async function bootApplication() {
         window.onstorage = handleStorageData;
         window.addEventListener('beforeunload', savePreferences);
         window.addEventListener('resize', handleViewportResize);
+        window.addEventListener('config-change', applyNavigationIconScale);
 
         setTimeout(() => showNotify('Notify1', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 1200);
         if (showHostedProxyWarning.value) {
@@ -517,6 +538,7 @@ onUnmounted(() => {
     }
     window.removeEventListener('beforeunload', savePreferences);
     window.removeEventListener('resize', handleViewportResize);
+    window.removeEventListener('config-change', applyNavigationIconScale);
 
     if (clickHandler) {
         window.removeEventListener('click', clickHandler);
@@ -635,7 +657,9 @@ onUnmounted(() => {
             </div>
             <div class="flex row" id="playControlBar">
                 <div class="flex row" id="currentSong">
-                    <img class="currentSongCover" :src="getPlayer()?.coverUrl" alt="Song cover"/>
+                    <button class="currentSongCoverButton" @click="showLyrics" title="显示歌词">
+                        <img class="currentSongCover" :src="getPlayer()?.coverUrl" alt="Song cover"/>
+                    </button>
                     <span class="flex column songMeta">
                         <span id="songNameContainer" @mouseenter="checkScrollAnimation" @mouseleave="resetScroll">
                             <label class="text small bold" id="currentSongName" @click="copySongName">{{ getPlayer()?.name }}</label>
@@ -780,12 +804,32 @@ onUnmounted(() => {
 }
 
 .pageButton.topAction > img {
-    width: 2rem;
-    height: 2rem;
+    width: var(--nav-top-action-icon-size);
+    height: var(--nav-top-action-icon-size);
 }
 
 .pageButton.topAction > label {
     display: none;
+}
+
+.currentSongCoverButton {
+    appearance: none;
+    background: transparent;
+    border: none;
+    border-radius: 0.6rem;
+    padding: 0;
+    margin-right: 6px;
+    cursor: pointer;
+
+    transition: transform 150ms ease-in-out;
+}
+
+.currentSongCoverButton:hover {
+    transform: scale(1.03);
+}
+
+.currentSongCoverButton .currentSongCover {
+    margin-right: 0;
 }
 
 #bottomBlock.mobile {
@@ -822,8 +866,8 @@ onUnmounted(() => {
 }
 
 .mobileTab > img {
-    width: 1.8rem;
-    height: 1.8rem;
+    width: var(--mobile-tab-icon-size);
+    height: var(--mobile-tab-icon-size);
 }
 
 .mobileTab > label {

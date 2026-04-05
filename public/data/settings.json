@@ -24,6 +24,12 @@
                 "lyricsBackground": 1,
                 "lyricsStyle": 0,
                 "lyricsGlow": true
+            },
+            "navigation": {
+                "iconScale": 100
+            },
+            "home": {
+                "recommendationSource": 0
             }
         }
     },
