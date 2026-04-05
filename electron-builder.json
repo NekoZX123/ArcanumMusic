@@ -15,7 +15,8 @@
         "./icons"
     ],
     "directories": {
-        "output": "./build/output"
+        "output": "./build/output",
+        "buildResources": "./resources"
     },
     "win": {
         "target": [
@@ -34,6 +35,7 @@
         "uninstallerIcon": "./icons/ArcanumMusic.ico"
     },
     "linux": {
+        "executableName": "arcanummusic",
         "target": [
             {
                 "target": "deb",
@@ -42,23 +44,10 @@
             {
                 "target": "AppImage",
                 "arch": ["x64"]
-            },
-            {
-                "target": "pacman",
-                "arch": ["x64"]
             }
         ],
-        "icon": "./icons/ArcanumMusic.png",
+        "icon": "icons/linux",
         "synopsis": "Arcanum Music - A multiplatform music application",
-        "category": "Audio",
-        "desktop": {
-            "entry": {
-                "Name": "ArcanumMusic",
-                "Icon": "moe.nekozx123.arcanummusic",
-                "Comment": "Arcanum Music - A multiplatform music application",
-                "Terminal": false,
-                "Categories": "Audio;Music;"
-            }
-        }
+        "category": "Audio"
     }
 }

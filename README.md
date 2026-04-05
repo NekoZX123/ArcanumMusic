@@ -39,6 +39,26 @@ sudo apt install ./arcanummusic_<version>_amd64.deb
 sudo apt install ./arcanummusic_1.8.0_amd64.deb
 ```
 
+### Linux 打包
+
+默认 Linux 打包命令会生成 `.deb` 和 `AppImage`:
+
+```bash
+npm run electron:build
+```
+
+如果需要单独构建 `pacman` 包，请显式运行:
+
+```bash
+npm run electron:build:linux:pacman
+```
+
+`pacman` 打包依赖 `bsdtar`。在 Debian / Ubuntu / Kubuntu 上通常需要先安装:
+
+```bash
+sudo apt install libarchive-tools
+```
+
 ### 如果 `.deb` 无法安装或运行
 
 如果当前发行版上的 `.deb` 安装包存在兼容性问题，建议优先尝试同版本的 `AppImage` 安装包。

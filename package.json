@@ -18,7 +18,8 @@
         "build": "vue-tsc -b && vite build",
         "preview": "vite preview",
         "electron:dev": "concurrently vite \"electron .\"",
-        "electron:build": "npm run build && electron-builder build --config electron-builder.json"
+        "electron:build": "npm run build && electron-builder build --config electron-builder.json",
+        "electron:build:linux:pacman": "npm run build && electron-builder build --config electron-builder.json --linux pacman"
     },
     "dependencies": {
         "auto-launch": "^5.0.6",
