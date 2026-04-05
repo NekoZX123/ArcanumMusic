@@ -127,3 +127,26 @@
     margin-top: 1rem;
     margin-bottom: 3rem;
 }
+
+@media (max-width: 767px) {
+    #musicSearch {
+        padding: 0 0.75rem 7rem;
+    }
+
+    #searchBarContainer {
+        padding-left: 0.75rem;
+    }
+
+    #searchBar {
+        font-size: 1rem;
+    }
+
+    #searchSourceContainer {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .musicBox {
+        gap: 0.75rem;
+    }
+}

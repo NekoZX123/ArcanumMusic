@@ -186,3 +186,36 @@
 #footerText {
     margin: 1rem 0;
 }
+
+@media (max-width: 767px) {
+    #musicHome {
+        padding: 0 0.75rem 7rem;
+    }
+
+    .text.sectionTitle,
+    .titleWithMore,
+    .horizontalScroll {
+        width: 100%;
+    }
+
+    #dailyRecommends,
+    #musicRadio {
+        margin: 0;
+    }
+
+    #dailyRecommends_play,
+    #musicRadio_play {
+        position: static;
+        margin-top: 0.75rem;
+    }
+
+    .nowrapBox {
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+    }
+
+    #singleRecommends,
+    #newSingles {
+        padding-left: 0;
+    }
+}

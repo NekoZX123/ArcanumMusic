@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { createApp, onMounted, ref } from 'vue';
 
 import { AccountCard } from '../../assets/widgets/Account.tsx';
@@ -9,12 +9,14 @@ import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
 import { showNotify } from '../../assets/notifications/Notification.ts';
 import {setConfig} from "../../assets/utilities/configLoader.ts";
 import { getThemeConfig, setControlBarTheme, setThemeColor, setWindowBackground, type colorThemeName } from '../../assets/effects/themeControl.ts';
+import { runtime } from '../../runtime';
 
-// 设置页面及内容
+// 璁剧疆椤甸潰鍙婂唴瀹?
 let settingsPage, settings: any;
+const capabilities = runtime.getCapabilities();
 
-/* 树形结构组件点击 */
-// 当前选中节点
+/* 鏍戝舰缁撴瀯缁勪欢鐐瑰嚮 */
+// 褰撳墠閫変腑鑺傜偣
 let currentPageId = '';
 
 function setCurrentPage(pageId: string) {
@@ -48,7 +50,7 @@ function onNodeClick(event: any) {
     setCurrentPage(targetId);
 }
 
-/* 展开切换 */
+/* 灞曞紑鍒囨崲 */
 function toggleExpand(event: any) {
     let node = event.target;
     if (node.tagName === 'IMG') node = node.parentNode;
@@ -68,12 +70,12 @@ function toggleExpand(event: any) {
     }
 }
 
-// 创建页面
-let settingsContent: any; // 设置内容区域
-const optionTypes = ['checkbox', 'colorpicker', 'slider', 'textinput', 'dropbox', 'account']; // 设置项目类型
-const decorationTypes = ['info', 'warning', 'image', 'link', 'label']; // 装饰元素类型
+// 鍒涘缓椤甸潰
+let settingsContent: any; // 璁剧疆鍐呭鍖哄煙
+const optionTypes = ['checkbox', 'colorpicker', 'slider', 'textinput', 'dropbox', 'account']; // 璁剧疆椤圭洰绫诲瀷
+const decorationTypes = ['info', 'warning', 'image', 'link', 'label']; // 瑁呴グ鍏冪礌绫诲瀷
 
-// 设置页面初始化
+// 璁剧疆椤甸潰鍒濆鍖?
 function setupPage(depth: string[], settingsObject: any) {
     let optionKeys = Object.keys(settingsObject);
 
@@ -88,18 +90,18 @@ function setupPage(depth: string[], settingsObject: any) {
 
             if (!element) continue;
 
-            // 复选框 - 选中状态
+            // 澶嶉€夋 - 閫変腑鐘舵€?
             if (element.getAttribute('type') === 'checkbox') {
                 element.checked = optionValue;
             }
 
-            // 颜色选择器 - 附加输入框
+            // 棰滆壊閫夋嫨鍣?- 闄勫姞杈撳叆妗?
             if (element.classList.contains('colorpicker')) {
                 let nextElement = document.getElementById(`${optionId}_text`) as HTMLInputElement;
                 nextElement.value = optionValue;
             }
 
-            // 滑动条 - 附加输入框类型 & 范围限制
+            // 婊戝姩鏉?- 闄勫姞杈撳叆妗嗙被鍨?& 鑼冨洿闄愬埗
             if (element.classList.contains('slider')) {
                 let nextElement = document.getElementById(`${optionId}_text`) as HTMLInputElement;
                 nextElement.value = optionValue;
@@ -133,11 +135,11 @@ function setupPage(depth: string[], settingsObject: any) {
 }
 
 /**
- * 根据页面元素读取设置
- * @param pageElement 页面元素
+ * 鏍规嵁椤甸潰鍏冪礌璇诲彇璁剧疆
+ * @param pageElement 椤甸潰鍏冪礌
  */
 function readSettingsThroughPage(pageElement: HTMLElement) {
-    // 获取所有 <input/> <select/> 元素
+    // 鑾峰彇鎵€鏈?<input/> <select/> 鍏冪礌
     const inputs = pageElement.getElementsByTagName('input');
     const optionElems = [...inputs, ...pageElement.getElementsByTagName('select')];
 
@@ -145,7 +147,7 @@ function readSettingsThroughPage(pageElement: HTMLElement) {
 
     function setSettingsValue(parseList: string[], value: any) {
         let targetObject = settingsObject;
-        for (let i = 0; i < parseList.length - 1; i++) { // 设置对象结构
+        for (let i = 0; i < parseList.length - 1; i++) { // 璁剧疆瀵硅薄缁撴瀯
             const key = parseList[i];
             if (!targetObject[key]) {
                 targetObject[key] = {};
@@ -158,21 +160,21 @@ function readSettingsThroughPage(pageElement: HTMLElement) {
     optionElems.forEach((element) => {
         const idParseList = element.id.split('.');
 
-        // 排除附属输入控件
+        // 鎺掗櫎闄勫睘杈撳叆鎺т欢
         if (element.classList.contains('affiliated')) {
             return;
         }
 
         if (element.tagName === 'INPUT') {
-            if (element.type === 'checkbox') { // 复选框
+            if (element.type === 'checkbox') { // 澶嶉€夋
                 const checked = element.checked;
                 setSettingsValue(idParseList, checked);
             }
-            if (element.type === 'color') { // 颜色选择
+            if (element.type === 'color') { // 棰滆壊閫夋嫨
                 const color = element.value;
                 setSettingsValue(idParseList, color);
             }
-            if (element.type === 'range') { // 滑动条
+            if (element.type === 'range') { // 婊戝姩鏉?
                 const value = parseInt(element.value);
                 if (!value) {
                     console.error(`[Error] Unknown value on slider detected: ${value} (${element.id})`);
@@ -180,12 +182,12 @@ function readSettingsThroughPage(pageElement: HTMLElement) {
                 }
                 setSettingsValue(idParseList, value);
             }
-            if (element.type === 'text') { // 文本输入
+            if (element.type === 'text') { // 鏂囨湰杈撳叆
                 const value = element.value;
                 setSettingsValue(idParseList, value);
             }
         }
-        if (element.tagName === 'SELECT') { // 下拉选择框
+        if (element.tagName === 'SELECT') { // 涓嬫媺閫夋嫨妗?
             const index = parseInt(element.value);
             setSettingsValue(idParseList, index);
         }
@@ -194,12 +196,12 @@ function readSettingsThroughPage(pageElement: HTMLElement) {
     return settingsObject;
 }
 
-// 设置页面结构
+// 璁剧疆椤甸潰缁撴瀯
 async function setPageStructure(depth: string[], node: any) {
-    // 跳过换行符
+    // 璺宠繃鎹㈣绗?
     if (!node.nodeName || node.nodeName === '#text') return;
 
-    // 末级组件 - 配置后返回
+    // 鏈骇缁勪欢 - 閰嶇疆鍚庤繑鍥?
     if (optionTypes.includes(node.nodeName)) {
         const targetId = `${depth.join('.')}_container`;
         const widgetId = depth.join('.');
@@ -212,15 +214,15 @@ async function setPageStructure(depth: string[], node: any) {
 
         targetElement.childNodes.forEach((element) => targetElement.removeChild(element));
 
-        // 开始设置元素
+        // 寮€濮嬭缃厓绱?
 
-        // 账户登录框
+        // 璐︽埛鐧诲綍妗?
         if (node.nodeName === 'account') {
             let platform = node.getAttribute('id');
 
             createApp(AccountCard, { platform: platform }).mount(targetElement);
         }
-        // 候选框
+        // 鍊欓€夋
         else if (node.nodeName === 'checkbox') {
             const widgetProps = {
                 name: node.getAttribute('text'),
@@ -229,7 +231,7 @@ async function setPageStructure(depth: string[], node: any) {
             };
             createApp(CheckBox, widgetProps).mount(targetElement);
         }
-        // 颜色选择器
+        // 棰滆壊閫夋嫨鍣?
         else if (node.nodeName === 'colorpicker') {
             const widgetProps = {
                 name: node.getAttribute('text'),
@@ -238,7 +240,7 @@ async function setPageStructure(depth: string[], node: any) {
             };
             createApp(ColorPicker, widgetProps).mount(targetElement);
         }
-        // 滑动条
+        // 婊戝姩鏉?
         else if (node.nodeName === 'slider') {
             const widgetProps = {
                 name: node.getAttribute('text'),
@@ -250,7 +252,7 @@ async function setPageStructure(depth: string[], node: any) {
             };
             createApp(Slider, widgetProps).mount(targetElement);
         }
-        // 文字输入框
+        // 鏂囧瓧杈撳叆妗?
         else if (node.nodeName === 'textinput') {
             const widgetProps = {
                 name: node.getAttribute('text'),
@@ -260,9 +262,9 @@ async function setPageStructure(depth: string[], node: any) {
             };
             createApp(TextInput, widgetProps).mount(targetElement);
         }
-        // 下拉选择框
+        // 涓嬫媺閫夋嫨妗?
         else if (node.nodeName === 'dropbox') {
-            // 处理子项
+            // 澶勭悊瀛愰」
             const items = node.childNodes;
             let options:  Array<{ id: string, text: string }>= [];
             items.forEach((item: any) => {
@@ -297,12 +299,12 @@ async function setPageStructure(depth: string[], node: any) {
 
         targetElement.childNodes.forEach((element) => targetElement.removeChild(element));
 
-        // 提示 / 警告信息
+        // 鎻愮ず / 璀﹀憡淇℃伅
         if (node.nodeName === 'info' || node.nodeName === 'warning') {
             const child = document.createElement('div');
             targetElement.appendChild(child);
 
-            // 警告提示框
+            // 璀﹀憡鎻愮ず妗?
             if (node.getAttribute('type') === 'critical') {
                 setTimeout(() => {
                     let targetId = `selector.${node.parentNode.getAttribute('id')}`;
@@ -320,8 +322,8 @@ async function setPageStructure(depth: string[], node: any) {
 
                             let targetId = (selector.parentNode as HTMLElement).id.replace('selector.', '');
                             if (targetId === currentPageId) return;
-                            // 显示警告弹窗
-                            showPopup('warning', 'yesno', '警告: 是否继续?', node.innerHTML, ['', 'red'], (code: number) => {
+                            // 鏄剧ず璀﹀憡寮圭獥
+                            showPopup('warning', 'yesno', '璀﹀憡: 鏄惁缁х画?', node.innerHTML, ['', 'red'], (code: number) => {
                                 if (code === buttonTypes.BUTTON_YES) {
                                     onNodeClick(event);
                                 } else {
@@ -343,14 +345,14 @@ async function setPageStructure(depth: string[], node: any) {
             };
             createApp(HeadersText, decorationProps).mount(child);
         }
-        // 图片
+        // 鍥剧墖
         else if (node.nodeName === 'image') {
             const child = document.createElement('img');
             child.id = node.getAttribute('id');
             child.src = node.getAttribute('src');
             targetElement.appendChild(child);
         }
-        // 链接
+        // 閾炬帴
         else if (node.nodeName === 'link') {
             const child = document.createElement('a');
             child.id = node.getAttribute('id');
@@ -358,7 +360,7 @@ async function setPageStructure(depth: string[], node: any) {
             child.href = node.getAttribute('href');
             targetElement.appendChild(child);
         }
-        // 文字
+        // 鏂囧瓧
         else if (node.nodeName === 'label') {
             const child = document.createElement('label');
             child.id = node.getAttribute('id');
@@ -369,15 +371,15 @@ async function setPageStructure(depth: string[], node: any) {
         return;
     }
 
-    // 非末级组件 - 递归创建
+    // 闈炴湯绾х粍浠?- 閫掑綊鍒涘缓
     const children = node.childNodes;
     for (let i = 0; i < children.length; i++) {
         const targetChild = children[i];
 
-        if (targetChild.nodeName === '#text') continue; // 跳过换行符
+        if (targetChild.nodeName === '#text') continue; // 璺宠繃鎹㈣绗?
 
         // console.log(targetChild);
-        // 创建子组件
+        // 鍒涘缓瀛愮粍浠?
         const targetMountId = `${depth.join('.')}_children`;
         const childrenContainer = document.getElementById(targetMountId);
         const childrenMountPoint = document.createElement('div');
@@ -402,7 +404,7 @@ async function setPageStructure(depth: string[], node: any) {
     }
 }
 
-// 绘制页面内容
+// 缁樺埗椤甸潰鍐呭
 async function createPage(prefix: string[], pageXml: any) {
     if (pageXml.nodeName !== 'page') {
         console.error('[Error] Unrecognized page xml structure type: ' + pageXml.nodeName);
@@ -423,11 +425,11 @@ async function createPage(prefix: string[], pageXml: any) {
     };
     createApp(NodeBlock, pageProps).mount(targetSelector);
 
-    // 创建页面结构
+    // 鍒涘缓椤甸潰缁撴瀯
     setPageStructure(depthList, pageXml);
 }
 
-// 加载设置页面树
+// 鍔犺浇璁剧疆椤甸潰鏍?
 function loadPageTree(pageData: any) {
     const tabs = document.getElementById('settingsTabs') as HTMLElement;
 
@@ -440,21 +442,21 @@ function loadPageTree(pageData: any) {
         if (elem.nodeName !== 'pagebox' && elem.nodeName !== 'page') continue;
 
         let node = initNode.cloneNode(true) as HTMLElement;
-        node.id = `selector.${elem.getAttribute('id')}`; // 设置节点ID
+        node.id = `selector.${elem.getAttribute('id')}`; // 璁剧疆鑺傜偣ID
 
         let nodeContent = node.childNodes[0] as HTMLElement;
 
-        (nodeContent.childNodes[1] as HTMLElement).innerText = elem.getAttribute('name'); // 设置节点显示名称
+        (nodeContent.childNodes[1] as HTMLElement).innerText = elem.getAttribute('name'); // 璁剧疆鑺傜偣鏄剧ず鍚嶇О
         // nodeContent.childNodes[1].id = elem.getAttribute('id');
 
-        if (elem.nodeName === 'pagebox') { // 页面组
+        if (elem.nodeName === 'pagebox') { // 椤甸潰缁?
             node.classList.add('expandable');
-            // 添加点击展开触发器 (箭头 + 文字)
+            // 娣诲姞鐐瑰嚮灞曞紑瑙﹀彂鍣?(绠ご + 鏂囧瓧)
             nodeContent.childNodes[0].addEventListener('click', toggleExpand);
             nodeContent.childNodes[1].addEventListener('click', toggleExpand);
 
             let pages = elem.childNodes;
-            // 添加子页面
+            // 娣诲姞瀛愰〉闈?
             for (let j = 0; j < pages.length; j++) {
                 const pageElem = pages[j];
 
@@ -477,12 +479,12 @@ function loadPageTree(pageData: any) {
                 loadedPages.push(pageNodeId);
             }
         }
-        else if (elem.nodeName === 'page') { // 页面
-            // 移除展开按钮
+        else if (elem.nodeName === 'page') { // 椤甸潰
+            // 绉婚櫎灞曞紑鎸夐挳
             let expandButton = nodeContent.childNodes[0];
             expandButton.removeChild(expandButton.childNodes[0]);
 
-            // 添加点击触发器 (整个元素)
+            // 娣诲姞鐐瑰嚮瑙﹀彂鍣?(鏁翠釜鍏冪礌)
             node.addEventListener('click', onNodeClick);
             node.removeChild(node.childNodes[1]);
 
@@ -498,12 +500,12 @@ function loadPageTree(pageData: any) {
     }
 }
 
-// 丢弃设置更改
+// 涓㈠純璁剧疆鏇存敼
 function discardChanges(_: MouseEvent) {
     setupPage([], settings);
 }
-// 保存设置更改
-function saveChanges(_: MouseEvent) {
+// 淇濆瓨璁剧疆鏇存敼
+async function saveChanges(_: MouseEvent) {
     const settingsContent = document.getElementById('settingsContent');
     if (!settingsContent) {
         console.error(`[Error] Failed to get settings content`);
@@ -512,51 +514,39 @@ function saveChanges(_: MouseEvent) {
 
     const modifiedSettings = readSettingsThroughPage(settingsContent);
     settings = modifiedSettings;
-    const settingsText =  JSON.stringify(modifiedSettings);
-    
-    window.electron.getAppData()
-        .then((appDataPath: string) => {
-            // 部分设置立即生效
-            // 开机自启
-            const autoLaunchFlag = settings.generic.system.start.startOnBoot;
-            window.electron.setAutoLaunch(autoLaunchFlag);
+    const settingsText = JSON.stringify(modifiedSettings);
 
-            // 颜色主题及深色模式
-            const themeList: colorThemeName[] = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
-            const colorIndex = settings.generic.appearance.colors.themeColor;
-            const themeColor = themeList[colorIndex];
-            const darkEnabled = parseInt(settings.generic.appearance.colors.darkMode);
-            const windowBackgroundMode: any = parseInt(settings.generic.appearance.colors.backgroundColor);
-            
-            setThemeColor(themeColor, darkEnabled);
+    if (runtime.isElectron()) {
+        const autoLaunchFlag = settings.generic.system.start.startOnBoot;
+        await runtime.setAutoLaunch(autoLaunchFlag);
+    }
 
-            setWindowBackground(windowBackgroundMode);
+    const themeList: colorThemeName[] = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+    const colorIndex = settings.generic.appearance.colors.themeColor;
+    const themeColor = themeList[colorIndex];
+    const darkEnabled = parseInt(settings.generic.appearance.colors.darkMode);
+    const windowBackgroundMode: any = parseInt(settings.generic.appearance.colors.backgroundColor);
 
-            refreshModifyImage();
+    setThemeColor(themeColor, darkEnabled);
+    setWindowBackground(windowBackgroundMode);
+    refreshModifyImage();
 
-            // 窗口标题栏显示主题色
-            const showColorInBorders = settings.generic.appearance.colors.showColorInBorders;
-            setControlBarTheme(showColorInBorders);
+    const showColorInBorders = settings.generic.appearance.colors.showColorInBorders;
+    setControlBarTheme(showColorInBorders);
 
-            // 保存设置文件
-            console.log(appDataPath);
-            const targetFile = `${appDataPath}/ArcanumMusic_data/settings.json`;
-
-            window.electron.writeLocalFile(targetFile, settingsText);
-
-            showNotify('arcanummusic.settings.filemodify', 'success', '设置已保存', '设置文件已保存');
-
-            // 重新加载设置文件
-            setConfig(modifiedSettings);
-        });
+    await runtime.saveConfig(settingsText);
+    showNotify('arcanummusic.settings.filemodify', 'success', '设置已保存', '设置文件已保存');
+    setConfig(modifiedSettings);
 }
 
 // 保存 / 丢弃更改图片路径
+
+// 淇濆瓨 / 涓㈠純鏇存敼鍥剧墖璺緞
 const saveButtonImage = ref('./images/fileControl/save.svg');
 const discardButtonImage = ref('./images/fileControl/discard.svg');
 
 /**
- * 更新保存 / 丢弃更改图片路径
+ * 鏇存柊淇濆瓨 / 涓㈠純鏇存敼鍥剧墖璺緞
  */
 function refreshModifyImage() {
     const theme = getThemeConfig();
@@ -565,45 +555,50 @@ function refreshModifyImage() {
     discardButtonImage.value = `./images/fileControl/discard${theme.darkEnabled ? '.dark' : ''}.svg`;
 }
 
+function applyCapabilityGates() {
+    const hiddenTargets = [
+        !capabilities.tray ? 'generic.system.start.startOnBoot' : '',
+        !capabilities.windowControls ? 'generic.system.start.startMinimized' : '',
+        !capabilities.tray ? 'generic.system.closeOptions.hideToTray' : '',
+        !capabilities.windowControls ? 'generic.appearance.window.rememberSize' : '',
+        !capabilities.windowControls ? 'generic.appearance.window.useSystemFrame' : '',
+        !capabilities.windowControls ? 'developerOptions.application.enableDevtoolsHotkey' : '',
+        !capabilities.windowControls ? 'developerOptions.application.devtoolsOnLaunched' : ''
+    ].filter(Boolean);
+
+    hiddenTargets.forEach((targetId) => {
+        const element = document.getElementById(`${targetId}_container`) as HTMLElement | null;
+        if (element) {
+            element.style.display = 'none';
+        }
+    });
+}
+
 onMounted(async () => {
     settingsContent = document.getElementById('settingsContent') as HTMLElement;
 
-    // 获取设置页面
-    let appEnv = await window.electron.getAppEnvironment();
-    let asarPath = await window.electron.getAsarLocation();
-    if (appEnv === 'dev') {
-        asarPath += '/public';
-    }
-    else {
-        asarPath += '/dist';
-    }
-    const pagePath = `${asarPath}/data/AppSettings.xml`;
-    const pageStructureString: string = await window.electron.readLocalFile(pagePath);
+    const pageStructureString: string = await runtime.getSettingsSchema();
     const parser = new DOMParser();
     settingsPage = parser.parseFromString(pageStructureString, 'text/xml');
-    // console.log(settingsPage);
 
-    // 读取设置内容
-    const settingsText = await window.electron.getAppConfig();
+    const settingsText = await runtime.getConfig();
     settings = JSON.parse(settingsText);
 
     loadPageTree(settingsPage);
     setupPage([], settings);
+    applyCapabilityGates();
 
-    // 浏览器打开 <a> 标签
     document.addEventListener('click', function (event) {
         const target = event.target as HTMLElement;
         const url = target.getAttribute('href');
         if (target.tagName === 'A' && url) {
             event.preventDefault();
-            window.electron.openExternal(url);
+            runtime.openExternal(url);
         }
     });
 
-    // 保存 / 丢弃更改按钮图片
     refreshModifyImage();
 
-    // 处理系统深色模式变化
     const darkModeCheckList = window.matchMedia('(prefers-color-scheme:dark)');
     darkModeCheckList.addEventListener('change', () => setTimeout(() => {
         refreshModifyImage();
@@ -617,7 +612,7 @@ onMounted(async () => {
     <div id="musicSettings">
         <div class="flex column">
             <div class="flex row">
-                <!-- 设置标签页区域 -->
+                <!-- 璁剧疆鏍囩椤靛尯鍩?-->
                 <div id="settingsTabs" class="tree">
                     <div class="treeNode expandable" id="initialNode">
                         <div class="nodeContent">
@@ -629,25 +624,28 @@ onMounted(async () => {
                         <div class="nodeChildren"></div>
                     </div>
                 </div>
-                <!-- 设置内容区域 -->
+                <!-- 璁剧疆鍐呭鍖哄煙 -->
                 <div id="settingsContent">
                 </div>
             </div>
         </div>
 
-        <!-- 设置更改保存及丢弃 -->
+        <!-- 璁剧疆鏇存敼淇濆瓨鍙婁涪寮?-->
         <div class="flex row" id="changesControl">
             <button class="changesOption" id="discardButton" @click="discardChanges">
                 <img :src="discardButtonImage" alt="Discard"/>
-                <label class="text small bold">丢弃</label>
+                <label class="text small bold">涓㈠純</label>
             </button>
             <button class="changesOption" id="saveButton" @click="saveChanges">
                 <img :src="saveButtonImage" alt="Save"/>
-                <label class="text small bold">保存</label>
+                <label class="text small bold">淇濆瓨</label>
             </button>
         </div>
         
-        <!-- 页面底部占位 -->
+        <!-- 椤甸潰搴曢儴鍗犱綅 -->
         <div id="settingsBlock"></div>
     </div>
 </template>
+
+
+

@@ -1,125 +1,171 @@
-import { decrypt, encrypt } from './crypto.ts';
+﻿import { decrypt, encrypt } from './crypto';
+import { runtime, type MusicPlatform, type RuntimeAccountStatus } from '../../runtime';
 
-let userData: { [type: string]: any } = {
-    netease: {
-        loggedIn: false,
-        userData: {
-            avatarUrl: './images/library/defaultAvatar.png',
-            nickname: '未登录',
-            userId: -1
-        },
-        cookies: {
-            'MUSIC_U': '',
-        }
-    },
-    qqmusic: {
-        loggedIn: false,
-        userData: {
-            avatarUrl: './images/library/defaultAvatar.png',
-            nickname: '未登录'
-        },
-        cookies: {
-            'uin': '',
-            'qm_keyst': '',
-            'qqmusic_key': ''
-        }
-    },
-    kuwo: {
-        loggedIn: false,
-        userData: {
-            avatarUrl: './images/library/defaultAvatar.png',
-            nickname: '未登录'
-        },
-        cookies: {
-            'userid': ''
-        }
-    },
-    kugou: {
-        loggedIn: false,
-        userData: {
-            avatarUrl: './images/library/defaultAvatar.png',
-            nickname: '未登录'
-        },
-        cookies: {
-            "KuGoo": ""
-        }
-    }
-};
+const platformList: MusicPlatform[] = ['netease', 'qqmusic', 'kuwo', 'kugou'];
+const defaultAvatar = './images/library/defaultAvatar.svg';
 
-// 登录信息管理
+function getDefaultAccountState() {
+    return {
+        netease: {
+            loggedIn: false,
+            userData: {
+                avatarUrl: defaultAvatar,
+                nickname: '未登录',
+                userId: -1
+            },
+            cookies: {
+                MUSIC_U: ''
+            }
+        },
+        qqmusic: {
+            loggedIn: false,
+            userData: {
+                avatarUrl: defaultAvatar,
+                nickname: '未登录'
+            },
+            cookies: {
+                uin: '',
+                qm_keyst: '',
+                qqmusic_key: ''
+            }
+        },
+        kuwo: {
+            loggedIn: false,
+            userData: {
+                avatarUrl: defaultAvatar,
+                nickname: '未登录'
+            },
+            cookies: {
+                userid: ''
+            }
+        },
+        kugou: {
+            loggedIn: false,
+            userData: {
+                avatarUrl: defaultAvatar,
+                nickname: '未登录'
+            },
+            cookies: {
+                KuGoo: '',
+                userid: '',
+                token: ''
+            }
+        }
+    };
+}
 
-// 获取登录信息
+let userData: Record<string, any> = getDefaultAccountState();
+
 function getAccountInfo(platform: string = 'all') {
-    if (platform === 'all') return userData;
-    else if (userData[platform]) return userData[platform];
-    else return null;
-}
-// 写入登录信息
-function setAccountInfo(platform: string, data: any) {
-    if (!userData[platform]) return;
-
-    // 设置用户信息
-    userData[platform] = data;
-    userData[platform].loggedIn = true;
-}
-
-// 存储登录信息
-async function storeAccountInfo(platform: string) {
-    if (!userData[platform]) return;
-
-    // 加密登录信息
-    const baseString = JSON.stringify(userData[platform]);
-
-    const encrypted = await encrypt(baseString);
-    const cipherData = encrypted;
-    
-    // 存储登录信息
-    const fileName = `${platform}.arca`;
-    const filePath = `${await window.electron.getAppData()}\\ArcanumMusic_data\\accounts\\${fileName}`;
-
-    window.electron.writeLocalFile(filePath, cipherData);
-}
-// 读取登录信息
-async function readAccountInfo(platform: string = 'all') {
     if (platform === 'all') {
-        const platforms = ['netease', 'qqmusic', 'kuwo', 'kugou'];
-        platforms.forEach(async (plat) => {
-            await readAccountInfo(plat);
-        });
+        return userData;
+    }
+
+    return userData[platform] || null;
+}
+
+function resetAccountInfo(platform: string) {
+    const defaults = getDefaultAccountState();
+    const defaultState = defaults[platform as keyof typeof defaults];
+    if (!defaultState) {
         return;
     }
 
-    const cookieValidate =  await window.electron.validateCookie(platform);
-    console.log(await cookieValidate);
+    userData[platform] = defaultState;
+}
 
-    const fileName = `${platform}.arca`;
-    const filePath = `${await window.electron.getAppData()}\\ArcanumMusic_data\\accounts\\${fileName}`;
+function setAccountInfo(platform: string, data: any) {
+    if (!userData[platform]) {
+        return;
+    }
 
-    const fileExist = await window.electron.isFileExist(filePath);
-    if (!fileExist) return null;
+    const defaults = getDefaultAccountState()[platform as keyof ReturnType<typeof getDefaultAccountState>];
+    userData[platform] = {
+        ...defaults,
+        ...data,
+        loggedIn: true,
+        userData: {
+            ...defaults.userData,
+            ...(data?.userData || {})
+        },
+        cookies: {
+            ...defaults.cookies,
+            ...(data?.cookies || {})
+        }
+    };
+}
 
-    const cipherData = await window.electron.readLocalFile(filePath);
-    if (cipherData === '') {
+async function storeAccountInfo(platform: string) {
+    if (!userData[platform] || !runtime.getCapabilities().localEncryptedAccounts) {
+        return;
+    }
+
+    const cipherData = await encrypt(JSON.stringify(userData[platform]));
+    const filePath = `${await runtime.getAppData()}\\ArcanumMusic_data\\accounts\\${platform}.arca`;
+    await runtime.writeLocalFile(filePath, cipherData);
+}
+
+function applyRuntimeStatus(platform: MusicPlatform, status: RuntimeAccountStatus | null) {
+    if (!status?.loggedIn) {
+        resetAccountInfo(platform);
         return null;
     }
 
-    // 解密登录信息
+    setAccountInfo(platform, status);
+    return userData[platform];
+}
+
+async function readLocalEncryptedAccount(platform: MusicPlatform) {
+    const filePath = `${await runtime.getAppData()}\\ArcanumMusic_data\\accounts\\${platform}.arca`;
+    const fileExist = await runtime.isFileExist(filePath);
+    if (!fileExist) {
+        resetAccountInfo(platform);
+        return null;
+    }
+
+    const cipherData = await runtime.readLocalFile(filePath);
+    if (!cipherData) {
+        resetAccountInfo(platform);
+        return null;
+    }
+
     const decryptedString = await decrypt(cipherData);
     if (!decryptedString) {
         console.error(`Failed to decrypt data for platform: ${platform}, please login again`);
-        cleanAccountInfo(platform);
+        await cleanAccountInfo(platform);
         return null;
     }
 
     const accountData = JSON.parse(decryptedString);
-    console.log(accountData);
     setAccountInfo(platform, accountData);
-
     return accountData;
 }
-// 重置登录信息
+
+async function readAccountInfo(platform: string = 'all') {
+    if (platform === 'all') {
+        await Promise.all(platformList.map((currentPlatform) => readAccountInfo(currentPlatform)));
+        return userData;
+    }
+
+    const targetPlatform = platform as MusicPlatform;
+
+    if (runtime.getCapabilities().localEncryptedAccounts) {
+        await runtime.validateCookie(targetPlatform);
+        return await readLocalEncryptedAccount(targetPlatform);
+    }
+
+    if (runtime.getCapabilities().browserLogin) {
+        const status = await runtime.getAccountStatus(targetPlatform);
+        return applyRuntimeStatus(targetPlatform, status);
+    }
+
+    resetAccountInfo(targetPlatform);
+    return userData[targetPlatform];
+}
+
 async function cleanAccountInfo(platform: string) {
-    window.electron.deleteCookies(platform);
+    await runtime.logout(platform as MusicPlatform);
+    resetAccountInfo(platform);
 }
 
 export {
@@ -128,4 +174,4 @@ export {
     cleanAccountInfo,
     getAccountInfo,
     setAccountInfo
-}
+};

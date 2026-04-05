@@ -112,3 +112,31 @@
     flex-wrap: wrap;
     justify-content: flex-start;
 }
+
+@media (max-width: 767px) {
+    #musicLibrary {
+        padding: 0 0.75rem 7rem;
+    }
+
+    #userInfo {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    #userFavouritesPreview,
+    #recommendContainer {
+        width: 100%;
+        height: auto;
+        max-height: 18rem;
+    }
+
+    #playlistSourceTabs {
+        padding: 0;
+        justify-content: center;
+    }
+
+    .musicBox.userLists {
+        justify-content: center;
+    }
+}

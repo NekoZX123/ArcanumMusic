@@ -1,49 +1,51 @@
-import CryptoJS from "crypto-js";
+import CryptoJS from 'crypto-js';
+
+import { runtime } from '../../runtime';
 
 function uuidv4(): string {
-    // Use crypto.getRandomValues if available for secure random numbers
-    const getRandomValues = (typeof crypto !== "undefined" && crypto.getRandomValues)
+    const getRandomValues = (typeof crypto !== 'undefined' && crypto.getRandomValues)
         ? crypto.getRandomValues.bind(crypto)
         : null;
 
     const rnds = new Uint8Array(16);
     if (getRandomValues) {
         getRandomValues(rnds);
-    } else {
-        // Fallback to Math.random (less secure)
+    }
+    else {
         for (let i = 0; i < 16; i++) {
             rnds[i] = Math.floor(Math.random() * 256);
         }
     }
 
-    // Per RFC4122
-    rnds[6] = (rnds[6] & 0x0f) | 0x40; // version 4
-    rnds[8] = (rnds[8] & 0x3f) | 0x80; // variant
+    rnds[6] = (rnds[6] & 0x0f) | 0x40;
+    rnds[8] = (rnds[8] & 0x3f) | 0x80;
 
-    const hex = Array.from(rnds, b => b.toString(16).padStart(2, "0")).join("");
+    const hex = Array.from(rnds, (byte) => byte.toString(16).padStart(2, '0')).join('');
     return (
-        hex.slice(0, 8) + "-" +
-        hex.slice(8, 12) + "-" +
-        hex.slice(12, 16) + "-" +
-        hex.slice(16, 20) + "-" +
-        hex.slice(20)
+        `${hex.slice(0, 8)}-` +
+        `${hex.slice(8, 12)}-` +
+        `${hex.slice(12, 16)}-` +
+        `${hex.slice(16, 20)}-` +
+        `${hex.slice(20)}`
     );
 }
 
 async function getNewPassword() {
     let uuid = uuidv4();
-    const username = await window.electron.getUserName();
+    const username = await runtime.getUserName();
     const usernameHash = CryptoJS.SHA256(username);
-    const password = `moe.nekozx.arcanummusic.pwd#${uuid}@${usernameHash}`;
-    return password;
+    return `moe.nekozx.arcanummusic.pwd#${uuid}@${usernameHash}`;
 }
+
 async function encrypt(plainText: string) {
+    if (!runtime.getCapabilities().localEncryptedAccounts) {
+        return plainText;
+    }
+
     const password = await getNewPassword();
-    console.log(`[Debug] Password: ${password}`);
     const passwordUuid = password.split('#')[1].split('@')[0];
     const salt = CryptoJS.lib.WordArray.random(128 / 8);
 
-    // 通过 PBKDF2 派生密钥（AES-256）
     const key = CryptoJS.PBKDF2(password, salt, {
         keySize: 256 / 32,
         iterations: 10000,
@@ -66,9 +68,13 @@ async function encrypt(plainText: string) {
     const hash = CryptoJS.SHA256(fileContent).toString();
 
     return `${fileContent}@${hash}`;
-};
+}
 
 async function decrypt(cipher: string) {
+    if (!runtime.getCapabilities().localEncryptedAccounts) {
+        return cipher;
+    }
+
     const [fileContent, hash] = cipher.split('@');
     const hashExpected = CryptoJS.SHA256(fileContent).toString();
     if (hash !== hashExpected) {
@@ -79,15 +85,13 @@ async function decrypt(cipher: string) {
     const [b64uuid, cipherText, iv, salt] = cipherData;
 
     const passwordUuid = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(b64uuid));
-    const username = await window.electron.getUserName();
+    const username = await runtime.getUserName();
     const usernameHash = CryptoJS.SHA256(username);
     const password = `moe.nekozx.arcanummusic.pwd#${passwordUuid}@${usernameHash}`;
 
-    // 转换 IV 和 Salt 为 WordArray
     const ivWordArray = CryptoJS.enc.Base64.parse(iv);
     const saltWordArray = CryptoJS.enc.Base64.parse(salt);
 
-    // 重新派生密钥
     const key = CryptoJS.PBKDF2(password, saltWordArray, {
         keySize: 256 / 32,
         iterations: 10000,
@@ -101,6 +105,6 @@ async function decrypt(cipher: string) {
     });
 
     return decrypted.toString(CryptoJS.enc.Utf8);
-};
+}
 
 export { encrypt, decrypt };

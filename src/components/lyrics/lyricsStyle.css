@@ -348,3 +348,50 @@
 .lyricsBox.lite > ul {
     text-align: center;
 }
+
+@media (max-width: 767px) {
+    #panelTop {
+        padding: 0 0.75rem;
+    }
+
+    #panelMain {
+        height: calc(100vh - 4rem);
+        padding: 0 0.75rem 2rem;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 1rem;
+    }
+
+    #controller,
+    #lyricsContent {
+        width: 100%;
+        min-width: 0;
+        margin-left: 0;
+    }
+
+    #songInfo {
+        height: auto;
+    }
+
+    #songCover {
+        width: min(70vw, 18rem);
+        height: min(70vw, 18rem);
+    }
+
+    #playerControl,
+    #playerInfo {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    #progressContainer,
+    #progressBar {
+        width: 100%;
+    }
+
+    #lyricsContent {
+        height: auto;
+        padding-bottom: 10rem;
+    }
+}

@@ -78,3 +78,26 @@
     height: 2rem;
     display: block;
 }
+
+@media (max-width: 767px) {
+    #artistPage {
+        padding: 0.75rem 0.75rem 7rem;
+    }
+
+    #artistInfo {
+        padding: 0.75rem 0;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    #artistAvatar {
+        width: 10rem;
+        height: 10rem;
+        margin-right: 0;
+    }
+
+    #artistDescription {
+        max-height: none;
+    }
+}

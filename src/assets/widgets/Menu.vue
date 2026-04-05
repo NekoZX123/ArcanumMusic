@@ -5,6 +5,7 @@ import { changePage, getCurrentPage, togglePlaylist } from '../utilities/pageSwi
 import { getSongInfo, getSongLink } from '../player/songUtils.ts';
 import { hideArtistSelect, showArtistSelect } from '../utilities/elementControl.ts';
 import { showNotify } from '../notifications/Notification.ts';
+import { runtime } from '../../runtime';
 
 const MenuItem = defineComponent({
     props: {
@@ -46,10 +47,6 @@ function jumpToSongInfo(songId: string) {
     changePage('single', true, songId);
 }
 
-/**
- * 跳转至歌曲专辑
- * @param songId 歌曲 ID
- */
 function jumpToSongAlbum(songId: string) {
     const idParts = songId.split('-');
     const platform = idParts[1];
@@ -66,10 +63,6 @@ function jumpToSongAlbum(songId: string) {
     });
 }
 
-/**
- * 跳转至歌曲歌手
- * @param songId 歌曲 ID
- */
 function jumpToSongArtist(songId: string) {
     if (getCurrentPage() === 'playlist') {
         togglePlaylist(undefined);
@@ -91,10 +84,6 @@ function jumpToSongArtist(songId: string) {
     });
 }
 
-/**
- * 复制歌曲链接
- * @param songId 歌曲 ID
- */
 function copyLink(songId: string) {
     const idParts = songId.split('-');
     const platform = idParts[1];
@@ -107,15 +96,11 @@ function copyLink(songId: string) {
             link = `https://music.163.com/song/media/outer/url?id=${musicId}.mp3`;
         }
 
-        window.electron.copyToClipboard(link);
+        runtime.copyText(link);
         showNotify('linkCopySucceed', 'success', '链接复制成功', '歌曲链接已复制至剪贴板', 1000);
     });
 }
 
-/**
- * 加载指定平台收藏歌曲
- * @param platform 平台名称
- */
 function sendFavReload(platform: string) {
     const favReloadEvent = new CustomEvent('load-favourites', { detail: { platform: platform} });
     window.dispatchEvent(favReloadEvent);
@@ -126,11 +111,6 @@ function sendRecommendReload(platform: string) {
     window.dispatchEvent(recommendReloadEvent);
 }
 
-/**
- * 根据参数加载指定平台收藏 / 推荐歌曲
- * @param platform 平台名称
- * @param type 类型
- */
 function changeCollectionPlatform(platform: string, type: string) {
     if (type === 'userFavourites') {
         sendFavReload(platform);
@@ -147,46 +127,46 @@ onMounted(() => {
 <template>
     <div class="rightMenu flex column">
         <span class="menuPart flex column">
-            <MenuItem id="play" icon="./images/menu/play.svg" text="播放" 
-                :on-click="playCurrentContent" 
+            <MenuItem id="play" icon="./images/menu/play.svg" text="播放"
+                :on-click="playCurrentContent"
                 v-if="['collections', 'song'].includes(props.menuType)"></MenuItem>
-            <MenuItem id="playNext" icon="./images/menu/addToList.svg" text="下一首播放" 
-                :on-click="() => {getPlayer()?.playlistAdd(props.targetInfo, true)}" 
+            <MenuItem id="playNext" icon="./images/menu/addToList.svg" text="下一首播放"
+                :on-click="() => {getPlayer()?.playlistAdd(props.targetInfo, true)}"
                 v-if="props.menuType === 'song'"></MenuItem>
         </span>
         <span class="menuPart flex column">
-            <MenuItem id="songInfo" icon="./images/menu/play.svg" text="查看歌曲信息" 
-                :on-click="() => {jumpToSongInfo(props.targetInfo.id)}" 
+            <MenuItem id="songInfo" icon="./images/menu/play.svg" text="查看歌曲信息"
+                :on-click="() => {jumpToSongInfo(props.targetInfo.id)}"
                 v-if="props.menuType === 'playlistItem'"></MenuItem>
-            <MenuItem id="albumInfo" icon="./images/menu/album.svg" text="查看专辑" 
-                :on-click="() => {jumpToSongAlbum(props.targetInfo.id)}" 
+            <MenuItem id="albumInfo" icon="./images/menu/album.svg" text="查看专辑"
+                :on-click="() => {jumpToSongAlbum(props.targetInfo.id)}"
                 v-if="['song', 'playlistItem'].includes(props.menuType)"></MenuItem>
-            <MenuItem id="menuArtistInfo" icon="./images/menu/artist.svg" text="查看歌手" 
-                :on-click="() => {jumpToSongArtist(props.targetInfo.id)}" 
-                v-if="['song', 'playlistItem'].includes(props.menuType)"></MenuItem>
-        </span>
-        <span class="menuPart flex column">
-            <MenuItem id="copyLink" icon="./images/menu/copyLink.svg" text="复制播放链接" 
-                :on-click="() => {copyLink(props.targetInfo.id)}" 
+            <MenuItem id="menuArtistInfo" icon="./images/menu/artist.svg" text="查看歌手"
+                :on-click="() => {jumpToSongArtist(props.targetInfo.id)}"
                 v-if="['song', 'playlistItem'].includes(props.menuType)"></MenuItem>
         </span>
         <span class="menuPart flex column">
-            <MenuItem id="listRemove" icon="./images/menu/removeFromList.svg" text="从列表中删除" 
-                :on-click="() => {getPlayer()?.playlistRemove(props.targetInfo.id)}" 
+            <MenuItem id="copyLink" icon="./images/menu/copyLink.svg" text="复制播放链接"
+                :on-click="() => {copyLink(props.targetInfo.id)}"
+                v-if="['song', 'playlistItem'].includes(props.menuType)"></MenuItem>
+        </span>
+        <span class="menuPart flex column">
+            <MenuItem id="listRemove" icon="./images/menu/removeFromList.svg" text="从列表中删除"
+                :on-click="() => {getPlayer()?.playlistRemove(props.targetInfo.id)}"
                 v-if="props.menuType === 'playlistItem'"></MenuItem>
         </span>
         <span class="menuPart flex column">
-            <MenuItem id="platform_netease" icon="./images/platforms/netease.png" text="网易云音乐" 
-                :on-click="() => {changeCollectionPlatform('netease', props.targetInfo.type)}" 
+            <MenuItem id="platform_netease" icon="./images/platforms/netease.png" text="网易云音乐"
+                :on-click="() => {changeCollectionPlatform('netease', props.targetInfo.type)}"
                 v-if="props.menuType === 'platformSelect'"></MenuItem>
-            <MenuItem id="platform_qqmusic" icon="./images/platforms/qqmusic.png" text="QQ 音乐" 
-                :on-click="() => {changeCollectionPlatform('qqmusic', props.targetInfo.type)}" 
+            <MenuItem id="platform_qqmusic" icon="./images/platforms/qqmusic.png" text="QQ 音乐"
+                :on-click="() => {changeCollectionPlatform('qqmusic', props.targetInfo.type)}"
                 v-if="props.menuType === 'platformSelect'"></MenuItem>
-            <MenuItem id="platform_kuwo" icon="./images/platforms/kuwo.png" text="酷我音乐" 
-                :on-click="() => {changeCollectionPlatform('kuwo', props.targetInfo.type)}" 
+            <MenuItem id="platform_kuwo" icon="./images/platforms/kuwo.png" text="酷我音乐"
+                :on-click="() => {changeCollectionPlatform('kuwo', props.targetInfo.type)}"
                 v-if="props.menuType === 'platformSelect'"></MenuItem>
-            <MenuItem id="platform_kugou" icon="./images/platforms/kugou.png" text="酷狗音乐" 
-                :on-click="() => {changeCollectionPlatform('kugou', props.targetInfo.type)}" 
+            <MenuItem id="platform_kugou" icon="./images/platforms/kugou.png" text="酷狗音乐"
+                :on-click="() => {changeCollectionPlatform('kugou', props.targetInfo.type)}"
                 v-if="props.menuType === 'platformSelect'"></MenuItem>
         </span>
     </div>
