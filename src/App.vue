@@ -331,15 +331,31 @@ function limitAuthorsTextLength(authors: string) {
     return authors;
 }
 
+// 播放进度更新 (BroadcastChannel)
+const appChannel = new BroadcastChannel('moe.nekozx123.arcanummusic');
+function postSongProgress(time: number) {
+    appChannel.postMessage({
+        eventName: 'progress-update',
+        message: time
+    });
+}
+function handleProgressUpdate(event: MessageEvent) {
+    console.log(`[Debug] Channel message: ${event.data}`);
+    if (event.data.eventName === 'set-progress') {
+        const time = event.data.message;
+        getPlayer()?.setProgress(time);
+    }
+}
+
 // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
 const allowedIdentifiers = ['moe.nekozx123.arcanummusic.desktoplyrics', 'moe.nekozx123.arcanummusic.contextmenu'];
 function handleStorageData (updateEvent: StorageEvent) {
     if (updateEvent.key === 'playerSignal' && updateEvent.newValue) {
         const eventObject = JSON.parse(updateEvent.newValue);
         const eventName = eventObject.eventName;
-        console.log(`[Debug] Event triggered: name = ${eventName}; content = ${eventObject.message}`);
-        if (!allowedIdentifiers.includes(eventObject.message)) {
-            console.error(`[Error] Unidentified identifier ${eventObject.message}`);
+        console.log(`[Debug] Event triggered: name = ${eventName}; content = ${eventObject.message}; identifier = ${eventObject.identifier}`);
+        if (!allowedIdentifiers.includes(eventObject.identifier)) {
+            console.error(`[Error] Unidentified identifier ${eventObject.identifier}`);
             return;
         }
 
@@ -468,7 +484,11 @@ onMounted(async () => {
         return;
     }
     playerElem.addEventListener('timeupdate', () => {
-        if (!playTimeAdjustFlag.value) getPlayer()?.updateProgress(Math.ceil(playerElem.currentTime));
+        if (!playTimeAdjustFlag.value) {
+            const currentTime = Math.ceil(playerElem.currentTime);
+            postSongProgress(currentTime);
+            getPlayer()?.updateProgress(currentTime);
+        }
 
         getPlayer()?.checkNextSong();
     });
@@ -476,6 +496,9 @@ onMounted(async () => {
     // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
     // 通过 `onstorage` 赋值以方便从 Electron 主进程调用
     window.onstorage = handleStorageData;
+
+    // 监听播放进度更新 (BroadcastChannel)
+    appChannel.addEventListener('message', handleProgressUpdate);
 
     // 关闭窗口时保存偏好数据
     window.addEventListener('close', savePreferences);

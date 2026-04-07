@@ -154,6 +154,9 @@ function toggleWindowTop(_?: any) {
     isCaptionsOn = !isCaptionsOn;
 }
 
+// 应用内通信频道
+const appChannel = new BroadcastChannel('moe.nekozx123.arcanummusic');
+
 /**
  * 向主窗口发送消息 (使用 localStorage 作为中间桥)
  * @param eventName 事件名称
@@ -161,7 +164,13 @@ function toggleWindowTop(_?: any) {
  */
 function sendToMain(eventName: string, message?: any) {
     window.localStorage.setItem('playerSignal', '');
-    window.localStorage.setItem('playerSignal', JSON.stringify({eventName: eventName, message: message}));
+    window.localStorage.setItem('playerSignal', 
+        JSON.stringify({
+            eventName: eventName, 
+            message: message, 
+            identifier: windowIdentifier
+        })
+    );
 }
 
 let lyricStyle: HTMLElement;
@@ -196,17 +205,77 @@ function toggleControlPanel() {
     controlShow.value = !controlShow.value;
 }
 
+// 播放进度调整
+const playTimeAdjustFlag = ref(false);
+let targetTime = 0;
+const targetPercentage = ref(0);
+const targetTimeText = ref('00:00');
+
+// 开始调整
+function adjustPlayProgress(mouseX: number) {
+    const progressBar = document.getElementById('desktopLyricsProgressBar');
+    if (!progressBar) return;
+
+    // 设置进度条宽度
+    const barRect = progressBar.getBoundingClientRect();
+    let deltaX = mouseX - barRect.left;
+    let progress = deltaX / progressBar.clientWidth;
+
+    // 防止范围溢出
+    if (progress < 0) progress = 0;
+    if (progress > 1) progress = 1;
+
+    // 设置播放进度文字
+    targetPercentage.value = progress * 100;
+    targetTime = Math.round(progress * songDuration.value);
+    targetTimeText.value = timeFormat(targetTime);
+}
+function startProgressAdjust(event: MouseEvent) {
+    if (event.buttons === 1 && !playTimeAdjustFlag.value) {
+        // 添加全局事件监听器
+        document.addEventListener('mousemove', adjustOnMouseMove);
+        playTimeAdjustFlag.value = true;
+
+        // 点击时同样调整进度
+        adjustPlayProgress(event.clientX);
+
+        // 结束调整
+        const handleMouseUp = () => {
+            document.removeEventListener('mousemove', adjustOnMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            playTimeAdjustFlag.value = false;
+
+            appChannel.postMessage({
+                eventName: 'set-progress',
+                message: targetTime
+            });
+        };
+
+        document.addEventListener('mouseup', handleMouseUp);
+    }
+}
+// 鼠标移动事件调整处理
+function adjustOnMouseMove(event: MouseEvent) {
+    const progressBar = document.getElementById('desktopLyricsProgressBar');
+    if (!progressBar) return;
+
+    if (event.buttons === 1 && playTimeAdjustFlag.value) {
+        adjustPlayProgress(event.clientX);
+    }
+}
+
+
 // 更新播放进度
-let progressUpdateInterval: number | null = null;
 const songDuration = ref(0);
 const durationText = ref('00:00');
 const currentProgress = ref(0);
 const progressText = ref('00:00');
 const progressPercentage = ref(0);
-async function updateSongProgress() {
-    const progressStr = await window.electron.readData('songProgress', windowIdentifier);
-    if (progressStr) {
-        currentProgress.value = parseFloat(progressStr);
+function updateSongProgress(event: MessageEvent) {
+    if (event.data.eventName === 'progress-update') {
+        const time = event.data.message;
+
+        currentProgress.value = time;
         progressText.value = timeFormat(currentProgress.value);
 
         progressPercentage.value = currentProgress.value / songDuration.value * 100;
@@ -242,16 +311,14 @@ onMounted(() => {
     window.addEventListener('resize', adjustFontSize);
     adjustFontSize();
 
-    // 定期更新播放进度
-    progressUpdateInterval = setInterval(updateSongProgress, 200);
+    // 监听播放进度更新
+    appChannel.addEventListener('message', updateSongProgress);
 
     console.log(`[Debug] Captions.vue loaded`);
 });
 onUnmounted(() => {
     window.removeEventListener('storage', updateStorageData);
     window.removeEventListener('resize', adjustFontSize);
-
-    clearInterval(progressUpdateInterval!);
 });
 
 </script>
@@ -271,7 +338,7 @@ onUnmounted(() => {
                 </button>
 
                 <button class="playControl small" id="closeCaptions" title="关闭窗口"
-                    @click="() => sendToMain('captions-close', windowIdentifier)">
+                    @click="() => sendToMain('captions-close')">
                     <img src="/images/windowControl/close.svg" alt="Close window"/>
                 </button>
             </div>
@@ -281,13 +348,15 @@ onUnmounted(() => {
         <div :class="`flex row ${controlShow ? 'expanded' : ''}`" id="captionsControl">
             <img :src="currentSongInfo.coverUrl" alt="Current Song Cover" id="captionsSongCover"/>
             <div class="flex column" id="captionsSongInfo">
-                <span class="text medium bold">{{ currentSongInfo.name }}</span>
-                <span class="text small">{{ currentSongInfo.authors }}</span>
+                <span class="text medium bold" id="desktopSongName">{{ currentSongInfo.name }}</span>
+                <span class="text small" id="desktopSongAuthors">{{ currentSongInfo.authors }}</span>
                 
                 <div class="flex row" id="progressDesktopLyrics">
-                    <label class="text ultraSmall">{{ progressText }}</label>
-                    <span class="flex row" id="desktopLyricsProgressBar">
-                        <span id="desktopLyricsProgressDone" :style="`width: ${progressPercentage}%`"></span>
+                    <label class="text ultraSmall">{{ playTimeAdjustFlag ? targetTimeText : progressText }}</label>
+                    <span class="flex row" id="desktopLyricsProgressBar"
+                        @mousedown="startProgressAdjust" @mousemove="adjustOnMouseMove">
+                        <span id="desktopLyricsProgressDone" 
+                            :style="`width: ${playTimeAdjustFlag ? targetPercentage : progressPercentage}%`"></span>
                     </span>
                     <label class="text ultraSmall">{{ durationText }}</label>
                 </div>
@@ -295,28 +364,34 @@ onUnmounted(() => {
                 <div class="flex row" id="playbackControl">
                     <div class="flex row controlButtonGroup">
                         <button class="playControl small" id="repeat" title="循环播放"
-                            @click="() => sendToMain('toggle-repeat', windowIdentifier)">
+                            @click="() => sendToMain('toggle-repeat')">
                             <img :src="repeatStateImage" alt="Toggle repeat"/>
                         </button>
                         <button class="playControl" id="previousButton" title="上一首" 
-                            @click="() => sendToMain('previous-song', windowIdentifier)">
+                            @click="() => sendToMain('previous-song')">
                             <img src="/images/player/previous.svg"/>
                         </button>
                         <button class="playControl" id="playPauseButton" title="播放 / 暂停"
-                            @click="() => sendToMain('toggle-play-pause', windowIdentifier)">
+                            @click="() => sendToMain('toggle-play-pause')">
                             <img :src="playStateImage"/>
                         </button>
                         <button class="playControl" id="nextButton" title="下一首"
-                            @click="() => sendToMain('next-song', windowIdentifier)">
+                            @click="() => sendToMain('next-song')">
                             <img src="/images/player/next.svg"/>
                         </button>
                         <button class="playControl small" id="shuffle" title="随机播放"
-                            @click="() => sendToMain('toggle-shuffle', windowIdentifier)">
+                            @click="() => sendToMain('toggle-shuffle')">
                             <img :src="shuffleStateImage" alt="Toggle shuffle"/>
                         </button>
                     </div>
 
                     <div class="verticleSplitline"></div>
+
+                    <div class="flex row controlButtonGroup">
+                        <button class="playControl small" id="toggleTopOnControl" title="窗口置顶" @click="toggleWindowTop">
+                            <img :src="alwaysOnTopImage"/>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

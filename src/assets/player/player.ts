@@ -3,7 +3,7 @@ import { showNotify } from "../notifications/Notification.ts";
 import { getListContent, getSongInfo, getSongLink } from "./songUtils.ts";
 import { timeFormat } from "../utilities/timeFormat.ts";
 
-const identifier = 'moe.nekozx123.arcanummusic.audioplayer';
+// const identifier = 'moe.nekozx123.arcanummusic.audioplayer';
 
 const neteaseCdnPostfix = 'music.126.net';
 
@@ -137,8 +137,6 @@ class Player {
         this.playedTimeText = timeFormat(time);
 
         this.progressPercentage = time / this.duration * 100;
-
-        window.electron.writeData('songProgress', this.playedTime.toString(), identifier);
     }
     // 设置播放进度
     setProgress(time: number, check: boolean = true) {

@@ -86,13 +86,22 @@
 
 #captionsSongInfo {
     height: 100%;
-    padding: 1rem 0;
+    padding: 8px 0;
 
     justify-content: center;
     flex: 1;
 }
 #captionsSongInfo > span {
-    height: 20pt;
+    max-width: 20rem;
+    
+    text-wrap: nowrap;
+    overflow-x: hidden;
+}
+#captionsSongInfo > #desktopSongName {
+    height: 28pt;
+}
+#captionsSongInfo > #desktopSongAuthors {
+    height: 22pt;
 }
 #captionsSongInfo > div {
     align-items: center;
