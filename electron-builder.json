@@ -15,8 +15,7 @@
         "./icons"
     ],
     "directories": {
-        "output": "./build/output",
-        "buildResources": "./resources"
+        "output": "./build/output"
     },
     "win": {
         "target": [
@@ -43,6 +42,10 @@
             },
             {
                 "target": "AppImage",
+                "arch": ["x64"]
+            },
+            {
+                "target": "pacman",
                 "arch": ["x64"]
             }
         ],
