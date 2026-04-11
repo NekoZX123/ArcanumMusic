@@ -22,6 +22,7 @@ made with TypeScript + Vue.js
 
 - `.deb` 安装包
 - `AppImage` 便携包
+- `pacman` 安装包
 
 ### 架构
 
@@ -39,11 +40,17 @@ sudo apt install ./arcanummusic_<version>_amd64.deb
 sudo apt install ./arcanummusic_1.8.0_amd64.deb
 ```
 
-### 如果 `.deb` 无法安装或运行
+### Linux 打包注意事项
+
+`pacman` 打包依赖 `bsdtar`。在 Debian / Ubuntu / Kubuntu 上通常需要先执行
+
+```bash
+sudo apt install libarchive-tools
+```
+
+### 安装及运行注意事项
 
 如果当前发行版上的 `.deb` 安装包存在兼容性问题，建议优先尝试同版本的 `AppImage` 安装包。
-
-### 说明
 
 如果您在 Ubuntu / Debian 或其他 Linux 发行版上遇到安装或运行问题，欢迎在 GitHub 提交 Issue 并附上系统版本、架构和报错信息。
 
