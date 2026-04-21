@@ -1,5 +1,5 @@
 const dataStroage = {
-    songProgress: 0
+    visulizerData: []
 };
 
 const identifierList = ['moe.nekozx123.arcanummusic.desktoplyrics', 'moe.nekozx123.arcanummusic.audioplayer'];

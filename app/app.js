@@ -6,7 +6,7 @@ import pkg from 'auto-launch';
 const AutoLaunch = pkg;
 
 import { startService, stopService } from './service.js';
-// import { startWebSocket } from './webSocket.js';
+import { startWebSocket } from './webSocket.js';
 import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 import { deleteCookies, validateCookieExpiration, listenForCookie, prepareAccountStorage } from './accountHelper.js';
 import { getAppData, getEnvironment } from './globalUtils.js';
@@ -333,7 +333,7 @@ app.whenReady().then(() => {
 
     // 启动服务
     startService(environment);
-    // startWebSocket();
+    startWebSocket();
 
     // 创建应用主窗口
     createMainWindow();

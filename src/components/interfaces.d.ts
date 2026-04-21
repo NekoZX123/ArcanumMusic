@@ -15,8 +15,8 @@ export interface IElectronAPI {
     readLocalFile: (path: String) => Promise<string>,
     writeLocalFile: (path: String, content: String) => Promise<void>,
 
-    readData: (key: string, identifier: string) => Promise<string | null>,
-    writeData: (key: string, value: string, identifier: string) => Promise<void>,
+    readData: (key: string, identifier: string) => Promise<any | null>,
+    writeData: (key: string, value: any, identifier: string) => Promise<void>,
 
     getAppConfig: () => Promise<string>,
     getUserPreference: () => Promise<string>,

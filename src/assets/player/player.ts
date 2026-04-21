@@ -310,8 +310,6 @@ class Player {
             this.updateProgress(0);
             this.setProgress(0, false);
 
-            this.syncSongInfo();
-
             // 设置播放链接
             if (!playInfo.url) {
                 showNotify('songUrlNullError', 'critical', `无法播放 ${this.name}`, '获取播放链接失败');
@@ -325,31 +323,31 @@ class Player {
                 return;
             }
             if (playInfo.url.includes(neteaseCdnPostfix)) {
-                // const audioChunks: BlobPart[] = [];
-                // const ws =  new WebSocket('ws://127.0.0.1:3001');
-
-                // ws.onmessage = (event) => {
-                //     audioChunks.push(event.data);
-                // };
-                // ws.onclose = (_) => {
-                //     const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
-                //     const audioUrl = URL.createObjectURL(audioBlob);
-                //     console.log(`[Debug] Audio blob URL: ${audioUrl}`);
-                //     this.url = audioUrl;
-                // };
-
-                // ws.onopen = () => {
-                //     ws.send(playInfo.url);
-                // };
                 const idParts = playInfo.id.split('-');
                 const musicId = idParts[2];
                 const fallbackUrl = `https://music.163.com/song/media/outer/url?id=${musicId}.mp3`;
                 console.log(`[Debug] Play URL: ${fallbackUrl}`);
-                this.url = fallbackUrl;
+                playInfo.url = fallbackUrl;
             }
-            else {
-                this.url = playInfo.url;
-            }
+
+            // 使用 WebSocket 接收音频数据并播放
+            const audioChunks: BlobPart[] = [];
+            const ws =  new WebSocket('ws://127.0.0.1:3030/');
+            ws.onmessage = (event) => {
+                audioChunks.push(event.data);
+            };
+            ws.onclose = (_) => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                console.log(`[Debug] Origin URL: ${playInfo.url} => Local URL: ${audioUrl}`);
+                this.url = audioUrl;
+                
+                this.syncSongInfo();
+            };
+
+            ws.onopen = () => {
+                ws.send(playInfo.url);
+            };
 
             // 开始播放
             const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;

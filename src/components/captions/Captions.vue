@@ -282,6 +282,34 @@ function updateSongProgress(event: MessageEvent) {
     }
 }
 
+// 更新可视化柱状图数据
+function handleFrequencyUpdate(event: MessageEvent) {
+    if (event.data.eventName === 'frequency-chart-update') {
+        const frequencyData = event.data.message;
+        requestAnimationFrame(() => updateVisualizerChart(frequencyData));
+    }
+}
+
+// 更新可视化柱状图
+let visualizerCanvas: HTMLCanvasElement | null = null;
+let visualizerContext: CanvasRenderingContext2D | null = null;
+function updateVisualizerChart(frequencyData: number[]) {
+    const barHeightPercentages: number[] = frequencyData.map(v => (v || 0) / 255 * 100);
+
+    if (!visualizerCanvas || !visualizerContext) return;
+
+    // 清空画布
+    visualizerContext.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
+
+    // 绘制柱状图
+    const barWidth = visualizerCanvas.width / barHeightPercentages.length;
+    for (let i = 0; i < barHeightPercentages.length; i++) {
+        const barHeight = barHeightPercentages[i] * 0.01 * visualizerCanvas.height;
+        visualizerContext.fillStyle = `rgb(255, 255, 255)`;
+        visualizerContext.fillRect(i * barWidth, visualizerCanvas.height - barHeight, barWidth - 1, barHeight);
+    }
+}
+
 onMounted(() => {
     lyricStyle = document.createElement('style');
     document.body.appendChild(lyricStyle);
@@ -314,11 +342,22 @@ onMounted(() => {
     // 监听播放进度更新
     appChannel.addEventListener('message', updateSongProgress);
 
+    // 监听可视化数据更新
+    appChannel.addEventListener('message', handleFrequencyUpdate);
+
+    // 监听可视化数据更新
+    visualizerCanvas = document.getElementById('visualizerCanvas') as HTMLCanvasElement;
+    visualizerContext = visualizerCanvas.getContext('2d');
+    visualizerCanvas.width = visualizerCanvas.clientWidth;
+    visualizerCanvas.height = visualizerCanvas.clientHeight;
+
     console.log(`[Debug] Captions.vue loaded`);
 });
 onUnmounted(() => {
     window.removeEventListener('storage', updateStorageData);
     window.removeEventListener('resize', adjustFontSize);
+    appChannel.removeEventListener('message', updateSongProgress);
+    appChannel.removeEventListener('message', handleFrequencyUpdate);
 });
 
 </script>
@@ -393,6 +432,9 @@ onUnmounted(() => {
                         </button>
                     </div>
                 </div>
+            </div>
+            <div id="audioVisualizer">
+                <canvas id="visualizerCanvas"></canvas>
             </div>
         </div>
 
