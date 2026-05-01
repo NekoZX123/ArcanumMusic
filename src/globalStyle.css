@@ -516,8 +516,7 @@ img.outlineImage {
     height: 13rem;
 
     margin: 0 3px;
-    padding: 0 3px;
-    padding-top: 3px;
+    padding: 3px 3px 0;
 
     border: none;
     border-radius: 12px;
@@ -583,8 +582,7 @@ img.outlineImage {
     background: var(--interface-background);
     box-shadow: 0 4px 4px 2px var(--transparent-grey);
 
-    padding: 0 6px;
-    padding-bottom: 6px;
+    padding: 0 6px 6px;
 }
 .songlistCard.large > .cardHeader {
     width: 100%;
@@ -701,14 +699,12 @@ img.outlineImage {
 
     background: transparent;
     border: none;
-    border-radius: 1.5rem;
+    border-radius: 1rem;
     box-shadow: 0 4px 4px var(--transparent-grey);
 
     margin: 6px;
 
     transition: all 150ms ease-in-out;
-
-    border-radius: 1rem;
 }
 
 .songlistPlay > img {

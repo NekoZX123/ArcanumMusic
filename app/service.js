@@ -51,7 +51,7 @@ function proxyRequest(link, method, headers = {}, body = null, responseType = 'j
         }
         if (!allowFlag) {
             console.error(`[Arcanum Music - Server] Proxy request to ${link} is not allowed`);
-            reject(new Error(`Proxy request to ${link} is not allowed`));
+            reject(`Proxy request to ${link} is not allowed`);
             return;
         }
         axios({
@@ -69,8 +69,9 @@ function proxyRequest(link, method, headers = {}, body = null, responseType = 'j
                     body: response.data
                 });
             })
-            .catch((error) => {
-                reject(error);
+            .catch((err) => {
+                console.log(`Web request failed: ${err}`);
+                reject(err);
             });
     });
 }

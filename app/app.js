@@ -63,7 +63,7 @@ async function ensureAutoLaunchState(state) {
 
 // 创建主窗口
 async function createMainWindow() {
-    prepareAccountStorage();
+    await prepareAccountStorage();
     const config = await getAppConfig();
     const configObject = JSON.parse(config);
 
@@ -81,7 +81,7 @@ async function createMainWindow() {
 
     // 开机自启判断
     const autoLaunchFlag = configObject.generic.system.start.startOnBoot;
-    ensureAutoLaunchState(autoLaunchFlag);
+    await ensureAutoLaunchState(autoLaunchFlag);
     // 是否使用系统边框
     const windowFrame = configObject.generic.appearance.window.useSystemFrame;
 
@@ -104,9 +104,9 @@ async function createMainWindow() {
         title: 'Arcanum Music',
         icon: loadIcon(),
         webPreferences: {
-            nodeIntegration: true,
+            nodeIntegration: false,
             contextIsolation: true,
-            preload: __dirname.replace('app.js', 'preload.mjs')
+            preload: __dirname.replace('app.js', 'preload.js')
         }
     });
 
@@ -142,16 +142,16 @@ async function createMainWindow() {
 
 // 新建窗口
 function newWindow(_, title, url, options) {
-    const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
+    // const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
 
     let windowConfig;
     if (options) {
         windowConfig = options;
         windowConfig.icon = loadIcon();
         windowConfig.webPreferences = {
-            nodeIntegration: true,
+            nodeIntegration: false,
             contextIsolation: true,
-            preload: __dirname.replace('app.js', 'preload.mjs')
+            preload: __dirname.replace('app.js', 'preload.js')
         };
     }
     else {
@@ -166,9 +166,9 @@ function newWindow(_, title, url, options) {
             title: title,
             icon: loadIcon(),
             webPreferences: {
-                nodeIntegration: true,
+                nodeIntegration: false,
                 contextIsolation: true,
-                preload: __dirname.replace('app.js', 'preload.mjs')
+                preload: __dirname.replace('app.js', 'preload.js')
             }
         };
     }
@@ -268,19 +268,32 @@ async function savePreferences(_, pref) {
     if (!config.generic.appearance.window.rememberSize) {
         preference.window.width = 1000;
         preference.window.height = 650;
-        preference.window.isMaximized = false;
+        preference.window.unmaximize();
     }
     // console.log(`[Debug] Preferences: ${JSON.stringify(preference)}`);
 
     await writeUserPreferences(JSON.stringify(preference));
 }
 
+const allowedSignals = [
+    'previous-song',
+    'next-song',
+    'toggle-play-pause',
+    'toggle-repeat',
+    'toggle-shuffle',
+    'captions-close'
+];
 /**
  * 向主窗口播放器发送消息 (通过 localStorage)
  * @param {*} signal string - 消息名称
  */
 function sendPlayerSignal(signal) {
     if (!mainWindow) return;
+
+    if (!allowedSignals.includes(signal)) {
+        console.warn(`[Warning] Attempted to send disallowed signal: ${signal}`);
+        return;
+    }
 
     // 仿制 Storage 对象
     mainWindow.webContents.executeJavaScript(`
@@ -327,7 +340,10 @@ app.whenReady().then(() => {
     ipcMain.handle('deleteCookie', deleteCookies);
 
     // 其他操作
-    ipcMain.handle('openExternal', (_, url) => shell.openExternal(url));
+    ipcMain.handle('openExternal', (_, url) => {
+        if (url.startsWith('https://')) shell.openExternal(url);
+        else console.warn(`[Warning] Link not allowed to open in browser: ${url}`);
+    });
     ipcMain.handle('copyContent', (_, content) => clipboard.writeText(content));
     ipcMain.handle('setAutoLaunch', (_, isEnabled) => ensureAutoLaunchState(isEnabled));
 
@@ -339,7 +355,7 @@ app.whenReady().then(() => {
     createMainWindow();
 
     // 托盘图标
-    const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
+    // const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
     tray = new Tray(loadIcon());
     const menu = Menu.buildFromTemplate([
         {

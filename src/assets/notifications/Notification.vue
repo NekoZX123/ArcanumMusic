@@ -1,5 +1,5 @@
 <script setup lang="ts" name="Notification">
-import { onMounted, ref } from 'vue';
+import {onMounted, onUnmounted, ref} from 'vue';
 
 const props = defineProps({
     type: {
@@ -28,15 +28,18 @@ const props = defineProps({
     }
 });
 
-var timer = props.duration;
-var countdown = ref(`width: 100%`);
-
+let timer = props.duration;
+let countdown = ref(`width: 100%`);
+let intervalId = NaN;
 onMounted(() => {
     // 定时器
-    setInterval(() => {
+    intervalId = setInterval(() => {
         timer -= 10;
         countdown.value = `width: ${timer / props.duration * 100}%`;
     }, 10);
+});
+onUnmounted(() => {
+    clearInterval(intervalId);
 });
 </script>
 

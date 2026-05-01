@@ -53,7 +53,7 @@ function switchTab(index: number) {
                 ]" 
                 @click="switchTab(index)">
                 <!-- 图标 -->
-                <img v-if="tab.icon" class="tabIcon" :src="tab.icon"></img>
+                <img v-if="tab.icon" class="tabIcon" :src="tab.icon" :alt="tab.title"/>
                 <label class="text small bold">{{ tab.title }}</label>
             </div>
         </div>
@@ -61,7 +61,7 @@ function switchTab(index: number) {
         <!-- 标签页内容区域 -->
         <div class="tabContent">
             <transition name="switchAnimation" mode="out-in">
-                <div :key="currentIndex" class="currentTab">
+                <div class="currentTab">
                     <component :is="tabContents[currentIndex]" />
                 </div>
             </transition>

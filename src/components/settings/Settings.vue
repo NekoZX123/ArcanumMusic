@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { createApp, onMounted, ref } from 'vue';
+import {createApp, onMounted, onUnmounted, ref} from 'vue';
 
 import { AccountCard } from '../../assets/widgets/Account.tsx';
 import { HeadersText, NodeBlock, CheckBox, ColorPicker, Slider, TextInput, Dropbox } from '../../assets/widgets/Settings.tsx';
@@ -311,7 +311,7 @@ async function setPageStructure(depth: string[], node: any) {
                     if (targetNode) {
                         targetNode.removeEventListener('click', onNodeClick);
 
-                        targetNode.addEventListener('click', (event) => {
+                        const showWarningWindow = (event: MouseEvent) => {
                             let selector = event.target as HTMLElement;
                             if (!selector || !selector.parentNode) return;
                             if (selector.tagName === 'IMG') selector = selector.parentNode.parentNode as HTMLElement;
@@ -324,10 +324,13 @@ async function setPageStructure(depth: string[], node: any) {
                             showPopup('warning', 'yesno', '警告: 是否继续?', node.innerHTML, ['', 'red'], (code: number) => {
                                 if (code === buttonTypes.BUTTON_YES) {
                                     onNodeClick(event);
-                                } else {
-                                    console.log('[Arcanum Music - Debug] Page change cancelled');
                                 }
                             });
+                        }
+
+                        targetNode.addEventListener('click', showWarningWindow);
+                        onUnmounted(() => {
+                            targetNode?.removeEventListener('click', showWarningWindow);
                         });
                     }
                 }, 500);
@@ -565,6 +568,19 @@ function refreshModifyImage() {
     discardButtonImage.value = `./images/fileControl/discard${theme.darkEnabled ? '.dark' : ''}.svg`;
 }
 
+/**
+ * 浏览器打开外部链接
+ * @param event 点击事件
+ */
+function openInBrowser (event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const url = target.getAttribute('href');
+    if (target.tagName === 'A' && url) {
+        event.preventDefault();
+        window.electron.openExternal(url);
+    }
+}
+
 onMounted(async () => {
     settingsContent = document.getElementById('settingsContent') as HTMLElement;
 
@@ -591,14 +607,7 @@ onMounted(async () => {
     setupPage([], settings);
 
     // 浏览器打开 <a> 标签
-    document.addEventListener('click', function (event) {
-        const target = event.target as HTMLElement;
-        const url = target.getAttribute('href');
-        if (target.tagName === 'A' && url) {
-            event.preventDefault();
-            window.electron.openExternal(url);
-        }
-    });
+    document.addEventListener('click', openInBrowser);
 
     // 保存 / 丢弃更改按钮图片
     refreshModifyImage();
@@ -611,6 +620,10 @@ onMounted(async () => {
 
     console.log('Settings.vue loaded');
 });
+onUnmounted(() => {
+    document.removeEventListener('click', openInBrowser);
+});
+
 </script>
 
 <template>

@@ -79,15 +79,15 @@ async function closeWindow() {
 
                 const targetFile = `${appDataPath}/ArcanumMusic_data/settings.json`;
 
-                window.electron.writeLocalFile(targetFile, settingsText);
+                await window.electron.writeLocalFile(targetFile, settingsText);
 
                 // 储存 .notfirstrun 文件
-                window.electron.writeLocalFile(firstRunCheckPath, 'Not first run! Let me pass!');
+                await window.electron.writeLocalFile(firstRunCheckPath, 'Not first run! Let me pass!');
 
                 // 保存用户配置并关闭窗口
-                savePreferences();
+                await savePreferences();
 
-                window.electron.closeWindow(hideToTray);
+                await window.electron.closeWindow(hideToTray);
             });
     }
     else { // 非首次运行
@@ -96,9 +96,9 @@ async function closeWindow() {
         const hideToTrayFlag = settings.generic.system.closeOptions.hideToTray;
 
         // 保存用户配置并关闭窗口
-        savePreferences();
+        await savePreferences();
 
-        window.electron.closeWindow(hideToTrayFlag);
+        await window.electron.closeWindow(hideToTrayFlag);
     }
 }
 
@@ -483,11 +483,7 @@ onMounted(async () => {
     }, 300);
 
     // 设置点击 / 滚动时隐藏右键菜单
-    window.addEventListener('click', (event) => {
-        if (event.button === 0) {
-            hideRightMenu();
-        }
-    });
+    window.addEventListener('click', hideRightMenu);
     document.getElementById('pageContainer')?.addEventListener('scroll', (_) => hideRightMenu());
 
     // 加载应用配置文件
@@ -561,6 +557,8 @@ onMounted(async () => {
     window.addEventListener('close', savePreferences);
 });
 onUnmounted(() => {
+    window.onstorage = null;
+    window.removeEventListener('click', hideRightMenu);
     window.removeEventListener('storage', handleStorageData);
 });
 

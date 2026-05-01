@@ -45,8 +45,9 @@ function proxyRequest(method: string = 'GET', url: string, headers: object = {},
         axios(options).then((response) => {
             // console.log(response.data);
             resolve(response);
-        }).catch((error) => {
-            reject(error);
+        }).catch((err) => {
+            console.error(`Web request failed: ${err}`);
+            reject(err);
         });
     });
 }

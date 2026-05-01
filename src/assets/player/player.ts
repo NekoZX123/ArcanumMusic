@@ -375,6 +375,9 @@ class Player {
             // 更新动态背景
             const backgroundEvent = new CustomEvent('update-background');
             window.dispatchEvent(backgroundEvent);
+        })
+        .catch((err) => {
+            console.error(`Failed to get song link: ${err}`);
         });
     }
     /**
@@ -626,6 +629,9 @@ class Player {
             console.log(parsedTracks);
 
             this.playByList(parsedTracks, hasDetail);
+        })
+        .catch((err) => {
+            console.error(`Failed to get list content: ${err}`);
         });
     }
 

@@ -1,6 +1,7 @@
-import { contextBridge, ipcRenderer } from 'electron/renderer';
+// import { contextBridge, ipcRenderer } from 'electron/renderer';
+const { contextBridge, ipcRenderer } = require('electron');
 
-console.log('preload.mjs loaded');
+console.log('preload.js loaded');
 
 contextBridge.exposeInMainWorld(
     'electron', 
