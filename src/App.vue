@@ -180,6 +180,16 @@ function startProgressAdjust(event: MouseEvent) {
             document.removeEventListener('mousemove', adjustOnMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
             getPlayer()?.setProgress(targetProgress);
+            
+            // 同步播放进度到 localStorage
+            window.localStorage.setItem('playerProgress', targetProgress.toString());
+            
+            // 同步到 BroadcastChannel
+            appChannel.postMessage({
+                eventName: 'progress-update',
+                message: targetProgress
+            });
+            
             playTimeAdjustFlag.value = false;
         };
 
@@ -347,61 +357,6 @@ function handleProgressUpdate(event: MessageEvent) {
     }
 }
 
-// 频谱图数据获取
-const visualizerBarCount = 32;
-let _audioContext: AudioContext | null = null;
-let _analyserNode: AnalyserNode | null = null;
-let frequencyData: Uint8Array<ArrayBuffer> | null = null;
-function getFrequencyData() {
-    const audioElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement | null;
-    if (!audioElem) return new Array(visualizerBarCount).fill(0);
-
-    if (!_audioContext) {
-        _audioContext = new AudioContext();
-
-        try {
-            const source = _audioContext.createMediaElementSource(audioElem);
-            _analyserNode = _audioContext.createAnalyser();
-            _analyserNode.fftSize = 2048;
-            _analyserNode.smoothingTimeConstant = 0.8;
-            source.connect(_analyserNode);
-            _analyserNode.connect(_audioContext.destination);
-            frequencyData = new Uint8Array(_analyserNode.frequencyBinCount);
-        }
-        catch (e) {
-            return new Array(visualizerBarCount).fill(0);
-        }
-    }
-
-    if (_audioContext.state === 'suspended') {
-        _audioContext.resume().catch(() => {});
-    }
-
-    if (!_analyserNode || !frequencyData) return new Array(visualizerBarCount).fill(0);
-
-    _analyserNode.getByteFrequencyData(frequencyData);
-
-    return frequencyData;
-}
-function updateVisulizerData() {
-    const freqencyArray = getFrequencyData();
-
-    const startIndex = Math.floor(freqencyArray.length * 0.05);
-    const endIndex = Math.floor(freqencyArray.length * 0.90);
-    const effectiveLength = endIndex - startIndex;
-    const frequencyChartData = new Array(visualizerBarCount);
-    const step = Math.floor(effectiveLength / visualizerBarCount);
-    for (let i = 0; i < visualizerBarCount; i++) {
-        const index = startIndex + i * step;
-        frequencyChartData[i] = (index < endIndex) ? (freqencyArray[index] || 0) : 0;
-    }
-
-    appChannel.postMessage({
-        eventName: 'frequency-chart-update',
-        message: frequencyChartData
-    });
-}
-
 // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
 const allowedIdentifiers = ['moe.nekozx123.arcanummusic.desktoplyrics', 'moe.nekozx123.arcanummusic.contextmenu'];
 function handleStorageData (updateEvent: StorageEvent) {
@@ -542,8 +497,6 @@ onMounted(async () => {
         }
 
         getPlayer()?.checkNextSong();
-
-        updateVisulizerData();
     });
 
     // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)

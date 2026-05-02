@@ -3,6 +3,7 @@ import { onMounted, onUnmounted, ref } from 'vue';
 import './captionsStyle.css';
 import '../../globalStyle.css';
 import { timeFormat } from '../../assets/utilities/timeFormat.ts';
+import { getMainColors } from '../../assets/effects/colorUtils.ts';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -110,6 +111,23 @@ function updateStorageData(updateEvent: StorageEvent) {
 
         songDuration.value = songInfo.duration;
         durationText.value = timeFormat(songInfo.duration);
+        
+        // 从封面提取主要颜色更新渐变
+        if (songInfo.coverUrl) {
+            updateGradientFromImage(songInfo.coverUrl);
+        }
+
+        // 同步歌曲链接到音频元素
+        const audioElement = document.getElementById('desktoplrc-frequencychart') as HTMLAudioElement;
+        if (audioElement && songInfo.url) {
+            console.log(`[Debug] Updating audio source to: ${songInfo.url}`);
+
+            audioElement.src = songInfo.url;
+            audioElement.load();
+            audioElement.play().catch(error => {
+                console.error('[Error] Failed to play audio:', error);
+            });
+        }
     }
     if (updateEvent.key === 'currentLyrics' && updateEvent.newValue) { // 更新当前歌词
         const lyrics = JSON.parse(updateEvent.newValue);
@@ -118,6 +136,18 @@ function updateStorageData(updateEvent: StorageEvent) {
     }
     if (updateEvent.key === 'playState' && updateEvent.newValue) {
         playStateImage.value = updateEvent.newValue;
+
+        const isPlaying = playStateImage.value.includes('pause');
+        const audioElement = document.getElementById('desktoplrc-frequencychart') as HTMLAudioElement;
+        if (audioElement) {
+            if (isPlaying) {
+                audioElement.play().catch(error => {
+                    console.error('[Error] Failed to play audio:', error);
+                });
+            } else {
+                audioElement.pause();
+            }
+        }
     }
     if (updateEvent.key === 'repeatState' && updateEvent.newValue) {
         repeatStateImage.value = updateEvent.newValue;
@@ -279,24 +309,84 @@ function updateSongProgress(event: MessageEvent) {
         progressText.value = timeFormat(currentProgress.value);
 
         progressPercentage.value = currentProgress.value / songDuration.value * 100;
+
+        // 同步播放进度到音频元素
+        const audioElement = document.getElementById('desktoplrc-frequencychart') as HTMLAudioElement;
+        if (audioElement && Math.abs(audioElement.currentTime - time) > 0.1) {
+            audioElement.currentTime = time;
+        }
     }
 }
 
-// 更新可视化柱状图数据
-function handleFrequencyUpdate(event: MessageEvent) {
-    if (event.data.eventName === 'frequency-chart-update') {
-        const frequencyData = event.data.message;
-        requestAnimationFrame(() => updateVisualizerChart(frequencyData));
-    }
-}
+// Web Audio API 相关变量
+let audioContext: AudioContext | null = null;
+let analyser: AnalyserNode | null = null;
+let frequencyData: Uint8Array<ArrayBuffer> | null = null;
+let animationFrameId: number | null = null;
 
 // 更新可视化柱状图
 let visualizerCanvas: HTMLCanvasElement | null = null;
 let visualizerContext: CanvasRenderingContext2D | null = null;
-function updateVisualizerChart(frequencyData: number[]) {
-    const barHeightPercentages: number[] = frequencyData.map(v => (v || 0) / 255 * 100);
+const gradientDefault = ['#84FAB0', '#8FD3F4'];
+let gradientColor1 = '#84FAB0';
+let gradientColor2 = '#8FD3F4';
+let gradient: CanvasGradient | null = null;
 
-    if (!visualizerCanvas || !visualizerContext) return;
+/**
+ * 从图片URL提取主要颜色并更新渐变
+ */
+async function updateGradientFromImage(imageUrl: string) {
+    if (!imageUrl) {
+        gradientColor1 = gradientDefault[0];
+        gradientColor2 = gradientDefault[1];
+        return;
+    }
+    
+    try {
+        const colors = await getMainColors(imageUrl);
+        if (colors && colors.length >= 2) {
+            gradientColor1 = colors[0];
+            gradientColor2 = colors[1];
+        } else {
+            gradientColor1 = gradientDefault[0];
+            gradientColor2 = gradientDefault[1];
+        }
+    } catch (error) {
+        console.warn('[Warning] Failed to extract colors from image:', error);
+        gradientColor1 = gradientDefault[0];
+        gradientColor2 = gradientDefault[1];
+    }
+    
+    // 更新渐变色
+    if (visualizerContext) {
+        gradient = visualizerContext.createLinearGradient(0, 0, 0, visualizerCanvas?.height || 100);
+        gradient.addColorStop(0, gradientColor1);
+        gradient.addColorStop(1, gradientColor2);
+    }
+}
+function updateVisualizerChart(data: Uint8Array | number[]) {
+    let processedData = Array.from(data);
+    
+    // 丢弃前 5% 和后 10% 数据
+    const skipStart = Math.floor(processedData.length * 0.05);
+    const skipEnd = Math.floor(processedData.length * 0.1);
+    processedData = processedData.slice(skipStart, processedData.length - skipEnd);
+    
+    // 降采样至 32 个数据点
+    const targetLength = 32;
+    const sampledData: number[] = [];
+    const chunkSize = processedData.length / targetLength;
+    for (let i = 0; i < targetLength; i++) {
+        const start = Math.floor(i * chunkSize);
+        const end = Math.floor((i + 1) * chunkSize);
+        const chunk = processedData.slice(start, end);
+        const average = chunk.reduce((a, b) => a + b, 0) / chunk.length;
+        sampledData.push(average);
+    }
+    
+    const barHeightPercentages: number[] = sampledData.map(v => (v || 0) / 255 * 100);
+
+    if (!visualizerCanvas || !visualizerContext) return;    
 
     // 清空画布
     visualizerContext.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
@@ -305,7 +395,7 @@ function updateVisualizerChart(frequencyData: number[]) {
     const barWidth = visualizerCanvas.width / barHeightPercentages.length;
     for (let i = 0; i < barHeightPercentages.length; i++) {
         const barHeight = barHeightPercentages[i] * 0.01 * visualizerCanvas.height;
-        visualizerContext.fillStyle = `rgb(255, 255, 255)`;
+        visualizerContext.fillStyle = gradient || `rgb(255, 255, 255)`;
         visualizerContext.fillRect(i * barWidth, visualizerCanvas.height - barHeight, barWidth - 1, barHeight);
     }
 }
@@ -322,6 +412,11 @@ onMounted(() => {
 
         songDuration.value = currentSongInfo.value.duration;
         durationText.value = timeFormat(songDuration.value);
+        
+        // 从封面提取主要颜色
+        if (currentSongInfo.value.coverUrl) {
+            updateGradientFromImage(currentSongInfo.value.coverUrl);
+        }
     }
     // 加载 localStorage 中的歌词和状态
     const storedLyrics = window.localStorage.getItem('currentLyrics');
@@ -342,14 +437,53 @@ onMounted(() => {
     // 监听播放进度更新
     appChannel.addEventListener('message', updateSongProgress);
 
-    // 监听可视化数据更新
-    appChannel.addEventListener('message', handleFrequencyUpdate);
-
-    // 监听可视化数据更新
+    // 初始化可视化画布
     visualizerCanvas = document.getElementById('visualizerCanvas') as HTMLCanvasElement;
     visualizerContext = visualizerCanvas.getContext('2d');
     visualizerCanvas.width = visualizerCanvas.clientWidth;
     visualizerCanvas.height = visualizerCanvas.clientHeight;
+
+    // 初始化渐变色
+    if (visualizerContext) {
+        gradient = visualizerContext.createLinearGradient(0, 0, 0, visualizerCanvas.height);
+        gradient.addColorStop(0, gradientColor1);
+        gradient.addColorStop(1, gradientColor2);
+    }
+    // 设置 Web Audio API
+    const audioElement = document.getElementById('desktoplrc-frequencychart') as HTMLAudioElement;
+    if (audioElement) {
+        try {
+            audioContext = new AudioContext();
+            
+            // 创建 MediaElementSource -> AnalyserNode -> GainNode (gain=0) -> destination
+            const source = audioContext.createMediaElementSource(audioElement);
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+            
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = 0; // 静音
+            
+            // 连接节点
+            source.connect(analyser);
+            analyser.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // 初始化频率数据数组
+            frequencyData = new Uint8Array(analyser.frequencyBinCount);
+            
+            // 启动频谱图绘制循环
+            const drawFrequencyChart = () => {
+                animationFrameId = requestAnimationFrame(drawFrequencyChart);
+                if (analyser && frequencyData) {
+                    analyser.getByteFrequencyData(frequencyData);
+                    updateVisualizerChart(frequencyData);
+                }
+            };
+            drawFrequencyChart();
+        } catch (error) {
+            console.error('[Error] Failed to initialize Web Audio API:', error);
+        }
+    }
 
     console.log(`[Debug] Captions.vue loaded`);
 });
@@ -357,7 +491,20 @@ onUnmounted(() => {
     window.removeEventListener('storage', updateStorageData);
     window.removeEventListener('resize', adjustFontSize);
     appChannel.removeEventListener('message', updateSongProgress);
-    appChannel.removeEventListener('message', handleFrequencyUpdate);
+    
+    // 清理 Web Audio API 资源
+    if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+    }
+    
+    if (audioContext && audioContext.state !== 'closed') {
+        audioContext.close();
+    }
+    
+    audioContext = null;
+    analyser = null;
+    frequencyData = null;
 });
 
 </script>
@@ -449,5 +596,7 @@ onUnmounted(() => {
                 <ul class="text medium bold">{{ currentLyrics.translation }}</ul>
             </span>
         </div>
+
+        <audio id="desktoplrc-frequencychart" />
     </div>
 </template>
