@@ -470,6 +470,16 @@ onMounted(() => {
             
             // 初始化频率数据数组
             frequencyData = new Uint8Array(analyser.frequencyBinCount);
+
+            if (currentSongInfo.value.url) {
+                console.log(`[Debug] Setting initial audio source to: ${currentSongInfo.value.url}`);
+                audioElement.src = currentSongInfo.value.url;
+                audioElement.load();
+                audioElement.currentTime = currentProgress.value;
+                audioElement.play().catch(error => {
+                    console.error('[Error] Failed to play audio:', error);
+                });
+            }
             
             // 启动频谱图绘制循环
             const drawFrequencyChart = () => {
