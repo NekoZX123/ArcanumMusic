@@ -61,7 +61,7 @@ function switchTab(index: number) {
         <!-- 标签页内容区域 -->
         <div class="tabContent">
             <transition name="switchAnimation" mode="out-in">
-                <div class="currentTab">
+                <div :key="currentIndex" class="currentTab">
                     <component :is="tabContents[currentIndex]" />
                 </div>
             </transition>
