@@ -1,36 +1,23 @@
-<div style="display: flex; flex-direction: column; align-items: center;">
+<div align="center">
 
 <img width="150" height="150" src="https://github.com/NekoZX123/ArcanumMusic/blob/dev/preview/icon.png?raw=true"/>
 
 # Arcanum Music
-美观 简约 可定制的多平台音乐软件
-
+**美观 简约 可定制的多平台音乐软件**
 <img src="https://github.com/NekoZX123/ArcanumMusic/blob/dev/preview/preview.png?raw=true"/>
-<div>
+</div>
 
 ---
 
-<div style="display: flex; flex-direction: row; justify-content: center; gap: 8px">
-
 [![GitHub Issues](https://img.shields.io/github/issues/NekoZX123/ArcanumMusic)](https://github.com/NekoZX123/ArcanumMusic/issues)
-
 [![GitHub PRs](https://img.shields.io/github/issues-pr/NekoZX123/ArcanumMusic)](https://github.com/NekoZX123/ArcanumMusic/pulls)
-
 [![GitHub Actions](https://img.shields.io/github/actions/workflow/status/NekoZX123/ArcanumMusic/.github%2Fworkflows%2Fcodeql.yml?label=CodeQL)](https://github.com/NekoZX123/ArcanumMusic/actions)
-
 [![GitHub Release](https://img.shields.io/github/v/release/NekoZX123/ArcanumMusic)](https://github.com/NekoZX123/ArcanumMusic/releases)
 
-</div>
-
-<div style="display: flex; flex-direction: row; justify-content: center; gap: 8px">
 
 ![Language](https://img.shields.io/badge/language-vue-brightgreen)
-
 [![License](https://img.shields.io/github/license/NekoZX123/ArcanumMusic)](https://github.com/NekoZX123/ArcanumMusic/blob/master/LICENSE)
-
 [![Linux.do](https://img.shields.io/badge/Linux.do-community-0EA5E9?logo=discourse&logoColor=white)](https://linux.do)
-
-</div>
 
 ## :arrow_forward: 应用简介
 
