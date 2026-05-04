@@ -1,22 +1,51 @@
+<div style="display: flex; flex-direction: column; align-items: center;">
+
+<img width="150" height="150" src="https://github.com/NekoZX123/ArcanumMusic/blob/dev/preview/icon.png?raw=true"/>
+
 # Arcanum Music
+美观 简约 可定制的多平台音乐软件
+
+<img src="https://github.com/NekoZX123/ArcanumMusic/blob/dev/preview/preview.png?raw=true"/>
+<div>
+
+---
+
+<div style="display: flex; flex-direction: row; justify-content: center; gap: 8px">
+
+[![GitHub Issues](https://img.shields.io/github/issues/NekoZX123/ArcanumMusic)](https://github.com/NekoZX123/ArcanumMusic/issues)
+
+[![GitHub PRs](https://img.shields.io/github/issues-pr/NekoZX123/ArcanumMusic)](https://github.com/NekoZX123/ArcanumMusic/pulls)
+
+[![GitHub Actions](https://img.shields.io/github/actions/workflow/status/NekoZX123/ArcanumMusic/.github%2Fworkflows%2Fcodeql.yml?label=CodeQL)](https://github.com/NekoZX123/ArcanumMusic/actions)
+
+[![GitHub Release](https://img.shields.io/github/v/release/NekoZX123/ArcanumMusic)](https://github.com/NekoZX123/ArcanumMusic/releases)
+
+</div>
+
+<div style="display: flex; flex-direction: row; justify-content: center; gap: 8px">
+
+![Language](https://img.shields.io/badge/language-vue-brightgreen)
+
+[![License](https://img.shields.io/github/license/NekoZX123/ArcanumMusic)](https://github.com/NekoZX123/ArcanumMusic/blob/master/LICENSE)
 
 [![Linux.do](https://img.shields.io/badge/Linux.do-community-0EA5E9?logo=discourse&logoColor=white)](https://linux.do)
 
-v1.8.0 (Kyrios Internal)
+</div>
 
-简洁美观的多平台音乐软件
+## :arrow_forward: 应用简介
 
-支持 网易云音乐 / QQ音乐 / 酷我音乐 / 酷狗音乐
-
-内容丰富, 官方来源, 安全保证
-
+Arcanum Music - 简洁美观的多平台音乐软件
+网易云音乐 / QQ 音乐 / 酷我音乐 / 酷狗音乐 四端支持
+歌曲来源官方 界面轻简美观 支持自定义
 由 @NekoZX123 用心制作
 
 made with TypeScript + Vue.js
 
-*感谢 Linux.do 社区对本项目的支持*
+> 感谢 Linux.do 社区对本项目的支持
+感谢以下用户对本项目的贡献
+![Contributors](https://contrib.rocks/image?repo=NekoZX123/ArcanumMusic&size=50)
 
-## Linux 安装与兼容性说明
+## :memo: Linux 安装与兼容性说明
 
 当前 Release 提供以下 Linux 安装包:
 
@@ -54,20 +83,17 @@ sudo apt install libarchive-tools
 
 如果您在 Ubuntu / Debian 或其他 Linux 发行版上遇到安装或运行问题，欢迎在 GitHub 提交 Issue 并附上系统版本、架构和报错信息。
 
-## 问题修复
+## :bug: 问题修复
 
-- 修复 QQ 音乐 API 加密脚本导致应用无法加载的问题
+- 更换了新的网易云音乐 API
+- 修复了内存泄漏、XSS 安全漏洞及 Electron 安全问题 (#37)
 
-## 新功能
+## :sparkles: 新功能
 
-- 添加歌曲名称点击复制功能
-- 更新应用图标
-- 更新桌面歌词样式
+- 在桌面歌词添加歌曲进度条
+- 在桌面歌词控制页添加频谱图
+- 添加 Arch (pacman) 构建目标
 
-## 内测版本特别提示
+## :construction: 内测版本特别提示
 
 当前应用为内测版本, 可能存在部分问题. 当出现问题影响使用时, 可使用 Ctrl + R 刷新应用
-
----
-
-感谢 linux.do 对本项目的支持
