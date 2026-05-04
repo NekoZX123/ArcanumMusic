@@ -22,8 +22,11 @@
 ## :arrow_forward: 应用简介
 
 Arcanum Music - 简洁美观的多平台音乐软件
+
 网易云音乐 / QQ 音乐 / 酷我音乐 / 酷狗音乐 四端支持
+
 歌曲来源官方 界面轻简美观 支持自定义
+
 由 @NekoZX123 用心制作
 
 made with TypeScript + Vue.js
