@@ -87,7 +87,7 @@ function displayAccount(platform: string, nickname: string, avatar: string) {
 
     console.log(accountAvatar, accountNickname);
     accountAvatar.src = avatar;
-    accountNickname.innerHTML = nickname;
+    accountNickname.textContent = nickname;
 }
 
 // 账户登录功能

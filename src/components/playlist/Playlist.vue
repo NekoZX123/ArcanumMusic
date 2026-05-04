@@ -10,8 +10,9 @@ import './playlistStyle.css';
             <label class="text large bold playlistSubtitle">正在播放</label>
             <SongInfoLine 
                 v-if="`playlist_current_${getPlayer()?.playlist.current.id}`"
-                :id="`playlist_current_${getPlayer()?.playlist.current.id}`" 
-                :name="getPlayer()?.playlist.current.name" 
+                :key="`playlist_current_${getPlayer()?.playlist.current.id}`"
+                :id="`playlist_current_${getPlayer()?.playlist.current.id}`"
+                :name="getPlayer()?.playlist.current.name"
                 :authors="getPlayer()?.playlist.current.authors" 
                 :cover-url="getPlayer()?.playlist.current.coverUrl" 
                 :duration="getPlayer()?.playlist.current.duration"

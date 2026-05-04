@@ -6,11 +6,12 @@ import pkg from 'auto-launch';
 const AutoLaunch = pkg;
 
 import { startService, stopService } from './service.js';
-// import { startWebSocket } from './webSocket.js';
+import { startWebSocket } from './webSocket.js';
 import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 import { deleteCookies, validateCookieExpiration, listenForCookie, prepareAccountStorage } from './accountHelper.js';
 import { getAppData, getEnvironment } from './globalUtils.js';
 import { getAppConfig, getUserPreferences, writeUserPreferences } from "./configHelper.js";
+import { readData, writeData } from './dataBridge.js';
 
 const __dirname = fileURLToPath(import.meta.url);
 
@@ -62,7 +63,7 @@ async function ensureAutoLaunchState(state) {
 
 // 创建主窗口
 async function createMainWindow() {
-    prepareAccountStorage();
+    await prepareAccountStorage();
     const config = await getAppConfig();
     const configObject = JSON.parse(config);
 
@@ -80,7 +81,7 @@ async function createMainWindow() {
 
     // 开机自启判断
     const autoLaunchFlag = configObject.generic.system.start.startOnBoot;
-    ensureAutoLaunchState(autoLaunchFlag);
+    await ensureAutoLaunchState(autoLaunchFlag);
     // 是否使用系统边框
     const windowFrame = configObject.generic.appearance.window.useSystemFrame;
 
@@ -103,9 +104,9 @@ async function createMainWindow() {
         title: 'Arcanum Music',
         icon: loadIcon(),
         webPreferences: {
-            nodeIntegration: true,
+            nodeIntegration: false,
             contextIsolation: true,
-            preload: __dirname.replace('app.js', 'preload.mjs')
+            preload: __dirname.replace('app.js', 'preload.js')
         }
     });
 
@@ -141,16 +142,16 @@ async function createMainWindow() {
 
 // 新建窗口
 function newWindow(_, title, url, options) {
-    const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
+    // const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
 
     let windowConfig;
     if (options) {
         windowConfig = options;
         windowConfig.icon = loadIcon();
         windowConfig.webPreferences = {
-            nodeIntegration: true,
+            nodeIntegration: false,
             contextIsolation: true,
-            preload: __dirname.replace('app.js', 'preload.mjs')
+            preload: __dirname.replace('app.js', 'preload.js')
         };
     }
     else {
@@ -165,9 +166,9 @@ function newWindow(_, title, url, options) {
             title: title,
             icon: loadIcon(),
             webPreferences: {
-                nodeIntegration: true,
+                nodeIntegration: false,
                 contextIsolation: true,
-                preload: __dirname.replace('app.js', 'preload.mjs')
+                preload: __dirname.replace('app.js', 'preload.js')
             }
         };
     }
@@ -267,13 +268,21 @@ async function savePreferences(_, pref) {
     if (!config.generic.appearance.window.rememberSize) {
         preference.window.width = 1000;
         preference.window.height = 650;
-        preference.window.isMaximized = false;
+        preference.window.unmaximize();
     }
     // console.log(`[Debug] Preferences: ${JSON.stringify(preference)}`);
 
     await writeUserPreferences(JSON.stringify(preference));
 }
 
+const allowedSignals = [
+    'previous-song',
+    'next-song',
+    'toggle-play-pause',
+    'toggle-repeat',
+    'toggle-shuffle',
+    'captions-close'
+];
 /**
  * 向主窗口播放器发送消息 (通过 localStorage)
  * @param {*} signal string - 消息名称
@@ -281,17 +290,23 @@ async function savePreferences(_, pref) {
 function sendPlayerSignal(signal) {
     if (!mainWindow) return;
 
+    if (!allowedSignals.includes(signal)) {
+        console.warn(`[Warning] Attempted to send disallowed signal: ${signal}`);
+        return;
+    }
+
     // 仿制 Storage 对象
     mainWindow.webContents.executeJavaScript(`
     window.onstorage({
         key: 'playerSignal', 
-        newValue: JSON.stringify({eventName: '${signal}', message: 'moe.nekozx.arcanummusic.contextmenu'})
+        newValue: JSON.stringify({eventName: '${signal}', message: 'moe.nekozx123.arcanummusic.contextmenu'})
     });
     `, true);
 }
 
 app.whenReady().then(() => {
     // 添加事件触发
+    // 窗口操作
     ipcMain.handle('newAppWindow', newWindow);
     ipcMain.handle('minimizeWindow', minimizeWindow);
     ipcMain.handle('maximizeWindow', toggleMaximize);
@@ -301,10 +316,16 @@ app.whenReady().then(() => {
     ipcMain.handle('setAlwaysOnTop', setWindowTopState);
     ipcMain.handle('closeWindowById', closeWindowById);
 
+    // 文件操作
     ipcMain.handle('isFileExist', isFileExist);
     ipcMain.handle('readLocalFile', readLocalFile);
     ipcMain.handle('writeLocalFile', writeLocalFile);
 
+    // 主进程数据操作
+    ipcMain.handle('dataRead', (_, key, identifier) => readData(key, identifier));
+    ipcMain.handle('dataWrite', (_, key, value, identifier) => writeData(key, value, identifier));
+
+    // 用户数据操作
     ipcMain.handle('getAppConfig', getAppConfig);
     ipcMain.handle('getPreference', getUserPreferences);
     ipcMain.handle('writePreference', savePreferences);
@@ -313,23 +334,28 @@ app.whenReady().then(() => {
     ipcMain.handle('getAsarLocation', () => {console.log(app.getAppPath()); return app.getAppPath()});
     ipcMain.handle('getUserName', () => userInfo().username);
 
+    // 账号操作
     ipcMain.handle('validateCookieExpiration', validateCookieExpiration);
     ipcMain.handle('listenCookie', listenForCookie);
     ipcMain.handle('deleteCookie', deleteCookies);
 
-    ipcMain.handle('openExternal', (_, url) => shell.openExternal(url));
+    // 其他操作
+    ipcMain.handle('openExternal', (_, url) => {
+        if (url.startsWith('https://')) shell.openExternal(url);
+        else console.warn(`[Warning] Link not allowed to open in browser: ${url}`);
+    });
     ipcMain.handle('copyContent', (_, content) => clipboard.writeText(content));
     ipcMain.handle('setAutoLaunch', (_, isEnabled) => ensureAutoLaunchState(isEnabled));
 
     // 启动服务
     startService(environment);
-    // startWebSocket();
+    startWebSocket();
 
     // 创建应用主窗口
     createMainWindow();
 
     // 托盘图标
-    const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
+    // const appRootPath = app.getAppPath().replace('\\resources\\app.asar', '').replace('/resources/app.asar', '');
     tray = new Tray(loadIcon());
     const menu = Menu.buildFromTemplate([
         {

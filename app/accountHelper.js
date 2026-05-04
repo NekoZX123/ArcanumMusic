@@ -181,7 +181,7 @@ function listenForCookie(_, id, targets) {
                 }
             };
 
-            appWindow.webContents.session.cookies.on('changed', (_, cookie) => {
+            appWindow.webContents.session.cookies.once('changed', (_, cookie) => {
                 if (targets.includes(cookie.name)) {
                     cookiesMap[cookie.name] = cookie.value;
                     console.log(`[Debug] ${cookie.name} = ${cookie.value}`);

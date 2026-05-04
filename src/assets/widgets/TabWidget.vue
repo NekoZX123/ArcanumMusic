@@ -53,7 +53,7 @@ function switchTab(index: number) {
                 ]" 
                 @click="switchTab(index)">
                 <!-- 图标 -->
-                <img v-if="tab.icon" class="tabIcon" :src="tab.icon"></img>
+                <img v-if="tab.icon" class="tabIcon" :src="tab.icon" :alt="tab.title"/>
                 <label class="text small bold">{{ tab.title }}</label>
             </div>
         </div>

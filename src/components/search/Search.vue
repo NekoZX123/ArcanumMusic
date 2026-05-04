@@ -177,8 +177,8 @@ function searchSinglePlatform(platform: string, keyword: string, type: string, i
                 }
             }, 200);
         })
-        .catch((error: AxiosError) => {
-            console.log(error);
+        .catch((err: AxiosError) => {
+            console.log(`Failed to get search result: ${err}`);
         });
 }
 

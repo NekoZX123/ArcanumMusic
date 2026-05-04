@@ -9,7 +9,7 @@
     "homepage": "https://github.com/NekoZX123/ArcanumMusic",
     "license": "Apache-2.0",
     "private": true,
-    "version": "1.8.0",
+    "version": "1.9.2",
     "type": "module",
     "main": "app/app.js",
     "devtron": true,
@@ -22,29 +22,29 @@
     },
     "dependencies": {
         "auto-launch": "^5.0.6",
-        "axios": "^1.15.0",
+        "axios": "^1.16.0",
         "cors": "^2.8.6",
         "express": "^5.2.1",
-        "node-fetch": "^3.3.2"
+        "node-fetch": "^3.3.2",
+        "ws": "^8.20.0"
     },
     "devDependencies": {
         "@types/crypto-js": "^4.2.2",
-        "@types/node": "^22.18.10",
-        "@vitejs/plugin-vue": "^5.2.1",
-        "@vitejs/plugin-vue-jsx": "^4.1.1",
-        "@vue/tsconfig": "^0.7.0",
-        "concurrently": "^9.1.2",
-        "cookie": "^1.0.2",
+        "@types/node": "^25.6.0",
+        "@vitejs/plugin-vue": "^6.0.6",
+        "@vitejs/plugin-vue-jsx": "^5.1.5",
+        "@vue/tsconfig": "^0.9.1",
+        "concurrently": "^9.2.1",
+        "cookie": "^1.1.1",
         "crypto": "^1.0.1",
         "crypto-js": "^4.2.0",
         "cryptojs": "^2.5.3",
-        "electron": "^41.1.0",
+        "electron": "^41.5.0",
         "electron-builder": "^26.8.1",
-        "typescript": "~5.9.3",
+        "typescript": "~6.0.3",
         "uuid": "^14.0.0",
-        "vite": "^6.4.2",
-        "vue-tsc": "^2.2.0",
-        "websocket": "^1.0.35",
-        "ws": "^8.20.0"
+        "vite": "^8.0.10",
+        "vue-tsc": "^3.2.7",
+        "websocket": "^1.0.35"
     }
 }

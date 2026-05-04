@@ -2,6 +2,8 @@ import { proxyRequest } from '../../utilities/proxyRequest.ts';
 
 import { getNeteaseEncrypt } from './neteaseEncrypt.js';
 
+import CryptoJS from 'crypto-js';
+
 type neteaseEncryptedData = {
     encText: string,
     encSecKey: string
@@ -9,8 +11,8 @@ type neteaseEncryptedData = {
 
 // 请求链接
 const requestUrls: { [type: string]: string } = {
-    // 'songLink': 'https://interfacepc.music.163.com/api/song/enhance/player/url/v1?csrf_token=',
-    'songLink': 'https://music.163.com/weapi/song/enhance/player/url/v1?csrf_token=',
+    'songLink': 'https://interfacepc.music.163.com/eapi/song/enhance/player/url/v1',
+    // 'songLink': 'https://music.163.com/weapi/song/enhance/player/url/v1?csrf_token=',
     'search': 'https://music.163.com/weapi/cloudsearch/get/web?csrf_token=',
     'songInfo': 'https://music.163.com/weapi/song/detail',
     'lyrics': 'https://music.163.com/weapi/song/lyric?csrf_token=',
@@ -41,9 +43,9 @@ const searchTypes: Record<string, number> = {
 const requestData: { [type: string]: any } = {
     "songLink": {
         "ids": "[[songId]]",
-        "level": "jymaster",
-        "encodeType": "aac",
-        "csrf_token": ""
+        "level": "hires",
+        "encodeType": "flac",
+        "header": '{"os":"pc","appver":"2.10.12.201849","osver":"Microsoft-Windows-11--build-26100-64bit","deviceId":"pyncm!","requestId":"21474836"}'
     },
     "search": {
         "hlpretag": "<span class=\"s-fc7\">",
@@ -177,6 +179,44 @@ function getNeteaseSearchTypes() {
     return searchTypes;
 }
 
+function getNeteaseSongLink_v2(payload: string, cookies: string) {
+    // const urlApi = requestUrls.songLink;
+    const urlApiPart = `/api/song/enhance/player/url/v1`;
+
+    // 解析 payload 为对象后 JSON 序列化
+    const payloadObj = JSON.parse(payload);
+    const payloadJson = JSON.stringify(payloadObj);
+
+    const encryptKey = CryptoJS.enc.Utf8.parse('e82ckenh8dichen8');
+    const digest = `nobody${urlApiPart}use${payloadJson}md5forencrypt`;
+    const dataDigest = CryptoJS.MD5(digest).toString(CryptoJS.enc.Hex);
+    const params = `${urlApiPart}-36cd479b6b5-${payloadJson}-36cd479b6b5-${dataDigest}`;
+    console.log(`[Debug] Netease API: params = ${params}`);
+
+    // 使用 PKCS7 填充
+    const encrypted = CryptoJS.AES.encrypt(params, encryptKey, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    });
+
+    // 转换为十六进制字符串并大写
+    const finalParams = encrypted.ciphertext.toString(CryptoJS.enc.Hex).toUpperCase();
+    console.log(`[Debug] Final params = ${finalParams}`);
+
+    return proxyRequest(
+        'POST',
+        requestUrls.songLink,
+        {
+            'Accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Cookie': cookies,
+            'User-Agent': ncmDesktopUA,
+            'Referer': 'https://music.163.com/'
+        },
+        `params=${finalParams}`
+    );
+}
+
 /**
  * 通用网易云音乐 API 请求函数
  * 
@@ -249,6 +289,7 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
     const referer = moduleName === 'songLink' ? 'https://music.163.com/' : 'http://127.0.0.1:5173/';
 
     // console.log(`[Netease Music]\n URL: ${targetUrl};\n Data: ${moduleParams};`);
+    if (moduleName === 'songLink') return getNeteaseSongLink_v2(moduleParams, cookieHeader);
 
     return proxyRequest(
         'POST',

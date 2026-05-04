@@ -137,7 +137,7 @@ const PopupWindow = defineComponent({
                         <img class="outlineImage" src="./images/windowControl/close.svg"/>
                     </button>
                 </div>
-                <div class="popupContent text ultraSmall" innerHTML={props.content}></div>
+                <div class="popupContent text ultraSmall">{props.content}</div>
                 <PopupOptions type={props.optionsType} highlights={props.highlights} callback={
                     (code: number) => {closePopup(code, props.callback)}
                 } />

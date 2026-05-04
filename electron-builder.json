@@ -2,13 +2,7 @@
     "productName": "ArcanumMusic",
     "appId": "moe.nekozx123.arcanummusic",
     "files": [
-        "./app/app.js",
-        "./app/accountHelper.js",
-        "./app/configHelper.js",
-        "./app/fileManager.js",
-        "./app/globalUtils.js",
-        "./app/preload.mjs",
-        "./app/service.js",
+        "./app/*",
         "./dist"
     ],
     "extraFiles": [
@@ -54,7 +48,11 @@
         "category": "Audio",
         "desktop": {
             "entry": {
-                "Icon": "arcanummusic"
+                "Icon": "arcanummusic",
+                "Name": "ArcanumMusic",
+                "Comment": "Arcanum Music - A multiplatform music application",
+                "Terminal": false,
+                "Categories": "Audio;Music;"
             }
         }
     }

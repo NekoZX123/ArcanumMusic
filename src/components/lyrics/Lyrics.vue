@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import {onMounted, onUnmounted, ref} from 'vue';
 import './lyricsStyle.css';
-import { LyricsLine } from '../../assets/lyrics/Lyrics.tsx';
-import { getPlayer } from '../../assets/player/player.ts';
-import { getMainColors, ParticleManager } from '../../assets/effects/colorUtils.ts';
-import { getLyricsData, setEffectMode, setContainerId, updateCurrentLyrics, updateFocusedLyric } from '../../assets/lyrics/lyricsManager.ts';
-import { getConfig } from '../../assets/utilities/configLoader.ts';
+import {LyricsLine} from '../../assets/lyrics/Lyrics.tsx';
+import {getPlayer} from '../../assets/player/player.ts';
+import {getMainColors, ParticleManager} from '../../assets/effects/colorUtils.ts';
+import {
+    getLyricsData,
+    setContainerId,
+    setEffectMode,
+    updateCurrentLyrics,
+    updateFocusedLyric
+} from '../../assets/lyrics/lyricsManager.ts';
+import {getConfig} from '../../assets/utilities/configLoader.ts';
 
 // const songData = ref(getPlayer());
 // 最大偏移回弹距离
@@ -137,14 +143,13 @@ function limitAuthorsTextLength(authors: string) {
     }
 
     if (authors.length > 10) {
-        const limitedText = `${authors.substring(0, 10)}...`;
-        return limitedText;
+        return `${authors.substring(0, 10)}...`;
     }
     return authors;
 }
 
 // 模糊歌曲封面背景
-function loadBluredCoverBackground(_?: any) {
+function loadBlurredCoverBackground(_?: any) {
     // 显示模糊遮罩层
     const backgroundContainer = document.getElementById('backgroundContainer');
     const backgroundCanvas = document.getElementById('dynamicBackground');
@@ -255,7 +260,7 @@ function updateBackground(_?: any) {
     if (lyricsBackgroundType === 0) { // 模糊歌曲封面
         stopAnimation();
 
-        loadBluredCoverBackground();
+        loadBlurredCoverBackground();
     }
     else if (lyricsBackgroundType === 1) { // 歌曲封面取色 (动态)
         // 光斑背景动效
@@ -303,10 +308,18 @@ function updateLyricsStyle(style: number) {
     setEffectMode(style);
 }
 
+// 设置变化时更新歌词样式
+function handleConfigChange() {
+    const lyricsOptions = getConfig().generic.appearance.lyrics;
+    lyricsGlow.value = lyricsOptions.lyricsGlow;
+    updateLyricsStyle(parseInt(lyricsOptions.lyricsStyle));
+}
+
 // 歌词光效及样式
 const lyricsGlow = ref(true);
 const lyricsEffectMode = ref(0);
 
+let observer: MutationObserver | null = null;
 onMounted(() => {
     // 设置触发器
     const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
@@ -326,7 +339,7 @@ onMounted(() => {
     });
 
     // 监听歌曲文件变化
-    const observer = new MutationObserver((mutations) => {
+    observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             if (mutation.type === 'attributes' && mutation.attributeName === 'src') {
                 updateCurrentLyrics();
@@ -359,13 +372,17 @@ onMounted(() => {
     updateLyricsStyle(lyricsStyle);
 
     // 同步设置变化
-    window.addEventListener('config-change', () => {
-        const lyricsOptions = getConfig().generic.appearance.lyrics;
-        lyricsGlow.value = lyricsOptions.lyricsGlow;
-        updateLyricsStyle(parseInt(lyricsOptions.lyricsStyle));
-    });
+    window.addEventListener('config-change', handleConfigChange);
 
     console.log('Lyrics.vue loaded');
+});
+onUnmounted(() => {
+    window.removeEventListener('update-lyrics', updateCurrentLyrics);
+    window.removeEventListener('lyrics-launch', updateBackground);
+    window.removeEventListener('config-change', updateBackground);
+    window.removeEventListener('config-change', handleConfigChange);
+
+    if (observer) observer.disconnect();
 });
 
 </script>
@@ -387,7 +404,7 @@ onMounted(() => {
             <!-- 歌曲信息 & 播放控制 -->
             <div class="flex column" id="controller">
                 <div class="flex column" id="songInfo">
-                    <img id="songCover" :src="getPlayer()?.playlist.current.coverUrl"/>
+                    <img id="songCover" :src="getPlayer()?.playlist.current.coverUrl" alt="Song cover"/>
                     <div class="flex row" id="playerInfo">
                         <div class="flex column">
                             <span id="lyricsPageSongNameContainer" @mouseenter="checkScrollAnimation" @mouseleave="resetScroll">
@@ -397,7 +414,7 @@ onMounted(() => {
                         </div>
                         <div class="flex row" id="volumeInLyrics">
                             <button id="toggleMute" @click="getPlayer()?.toggleMute">
-                                <img :src="`./images/lyricsPanel/volume_0${getPlayer()?.volumeLevel}.svg`"/>
+                                <img :src="`./images/lyricsPanel/volume_0${getPlayer()?.volumeLevel}.svg`" alt="Toggle mute"/>
                             </button>
                             <div id="lyricsPageVolumeFilled" @mousemove="adjustVolume">
                                 <div id="lyricsPageVolumeBar">

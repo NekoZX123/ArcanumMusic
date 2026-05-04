@@ -1,29 +1,9 @@
 import { reactive } from "vue";
 import { showNotify } from "../notifications/Notification.ts";
 import { getListContent, getSongInfo, getSongLink } from "./songUtils.ts";
+import { timeFormat } from "../utilities/timeFormat.ts";
 
-// 时间格式化
-function timeFormat(timeSeconds: number) {
-    let secondNum = Math.round(timeSeconds % 60);
-    if (secondNum < 0) secondNum = 0;
-    let minTemp = Math.floor(timeSeconds / 60);
-    let minuteNum = minTemp % 60;
-    let hourNum = Math.floor(minTemp / 60);
-
-    let second = secondNum < 10 ? `0${secondNum}` : `${secondNum}`;
-    let minute = minuteNum < 10 ? `0${minuteNum}` : `${minuteNum}`;
-    let hour = hourNum < 10 ? `0${hourNum}` : `${hourNum}`;
-
-    let result: string;
-    if (hourNum > 0) {
-        result = `${hour}:${minute}:${second}`;
-    }
-    else {
-        result = `${minute}:${second}`;
-    }
-
-    return result;
-}
+// const identifier = 'moe.nekozx123.arcanummusic.audioplayer';
 
 const neteaseCdnPostfix = 'music.126.net';
 
@@ -330,8 +310,6 @@ class Player {
             this.updateProgress(0);
             this.setProgress(0, false);
 
-            this.syncSongInfo();
-
             // 设置播放链接
             if (!playInfo.url) {
                 showNotify('songUrlNullError', 'critical', `无法播放 ${this.name}`, '获取播放链接失败');
@@ -345,31 +323,31 @@ class Player {
                 return;
             }
             if (playInfo.url.includes(neteaseCdnPostfix)) {
-                // const audioChunks: BlobPart[] = [];
-                // const ws =  new WebSocket('ws://127.0.0.1:3001');
-
-                // ws.onmessage = (event) => {
-                //     audioChunks.push(event.data);
-                // };
-                // ws.onclose = (_) => {
-                //     const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
-                //     const audioUrl = URL.createObjectURL(audioBlob);
-                //     console.log(`[Debug] Audio blob URL: ${audioUrl}`);
-                //     this.url = audioUrl;
-                // };
-
-                // ws.onopen = () => {
-                //     ws.send(playInfo.url);
-                // };
                 const idParts = playInfo.id.split('-');
                 const musicId = idParts[2];
                 const fallbackUrl = `https://music.163.com/song/media/outer/url?id=${musicId}.mp3`;
                 console.log(`[Debug] Play URL: ${fallbackUrl}`);
-                this.url = fallbackUrl;
+                playInfo.url = fallbackUrl;
             }
-            else {
-                this.url = playInfo.url;
-            }
+
+            // 使用 WebSocket 接收音频数据并播放
+            const audioChunks: BlobPart[] = [];
+            const ws =  new WebSocket('ws://127.0.0.1:3030/');
+            ws.onmessage = (event) => {
+                audioChunks.push(event.data);
+            };
+            ws.onclose = (_) => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                console.log(`[Debug] Origin URL: ${playInfo.url} => Local URL: ${audioUrl}`);
+                this.url = audioUrl;
+                
+                this.syncSongInfo();
+            };
+
+            ws.onopen = () => {
+                ws.send(playInfo.url);
+            };
 
             // 开始播放
             const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
@@ -397,6 +375,9 @@ class Player {
             // 更新动态背景
             const backgroundEvent = new CustomEvent('update-background');
             window.dispatchEvent(backgroundEvent);
+        })
+        .catch((err) => {
+            console.error(`Failed to get song link: ${err}`);
         });
     }
     /**
@@ -648,6 +629,9 @@ class Player {
             console.log(parsedTracks);
 
             this.playByList(parsedTracks, hasDetail);
+        })
+        .catch((err) => {
+            console.error(`Failed to get list content: ${err}`);
         });
     }
 

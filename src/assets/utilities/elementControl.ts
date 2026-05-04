@@ -160,12 +160,15 @@ function triggerRightMenu(event: MouseEvent, info: any, menuType: MenuType) {
     
 }
 // 隐藏右键菜单
-function hideRightMenu() {
-    const menuContainer = document.getElementById('rightClickMenuContainer') as HTMLElement;
-    menuContainer.classList.remove('show');
-    setTimeout(() => {
-        menuContainer.style.display = 'none';
-    }, 250);
+function hideRightMenu(event?: MouseEvent) {
+    if (event?.button === 0 || !event) {
+        const menuContainer = document.getElementById('rightClickMenuContainer') as HTMLElement;
+        menuContainer.classList.remove('show');
+        setTimeout(() => {
+            menuContainer.style.display = 'none';
+        }, 250);
+    }
+
 }
 
 // 显示歌手选取弹窗
