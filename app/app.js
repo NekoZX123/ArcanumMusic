@@ -320,11 +320,7 @@ app.whenReady().then(() => {
     ipcMain.handle('isFileExist', isFileExist);
     ipcMain.handle('readLocalFile', readLocalFile);
     ipcMain.handle('writeLocalFile', writeLocalFile);
-
-    // 主进程数据操作
-    ipcMain.handle('dataRead', (_, key, identifier) => readData(key, identifier));
-    ipcMain.handle('dataWrite', (_, key, value, identifier) => writeData(key, value, identifier));
-
+    
     // 用户数据操作
     ipcMain.handle('getAppConfig', getAppConfig);
     ipcMain.handle('getPreference', getUserPreferences);

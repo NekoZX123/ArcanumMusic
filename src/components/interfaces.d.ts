@@ -14,10 +14,7 @@ export interface IElectronAPI {
     isFileExist: (path: String) => Promise<boolean>,
     readLocalFile: (path: String) => Promise<string>,
     writeLocalFile: (path: String, content: String) => Promise<void>,
-
-    readData: (key: string, identifier: string) => Promise<any | null>,
-    writeData: (key: string, value: any, identifier: string) => Promise<void>,
-
+    
     getAppConfig: () => Promise<string>,
     getUserPreference: () => Promise<string>,
     writeUserPreferences: (pref: string) => Promise<void>,
