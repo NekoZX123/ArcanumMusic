@@ -8,6 +8,7 @@ const __dirname = fileURLToPath(import.meta.url);
 
 const configPath = '/ArcanumMusic_data/settings.json';
 const preferencePath = '/ArcanumMusic_data/userPreferences.json';
+const historyPath = '/ArcanumMusic_data/history.json';
 
 async function getAppConfig() {
     let prefix = getAppData();

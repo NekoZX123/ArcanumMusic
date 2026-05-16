@@ -1,0 +1,42 @@
+#historyPage {
+    width: 100%;
+
+    padding: 2rem;
+}
+
+#historyHeader {
+    margin-bottom: 8px;
+}
+
+#songlistCoverContainer {
+    position: relative;
+    width: 15rem;
+    height: 15rem;
+    margin-right: 12px;
+}
+
+#historyCoverMask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    border: none;
+    border-radius: 8px;
+
+    pointer-events: none;
+}
+
+#historyInfo {
+    justify-content: space-between;
+}
+
+#historyButtonGroup {
+    gap: 8px;
+}
+
+.historyTimeTag {
+    padding: 8px 0 4px 0;
+    margin-bottom: 4px;
+}

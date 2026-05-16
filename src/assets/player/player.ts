@@ -80,6 +80,21 @@ class Player {
             history: []
         };
 
+        // 从 localStorage 加载播放历史
+        const storedHistory = window.localStorage.getItem('playHistory');
+        if (storedHistory) {
+            try {
+                const parsed = JSON.parse(storedHistory);
+                if (Array.isArray(parsed)) {
+                    this.playlist.history = parsed;
+                }
+                else this.playlist.history = [];
+            } catch (e) {
+                console.error('[Error] Failed to parse stored play history:', e);
+                this.playlist.history = [];
+            }
+        }
+
         this.name = '未在播放';
         this.authors = '';
         this._coverUrl = './images/player/testAlbum.png';
@@ -288,7 +303,7 @@ class Player {
             .replace('cutin_', '').replace('current_', '');
 
         const current = this.playlist.current;
-        if (Object.keys(current).length !== 0 && addToHistory) this.playlist.history.unshift(current);
+        if (Object.keys(current).length !== 0 && addToHistory) this.addToHistory(songInfo);
 
         this.playlist.current = songInfo;
 
@@ -380,6 +395,32 @@ class Player {
             console.error(`Failed to get song link: ${err}`);
         });
     }
+
+    /**
+     * 将歌曲加入播放历史，自动持久化到 localStorage，上限 300 条
+     * @param songInfo 歌曲信息对象（与 playAudio 传入格式一致）
+     */
+    addToHistory(songInfo: any) {
+        if (!songInfo || !songInfo.id) {
+            return;
+        }
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const existingIndex = this.playlist.history.findIndex(item => item.id === songInfo.id);
+        if (existingIndex !== -1) {
+            const existing = this.playlist.history.splice(existingIndex, 1)[0];
+            Object.assign(existing, { addTime: dateStr });
+            this.playlist.history.unshift(existing);
+        }
+        else {
+            const record = Object.assign({}, songInfo, { addTime: dateStr });
+            this.playlist.history.unshift(record);
+            if (this.playlist.history.length > 300) {
+                this.playlist.history = this.playlist.history.slice(0, 300);
+            }
+        }
+        window.localStorage.setItem('playHistory', JSON.stringify(this.playlist.history));
+    }
+
     /**
      * 立即播放指定音频
      * @param songInfo 歌曲信息

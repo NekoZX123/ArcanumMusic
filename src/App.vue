@@ -481,7 +481,12 @@ onMounted(async () => {
     if (userPreference.player.desktopLyrics) { // 桌面歌词
         toggleCaptions();
     }
-    
+
+    // 检查历史记录
+    if (!localStorage.getItem('playHistory')) {
+        localStorage.setItem('playHistory', JSON.stringify([]));
+    }
+
     // 设置触发器
     // 播放器组件
     const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
