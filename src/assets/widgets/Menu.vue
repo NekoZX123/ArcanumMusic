@@ -23,14 +23,14 @@ const MenuItem = defineComponent({
     }
 });
 
-type MenuType = 'collections' | 'song' | 'playlistItem' | 'platformSelect';
+type MenuType = 'collections' | 'song' | 'playlistItem' | 'platformSelect' | 'localAudio';
 const props = defineProps<{
     targetInfo: any,
     menuType: MenuType
 }>();
 
 function playCurrentContent() {
-    if (props.menuType === 'song') {
+    if (props.menuType === 'song' || props.menuType === 'localAudio') {
         getPlayer()?.playNow(props.targetInfo);
     }
     if (props.menuType === 'collections') {
@@ -131,6 +131,12 @@ function sendRecommendReload(platform: string) {
  * @param platform 平台名称
  * @param type 类型
  */
+function openLocalFolder(path: string) {
+    if (path) {
+        window.electron.openMusicFolder(path);
+    }
+}
+
 function changeCollectionPlatform(platform: string, type: string) {
     if (type === 'userFavourites') {
         sendFavReload(platform);
@@ -149,10 +155,15 @@ onMounted(() => {
         <span class="menuPart flex column">
             <MenuItem id="play" icon="./images/menu/play.svg" text="播放" 
                 :on-click="playCurrentContent" 
-                v-if="['collections', 'song'].includes(props.menuType)"></MenuItem>
+                v-if="['collections', 'song', 'localAudio'].includes(props.menuType)"></MenuItem>
             <MenuItem id="playNext" icon="./images/menu/addToList.svg" text="下一首播放" 
                 :on-click="() => {getPlayer()?.playlistAdd(props.targetInfo, true)}" 
-                v-if="props.menuType === 'song'"></MenuItem>
+                v-if="['song', 'localAudio'].includes(props.menuType)"></MenuItem>
+        </span>
+        <span class="menuPart flex column">
+            <MenuItem id="openFolder" icon="./images/library/openFolder.svg" text="打开所在文件夹"
+                :on-click="() => openLocalFolder(props.targetInfo.id.replace('local_', ''))"
+                v-if="props.menuType === 'localAudio'"></MenuItem>
         </span>
         <span class="menuPart flex column">
             <MenuItem id="songInfo" icon="./images/menu/play.svg" text="查看歌曲信息" 

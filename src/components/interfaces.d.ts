@@ -28,6 +28,13 @@ export interface IElectronAPI {
     validateCookie: (platform: string) => Promise<any>,
     deleteCookies: (platform: string) => Promise<void>,
 
+    scanLocalMusic: () => Promise<any[]>,
+    getMusicMetadata: (filePath: String) => Promise<any>,
+    getLocalPaths: () => Promise<String[]>,
+    writeLocalPaths: (paths: String[]) => Promise<void>,
+    openMusicFolder: (folderPath: String) => Promise<void>,
+    selectFolder: () => Promise<string | null>,
+
     openExternal: (url: String) => Promise<void>,
     copyToClipboard: (content: String) => Promise<void>,
     setAutoLaunch: (isEnabled: boolean) => Promise<void>

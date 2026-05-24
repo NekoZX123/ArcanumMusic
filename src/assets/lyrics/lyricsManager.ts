@@ -35,6 +35,12 @@ function setEffectMode(effectMode: number) {
 function updateCurrentLyrics(_?: any) {
     const songId = getPlayer()?.playlist.current.id;
     if (!songId) return;
+
+    if (songId.startsWith('local_')) {
+        console.log(`[Debug] Local song detected`);
+        return;
+    }
+
     const platform = songId.split('-')[1];
 
     // 重置歌词

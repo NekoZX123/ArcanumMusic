@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue';
 import './captionsStyle.css';
 import '../../globalStyle.css';
-import { timeFormat } from '../../assets/utilities/timeFormat.ts';
+import { timeFormat } from '../../assets/utilities/formatter.ts';
 import { getMainColors } from '../../assets/effects/colorUtils.ts';
 
 /* 窗口移动功能 */

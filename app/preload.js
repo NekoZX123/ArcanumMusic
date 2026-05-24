@@ -31,8 +31,15 @@ contextBridge.exposeInMainWorld(
         validateCookie: (platform) => ipcRenderer.invoke('validateCookieExpiration', platform), // 验证 Cookie 有效期
         deleteCookies: (platform) => ipcRenderer.invoke('deleteCookie', platform), // 清除指定平台 Cookies
 
+        scanLocalMusic: () => ipcRenderer.invoke('scanLocalMusic'), // 扫描本地音乐文件
+        getMusicMetadata: (filePath) => ipcRenderer.invoke('getMusicMetadata', filePath), // 获取音乐文件元数据
+        getLocalPaths: () => ipcRenderer.invoke('getLocalMusicPaths'), // 获取本地音乐路径
+        writeLocalPaths: (paths) => ipcRenderer.invoke('writeLocalMusicPaths', paths), // 写入本地音乐路径
+        openMusicFolder: (folderPath) => ipcRenderer.invoke('openMusicFolder', folderPath), // 打开音乐文件夹
+        selectFolder: () => ipcRenderer.invoke('selectFolder'), // 选择文件夹
+
         openExternal: (url) => ipcRenderer.invoke('openExternal', url), // 打开外部链接
         copyToClipboard: (content) => ipcRenderer.invoke('copyContent', content), // 复制内容至剪贴板
-        setAutoLaunch: (isEnabled) => ipcRenderer.invoke('setAutoLaunch', isEnabled), // 设置开启自启
+        setAutoLaunch: (isEnabled) => ipcRenderer.invoke('setAutoLaunch', isEnabled), // 设置开机自启
     }
 );

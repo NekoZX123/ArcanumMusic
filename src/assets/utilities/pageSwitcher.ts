@@ -10,6 +10,7 @@ import Accounts from '../../components/accounts/Accounts.vue';
 
 import Playlist from '../../components/playlist/Playlist.vue';
 import History from "../../components/history/History.vue";
+import Local from "../../components/local/Local.vue";
 
 import Songlist from "../../components/songlist/Songlist.vue";
 import Single from "../../components/single/Single.vue";
@@ -22,7 +23,7 @@ import { getAccountInfo } from "./accountManager";
 // 应用各页面
 const appPageNames = [
     'home', 'library', 'search', 'settings', 'accounts',
-    'playlist', 'history',
+    'playlist', 'history', 'local',
     'songlist', 'single', 'artist',
     'artistCollections', 'songlistCollections', 'singleCollections'
 ];
@@ -34,6 +35,7 @@ var pageComponents: { [key: string]: any } = {
     'accounts': Accounts,
     'playlist': Playlist,
     'history': History,
+    'local': Local,
     'songlist': Songlist,
     'single': Single,
     'artist': Artist,
@@ -51,7 +53,7 @@ let historyParams: any[] = []; // 历史页面参数
 let pageApp = createApp(Home);
 
 type page ='home' |'library' | 'search' | 'settings' | 'accounts' | 
-    'playlist' | 'history' | 
+    'playlist' | 'history' | 'local' |
     'songlist' | 'single' | 'artist' | 
     'artistCollections' | 'songlistCollections' | 'singleCollections';
 /**

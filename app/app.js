@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, shell, Tray, clipboard, nativeImage } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, shell, Tray, clipboard, nativeImage, dialog } from 'electron';
 import { fileURLToPath } from 'url';
 import { userInfo } from 'os';
 import path from 'path';
@@ -11,7 +11,7 @@ import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 import { deleteCookies, validateCookieExpiration, listenForCookie, prepareAccountStorage } from './accountHelper.js';
 import { getAppData, getEnvironment } from './globalUtils.js';
 import { getAppConfig, getUserPreferences, writeUserPreferences } from "./configHelper.js";
-import { readData, writeData } from './dataBridge.js';
+import { scanLocalMusic, getMusicMetadata, getLocalPaths, writeLocalPaths, openMusicFolder } from './localMusicHelper.js';
 
 const __dirname = fileURLToPath(import.meta.url);
 
@@ -320,7 +320,7 @@ app.whenReady().then(() => {
     ipcMain.handle('isFileExist', isFileExist);
     ipcMain.handle('readLocalFile', readLocalFile);
     ipcMain.handle('writeLocalFile', writeLocalFile);
-    
+
     // 用户数据操作
     ipcMain.handle('getAppConfig', getAppConfig);
     ipcMain.handle('getPreference', getUserPreferences);
@@ -334,6 +334,20 @@ app.whenReady().then(() => {
     ipcMain.handle('validateCookieExpiration', validateCookieExpiration);
     ipcMain.handle('listenCookie', listenForCookie);
     ipcMain.handle('deleteCookie', deleteCookies);
+
+    // 音频文件操作
+    ipcMain.handle('scanLocalMusic', scanLocalMusic);
+    ipcMain.handle('getMusicMetadata', getMusicMetadata);
+    ipcMain.handle('getLocalMusicPaths', getLocalPaths);
+    ipcMain.handle('writeLocalMusicPaths', writeLocalPaths);
+    ipcMain.handle('openMusicFolder', openMusicFolder);
+    ipcMain.handle('selectFolder', async () => {
+        const result = await dialog.showOpenDialog(mainWindow, {
+            properties: ['openDirectory']
+        });
+        if (result.canceled) return null;
+        return result.filePaths[0];
+    });
 
     // 其他操作
     ipcMain.handle('openExternal', (_, url) => {

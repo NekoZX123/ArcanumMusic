@@ -278,7 +278,7 @@ onUnmounted(() => {
                             <img src="/images/library/history.svg" alt="History"/>
                             <label class="text small">播放历史</label>
                         </button>
-                        <button class="libToolbarButton flex row">
+                        <button class="libToolbarButton flex row" @click="changePage('local', true)">
                             <img src="/images/library/downloads.svg" alt="Downloads"/>
                             <label class="text small">本地音乐</label>
                         </button>

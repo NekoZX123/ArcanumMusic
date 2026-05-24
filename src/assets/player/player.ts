@@ -1,11 +1,22 @@
 import { reactive } from "vue";
 import { showNotify } from "../notifications/Notification.ts";
 import { getListContent, getSongInfo, getSongLink } from "./songUtils.ts";
-import { timeFormat } from "../utilities/timeFormat.ts";
+import { timeFormat } from "../utilities/formatter.ts";
 
 // const identifier = 'moe.nekozx123.arcanummusic.audioplayer';
 
 const neteaseCdnPostfix = 'music.126.net';
+
+const MIME_MAP: Record<string, string> = {
+    '.mp3': 'audio/mpeg',
+    '.flac': 'audio/flac',
+    '.wav': 'audio/wav',
+    '.ogg': 'audio/ogg',
+    '.aac': 'audio/aac',
+    '.wma': 'audio/wma',
+    '.m4a': 'audio/mp4',
+    '.opus': 'audio/ogg'
+};
 
 // 循环 / 随机播放图片链接常量池
 const IMAGES_REPEAT = ['./images/player/repeat.svg', './images/player/repeat.on.svg', './images/player/repeatSingle.svg'];
@@ -302,6 +313,11 @@ class Player {
         songInfo.id = songInfo.id.replace('new_', '').replace('playlist_', '')
             .replace('cutin_', '').replace('current_', '');
 
+        if (songInfo.id.startsWith('local_')) {
+            this.playLocalAudio(songInfo, addToHistory);
+            return;
+        }
+
         const current = this.playlist.current;
         if (Object.keys(current).length !== 0 && addToHistory) this.addToHistory(songInfo);
 
@@ -419,6 +435,88 @@ class Player {
             }
         }
         window.localStorage.setItem('playHistory', JSON.stringify(this.playlist.history));
+    }
+
+    /**
+     * 播放本地音频文件
+     * @param songInfo 歌曲信息 (id 以 `local_` 开头)
+     */
+    playLocalAudio(songInfo: any, addToHistory: boolean = true) {
+        const current = this.playlist.current;
+        if (Object.keys(current).length !== 0 && addToHistory) this.addToHistory(songInfo);
+
+        const filePath = songInfo.id.substring(6).replace(/\\/g, '/');
+
+        this.playlist.current = songInfo;
+        this.name = songInfo.name || '未知名称';
+        this.authors = songInfo.authors || '未知作者';
+        this.coverUrl = songInfo.coverUrl || './images/player/testAlbum.png';
+        this.duration = songInfo.duration || -1;
+        this.updateDuration(this.duration);
+        this.updateProgress(0);
+        this.setProgress(0, false);
+
+        // 通过 WebSocket 代理读取本地文件并创建 Blob URL
+        const audioChunks: BlobPart[] = [];
+        const ws = new WebSocket('ws://127.0.0.1:3030/');
+
+        ws.onmessage = (event) => {
+            audioChunks.push(event.data);
+        };
+
+        ws.onclose = (_) => {
+            const ext = filePath.substring(filePath.lastIndexOf('.')).toLowerCase();
+            const mimeType = MIME_MAP[ext] || 'audio/mpeg';
+            const audioBlob = new Blob(audioChunks, { type: mimeType });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            console.log(`[Debug] Local file => Blob URL: ${audioUrl}`);
+
+            this.url = audioUrl;
+
+            const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+            if (!playerElem) {
+                console.error('[Error] Player element not found');
+                return;
+            }
+
+            playerElem.src = audioUrl;
+
+            // music-metadata 无法获取时长时, 从 <audio> 元素获取
+            if (this.duration === -1 || this.duration === undefined) {
+                const updateDurationFromElem = () => {
+                    if (playerElem.duration && isFinite(playerElem.duration)) {
+                        this.duration = playerElem.duration;
+                        this.updateDuration(this.duration);
+                    }
+                };
+                playerElem.addEventListener('loadedmetadata', updateDurationFromElem, { once: true });
+                playerElem.addEventListener('canplay', updateDurationFromElem, { once: true });
+            }
+
+            this.syncSongInfo();
+        };
+
+        ws.onopen = () => {
+            ws.send(`file:///${filePath}`);
+        };
+
+        const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+        if (!playerElem) {
+            console.error('[Error] Player element not found');
+            return;
+        }
+
+        const startPlaying = () => {
+            playerElem.play();
+            this.isPlaying = true;
+            this.playStateImage = './images/player/pause.dark.svg';
+            this.playStateImageTransparent = './images/lyricsPanel/pause.svg';
+            this.syncPlayStateImage();
+        };
+        playerElem.addEventListener('canplay', startPlaying, { once: true });
+
+        window.dispatchEvent(new CustomEvent('update-lyrics'));
+        window.dispatchEvent(new CustomEvent('update-background'));
     }
 
     /**

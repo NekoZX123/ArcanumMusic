@@ -21,4 +21,13 @@ function timeFormat(timeSeconds: number) {
     return result;
 }
 
-export { timeFormat };
+// 文件大小格式化
+function sizeFormat(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    const units = ['KB', 'MB', 'GB'];
+    const unitIndex = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length);
+    const value = bytes / Math.pow(1024, unitIndex);
+    return `${value.toFixed(1)} ${units[unitIndex - 1]}`;
+}
+
+export { timeFormat, sizeFormat };

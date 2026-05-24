@@ -868,6 +868,9 @@ img.outlineImage {
 .songLine > .songInfo {
     flex: 1 0;
 }
+.songLine.local > .localInfo {
+    align-items: flex-end;
+}
 
 /* 歌手卡片 */
 .artistContainer {
