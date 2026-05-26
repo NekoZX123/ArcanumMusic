@@ -3,7 +3,7 @@ import { defineComponent, onMounted } from 'vue';
 import { getPlayer } from '../player/player.ts';
 import { changePage, getCurrentPage, togglePlaylist } from '../utilities/pageSwitcher.ts';
 import { getSongInfo, getSongLink } from '../player/songUtils.ts';
-import { hideArtistSelect, showArtistSelect } from '../utilities/elementControl.ts';
+import { hideArtistSelect, showArtistSelect, type MenuType } from '../utilities/elementControl.ts';
 import { showNotify } from '../notifications/Notification.ts';
 
 const MenuItem = defineComponent({
@@ -23,7 +23,6 @@ const MenuItem = defineComponent({
     }
 });
 
-type MenuType = 'collections' | 'song' | 'playlistItem' | 'platformSelect' | 'localAudio';
 const props = defineProps<{
     targetInfo: any,
     menuType: MenuType
@@ -131,10 +130,12 @@ function sendRecommendReload(platform: string) {
  * @param platform 平台名称
  * @param type 类型
  */
-function openLocalFolder(path: string) {
-    if (path) {
-        window.electron.openMusicFolder(path);
+function openLocalFolder(id: string) {
+    let path = id;
+    if (id.startsWith('playlist_current_') || id.startsWith('playlist_cutin_') || id.startsWith('playlist_')) {
+        path = id.replace('playlist_current_', '').replace('playlist_cutin_', '').replace('playlist_', '');
     }
+    window.electron.openMusicFolder(path);
 }
 
 function changeCollectionPlatform(platform: string, type: string) {
@@ -147,7 +148,7 @@ function changeCollectionPlatform(platform: string, type: string) {
 }
 
 onMounted(() => {
-    console.log(`[Debug] Menu loaded with properties ${JSON.stringify(props)}`);
+    console.log(`[Debug] Menu loaded (id = ${props.targetInfo.id})`);
 });
 </script>
 <template>
@@ -163,10 +164,10 @@ onMounted(() => {
         <span class="menuPart flex column">
             <MenuItem id="openFolder" icon="./images/library/openFolder.svg" text="打开所在文件夹"
                 :on-click="() => openLocalFolder(props.targetInfo.id.replace('local_', ''))"
-                v-if="props.menuType === 'localAudio'"></MenuItem>
+                v-if="['localAudio', 'playlistLocalItem'].includes(props.menuType)"></MenuItem>
         </span>
         <span class="menuPart flex column">
-            <MenuItem id="songInfo" icon="./images/menu/play.svg" text="查看歌曲信息" 
+            <MenuItem id="menuSongInfo" icon="./images/menu/play.svg" text="查看歌曲信息" 
                 :on-click="() => {jumpToSongInfo(props.targetInfo.id)}" 
                 v-if="props.menuType === 'playlistItem'"></MenuItem>
             <MenuItem id="albumInfo" icon="./images/menu/album.svg" text="查看专辑" 
@@ -184,7 +185,7 @@ onMounted(() => {
         <span class="menuPart flex column">
             <MenuItem id="listRemove" icon="./images/menu/removeFromList.svg" text="从列表中删除" 
                 :on-click="() => {getPlayer()?.playlistRemove(props.targetInfo.id)}" 
-                v-if="props.menuType === 'playlistItem'"></MenuItem>
+                v-if="['playlistItem', 'playlistLocalItem'].includes(props.menuType)"></MenuItem>
         </span>
         <span class="menuPart flex column">
             <MenuItem id="platform_netease" icon="./images/platforms/netease.png" text="网易云音乐" 

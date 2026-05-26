@@ -99,7 +99,7 @@ const SongCard = defineComponent({
 
 // 单行歌曲卡片右键点击事件处理
 function handleSongLineRightClick(event: MouseEvent, props: any) {
-    const menuType = props.id.includes('playlist_') ? 'playlistItem' : 'song';
+    const menuType = props.id.includes('local_') ? 'playlistLocalItem' : (props.id.includes('playlist_') ? 'playlistItem' : 'song');
     if (event.button === 2) triggerRightMenu(event, props, menuType);
 }
 // 歌曲卡片 (单行)

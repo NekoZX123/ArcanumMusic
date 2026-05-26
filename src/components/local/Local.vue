@@ -77,7 +77,7 @@ onMounted(async () => {
                     id: `local_${dir}/${file}`,
                     path: `${dir}/${file}`,
                     name: meta.name,
-                    songCover: meta.songCover,
+                    coverUrl: meta.songCover ? meta.songCover : './images/player/testAlbum.png',
                     authors: meta.author,
                     duration: meta.duration,
                     ext: meta.ext,
@@ -160,7 +160,7 @@ onMounted(async () => {
                 :key="`local_${info.path}`"
                 :id="info.id"
                 :name="info.name"
-                :cover-url="info.songCover"
+                :cover-url="info.coverUrl"
                 :authors="info.authors"
                 :duration="info.duration"
                 :ext="info.ext"

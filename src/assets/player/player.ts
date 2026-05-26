@@ -450,7 +450,7 @@ class Player {
         this.playlist.current = songInfo;
         this.name = songInfo.name || '未知名称';
         this.authors = songInfo.authors || '未知作者';
-        this.coverUrl = songInfo.coverUrl || './images/player/testAlbum.png';
+        this.coverUrl = songInfo.coverUrl || songInfo.songCover || './images/player/testAlbum.png';
         this.duration = songInfo.duration || -1;
         this.updateDuration(this.duration);
         this.updateProgress(0);
@@ -722,6 +722,7 @@ class Player {
         detailFlag = !(typeof list[0] !== 'object');
 
         if (detailFlag) {
+            list = Object.assign([], list);
             list.forEach((songInfo) => {
                 this.playlistAdd(Object.assign({}, songInfo), false);
             });

@@ -48,7 +48,7 @@ function openMusicFolder(_, folderPath) {
             targetPath = path.dirname(folderPath);
         }
     } catch {
-        return Promise.reject(new Error('路径无效'));
+        return Promise.reject(new Error(`路径无效: ${folderPath}`));
     }
 
     shell.openPath(targetPath);
