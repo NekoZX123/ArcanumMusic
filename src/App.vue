@@ -412,7 +412,7 @@ onMounted(async () => {
     window.__qmfe_sign_check = 1;
 
     // 加载代理端口
-    loadProxyPort();
+    await loadProxyPort();
 
     // 加载配置文件
     await loadConfig();

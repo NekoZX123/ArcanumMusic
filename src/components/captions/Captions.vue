@@ -4,6 +4,7 @@ import './captionsStyle.css';
 import '../../globalStyle.css';
 import { timeFormat } from '../../assets/utilities/formatter.ts';
 import { getMainColors } from '../../assets/effects/colorUtils.ts';
+import { getProxyStreamUrl, loadProxyPort } from '../../assets/utilities/proxyRequest.ts';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -120,9 +121,14 @@ function updateStorageData(updateEvent: StorageEvent) {
         // 同步歌曲链接到音频元素
         const audioElement = document.getElementById('desktoplrc-frequencychart') as HTMLAudioElement;
         if (audioElement && songInfo.url) {
-            console.log(`[Debug] Updating audio source to: ${songInfo.url}`);
+            // 网易云 CDN 链接通过本地代理流式播放
+            const audioUrl = isNeteaseCdnUrl(songInfo.url)
+                ? getProxyStreamUrl(songInfo.url)
+                : songInfo.url;
 
-            audioElement.src = songInfo.url;
+            console.log(`[Debug] Updating audio source to: ${audioUrl}${audioUrl !== songInfo.url ? ` (proxied from: ${songInfo.url})` : ''}`);
+
+            audioElement.src = audioUrl;
             audioElement.load();
             audioElement.play().catch(error => {
                 console.error('[Error] Failed to play audio:', error);
@@ -233,6 +239,16 @@ function adjustFontSize() {
 let controlShow = ref(false);
 function toggleControlPanel() {
     controlShow.value = !controlShow.value;
+}
+
+/* 判断是否为网易云音乐 CDN 链接 */
+function isNeteaseCdnUrl(url: string): boolean {
+    try {
+        const urlObj = new URL(url);
+        return urlObj.hostname.endsWith('music.126.net');
+    } catch {
+        return false;
+    }
 }
 
 // 播放进度调整
@@ -400,13 +416,17 @@ function updateVisualizerChart(data: Uint8Array | number[]) {
     }
 }
 
-onMounted(() => {
+onMounted(async () => {
+    // 加载代理端口配置 (dev=3001, prod=3000)
+    await loadProxyPort();
+
     lyricStyle = document.createElement('style');
     document.body.appendChild(lyricStyle);
     lyricStyle.innerText = styleText;
 
     // 加载 localStorage 中的歌曲信息
     const storedSongInfo = window.localStorage.getItem('currentSongInfo');
+    console.log(storedSongInfo);
     if (storedSongInfo) {
         currentSongInfo.value = JSON.parse(storedSongInfo);
 
@@ -472,8 +492,13 @@ onMounted(() => {
             frequencyData = new Uint8Array(analyser.frequencyBinCount);
 
             if (currentSongInfo.value.url) {
-                console.log(`[Debug] Setting initial audio source to: ${currentSongInfo.value.url}`);
-                audioElement.src = currentSongInfo.value.url;
+                // 网易云 CDN 链接通过本地代理流式播放
+                const audioUrl = isNeteaseCdnUrl(currentSongInfo.value.url)
+                    ? getProxyStreamUrl(currentSongInfo.value.url)
+                    : currentSongInfo.value.url;
+
+                console.log(`[Debug] Setting initial audio source to: ${audioUrl}${audioUrl !== currentSongInfo.value.url ? ` (proxied from: ${currentSongInfo.value.url})` : ''}`);
+                audioElement.src = audioUrl;
                 audioElement.load();
                 audioElement.currentTime = currentProgress.value;
                 audioElement.play().catch(error => {
@@ -607,6 +632,6 @@ onUnmounted(() => {
             </span>
         </div>
 
-        <audio id="desktoplrc-frequencychart" />
+        <audio id="desktoplrc-frequencychart" crossorigin="anonymous" />
     </div>
 </template>

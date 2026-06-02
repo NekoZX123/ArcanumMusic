@@ -5,8 +5,6 @@ import { timeFormat } from "../utilities/formatter.ts";
 
 // const identifier = 'moe.nekozx123.arcanummusic.audioplayer';
 
-const neteaseCdnPostfix = 'music.126.net';
-
 const MIME_MAP: Record<string, string> = {
     '.mp3': 'audio/mpeg',
     '.flac': 'audio/flac',
@@ -353,42 +351,58 @@ class Player {
                 this.nextSong();
                 return;
             }
-            if (playInfo.url.includes(neteaseCdnPostfix)) {
-                const idParts = playInfo.id.split('-');
-                const musicId = idParts[2];
-                const fallbackUrl = `https://music.163.com/song/media/outer/url?id=${musicId}.mp3`;
-                console.log(`[Debug] Play URL: ${fallbackUrl}`);
-                playInfo.url = fallbackUrl;
-            }
 
-            // 使用 WebSocket 接收音频数据并播放
-            const audioChunks: BlobPart[] = [];
-            const ws =  new WebSocket('ws://127.0.0.1:3030/');
-            ws.onmessage = (event) => {
-                audioChunks.push(event.data);
-            };
-            ws.onclose = (_) => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
-                const audioUrl = URL.createObjectURL(audioBlob);
-                console.log(`[Debug] Origin URL: ${playInfo.url} => Local URL: ${audioUrl}`);
-                this.url = audioUrl;
-                
+            // 删除网易云 CDN 链接中的查询参数, 防止 403
+            const neteaseCdnPostfix = 'music.126.net';
+            const urlObj = new URL(playInfo.url);
+            const isNeteaseCdn = urlObj.hostname.endsWith(neteaseCdnPostfix) && urlObj.search;
+            if (isNeteaseCdn) {
+                // 当为网易云 CDN 且带查询参数时, 直接使用原始链接(移除查询) 且不通过 WebSocket 代理
+                playInfo.url = `${urlObj.origin}${urlObj.pathname}`;
+
+                console.log(`[Debug] Using direct URL for Netease CDN: ${playInfo.url}`);
+
+                // 直接使用 URL 播放
+                this.url = playInfo.url;
                 this.syncSongInfo();
-            };
+            }
+            else{
+                // 使用 WebSocket 接收音频数据并播放
+                const audioChunks: BlobPart[] = [];
+                const ws =  new WebSocket('ws://127.0.0.1:3030/');
+                ws.onmessage = (event) => {
+                    audioChunks.push(event.data);
+                };
+                ws.onclose = (_) => {
+                    if (audioChunks.length === 0) {
+                        console.warn('[Warning] No audio data received from proxy');
+                        showNotify('audioStreamError', 'critical', `${this.name}`, '未收到音频数据');
+                        return;
+                    }
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    console.log(`[Debug] Origin URL: ${playInfo.url} => Local URL: ${audioUrl}`);
+                    this.url = audioUrl;
+                    
+                    this.syncSongInfo();
+                };
+                ws.onerror = (error) => {
+                    console.error(`[Error] WebSocket error while fetching audio:`, error);
+                    ws.close();
+                };
 
-            ws.onopen = () => {
-                ws.send(playInfo.url);
-            };
-
-            // 开始播放
-            const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
-            if (!playerElem) {
-                console.error('[Error] Player element not found');
-                return;
+                ws.onopen = () => {
+                    ws.send(playInfo.url);
+                };
             }
 
             // 设置播放按钮图片
             const startPlaying = () => {
+                const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+                if (!playerElem) {
+                    console.error('[Error] Player element not found');
+                    return;
+                }
                 playerElem.play();
                 this.isPlaying = true;
 
@@ -397,7 +411,10 @@ class Player {
                 this.syncPlayStateImage();
             }
             // 音频准备完成后播放
-            playerElem.addEventListener('canplay', startPlaying, { once: true });
+            const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+            if (playerElem) {
+                playerElem.addEventListener('canplay', startPlaying, { once: true });
+            }
             
             // 更新歌词
             const lyricsEvent = new CustomEvent('update-lyrics');
@@ -465,6 +482,11 @@ class Player {
         };
 
         ws.onclose = (_) => {
+            if (audioChunks.length === 0) {
+                console.warn('[Warning] No audio data received from local file proxy');
+                showNotify('localFileError', 'critical', `${this.name}`, '本地文件读取失败');
+                return;
+            }
             const ext = filePath.substring(filePath.lastIndexOf('.')).toLowerCase();
             const mimeType = MIME_MAP[ext] || 'audio/mpeg';
             const audioBlob = new Blob(audioChunks, { type: mimeType });
@@ -494,6 +516,10 @@ class Player {
             }
 
             this.syncSongInfo();
+        };
+        ws.onerror = (error) => {
+            console.error(`[Error] WebSocket error while reading local file:`, error);
+            ws.close();
         };
 
         ws.onopen = () => {
