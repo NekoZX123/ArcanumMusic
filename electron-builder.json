@@ -20,13 +20,6 @@
         ],
         "icon": "./icons/ArcanumMusic.ico"
     },
-    "nsis": {
-        "artifactName": "${productName}_${version}_Setup.${ext}",
-        "shortcutName": "${productName}",
-        "uninstallDisplayName": "${productName}",
-        "installerIcon": "./icons/ArcanumMusic.ico",
-        "uninstallerIcon": "./icons/ArcanumMusic.ico"
-    },
     "linux": {
         "executableName": "arcanummusic",
         "target": [

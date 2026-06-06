@@ -1675,13 +1675,13 @@ img.outlineImage {
     margin-bottom: 0.5rem;
 }
 #downloadIndicators > .fileName {
-    width: 12rem;
+    width: 10rem;
 }
 #downloadIndicators > .status {
     width: 8rem;
 }
 #downloadIndicators > .progress {
-    width: 8rem;
+    width: 10rem;
 }
 #downloadWindowClose > img {
     position: relative;
@@ -1701,14 +1701,14 @@ img.outlineImage {
     align-items: center
 }
 .downloadItem > .downloadFileName {
-    width: 12rem;
+    width: 10rem;
     overflow: hidden;
 }
 .downloadItem > .downloadStatus {
     width: 8rem;
 }
 .downloadItem > .progressDisplay {
-    width: 8rem;
+    width: 10rem;
     height: 100%;
 
     align-items: center;
