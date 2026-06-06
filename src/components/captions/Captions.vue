@@ -22,12 +22,12 @@ async function titlebarMouseDown(event: any) {
     }
 }
 
-function titlebarMouseMove(event: any) {
+async function titlebarMouseMove(event: any) {
     if (event.buttons === 1 && isMoving) {
         let currentX = event.x - startX;
         let currentY = event.y - startY;
-        let winRect = (window as any).electron.getWindowRect();
-        (window as any).electron.moveWindow(winRect.x + currentX, winRect.y + currentY);
+        let winRect = await window.electron.getWindowRect();
+        window.electron.moveWindow(winRect.x + currentX, winRect.y + currentY);
     }
 }
 

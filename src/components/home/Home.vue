@@ -152,7 +152,7 @@ onMounted(() => {
                 // 展示数据
                 const songs = recommendations.songList;
                 for (let i = 0; i < 3; i++) {
-                    let skips = 1;
+                    let skips = 0;
                     let songDetail = songs[i];
 
                     if (loadedRecommendSongs.includes(songDetail.songName)) {
@@ -192,7 +192,7 @@ onMounted(() => {
 
                 for (let i = 0; i < 2; i++) {
                     let artistInfo = artistList[i];
-                    let skips = 1;
+                    let skips = 0;
 
                     if (loadedArtists.includes(artistInfo.artistName)) {
                         while (loadedArtists.includes(artistInfo.artistName)) {
@@ -282,7 +282,7 @@ onMounted(() => {
 
                 for (let i = 0; i < 3; i++) {
                     let songInfo = songs[i];
-                    let skips = 1;
+                    let skips = 0;
                     
                     if (loadedSongs.includes(songInfo.songName)) {
                         while (loadedSongs.includes(songInfo.songName)) {

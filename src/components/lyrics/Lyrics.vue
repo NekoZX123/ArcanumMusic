@@ -98,7 +98,7 @@ function hideLyrics(_: any) {
     setTimeout(() => {
         stopAnimation();
 
-        lyricsPanel.style.display = 'none;';
+        lyricsPanel.style.display = 'none';
     }, 500);
 }
 
@@ -180,7 +180,7 @@ async function loadMainColorBackground(_?: any) {
     
     backgroundBlurMask.style.display = 'none';
     backgroundCanvas.style.display = 'block';
-    backgroundContainer.style.backgroundImage = 'transparent';
+    backgroundContainer.style.backgroundImage = 'none';
 
     // 加载动态背景
     const coverUrl = getPlayer()?.coverUrl;

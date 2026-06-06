@@ -6,7 +6,7 @@ import pkg from 'auto-launch';
 const AutoLaunch = pkg;
 
 import { startService, stopService } from './service.js';
-import { startWebSocket } from './webSocket.js';
+import { startWebSocket, stopWebSocket } from './webSocket.js';
 import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 import { deleteCookies, validateCookieExpiration, listenForCookie, prepareAccountStorage } from './accountHelper.js';
 import { getAppData, getEnvironment } from './globalUtils.js';
@@ -219,6 +219,7 @@ function quitApp(_) {
 
     // 停止服务并退出
     stopService();
+    stopWebSocket();
     app.quit();
 }
 

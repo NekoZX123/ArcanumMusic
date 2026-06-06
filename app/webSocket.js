@@ -2,9 +2,9 @@ import { WebSocketServer } from 'ws';
 import fetch from 'node-fetch';
 import { createReadStream, existsSync } from 'fs';
 
-function startWebSocket() {
-    const wsServer = new WebSocketServer({ port: 3030 });
+const wsServer = new WebSocketServer({ port: 3030 });
 
+function startWebSocket() {
     wsServer.on('connection', (ws) => {
         ws.on('message', async (message) => {
             const messageStr = message.toString();
@@ -76,4 +76,10 @@ function startWebSocket() {
     console.log(`[WebSocket] Server running on http://127.0.0.1:3030/`);
 }
 
-export { startWebSocket };
+function stopWebSocket() {
+    wsServer.close(() => {
+        console.log(`[WebSocket] Server has been closed`);
+    });
+}
+
+export { startWebSocket, stopWebSocket };

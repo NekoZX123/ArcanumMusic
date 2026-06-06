@@ -46,8 +46,6 @@ async function toggleMaximize() {
     else {
         maxButtonSrc.value = maxButtonSrc.value.replace('restore.svg', 'maximize.svg');
     }
-
-    winMaximumState = !winMaximumState;
 }
 
 // 关闭当前窗口
@@ -429,7 +427,7 @@ onMounted(async () => {
     lyrics.mount('#lyricsArea');
 
     const lyricsArea = document.getElementById('lyricsArea');
-    if (lyricsArea) lyricsArea.style.display = 'none;';
+    if (lyricsArea) lyricsArea.style.display = 'none';
 
     // 读取账户信息
     await readAccountInfo('all');
