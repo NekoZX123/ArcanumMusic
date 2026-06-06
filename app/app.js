@@ -11,7 +11,7 @@ import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 import { deleteCookies, validateCookieExpiration, listenForCookie, prepareAccountStorage } from './accountHelper.js';
 import { getAppData, getEnvironment } from './globalUtils.js';
 import { getAppConfig, getUserPreferences, writeUserPreferences } from "./configHelper.js";
-import { scanLocalMusic, getMusicMetadata, getLocalPaths, writeLocalPaths, openMusicFolder } from './localMusicHelper.js';
+import { scanLocalMusic, getMusicMetadata, getLocalPaths, writeLocalPaths, openMusicFolder, downloadAudio } from './localMusicHelper.js';
 
 const __dirname = fileURLToPath(import.meta.url);
 
@@ -341,6 +341,7 @@ app.whenReady().then(() => {
     ipcMain.handle('getLocalMusicPaths', getLocalPaths);
     ipcMain.handle('writeLocalMusicPaths', writeLocalPaths);
     ipcMain.handle('openMusicFolder', openMusicFolder);
+    ipcMain.handle('downloadAudio', downloadAudio);
     ipcMain.handle('selectFolder', async () => {
         const result = await dialog.showOpenDialog(mainWindow, {
             properties: ['openDirectory']

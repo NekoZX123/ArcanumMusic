@@ -480,8 +480,7 @@ img.outlineImage {
     flex: 1 0;
 }
 
-#settings,
-#accounts {
+.pageButton.round {
     appearance: none;
     position: relative;
     width: 3rem;
@@ -497,12 +496,10 @@ img.outlineImage {
     justify-content: center;
     align-items: center;
 }
-#settings:hover,
-#accounts:hover {
+.pageButton.round:hover {
     background: var(--transparent-grey);
 }
-#settings.current,
-#accounts.current {
+.pageButton.round.current {
     background: var(--theme-color-default);
 }
 #settings > img {
@@ -1624,7 +1621,8 @@ img.outlineImage {
     
     justify-content: space-between;
 }
-#artistSelectClose {
+#artistSelectClose,
+#downloadWindowClose {
     appearance: none;
     width: 2rem;
     height: 2rem;
@@ -1635,11 +1633,112 @@ img.outlineImage {
 
     transition: all 200ms ease-in-out;
 }
-#artistSelectClose > img {
+#artistSelectClose > img,
+#downloadWindowClose > img {
     width: 1.5rem;
     height: 1.5rem;
 }
-#artistSelectClose:hover {
+#artistSelectClose:hover,
+#downloadWindowClose:hover {
     background: var(--transparent-grey);
 }
 
+/* 下载窗口 */
+#downloadWindow {
+    position: absolute;
+    top: 3rem;
+    right: 5rem;
+    width: 28rem;
+    height: 18rem;
+
+    background: var(--interface-background);
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 0 6px var(--transparent-darkgrey);
+
+    padding: 0.5rem;
+
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+    pointer-events: none;
+
+    z-index: 150;
+}
+#downloadWindow.show {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+#downloadHeaders {
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+#downloadIndicators > .fileName {
+    width: 12rem;
+}
+#downloadIndicators > .status {
+    width: 8rem;
+}
+#downloadIndicators > .progress {
+    width: 8rem;
+}
+#downloadWindowClose > img {
+    position: relative;
+    left: -1px;
+    top: 1px;
+}
+
+.downloadItem{
+    width: 100%;
+    height: 2.5rem;
+
+    margin: 3px 0;
+
+    background: transparent;
+    border: none;
+
+    align-items: center
+}
+.downloadItem > .downloadFileName {
+    width: 12rem;
+    overflow: hidden;
+}
+.downloadItem > .downloadStatus {
+    width: 8rem;
+}
+.downloadItem > .progressDisplay {
+    width: 8rem;
+    height: 100%;
+
+    align-items: center;
+    justify-content: center;
+}
+
+.downloadProgress {
+    width: 8rem;
+    height: 4px;
+
+    margin-top: 6px;
+
+    background: var(--interface-background-grey);
+    border: none;
+    border-radius: 2px;
+}
+.downloadProgress > .downloadCompleted {
+    width: 50%;
+    height: 4px;
+
+    background: var(--theme-color-default);
+    border: none;
+    border-radius: 2px;
+}
+.downloadProgress.completed > .downloadCompleted {
+    background: var(--color-green-default);
+}
+.downloadProgress.downloading > .downloadCompleted {
+    background: var(--color-blue-default);
+}
+.downloadProgress.failed > .downloadCompleted {
+    background: var(--color-red-default);
+}

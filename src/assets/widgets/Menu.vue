@@ -5,6 +5,7 @@ import { changePage, getCurrentPage, togglePlaylist } from '../utilities/pageSwi
 import { getSongInfo, getSongLink } from '../player/songUtils.ts';
 import { hideArtistSelect, showArtistSelect, type MenuType } from '../utilities/elementControl.ts';
 import { showNotify } from '../notifications/Notification.ts';
+import { saveAudio } from '../player/musicDownloader.ts';
 
 const MenuItem = defineComponent({
     props: {
@@ -180,6 +181,9 @@ onMounted(() => {
         <span class="menuPart flex column">
             <MenuItem id="copyLink" icon="./images/menu/copyLink.svg" text="复制播放链接" 
                 :on-click="() => {copyLink(props.targetInfo.id)}" 
+                v-if="['song', 'playlistItem'].includes(props.menuType)"></MenuItem>
+            <MenuItem id="saveAudio" icon="./images/menu/download.svg" text="保存至本地"
+                :on-click="() => {saveAudio(props.targetInfo.id, props.targetInfo.name)}"
                 v-if="['song', 'playlistItem'].includes(props.menuType)"></MenuItem>
         </span>
         <span class="menuPart flex column">

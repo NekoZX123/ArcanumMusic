@@ -21,6 +21,8 @@ import {loadProxyPort} from './assets/utilities/proxyRequest.ts';
 import {syncFocusedLyric} from './assets/lyrics/lyricsManager.ts';
 import { initializeTheme, setControlBarTheme, setWindowBackground, type colorThemeName } from './assets/effects/themeControl.ts';
 import { buttonTypes, showPopup } from './assets/notifications/popup.tsx';
+import DownloadItem from './assets/widgets/DownloadItem.vue';
+import { getDownloadQueue } from './assets/player/musicDownloader.ts';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -272,6 +274,7 @@ const captionWindowOptions = {
 let captionWindowId = -1;
 let isCaptionsOn: boolean = false;
 const desktopLyricsImage = ref('./images/player/desktopLyrics.svg');
+const showDownloadWindow = ref(false);
 // 桌面歌词窗口关闭处理
 function handleCaptionsClose() {
     desktopLyricsImage.value = './images/player/desktopLyrics.svg';
@@ -559,12 +562,16 @@ onUnmounted(() => {
 
                 <div id="topBarSpace"></div>
 
+                <!-- 下载窗口 -->
+                <button class="pageButton round" id="downloads" title="下载" @click="() => { showDownloadWindow = true }">
+                    <img class="outlineImage" src="/images/pageSwitcher/downloads.svg" alt="Downloads"/>
+                </button>
                 <!-- 设置 -->
-                <button class="pageButton" id="settings" title="设置" @click="(_: any) => {changePage('settings')}">
+                <button class="pageButton round" id="settings" title="设置" @click="(_: any) => {changePage('settings')}">
                     <img class="outlineImage" src="/images/pageSwitcher/settings.svg" alt="Application settings"/>
                 </button>
                 <!-- 账户 -->
-                <button class="pageButton" id="accounts" title="我的账户" @click="(_: any) => {changePage('accounts')}">
+                <button class="pageButton round" id="accounts" title="我的账户" @click="(_: any) => {changePage('accounts')}">
                     <img class="outlineImage" src="/images/pageSwitcher/accounts.svg" alt="My accounts"/>
                 </button>
             </div>
@@ -659,6 +666,24 @@ onUnmounted(() => {
                 </button>
             </div>
             <div id="artistSelectContent"></div>
+        </div>
+        <!-- 下载进度窗口 -->
+        <div class="flex column" id="downloadWindow" :class="{ show: showDownloadWindow }">
+            <div class="flex row" id="downloadHeaders">
+                <label class="text medium">下载队列</label>
+                <button id="downloadWindowClose" @click="() => { showDownloadWindow = false }">
+                    <img class="outlineImage" src="/images/windowControl/close.svg" alt="Close"/>
+                </button>
+            </div>
+            <div class="flex row" id="downloadIndicators">
+                <label class="text ultraSmall grey fileName">文件名称</label>
+                <label class="text ultraSmall grey status">状态</label>
+                <label class="text ultraSmall grey progress">下载进度</label>
+            </div>
+            <div class="flex column">
+                <DownloadItem v-for="i in getDownloadQueue()"
+                    :item="i"></DownloadItem>
+            </div>
         </div>
 
         <!-- 播放进度标签 -->

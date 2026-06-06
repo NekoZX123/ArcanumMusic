@@ -38,6 +38,13 @@ contextBridge.exposeInMainWorld(
         openMusicFolder: (folderPath) => ipcRenderer.invoke('openMusicFolder', folderPath), // 打开音乐文件夹
         selectFolder: () => ipcRenderer.invoke('selectFolder'), // 选择文件夹
 
+        downloadAudio: (url, songName) => ipcRenderer.invoke('downloadAudio', url, songName), // 下载音频到本地
+        onDownloadProgress: (callback) => { // 监听下载进度
+            const handler = (_event, progress) => callback(progress);
+            ipcRenderer.on('download-progress', handler);
+            return () => ipcRenderer.removeListener('download-progress', handler);
+        },
+
         openExternal: (url) => ipcRenderer.invoke('openExternal', url), // 打开外部链接
         copyToClipboard: (content) => ipcRenderer.invoke('copyContent', content), // 复制内容至剪贴板
         setAutoLaunch: (isEnabled) => ipcRenderer.invoke('setAutoLaunch', isEnabled), // 设置开机自启

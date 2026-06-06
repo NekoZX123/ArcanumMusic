@@ -1,7 +1,8 @@
-import { existsSync, readdirSync, statSync } from 'fs';
+import { existsSync, readdirSync, statSync, createWriteStream } from 'fs';
 import path from 'path';
 import { shell } from 'electron';
 import { parseFile } from 'music-metadata';
+import fetch from 'node-fetch';
 
 import { getLocalMusicPaths, writeLocalMusicPaths } from './configHelper.js';
 
@@ -77,10 +78,121 @@ async function getMusicMetadata(_, filePath) {
     return { name, songCover, author, duration, size, ext };
 }
 
+/**
+ * 下载音频文件到本地音乐目录（第一个路径）
+ * @param event IPC 事件对象（用于推送进度）
+ * @param url 音频下载链接
+ * @param songName 歌曲名称（用于生成文件名）
+ * @returns 保存的文件路径
+ */
+async function downloadAudio(event, url, songName) {
+    const paths = await getLocalMusicPaths();
+    if (!paths || paths.length === 0) {
+        throw new Error('未配置本地音乐路径');
+    }
+    const targetDir = paths[0];
+
+    if (!existsSync(targetDir)) {
+        throw new Error(`本地音乐目录不存在: ${targetDir}`);
+    }
+
+    // 发起下载请求，获取响应头和流
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error(`下载失败，服务器返回状态码: ${response.status}`);
+    }
+
+    // 从 URL 路径中推断扩展名
+    let ext = '.mp3';
+    try {
+        const urlPath = new URL(url).pathname;
+        const urlExt = path.extname(urlPath).toLowerCase();
+        if (['.mp3', '.flac', '.wav', '.ogg', '.aac', '.wma', '.m4a', '.opus'].includes(urlExt)) {
+            ext = urlExt;
+        }
+    } catch {
+        // URL 解析失败，使用默认扩展名
+    }
+
+    // URL 未提供扩展名时，从 Content-Type 推断
+    if (ext === '.mp3') {
+        const contentType = response.headers.get('content-type') || '';
+        const mimeMap = {
+            'audio/mpeg': '.mp3',
+            'audio/flac': '.flac',
+            'audio/wav': '.wav',
+            'audio/ogg': '.ogg',
+            'audio/aac': '.aac',
+            'audio/x-wma': '.wma',
+            'audio/x-m4a': '.m4a',
+            'audio/mp4': '.m4a',
+            'audio/opus': '.opus',
+        };
+        for (const [mime, mimeExt] of Object.entries(mimeMap)) {
+            if (contentType.includes(mime)) {
+                ext = mimeExt;
+                break;
+            }
+        }
+    }
+
+    // 生成合法文件名（移除 Windows 非法字符）
+    const baseName = (songName || `audio_${Date.now()}`)
+        .replace(/[<>:"/\\|?*]/g, '_')
+        .trim() || `audio_${Date.now()}`;
+
+    // 处理重名文件
+    let fileName = `${baseName}${ext}`;
+    let filePath = path.join(targetDir, fileName);
+    let counter = 1;
+    while (existsSync(filePath)) {
+        fileName = `${baseName} (${counter})${ext}`;
+        filePath = path.join(targetDir, fileName);
+        counter++;
+    }
+
+    // 流式下载并写入文件
+    const contentLength = response.headers.get('content-length');
+    const total = contentLength ? parseInt(contentLength, 10) : 0;
+    const writeStream = createWriteStream(filePath);
+    let loaded = 0;
+
+    response.body.on('data', (chunk) => {
+        loaded += chunk.length;
+        if (total > 0 && event && event.sender) {
+            event.sender.send('download-progress', {
+                percent: Math.round((loaded / total) * 100),
+                loaded,
+                total,
+            });
+        }
+    });
+
+    response.body.pipe(writeStream);
+
+    return new Promise((resolve, reject) => {
+        writeStream.on('finish', () => {
+            // 推送完成进度
+            if (event && event.sender) {
+                event.sender.send('download-progress', {
+                    percent: 100,
+                    loaded: total || loaded,
+                    total: total || loaded,
+                });
+            }
+            resolve(filePath);
+        });
+        writeStream.on('error', (err) => {
+            reject(new Error(`文件写入失败: ${err.message}`));
+        });
+    });
+}
+
 export {
     scanLocalMusic,
     getMusicMetadata,
     getLocalPaths,
     writeLocalPaths,
-    openMusicFolder
+    openMusicFolder,
+    downloadAudio,
 };
