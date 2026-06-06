@@ -152,7 +152,7 @@ onMounted(() => {
                 // 展示数据
                 const songs = recommendations.songList;
                 for (let i = 0; i < 3; i++) {
-                    let skips = 1;
+                    let skips = 0;
                     let songDetail = songs[i];
 
                     if (loadedRecommendSongs.includes(songDetail.songName)) {
@@ -192,7 +192,7 @@ onMounted(() => {
 
                 for (let i = 0; i < 2; i++) {
                     let artistInfo = artistList[i];
-                    let skips = 1;
+                    let skips = 0;
 
                     if (loadedArtists.includes(artistInfo.artistName)) {
                         while (loadedArtists.includes(artistInfo.artistName)) {
@@ -282,7 +282,7 @@ onMounted(() => {
 
                 for (let i = 0; i < 3; i++) {
                     let songInfo = songs[i];
-                    let skips = 1;
+                    let skips = 0;
                     
                     if (loadedSongs.includes(songInfo.songName)) {
                         while (loadedSongs.includes(songInfo.songName)) {
@@ -439,7 +439,7 @@ onMounted(() => {
         <!-- 页面底部 -->
         <div class="flex column" id="pageFooter">
             <label class="text small grey" id="footerText">-----&nbsp;已到达页面底部&nbsp;-----</label>
-            <label class="text small grey">Arcanum Music v1.9.2</label>
+            <label class="text small grey">Arcanum Music v1.10.2</label>
             <label class="text small grey">Made by NekoZX123</label>
             <label class="text ultraSmall grey">Licensed under Apache-2.0 license</label>
             <label class="text ultraSmall grey">仅供学习交流使用, 不得用于商业用途</label>

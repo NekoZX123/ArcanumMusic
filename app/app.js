@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, Menu, shell, Tray, clipboard, nativeImage } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu, shell, Tray, clipboard, nativeImage, dialog } from 'electron';
 import { fileURLToPath } from 'url';
 import { userInfo } from 'os';
 import path from 'path';
@@ -6,12 +6,12 @@ import pkg from 'auto-launch';
 const AutoLaunch = pkg;
 
 import { startService, stopService } from './service.js';
-import { startWebSocket } from './webSocket.js';
+import { startWebSocket, stopWebSocket } from './webSocket.js';
 import { isFileExist, readLocalFile, writeLocalFile } from './fileManager.js';
 import { deleteCookies, validateCookieExpiration, listenForCookie, prepareAccountStorage } from './accountHelper.js';
 import { getAppData, getEnvironment } from './globalUtils.js';
 import { getAppConfig, getUserPreferences, writeUserPreferences } from "./configHelper.js";
-import { readData, writeData } from './dataBridge.js';
+import { scanLocalMusic, getMusicMetadata, getLocalPaths, writeLocalPaths, openMusicFolder, downloadAudio } from './localMusicHelper.js';
 
 const __dirname = fileURLToPath(import.meta.url);
 
@@ -219,6 +219,7 @@ function quitApp(_) {
 
     // 停止服务并退出
     stopService();
+    stopWebSocket();
     app.quit();
 }
 
@@ -321,10 +322,6 @@ app.whenReady().then(() => {
     ipcMain.handle('readLocalFile', readLocalFile);
     ipcMain.handle('writeLocalFile', writeLocalFile);
 
-    // 主进程数据操作
-    ipcMain.handle('dataRead', (_, key, identifier) => readData(key, identifier));
-    ipcMain.handle('dataWrite', (_, key, value, identifier) => writeData(key, value, identifier));
-
     // 用户数据操作
     ipcMain.handle('getAppConfig', getAppConfig);
     ipcMain.handle('getPreference', getUserPreferences);
@@ -338,6 +335,21 @@ app.whenReady().then(() => {
     ipcMain.handle('validateCookieExpiration', validateCookieExpiration);
     ipcMain.handle('listenCookie', listenForCookie);
     ipcMain.handle('deleteCookie', deleteCookies);
+
+    // 音频文件操作
+    ipcMain.handle('scanLocalMusic', scanLocalMusic);
+    ipcMain.handle('getMusicMetadata', getMusicMetadata);
+    ipcMain.handle('getLocalMusicPaths', getLocalPaths);
+    ipcMain.handle('writeLocalMusicPaths', writeLocalPaths);
+    ipcMain.handle('openMusicFolder', openMusicFolder);
+    ipcMain.handle('downloadAudio', downloadAudio);
+    ipcMain.handle('selectFolder', async () => {
+        const result = await dialog.showOpenDialog(mainWindow, {
+            properties: ['openDirectory']
+        });
+        if (result.canceled) return null;
+        return result.filePaths[0];
+    });
 
     // 其他操作
     ipcMain.handle('openExternal', (_, url) => {

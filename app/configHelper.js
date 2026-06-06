@@ -3,11 +3,14 @@ import { isFileExist, readLocalFile, writeLocalFile } from "./fileManager.js";
 import { copyFileSync, mkdir } from "fs";
 import { getAppData, getEnvironment } from "./globalUtils.js";
 import { fileURLToPath } from "url";
+import { app } from 'electron';
 
 const __dirname = fileURLToPath(import.meta.url);
 
 const configPath = '/ArcanumMusic_data/settings.json';
 const preferencePath = '/ArcanumMusic_data/userPreferences.json';
+const historyPath = '/ArcanumMusic_data/history.json';
+const localMusicPath = '/ArcanumMusic_data/localMusic.list';
 
 async function getAppConfig() {
     let prefix = getAppData();
@@ -76,8 +79,44 @@ async function writeUserPreferences(prefText) {
     await writeLocalFile(undefined, prefPath, prefText);
 }
 
+async function getLocalMusicPaths() {
+    let prefix = getAppData();
+    let listPath = prefix + localMusicPath;
+
+    let fileExist = await isFileExist(null, listPath);
+    if (!fileExist) {
+        let configDir = listPath.substring(0, listPath.lastIndexOf('/'));
+        await new Promise((resolve, reject) => {
+            mkdir(configDir, { recursive: true }, (err) => {
+                if (err) {
+                    console.error('[Error] Directory creation failed: ', err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+
+        const defaultPaths = [app.getPath('music')];
+        await writeLocalFile(undefined, listPath, defaultPaths.join('\n'));
+        return defaultPaths;
+    }
+
+    let content = await readLocalFile(null, listPath);
+    return content ? content.trim().split('\n').filter(line => line.trim() !== '') : [];
+}
+
+async function writeLocalMusicPaths(paths) {
+    let prefix = getAppData();
+    let listPath = prefix + localMusicPath;
+
+    await writeLocalFile(undefined, listPath, paths.join('\n'));
+}
+
 export {
     getAppConfig,
     getUserPreferences,
-    writeUserPreferences
+    writeUserPreferences,
+    getLocalMusicPaths,
+    writeLocalMusicPaths
 }

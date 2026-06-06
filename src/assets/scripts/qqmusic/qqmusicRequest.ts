@@ -356,7 +356,7 @@ function getQQmusicResult(moduleName: QQMusicModule, params: { [type: string]: a
     common.uin = cookies.uin;
 
     let moduleString = JSON.stringify(moduleData);
-    moduleString.replace(/[QQMUSIC_UIN]/g, cookies.uin.toString());
+    moduleString = moduleString.replaceAll('[QQMUSIC_UIN]', cookies.uin.toString());
     // 替换参数
     Object.keys(params).forEach((key) => {
         if (moduleString.includes(`[${key}]`)) {

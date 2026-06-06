@@ -5,13 +5,11 @@ let proxyPort = 3000;
  * 根据应用环境加载代理端口
  * 开发环境下应用加载后必须先调用
  */
-function loadProxyPort() {
-    window.electron.getAppEnvironment()
-    .then((environment: string) => {
-        if (environment === 'dev') {
-            proxyPort = 3001;
-        }
-    });
+async function loadProxyPort() {
+    const environment = await window.electron.getAppEnvironment();
+    if (environment === 'dev') {
+        proxyPort = 3001;
+    }
 }
 
 /**
@@ -52,7 +50,29 @@ function proxyRequest(method: string = 'GET', url: string, headers: object = {},
     });
 }
 
+/**
+ * 获取流式代理链接
+ * 将原音频 URL 转换为通过本地代理服务器流式传输的 URL
+ * 用于需要渐进式播放的场景 (如 <audio> 标签的 src)
+ *
+ * @param originalUrl 原始音频 URL
+ * @returns 本地代理的流式 URL
+ */
+function getProxyStreamUrl(originalUrl: string): string {
+    const encodedUrl = encodeURIComponent(originalUrl);
+    return `http://localhost:${proxyPort}/proxy/stream?url=${encodedUrl}`;
+}
+
+/**
+ * 获取当前代理端口
+ */
+function getProxyPort(): number {
+    return proxyPort;
+}
+
 export {
-    loadProxyPort, 
-    proxyRequest
+    loadProxyPort,
+    proxyRequest,
+    getProxyStreamUrl,
+    getProxyPort
 };

@@ -11,6 +11,7 @@ type neteaseEncryptedData = {
 
 // 请求链接
 const requestUrls: { [type: string]: string } = {
+    // 'songLink': 'https://interfacepc.music.163.com/eapi/song/enhance/download/url/v1',
     'songLink': 'https://interfacepc.music.163.com/eapi/song/enhance/player/url/v1',
     // 'songLink': 'https://music.163.com/weapi/song/enhance/player/url/v1?csrf_token=',
     'search': 'https://music.163.com/weapi/cloudsearch/get/web?csrf_token=',
@@ -168,7 +169,7 @@ const PAGE_SIZE = 30;
 
 // User-Agent (两种)
 const mobileUA = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36 Edg/139.0.0.0';
-const ncmDesktopUA = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36 Chrome/91.0.4472.164 NeteaseMusicDesktop/2.10.2.200154';
+const ncmDesktopUA = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36 Chrome/91.0.4472.164 NeteaseMusicDesktop/3.1.28.205001';
 const mobileModuleList: NeteaseMusicModule[] = ['artist', 'artistSongs', 'hotList', 'recommendSong', 'rankings', 'newSong', 'newAlbum'];
 
 type NeteaseMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
@@ -182,15 +183,16 @@ function getNeteaseSearchTypes() {
 function getNeteaseSongLink_v2(payload: string, cookies: string) {
     // const urlApi = requestUrls.songLink;
     const urlApiPart = `/api/song/enhance/player/url/v1`;
+    // const urlApiPart = `/api/song/enhance/download/url/v1`;
 
     // 解析 payload 为对象后 JSON 序列化
-    const payloadObj = JSON.parse(payload);
-    const payloadJson = JSON.stringify(payloadObj);
+    // const payloadObj = JSON.parse(payload);
+    // const payloadJson = JSON.stringify(payloadObj);
 
     const encryptKey = CryptoJS.enc.Utf8.parse('e82ckenh8dichen8');
-    const digest = `nobody${urlApiPart}use${payloadJson}md5forencrypt`;
+    const digest = `nobody${urlApiPart}use${payload}md5forencrypt`;
     const dataDigest = CryptoJS.MD5(digest).toString(CryptoJS.enc.Hex);
-    const params = `${urlApiPart}-36cd479b6b5-${payloadJson}-36cd479b6b5-${dataDigest}`;
+    const params = `${urlApiPart}-36cd479b6b5-${payload}-36cd479b6b5-${dataDigest}`;
     console.log(`[Debug] Netease API: params = ${params}`);
 
     // 使用 PKCS7 填充
@@ -201,7 +203,6 @@ function getNeteaseSongLink_v2(payload: string, cookies: string) {
 
     // 转换为十六进制字符串并大写
     const finalParams = encrypted.ciphertext.toString(CryptoJS.enc.Hex).toUpperCase();
-    console.log(`[Debug] Final params = ${finalParams}`);
 
     return proxyRequest(
         'POST',
@@ -289,7 +290,9 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
     const referer = moduleName === 'songLink' ? 'https://music.163.com/' : 'http://127.0.0.1:5173/';
 
     // console.log(`[Netease Music]\n URL: ${targetUrl};\n Data: ${moduleParams};`);
-    if (moduleName === 'songLink') return getNeteaseSongLink_v2(moduleParams, cookieHeader);
+    if (moduleName === 'songLink') {
+        return getNeteaseSongLink_v2(moduleParams, cookieHeader);
+    }
 
     return proxyRequest(
         'POST',

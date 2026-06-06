@@ -98,7 +98,7 @@ function hideLyrics(_: any) {
     setTimeout(() => {
         stopAnimation();
 
-        lyricsPanel.style.display = 'none;';
+        lyricsPanel.style.display = 'none';
     }, 500);
 }
 
@@ -180,11 +180,11 @@ async function loadMainColorBackground(_?: any) {
     
     backgroundBlurMask.style.display = 'none';
     backgroundCanvas.style.display = 'block';
-    backgroundContainer.style.backgroundImage = 'transparent';
+    backgroundContainer.style.backgroundImage = 'none';
 
     // 加载动态背景
     const coverUrl = getPlayer()?.coverUrl;
-    console.log(`coverUrl: ${coverUrl}`);
+    console.log(`coverUrl: ${coverUrl?.startsWith('data:image/') ? '[Base64 Image data]' : coverUrl}`);
     if (coverUrl) {
         // 获取封面主色
         const colorList: any = await getMainColors(coverUrl, PARTICLES_COUNT);

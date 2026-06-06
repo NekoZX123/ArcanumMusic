@@ -41,6 +41,35 @@
     display: none;
 }
 
+#libraryToolbar {
+    width: 100%;
+    height: calc(2.5rem + 8px);
+}
+.libToolbarButton {
+    appearance: none;
+    width: calc(50% - 4px);
+    height: 2.5rem;
+    margin: 4px 2px;
+
+    background: var(--interface-background-grey);
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 4px 4px 2px var(--transparent-grey);
+
+    justify-content: center;
+    align-items: center;
+
+    transition: all 300ms ease-in-out;
+}
+.libToolbarButton:hover {
+    background: var(--theme-color-light);
+}
+.libToolbarButton > img {
+    width: 2rem;
+    height: 2rem;
+    margin-right: 4px;
+}
+
 #recommendContainer {
     width: 100%;
     height: calc(8rem + 6px);

@@ -22,21 +22,18 @@ const LyricsLine = defineComponent({
         }
     },
     setup(props: { lyricsObject: LyricLineInfo, glowEffect?: boolean, lyricsMode: number }) {
-        // 歌词属性
-        const time = props.lyricsObject.time;
-        const content = props.lyricsObject.content;
-        const translation = props.lyricsObject.translation;
-        // 歌词样式
-        const effectMode = effectClassList[props.lyricsMode];
-        const mainLineFontSize = props.lyricsMode === 2 ? 'medium' : 'large';
-        const transLineFontSize = props.lyricsMode === 2 ? 'small' : 'medium';
-        const lyricsFontWeight = props.lyricsMode === 0 ? 'bold' : '';
-        return () => (
-            <span class={`lyricsBox ${props.glowEffect ? 'glow' : ''} ${effectMode}`} onClick={() => getPlayer()?.setProgress(time)}>
-                <ul class={`text ${mainLineFontSize} ${lyricsFontWeight}`}>{content}</ul>
-                <ul class={`text ${transLineFontSize} ${lyricsFontWeight}`}>{translation}</ul>
-            </span>
-        );
+        return () => {
+            const effectMode = effectClassList[props.lyricsMode];
+            const mainLineFontSize = props.lyricsMode === 2 ? 'medium' : 'large';
+            const transLineFontSize = props.lyricsMode === 2 ? 'small' : 'medium';
+            const lyricsFontWeight = props.lyricsMode === 0 ? 'bold' : '';
+            return (
+                <span class={`lyricsBox ${props.glowEffect ? 'glow' : ''} ${effectMode}`} onClick={() => getPlayer()?.setProgress(props.lyricsObject.time)}>
+                    <ul class={`text ${mainLineFontSize} ${lyricsFontWeight}`}>{props.lyricsObject.content}</ul>
+                    <ul class={`text ${transLineFontSize} ${lyricsFontWeight}`}>{props.lyricsObject.translation}</ul>
+                </span>
+            );
+        };
     }
 });
 

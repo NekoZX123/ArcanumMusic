@@ -122,7 +122,7 @@ function addArtistLine(target: HTMLElement, id: string, name: string, coverUrl: 
 }
 
 // 显示右键菜单
-type MenuType = 'collections' | 'song' | 'playlistItem' | 'platformSelect';
+type MenuType = 'collections' | 'song' | 'playlistItem' | 'playlistLocalItem' | 'platformSelect' | 'localAudio';
 function triggerRightMenu(event: MouseEvent, info: any, menuType: MenuType) {
     // 获取容器
     const menuContainer = document.getElementById('rightClickMenuContainer') as HTMLElement;
@@ -205,5 +205,6 @@ export {
     triggerRightMenu,
     hideRightMenu,
     showArtistSelect,
-    hideArtistSelect
+    hideArtistSelect,
+    type MenuType
 }

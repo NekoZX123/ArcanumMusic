@@ -258,19 +258,31 @@ onUnmounted(() => {
         <!-- 收藏 & 推荐 -->
         <div class="flex row" id="userCollections">
             <div class="songlistCard exlarge flex row" id="userFavourites">
-                <span class="cardHeader flex row" id="userFavouritesBackground" 
-                    @contextmenu="(event) => {
-                        triggerRightMenu(event, { type: 'userFavourites' }, 'platformSelect');
-                    }" 
-                    :style="`background-image: url('./images/library/favouritesBackground_${currentFavPlatform}.png')`">
-                    <span class="cardInfo flex column">
-                        <label class="text medium bold interactiveTitle"
-                            @click="changePage('songlist', true, userFavourites)">我喜欢的音乐</label>
-                        <label class="text ultraSmall">共 {{ favLength }} 首</label>
+                <span class="flex column cardSide">
+                    <span class="cardHeader flex row" id="userFavouritesBackground" 
+                        @contextmenu="(event) => {
+                            triggerRightMenu(event, { type: 'userFavourites' }, 'platformSelect');
+                        }" 
+                        :style="`background-image: url('./images/library/favouritesBackground_${currentFavPlatform}.png')`">
+                        <span class="cardInfo flex column">
+                            <label class="text medium bold interactiveTitle"
+                                @click="changePage('songlist', true, userFavourites)">我喜欢的音乐</label>
+                            <label class="text ultraSmall">共 {{ favLength }} 首</label>
+                        </span>
+                        <button class="songlistPlay" id="userFavourites_play" @click="getPlayer()?.playListId(userFavourites)">
+                            <img src="/images/player/play.svg" alt="Play"/>
+                        </button>
                     </span>
-                    <button class="songlistPlay" id="userFavourites_play" @click="getPlayer()?.playListId(userFavourites)">
-                        <img src="/images/player/play.svg" alt="Play"/>
-                    </button>
+                    <span class="flex row" id="libraryToolbar">
+                        <button class="libToolbarButton flex row" @click="changePage('history', true)">
+                            <img src="/images/library/history.svg" alt="History"/>
+                            <label class="text small">播放历史</label>
+                        </button>
+                        <button class="libToolbarButton flex row" @click="changePage('local', true)">
+                            <img src="/images/library/downloads.svg" alt="Downloads"/>
+                            <label class="text small">本地音乐</label>
+                        </button>
+                    </span>
                 </span>
                 <span class="listContent flex column" id="userFavouritesPreview"></span>
             </div>

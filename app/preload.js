@@ -19,9 +19,6 @@ contextBridge.exposeInMainWorld(
         readLocalFile: (path) => ipcRenderer.invoke('readLocalFile', path), // 读取本地文件
         writeLocalFile: (path, content) => ipcRenderer.invoke('writeLocalFile', path, content), // 写入本地文件
 
-        readData: (key, identifier) => ipcRenderer.invoke('dataRead', key, identifier), // 读取主进程数据
-        writeData: (key, value, identifier) => ipcRenderer.invoke('dataWrite', key, value, identifier), // 写入主进程数据
-        
         getAppConfig: () => ipcRenderer.invoke('getAppConfig'), // 获取应用配置
         getUserPreference: () => ipcRenderer.invoke('getPreference'), // 获取偏好设置
         writeUserPreferences: (pref) => ipcRenderer.invoke('writePreference', pref), // 写入偏好设置
@@ -34,8 +31,22 @@ contextBridge.exposeInMainWorld(
         validateCookie: (platform) => ipcRenderer.invoke('validateCookieExpiration', platform), // 验证 Cookie 有效期
         deleteCookies: (platform) => ipcRenderer.invoke('deleteCookie', platform), // 清除指定平台 Cookies
 
+        scanLocalMusic: () => ipcRenderer.invoke('scanLocalMusic'), // 扫描本地音乐文件
+        getMusicMetadata: (filePath) => ipcRenderer.invoke('getMusicMetadata', filePath), // 获取音乐文件元数据
+        getLocalPaths: () => ipcRenderer.invoke('getLocalMusicPaths'), // 获取本地音乐路径
+        writeLocalPaths: (paths) => ipcRenderer.invoke('writeLocalMusicPaths', paths), // 写入本地音乐路径
+        openMusicFolder: (folderPath) => ipcRenderer.invoke('openMusicFolder', folderPath), // 打开音乐文件夹
+        selectFolder: () => ipcRenderer.invoke('selectFolder'), // 选择文件夹
+
+        downloadAudio: (url, songName) => ipcRenderer.invoke('downloadAudio', url, songName), // 下载音频到本地
+        onDownloadProgress: (callback) => { // 监听下载进度
+            const handler = (_event, progress) => callback(progress);
+            ipcRenderer.on('download-progress', handler);
+            return () => ipcRenderer.removeListener('download-progress', handler);
+        },
+
         openExternal: (url) => ipcRenderer.invoke('openExternal', url), // 打开外部链接
         copyToClipboard: (content) => ipcRenderer.invoke('copyContent', content), // 复制内容至剪贴板
-        setAutoLaunch: (isEnabled) => ipcRenderer.invoke('setAutoLaunch', isEnabled), // 设置开启自启
+        setAutoLaunch: (isEnabled) => ipcRenderer.invoke('setAutoLaunch', isEnabled), // 设置开机自启
     }
 );

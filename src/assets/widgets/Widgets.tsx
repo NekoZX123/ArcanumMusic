@@ -2,6 +2,7 @@ import { defineComponent } from "vue";
 import { changePage } from "../utilities/pageSwitcher";
 import { getPlayer } from "../player/player";
 import { hideArtistSelect, triggerRightMenu } from "../utilities/elementControl";
+import { sizeFormat } from "../utilities/formatter";
 
 // 各平台图标
 const platformIcons: Record<string, string> = {
@@ -98,7 +99,7 @@ const SongCard = defineComponent({
 
 // 单行歌曲卡片右键点击事件处理
 function handleSongLineRightClick(event: MouseEvent, props: any) {
-    const menuType = props.id.includes('playlist_') ? 'playlistItem' : 'song';
+    const menuType = props.id.includes('local_') ? 'playlistLocalItem' : (props.id.includes('playlist_') ? 'playlistItem' : 'song');
     if (event.button === 2) triggerRightMenu(event, props, menuType);
 }
 // 歌曲卡片 (单行)
@@ -121,7 +122,42 @@ const SongInfoLine = defineComponent({
                     <label class="text small bold">{props.name}</label>
                     <label class="text ultraSmall grey">{props.authors}</label>
                 </span>
-                <span class="text ultraSmall songLength">{timeFormat(props.duration)}</span>
+                <span class="text ultraSmall songLength">{props.duration === -1 ? '未知时长' : timeFormat(props.duration)}</span>
+            </span>
+        );
+    }
+});
+
+// 本地歌曲卡片右键点击事件处理
+function handleLocalSongLineRightClick(event: MouseEvent, props: any) {
+    if (event.button === 2) triggerRightMenu(event, props, 'localAudio');
+}
+// 单行歌曲卡片 (本地)
+const LocalSongLine = defineComponent({
+    props: {
+        id: String,
+        name: String,
+        authors: String,
+        coverUrl: String,
+        duration: Number,
+        ext: String,
+        sizeBytes: Number
+    },
+    setup(props: { id: string, name: string, authors: string, coverUrl: string, duration: number, sizeBytes: number, ext: string }) {
+        return () => (
+            <span class="songLine local flex row" onContextmenu={(event) => handleLocalSongLineRightClick(event, props)}>
+                <button class="songPlay" onClick={() => getPlayer()?.playNow(props)}>
+                    <img src="./images/player/play.dark.svg"/>
+                </button>
+                <img class="songCover" src={props.coverUrl}></img>
+                <span class="songInfo flex column">
+                    <label class="text small bold">{props.name}</label>
+                    <label class="text ultraSmall grey">{props.authors}</label>
+                </span>
+                <span class="flex column localInfo">
+                    <span class="text ultraSmall grey">{props.ext} | {sizeFormat(props.sizeBytes)}</span>
+                    <span class="text ultraSmall songLength">{props.duration === -1 ? '未知时长' : timeFormat(props.duration)}</span>
+                </span>
             </span>
         );
     }
@@ -171,4 +207,4 @@ const ArtistLine = defineComponent({
     }
 });
 
-export { SonglistCard, SongCard, SongInfoLine, ArtistCard, ArtistLine };
+export { SonglistCard, SongCard, SongInfoLine, LocalSongLine, ArtistCard, ArtistLine };

@@ -104,6 +104,92 @@ function startService(environment) {
         });
     });
 
+    /**
+     * localhost:{srvPort}/proxy/stream?url=<encoded_url>
+     * 流式代理端点 - 用于音频流式播放
+     * 支持 Range 请求头 (用于音频进度拖拽/跳跃)
+     */
+    server.get('/proxy/stream', async (req, res) => {
+        const { url } = req.query;
+        if (!url || typeof url !== 'string') {
+            res.status(400).json({ error: 'Missing or invalid url parameter' });
+            return;
+        }
+
+        // 检查链接是否在允许的范围内
+        let allowFlag = false;
+        try {
+            const parsedUrl = new URL(url);
+            // 精确匹配 allowedHosts
+            if (allowedHosts.includes(parsedUrl.hostname)) {
+                allowFlag = true;
+            }
+            // 通配匹配 *.music.126.net (网易云音乐 CDN 子域名不固定)
+            if (parsedUrl.hostname.endsWith('music.126.net')) {
+                allowFlag = true;
+            }
+        } catch (error) {
+            res.status(400).json({ error: 'Invalid URL' });
+            return;
+        }
+        if (!allowFlag) {
+            console.error(`[Arcanum Music - Server] Stream proxy request to ${url} is not allowed`);
+            res.status(403).json({ error: `Proxy request to ${url} is not allowed` });
+            return;
+        }
+
+        console.log(`[Arcanum Music - Server] Proxying stream request to: ${url}`);
+        try {
+            const axiosConfig = {
+                url: url,
+                method: 'GET',
+                responseType: 'stream',
+                headers: {}
+            };
+
+            // 转发 Range 请求头以支持音频拖拽/跳跃
+            const rangeHeader = req.headers['range'];
+            if (rangeHeader) {
+                axiosConfig.headers['Range'] = rangeHeader;
+            }
+
+            const response = await axios(axiosConfig);
+
+            // 转发关键响应头
+            const forwardHeaders = [
+                'content-type',
+                'content-length',
+                'content-range',
+                'accept-ranges',
+                'cache-control',
+                'expires',
+                'last-modified',
+                'etag'
+            ];
+            forwardHeaders.forEach((header) => {
+                const value = response.headers[header];
+                if (value) {
+                    res.setHeader(header, value);
+                }
+            });
+
+            // 防止代理端缓存
+            res.setHeader('Cache-Control', 'no-cache');
+            // 设置状态码 (206 用于 Range 请求)
+            res.status(response.status);
+
+            // 流式传输音频数据
+            response.data.pipe(res);
+        } catch (error) {
+            console.error(`[Arcanum Music - Server] Stream proxy error:`, error.message);
+            if (error.response) {
+                res.status(error.response.status).json({ error: `Upstream returned ${error.response.status}` });
+            } else {
+                res.status(502).json({ error: 'Failed to fetch stream' });
+            }
+        }
+    });
+
     port = environment === 'dev' ? 3001 : 3000;
     server.listen(port, () => {
         console.log(`[Arcanum Music - Service] Local proxy server running at http://localhost:${port}/`)

@@ -35,14 +35,31 @@ function setEffectMode(effectMode: number) {
 function updateCurrentLyrics(_?: any) {
     const songId = getPlayer()?.playlist.current.id;
     if (!songId) return;
+
+    // 重置歌词 — 直接修改 reactive 属性，保持代理不断开
+    lyricLines.lyrics = [];
+    lyricLines.metaData = {};
+
+    // 本地音乐 显示名称及作者
+    if (songId.startsWith('local_')) {
+        console.log(`[Lyrics Controller] local song id: ${songId}`);
+        lyricLines.lyrics = [
+            {
+                time: 0.0,
+                content: getPlayer()?.playlist.current.name,
+                translation: getPlayer()?.playlist.current.authors
+            }
+        ];
+
+        currentLyricIndex = -1;
+        updateFocusedLyric(0);
+        console.log(JSON.stringify(lyricLines.lyrics[0]));
+
+        return;
+    }
+
     const platform = songId.split('-')[1];
-
-    // 重置歌词
-    lyricLines = {
-        lyrics: [],
-        metaData: {}
-    };
-
+    
     getSongLyrics(songId)
     .then((lyricsInfo: any) => {
         console.log(lyricsInfo);
@@ -52,7 +69,8 @@ function updateCurrentLyrics(_?: any) {
             console.error(`[Error] Failed to parse lyrics`);
             return;
         }
-        lyricLines = parseResult;
+        lyricLines.lyrics = parseResult.lyrics;
+        lyricLines.metaData = parseResult.metaData || {};
 
         currentLyricIndex = -1;
         updateFocusedLyric(0);
