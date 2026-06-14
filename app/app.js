@@ -269,7 +269,7 @@ async function savePreferences(_, pref) {
     if (!config.generic.appearance.window.rememberSize) {
         preference.window.width = 1000;
         preference.window.height = 650;
-        preference.window.unmaximize();
+        preference.window.isMaximized = false;
     }
     // console.log(`[Debug] Preferences: ${JSON.stringify(preference)}`);
 
