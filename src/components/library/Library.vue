@@ -77,7 +77,7 @@ function platformChange(widgetInfo: { widgetId: string, current: number }) {
 
         let requestParams = {};
         if (platform === 'netease') {
-            requestParams = { userId: userData.netease.userData.userId };
+            requestParams = { userId: userData.netease.userData.userId, maxLength: 20 };
         }
         sendRequest('userPlaylists', requestParams, userData[platform].cookies)
             .then((response: AxiosResponse) => {
@@ -114,7 +114,7 @@ function loadFavPreview(platform: string, cookies: any) {
     currentFavPlatform.value = platform;
     userFavourites.value = userFavouriteIds[platform];
 
-    sendRequest('userFavourites', {}, cookies)
+    sendRequest('userFavourites', { maxLength: 20 }, cookies)
         .then((response: any) => {
             // console.log(response.data);
             const favList = parseMusicData(response, platform, 'userFavourites');
@@ -160,7 +160,7 @@ function loadRecommendPreview(platform: string, cookies: any) {
     dailyRecommends.value = `songList-${platform}-${dailyRecommendIds[platform]}`;
     const targetId = dailyRecommendIds[platform];
 
-    sendRequest('songList', { listId: targetId }, cookies)
+    sendRequest('songList', { listId: targetId, maxLength: 1000 }, cookies)
         .then((response: any) => {
             const recommends = parseMusicData(response, platform, 'songList');
 

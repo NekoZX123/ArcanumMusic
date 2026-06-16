@@ -53,16 +53,16 @@ const requestData: { [type: string]: string } = {
     'search': '@searchData',
     'songInfo': 'mid=[songId]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'lyrics': 'musicId=[songId]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'songList': 'pid=[listId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'songList': 'pid=[listId]&pn=1&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'album': 'stype=albuminfo&albumid=[albumId]&show_copyright_off=1&alflac=1&vipver=1&sortby=1&newver=1&mobi=1',
     'artist': 'artistid=[artistId]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'artistSongs': 'artistid=[artistId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'artistSongs': 'artistid=[artistId]&pn=1&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'artistAlbum': 'artistid=[artistId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'hotList': 'pn=1&rn=20&order=hot&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'recommendSong': 'pid=1082685104&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'recommendSong': 'pid=1082685104&pn=1&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'recommendArtist': 'category=0&prefix=&pn=1&rn=60&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'rankings': 'httpsStatus=1&reqId=[uuid]&plat=web_www',
-    'rankingContent': 'bangId=[rankingId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'rankingContent': 'bangId=[rankingId]&pn=1&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'newSong': 'bangId=17&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'newAlbum': 'bangId=17&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from='
 };
@@ -100,14 +100,14 @@ function getKuwoSearchTypes() {
  * - search: { keyword: string, type: string, pageIndex: number } - 搜索关键词, 搜索类型, 页码 (从 0 开始)
  * - songInfo: { songId: string } - 歌曲 ID
  * - lyrics: { songId: string } - 歌曲 ID
- * - songList: { listId: string } - 歌单 ID
+ * - songList: { listId: string, maxLength: number } - 歌单 ID
  * - album: { albumId: string } - 专辑 ID
  * - artist: { artistId: string } - 歌手 ID
  * - hotList: {} - 空对象
  * - recommendSong: {} - 空对象
  * - recommendArtist: {} - 空对象
  * - rankings: {} - 空对象
- * - rankingContent: { rankingId: string } - 排行榜 ID
+ * - rankingContent: { rankingId: string, maxLength: number } - 排行榜 ID
  * - newSong: {} - 空对象
  * - newAlbum: {} - 空对象
  */

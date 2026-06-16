@@ -325,7 +325,7 @@ const dataParsers: Record<string, any> = {
             'songAuthors': ['singer'],
             'songDuration': ['interval'],
             '@postprocessors': {
-                'tracks': (tracks: any[]) => tracks.map((trackInfo) => trackInfo.mid),
+                'tracks': (tracks?: any[]) => tracks?.map((trackInfo) => trackInfo.mid),
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'qqmusic'),
                 'songCover': (pmid: string) => `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`
             }
@@ -345,7 +345,7 @@ const dataParsers: Record<string, any> = {
             'songAuthors': ['songInfo', 'singer'],
             'songDuration': ['songInfo', 'interval'],
             '@postprocessors': {
-                'tracks': (tracks: any[]) => tracks.map((trackInfo) => trackInfo.songInfo.mid),
+                'tracks': (tracks?: any[]) => tracks?.map((trackInfo) => trackInfo.songInfo.mid),
                 'author': (authorList: object[]) => formatAuthors(authorList, 'qqmusic'),
                 'cover': (pmid: string) => `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`,
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'qqmusic'),
@@ -473,7 +473,7 @@ const dataParsers: Record<string, any> = {
             'songAuthors': ['singer'],
             'songDuration': ['interval'],
             '@postprocessors': {
-                'tracks': (tracks: any[]) => tracks.map((trackInfo) => trackInfo.mid),
+                'tracks': (tracks?: any[]) => tracks?.map((trackInfo) => trackInfo.mid),
                 'songCover': (pmid: string) => `https://y.qq.com/music/photo_new/T002R300x300M000${pmid}.jpg`,
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'qqmusic'),
             }
@@ -1049,44 +1049,44 @@ const platformRequest: Record<string, Record<string, any>> = {
         'function': getNeteaseResult,
         'data': {
             'songInfo': { songId: '[data]' },
-            'songList': { listId: '[data]' },
-            'album': { albumId: '[data]' },
+            'songList': { listId: '[data]', maxLength: 1000 },
+            'album': { albumId: '[data]', maxLength: 1000 },
             'artist': { artistId: '[dataInt]' },
-            'rankingContent': { rankingId: '[data]' }
+            'rankingContent': { rankingId: '[data]', maxLength: 1000 }
         }
     },
     'qqmusic': {
         'function': getQQmusicResult,
         'data': {
             'songInfo': { songMid: '[data]' },
-            'songList': { listId: '[data]' },
-            'album': { albumId: '[data]' },
-            'artist': { artistId: '[data]' },
-            'rankingContent': { rankingId: '[data]' }
+            'songList': { listId: '[data]', maxLength: 1000 },
+            'album': { albumId: '[data]', maxLength: 1000 },
+            'artist': { artistId: '[data]', maxLength: 1000 },
+            'rankingContent': { rankingId: '[data]', maxLength: 1000 }
         },
         '@processors': {
             'songList': (data: { listId: string }) => { return { listId: parseInt(data.listId) }; },
-            'rankingContent': (data: { rankingId: string }) => { return { rankingId: parseInt(data.rankingId) }; }
+            'rankingContent': (data: { rankingId: string }) => { return { rankingId: parseInt(data.rankingId), maxLength: 1000 }; }
         }
     },
     'kuwo': {
         'function': getKuwoResult,
         'data': {
             'songInfo': { songId: '[data]' },
-            'songList': { listId: '[data]' },
-            'album': { albumId: '[data]' },
+            'songList': { listId: '[data]', maxLength: 1000 },
+            'album': { albumId: '[data]', maxLength: 1000 },
             'artist': { artistId: '[dataInt]' },
-            'rankingContent': { rankingId: '[data]' }
+            'rankingContent': { rankingId: '[data]', maxLength: 100 }
         }
     },
     'kugou': {
         'function': getKugouResult,
         'data': {
             'songInfo': { songId: '[data]' },
-            'songList': { listId: '[data]' },
-            'album': { albumId: '[data]' },
+            'songList': { listId: '[data]', maxLength: 1000 },
+            'album': { albumId: '[data]', maxLength: 1000 },
             'artist': { artistId: '[dataInt]' },
-            'rankingContent': { rankingId: '[data]' }
+            'rankingContent': { rankingId: '[data]', maxLength: 100 }
         }
     }
 };

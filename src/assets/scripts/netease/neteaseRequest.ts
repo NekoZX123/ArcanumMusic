@@ -76,16 +76,16 @@ const requestData: { [type: string]: any } = {
         "id": "[listId]",
         "offset": "0",
         "total": "true",
-        "limit": "1000",
-        "n": "1000",
+        "limit": "[maxLength]",
+        "n": "[maxLength]",
         "csrf_token": ""
     },
     "album": {
         "id": "[albumId]",
         "offset": "0",
         "total": "true",
-        "limit": "1000",
-        "n": "1000",
+        "limit": "[maxLength]",
+        "n": "[maxLength]",
         "csrf_token": ""
     },
     "artist": {
@@ -95,7 +95,7 @@ const requestData: { [type: string]: any } = {
     },
     "artistSongs": {
         "id": "[artistId]",
-        "top": 30,
+        "top": "[maxLength]",
         "csrf_token": ""
     },
     "hotList": {
@@ -129,7 +129,7 @@ const requestData: { [type: string]: any } = {
     "rankingContent": {
         "id": "[rankingId]",
         "ids": "['[rankingId]']",
-        "limit": 1000,
+        "limit": "[maxLength]",
         "offset": 0,
         "csrf_token": ""
     },
@@ -153,8 +153,8 @@ const requestData: { [type: string]: any } = {
         "id": "12352057833",
         "offset": "0",
         "total": "true",
-        "limit": "1000",
-        "n": "1000",
+        "limit": "[maxLength]",
+        "n": "[maxLength]",
         "csrf_token": ""
     },
     "userPlaylists": {
@@ -236,19 +236,19 @@ function getNeteaseSongLink_v2(payload: string, cookies: string) {
  * - search: { keyword: string, type: number, pageIndex: number } - 搜索关键词, 搜索类型, 页码 (从 0 开始)
  * - songInfo: { songId: string } - 歌曲 ID
  * - lyrics: { songId: string } - 歌曲 ID
- * - songList: { listId: string } - 歌单 ID
- * - album: { albumId: string } - 专辑 ID
+ * - songList: { listId: string, maxLength: number } - 歌单 ID
+ * - album: { albumId: string, maxLength: number } - 专辑 ID
  * - artist: { artistId: number } - 歌手 ID
- * - artistSongs: { artistId: number } - 歌手 ID
+ * - artistSongs: { artistId: number, maxLength: number } - 歌手 ID
  * - hotList: {} - 空对象
  * - recommendSong: {} - 空对象
  * - recommendArtist: {} - 空对象
  * - rankings: {} - 空对象
- * - rankingContent: { rankingId: string } - 排行榜 ID
+ * - rankingContent: { rankingId: string, maxLength: number } - 排行榜 ID
  * - newSong: {} - 空对象
  * - newAlbum: {} - 空对象
  * - dailyRecommends: {} - 空对象
- * - userFavourites: {} - 空对象
+ * - userFavourites: { maxLength: number } - 空对象
  * - userPlaylists: { userId: string } - 用户 ID
  */
 function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: string]: any }, cookies: { MUSIC_U: string }) {

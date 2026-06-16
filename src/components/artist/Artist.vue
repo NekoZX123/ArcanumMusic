@@ -125,7 +125,7 @@ function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
         });
     
     // 加载歌手歌曲
-    getNeteaseResult('artistSongs', { artistId: parseInt(artistId) }, cookies)
+    getNeteaseResult('artistSongs', { artistId: parseInt(artistId), maxLength: 10 }, cookies)
         .then((response) => {
             const data = response.data;
             // console.log(data);
@@ -190,7 +190,7 @@ function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
  * @param cookies 用户 Token
  */
 function loadQQMusicArtist(artistId: string, cookies: { qm_keyst: string, uin: number }) {
-    getQQmusicResult('artist', { artistId: artistId}, cookies)
+    getQQmusicResult('artist', { artistId: artistId, maxLength: 10 }, cookies)
         .then((response) => {
             const data = response.data;
             console.log(data);
@@ -387,7 +387,7 @@ function loadKuwoArtist(artistId: string, cookies: { userid: string }) {
             }
         });
     // 获取最新 / 热门歌曲
-    getKuwoResult('artistSongs', { artistId: artistId }, cookies)
+    getKuwoResult('artistSongs', { artistId: artistId, maxLength: 10 }, cookies)
         .then((response) => {
             const data = response.data;
             if (data.code !== 200) {
@@ -451,7 +451,7 @@ function loadKuwoArtist(artistId: string, cookies: { userid: string }) {
  * @param cookies 用户 Token
  */
 function loadKugouArtist(artistId: string, cookies: { KuGoo: string }) {
-    getKugouResult('artist', { artistId: parseInt(artistId) }, cookies)
+    getKugouResult('artist', { artistId: parseInt(artistId), maxLength: 10 }, cookies)
         .then((response) => {
             const data = response.data;
             if (data.error_code !== 0) {

@@ -76,7 +76,7 @@ onMounted(() => {
     const userData = getAccountInfo('all');
 
     // 获取每日推荐封面
-    getNeteaseResult('songList', { listId: '3136952023' }, userData.netease.cookies)
+    getNeteaseResult('songList', { listId: '3136952023', maxLength: 20 }, userData.netease.cookies)
         .then((response) => {
             const data = response.data;
             if (data.code !== 200) {

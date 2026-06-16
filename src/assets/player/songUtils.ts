@@ -104,7 +104,7 @@ function getListContent(listId: string) {
             reject(`[Error] Unsupported platform: ${platform}`);
         }
 
-        const requestParams = type === 'songList' ? { listId: id } : { albumId: id };
+        const requestParams = type === 'songList' ? { listId: id, maxLength: 1000 } : { albumId: id, maxLength: 1000 };
         const userData = getAccountInfo('all');
         sendRequest(type, requestParams, userData[platform].cookies)
             .then((response: AxiosResponse) => {
