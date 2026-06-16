@@ -3,6 +3,7 @@ import path from 'path';
 import { shell } from 'electron';
 import { parseFile } from 'music-metadata';
 import fetch from 'node-fetch';
+import NodeID3 from 'node-id3';
 
 import { getLocalMusicPaths, writeLocalMusicPaths } from './configHelper.js';
 
@@ -83,9 +84,10 @@ async function getMusicMetadata(_, filePath) {
  * @param event IPC 事件对象（用于推送进度）
  * @param url 音频下载链接
  * @param songName 歌曲名称（用于生成文件名）
+ * @param metaData 歌曲元数据
  * @returns 保存的文件路径
  */
-async function downloadAudio(event, url, songName) {
+async function downloadAudio(event, url, songName, metaData) {
     const paths = await getLocalMusicPaths();
     if (!paths || paths.length === 0) {
         throw new Error('未配置本地音乐路径');
@@ -171,7 +173,7 @@ async function downloadAudio(event, url, songName) {
     response.body.pipe(writeStream);
 
     return new Promise((resolve, reject) => {
-        writeStream.on('finish', () => {
+        writeStream.on('finish', async () => {
             // 推送完成进度
             if (event && event.sender) {
                 event.sender.send('download-progress', {
@@ -180,6 +182,42 @@ async function downloadAudio(event, url, songName) {
                     total: total || loaded,
                 });
             }
+
+            // 写入 ID3 元数据
+            if (metaData) {
+                try {
+                    const tags = {};
+
+                    if (metaData.name) tags.title = metaData.name;
+                    if (metaData.authors || metaData.songAuthors) {
+                        tags.artist = metaData.authors || metaData.songAuthors;
+                    }
+                    if (metaData.albumName) tags.album = metaData.albumName;
+
+                    // 解析封面图片（base64 格式）
+                    if (metaData.coverBase64) {
+                        const matches = metaData.coverBase64.match(/^data:(image\/\w+);base64,(.+)$/);
+                        if (matches) {
+                            const mimeType = matches[1];
+                            const imageBuffer = Buffer.from(matches[2], 'base64');
+                            tags.image = {
+                                imageBuffer,
+                                type: { id: 3, name: 'front cover' },
+                                mime: mimeType,
+                                description: '',
+                            };
+                        }
+                    }
+
+                    const result = NodeID3.write(tags, filePath);
+                    if (!result) {
+                        console.warn(`[Warning] Failed to write ID3 tags for: ${filePath}`);
+                    }
+                } catch (tagErr) {
+                    console.warn(`[Warning] Error writing ID3 tags: ${tagErr.message}`);
+                }
+            }
+
             resolve(filePath);
         });
         writeStream.on('error', (err) => {

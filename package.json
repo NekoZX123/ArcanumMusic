@@ -27,6 +27,7 @@
         "express": "^5.2.1",
         "music-metadata": "^11.12.3",
         "node-fetch": "^3.3.2",
+        "node-id3": "^0.2.9",
         "ws": "^8.21.0"
     },
     "devDependencies": {

@@ -183,7 +183,7 @@ onMounted(() => {
                 :on-click="() => {copyLink(props.targetInfo.id)}" 
                 v-if="['song', 'playlistItem'].includes(props.menuType)"></MenuItem>
             <MenuItem id="saveAudio" icon="./images/menu/download.svg" text="保存至本地"
-                :on-click="() => {saveAudio(props.targetInfo.id, props.targetInfo.name)}"
+                :on-click="() => {saveAudio(props.targetInfo.id, props.targetInfo.name, props.targetInfo)}"
                 v-if="['song', 'playlistItem'].includes(props.menuType)"></MenuItem>
         </span>
         <span class="menuPart flex column">

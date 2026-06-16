@@ -39,7 +39,7 @@ export interface IElectronAPI {
     copyToClipboard: (content: String) => Promise<void>,
     setAutoLaunch: (isEnabled: boolean) => Promise<void>,
 
-    downloadAudio: (url: String, songName: String) => Promise<string>,
+    downloadAudio: (url: String, songName: String, metaData: any) => Promise<string>,
     onDownloadProgress: (callback: (progress: { percent: number, loaded: number, total: number }) => void) => () => void
 }
 
