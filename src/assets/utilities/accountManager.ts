@@ -83,9 +83,7 @@ async function storeAccountInfo(platform: string) {
 async function readAccountInfo(platform: string = 'all') {
     if (platform === 'all') {
         const platforms = ['netease', 'qqmusic', 'kuwo', 'kugou'];
-        platforms.forEach(async (plat) => {
-            await readAccountInfo(plat);
-        });
+        await Promise.all(platforms.map((plat) => readAccountInfo(plat)));
         return;
     }
 

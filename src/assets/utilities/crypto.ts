@@ -39,7 +39,6 @@ async function getNewPassword() {
 }
 async function encrypt(plainText: string) {
     const password = await getNewPassword();
-    console.log(`[Debug] Password: ${password}`);
     const passwordUuid = password.split('#')[1].split('@')[0];
     const salt = CryptoJS.lib.WordArray.random(128 / 8);
 
