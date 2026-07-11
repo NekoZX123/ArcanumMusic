@@ -17,11 +17,11 @@ const dataParsers: Record<string, any> = {
         'songInfo': {
             'body': ['data'],
             'songName': ['songs', '0', 'name'],
-            'songCover': ['songs', '0', 'album', 'picUrl'],
-            'songAuthors': ['songs', '0', 'artists'],
-            'songDuration': ['songs', '0', 'duration'],
-            'albumId': ['songs', '0', 'album', 'id'],
-            'authorsObject': ['songs', '0', 'artists'],
+            'songCover': ['songs', '0', 'al', 'picUrl'],
+            'songAuthors': ['songs', '0', 'ar'],
+            'songDuration': ['songs', '0', 'dt'],
+            'albumId': ['songs', '0', 'al', 'id'],
+            'authorsObject': ['songs', '0', 'ar'],
             '@postprocessors' : {
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'netease'),
                 'songDuration': (duration: number) => Math.round(duration / 1000),
@@ -41,12 +41,12 @@ const dataParsers: Record<string, any> = {
         },
         'search-singles': {
             'body': ['data'],
-            'songList': ['result', 'songs'],
-            'songId': ['id'],
-            'songName': ['name'],
-            'songCover': ['al', 'picUrl'],
-            'songAuthors': ['ar'],
-            'songDuration': ['dt'],
+            'songList': ['data', 'resources'],
+            'songId': ['baseInfo', 'simpleSongData', 'id'],
+            'songName': ['baseInfo', 'simpleSongData', 'name'],
+            'songCover': ['baseInfo', 'simpleSongData', 'al', 'picUrl'],
+            'songAuthors': ['baseInfo', 'simpleSongData', 'ar'],
+            'songDuration': ['baseInfo', 'simpleSongData', 'dt'],
             '@postprocessors' : {
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'netease'),
                 'songDuration': (duration: number) => Math.round(duration / 1000)
@@ -97,32 +97,25 @@ const dataParsers: Record<string, any> = {
             'body': ['data'], // 数据体
             'name': ['album', 'name'], // 专辑名称
             'cover': ['album', 'picUrl'], // 专辑封面
-            'description': ['album', 'briefDesc'], // 专辑介绍
+            'description': ['album', 'description'], // 专辑介绍
             'author': ['album', 'artist', 'name'], // 专辑作者
             'songCount': ['album', 'size'], // 歌曲数量 (null => 使用 `tracks` 的长度)
-            'tracks': ['album', 'songs'], // 所有歌曲
-            'loadTracks': ['album', 'songs'], // 含详细信息歌曲
+            'tracks': ['songs'], // 所有歌曲
+            'loadTracks': ['songs'], // 含详细信息歌曲
             'songId': ['id'], // 歌曲 ID
             'songName': ['name'], // 歌曲名
-            'songCover': ['album', 'picUrl'], // 歌曲封面 (null => 使用专辑封面)
-            'songAuthors': ['artists'], // 歌曲作者
-            'songDuration': ['duration'], // 歌曲时长
+            'songCover': ['al', 'picUrl'], // 歌曲封面 (null => 使用专辑封面)
+            'songAuthors': ['ar'], // 歌曲作者
+            'songDuration': ['dt'], // 歌曲时长
             '@postprocessors': { // 后处理函数
                 'tracks': (tracks: any[]) => tracks.map((trackInfo) => trackInfo.id),
                 'songAuthors': (authors: object[]) => formatAuthors(authors, 'netease'),
                 'songDuration': (duration: number) => Math.round(duration / 1000)
             }
         },
-        'artistAlbum': {
+        'artist': {
             'body': ['data'],
-            'albumList': ['hotAlbums'],
-            'albumId': ['id'],
-            'albumName': ['name'],
-            'albumCover': ['picUrl']
-        },
-        'artistSongs': {
-            'body': ['data'],
-            'songList': ['songs'],
+            'songList': ['hotSongs'],
             'songId': ['id'],
             'songName': ['name'],
             'songCover': ['al', 'picUrl'],
@@ -132,6 +125,26 @@ const dataParsers: Record<string, any> = {
                 'songAuthors': (authorList: any[]) => formatAuthors(authorList, 'netease'),
                 'songDuration': (duration: number) => Math.round(duration / 1000)
             }
+        },
+        'artistSongs': {
+            'body': ['data'],
+            'songList': ['hotSongs'],
+            'songId': ['id'],
+            'songName': ['name'],
+            'songCover': ['al', 'picUrl'],
+            'songAuthors': ['ar'],
+            'songDuration': ['dt'],
+            '@postprocessors': {
+                'songAuthors': (authorList: any[]) => formatAuthors(authorList, 'netease'),
+                'songDuration': (duration: number) => Math.round(duration / 1000)
+            }
+        },
+        'artistAlbum': {
+            'body': ['data'],
+            'albumList': ['hotAlbums'],
+            'albumId': ['id'],
+            'albumName': ['name'],
+            'albumCover': ['picUrl']
         },
         'hotList': {
             'body': ['data'],
@@ -161,7 +174,7 @@ const dataParsers: Record<string, any> = {
             'artistCover': ['picUrl']
         },
         'rankings': {
-            'body': ['data'],
+            'body': ['data', '0', 'list'],
             'rankingList': ['list'],
             'rankingId': ['id'],
             'rankingName': ['name'],
@@ -188,19 +201,19 @@ const dataParsers: Record<string, any> = {
         },
         'newAlbum': {
             'body': ['data'],
-            'albumList': ['albums'],
+            'albumList': ['weekData'],
             'albumId': ['id'],
             'albumName': ['name'],
             'albumCover': ['picUrl']
         },
         'newSong': {
             'body': ['data'],
-            'songList': ['result'],
+            'songList': ['data'],
             'songId': ['id'],
             'songName': ['name'],
-            'songCover': ['picUrl'],
-            'songAuthors': ['song', 'artists'],
-            'songDuration': ['song', 'duration'],
+            'songCover': ['al', 'picUrl'],
+            'songAuthors': ['ar'],
+            'songDuration': ['dt'],
             '@postprocessors': {
                 'songAuthors': (authorList: object[]) => formatAuthors(authorList, 'netease'),
                 'songDuration': (duration: number) => Math.round(duration / 1000)

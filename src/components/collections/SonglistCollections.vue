@@ -44,7 +44,7 @@ onMounted(() => {
     if (moduleName === 'hotList') {
         Object.keys(requestFunc).forEach((platform: string) => {
             const sendRequest = requestFunc[platform];
-            sendRequest('hotList', {}, userData[platform].cookies)
+            sendRequest('hotList', { maxLength: 30 }, userData[platform].cookies)
                 .then((response: AxiosResponse)=> {
                     // 解析数据
                     const recommendations = parseMusicData(response, platform, 'hotList');
@@ -68,8 +68,23 @@ onMounted(() => {
             const sendRequest = requestFunc[platform];
             sendRequest('rankings', {}, userData[platform].cookies)
                 .then((response: AxiosResponse) => {
-                    const rankings = parseMusicData(response, platform, 'rankings');
-                    const rankingList = rankings.rankingList;
+                    let rankingList: any[] = [];
+
+                    if (platform === 'netease') {
+                        rankingList = response.data.data.reduce((acc: any[], category: any) => {
+                            return acc.concat(category.list.map((ranking: any) => {
+                                return {
+                                    rankingId: ranking.id,
+                                    rankingName: ranking.name,
+                                    rankingCover: ranking.coverUrl
+                                };
+                            }));
+                        }, []);
+                    }
+                    else {
+                        const rankings = parseMusicData(response, platform, 'rankings');
+                        rankingList = rankings.rankingList;
+                    }
 
                     rankingList.forEach((rankingInfo: any) => {
                         const rankingId = `ranking-${platform}-${rankingInfo.rankingId.toString()}`;
@@ -85,7 +100,7 @@ onMounted(() => {
     if (moduleName === 'newAlbum') {
         Object.keys(requestFunc).forEach((platform: string) => {
             const sendRequest = requestFunc[platform];
-            sendRequest('newAlbum', {}, userData[platform].cookies)
+            sendRequest('newAlbum', { maxLength: 20 }, userData[platform].cookies)
                 .then((response: AxiosResponse) => {
                     // console.log(response.data);
                     const albums = parseMusicData(response, platform, 'newAlbum');
@@ -108,11 +123,11 @@ onMounted(() => {
         const sendRequest = requestFunc[platform];
 
         let reqModule = 'artist';
-        if (['kuwo', 'kugou'].includes(platform)) {
+        if (platform !== 'qqmusic') {
             reqModule = 'artistAlbum';
         }
 
-        sendRequest(reqModule, { artistId: artistId }, userData[platform].cookies)
+        sendRequest(reqModule, { artistId: artistId, maxLength: 50 }, userData[platform].cookies)
             .then((response: AxiosResponse) => {
                 console.log(response.data);
                 const albums = parseMusicData(response, platform, 'artistAlbum');

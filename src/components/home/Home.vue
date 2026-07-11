@@ -119,7 +119,7 @@ onMounted(() => {
     }
     Object.keys(requestFunc).forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
-        sendRequest('hotList', {}, userData[platform].cookies)
+        sendRequest('hotList', { maxLength: 5 }, userData[platform].cookies)
             .then((response: AxiosResponse)=> {
                 // 解析数据
                 const recommendations = parseMusicData(response, platform, 'hotList');
@@ -182,7 +182,7 @@ onMounted(() => {
     const loadedArtists: string[] = [];
     Object.keys(requestFunc).forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
-        sendRequest('recommendArtist', {}, userData[platform].cookies)
+        sendRequest('recommendArtist', { maxLength: 5 }, userData[platform].cookies)
             .then((response: AxiosResponse) => {
                 // 解析数据
                 const recommendations = parseMusicData(response, platform, 'recommendArtist');
@@ -224,13 +224,21 @@ onMounted(() => {
                 return;
             }
 
-            const rankings = data.list;
+            const rankings = data.data.reduce((acc: any[], category: any) => {
+                return acc.concat(category.list.map((ranking: any) => {
+                    return {
+                        id: ranking.id,
+                        name: ranking.name,
+                        coverUrl: ranking.coverUrl
+                    };
+                }));
+            }, []);
             for (let i = 0; i < 6; i++) {
                 const rankingInfo = rankings[i];
 
                 const rankingId = `ranking-netease-${rankingInfo.id.toString()}`;
                 const rankingName = rankingInfo.name;
-                const rankingCover = rankingInfo.coverImgUrl;
+                const rankingCover = rankingInfo.coverUrl;
 
                 addSonglistCard(rankingsContainer, rankingId, rankingName, rankingCover);
             }
@@ -243,7 +251,7 @@ onMounted(() => {
     }
     ['netease', 'qqmusic'].forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
-        sendRequest('newAlbum', {}, userData[platform].cookies)
+        sendRequest('newAlbum', { maxLength: 5 }, userData[platform].cookies)
             .then((response: AxiosResponse) => {
                 // 解析数据
                 const recommendations = parseMusicData(response, platform, 'newAlbum');
@@ -271,7 +279,7 @@ onMounted(() => {
     const loadedSongs: string[] = [];
     Object.keys(requestFunc).forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
-        sendRequest('newSong', {}, userData[platform].cookies)
+        sendRequest('newSong', { maxLength: 3 }, userData[platform].cookies)
             .then((response: AxiosResponse) => {
                 // 解析数据
                 // console.log(response.data);
