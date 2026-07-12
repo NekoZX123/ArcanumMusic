@@ -1,9 +1,8 @@
 import { Buffer } from 'buffer';
+import * as CryptoJS from 'crypto-js';
 
 import { proxyRequest } from "../../utilities/proxyRequest.ts";
 
-// @ts-ignore 6133
-import { getSign, getSearchId, validate } from "./qqmusicEncrypt.js";
 import type { AxiosResponse } from 'axios';
 
 // Note: api 包含:
@@ -280,6 +279,28 @@ const userPlaylistsUrl = 'https://c6.y.qq.com/fav/fcgi-bin/fcg_get_profile_order
 type QQMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
     'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 'newSong' | 'newAlbum' | 
     'userFavourites' | 'userPlaylists';
+
+// `sign` 签名参数获取 (Reference: https://jixun.uk/posts/2024/qqmusic-zzc-sign/)
+function hashText(text: string): string {
+  const sha1 = CryptoJS.SHA1(CryptoJS.enc.Utf8.parse(text));
+  return sha1.toString(CryptoJS.enc.Hex).toUpperCase();
+}
+const PART_1_INDEXES = [23, 14, 6, 36, 16, 40, 7, 19];
+const PART_2_INDEXES = [16, 1, 32, 12, 19, 27, 8, 5];
+const SCRAMBLE_VALUES = [89, 39, 179, 150, 218, 82, 58, 252, 177, 52, 186, 123, 120, 64, 242, 133, 143, 161, 121, 179];
+function pickHashByIdx(hash: string, indexes: number[]) {
+  return indexes.map((idx) => hash[idx]).join('');
+}
+function getSign(text: string): string {
+  const sha1 = hashText(text);
+  const part1 = pickHashByIdx(sha1, PART_1_INDEXES);
+  const part2 = pickHashByIdx(sha1, PART_2_INDEXES);
+  const part3 = SCRAMBLE_VALUES.map((scramble, i) => scramble ^ parseInt(sha1.slice(i * 2, i * 2 + 2), 16));
+  const b64Part = Buffer.from(part3)
+    .toString('base64')
+    .replace(/[\\/+=]/g, '');
+  return `zzc${part1}${b64Part}${part2}`.toLowerCase();
+}
 
 /**
  * 获取 QQ音乐 用户收藏歌单

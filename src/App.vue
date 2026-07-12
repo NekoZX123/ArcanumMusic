@@ -408,10 +408,6 @@ function copySongName() {
 }
 
 onMounted(async () => {
-    // 绕过 QQ 音乐脚本环境监测
-    // 参考 / Reference: https://jixun.uk/posts/2024/qqmusic-zzc-sign/
-    window.__qmfe_sign_check = 1;
-
     // 加载代理端口
     await loadProxyPort();
 
