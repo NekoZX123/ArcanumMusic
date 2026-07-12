@@ -1,13 +1,6 @@
 import { proxyRequest } from '../../utilities/proxyRequest.ts';
 
-import { getNeteaseEncrypt } from './neteaseEncrypt.js';
-
 import CryptoJS from 'crypto-js';
-
-type neteaseEncryptedData = {
-    encText: string,
-    encSecKey: string
-}
 
 // 不同搜索类型 API 地址
 const searchApiTable: { [type: string]: string } = {
@@ -155,9 +148,7 @@ const requestData: { [type: string]: any } = {
 const PAGE_SIZE = 30;
 
 // User-Agent (两种)
-const mobileUA = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36 Edg/139.0.0.0';
 const ncmDesktopUA = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36 Chrome/91.0.4472.164 NeteaseMusicDesktop/3.1.28.205001';
-const mobileModuleList: NeteaseMusicModule[] = ['artist', 'artistAlbum', 'hotList', 'recommendSong', 'rankings', 'newSong', 'newAlbum'];
 
 type NeteaseMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
     'artistAlbum' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' 
@@ -340,104 +331,28 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
 }
 
 /**
- * 通用网易云音乐 API 请求函数 (旧版本, 网页端 API)
- * 
- * 根据指定的模块名称、参数和用户 Cookie，构建请求数据并发起网易云音乐 API 请求
- * 支持歌曲链接、搜索、歌曲信息等多种模块，参数会自动替换为传入值
- * 
- * @param moduleName (必填) 请求模块名称（如 "songLink", "search", "songInfo" 等）
- * @param params (必填) 需要替换的参数对象，键为参数名，值为参数值
- * @param cookies (必填, 否则无法获取数据) 用户 Cookie 信息 (MUSIC_U)
- * @returns Promise<AxiosResponse> - 请求结果
- * 
- * @throws 如果模块名称不存在于请求数据中，则抛出错误
- * 
- * 附: moduleName 对应的 params 格式
- * - songLink: { songId: string } - 歌曲 ID
- * - search: { keyword: string, type: string, pageIndex: number } - 搜索关键词, 搜索类型, 页码 (从 0 开始)
- * - songInfo: { songId: string } - 歌曲 ID
- * - lyrics: { songId: string } - 歌曲 ID
- * - songList: { listId: string, maxLength: number } - 歌单 ID, 最大长度
- * - album: { albumId: string, maxLength: number } - 专辑 ID, 最大长度
- * - artist: { artistId: number } - 歌手 ID
- * - artistAlbum: { artistId: number, maxLength: number } - 歌手 ID, 最大长度
- * - hotList: { maxLength: number } - 最大长度
- * - recommendSong: {} - 空对象
- * - recommendArtist: { maxLength: number } - 最大长度
- * - rankings: {} - 空对象
- * - rankingContent: { rankingId: string, maxLength: number } - 排行榜 ID, 最大长度
- * - newSong: { maxLength: number } - 最大长度
- * - newAlbum: {} - 空对象
- * - dailyRecommends: {} - 空对象
- * - userFavourites: { maxLength: number } - 最大长度
- * - userPlaylists: { userId: string } - 用户 ID
- * 
- * @deprecated 此函数作为旧版本网易云网页端 API 请求函数已被弃用, 请使用 `getNeteaseResult` (电脑端 API) [注: 此函数预计下次更新时移除]
- */
-function getNeteaseResult_old(moduleName: NeteaseMusicModule, params: { [type: string]: any }, cookies: { MUSIC_U: string }) {
-    console.warn(`[Warning] You're using the old version of getNeteaseResult. Consider using getNeteaseResult for better compatibility.`);
-    
-    let targetUrl = requestUrls[moduleName];
-    if (moduleName === 'album') { // 专辑信息
-        targetUrl = targetUrl.replace('[albumId]', params.albumId);
-    }
-    if (moduleName === 'artist') { // 歌手信息及专辑
-        targetUrl = targetUrl.replace('[artistId]', params.artistId);
-    }
-    const moduleData = requestData[moduleName];
-    if (!targetUrl || !moduleData) {
-        throw new Error(`Module ${moduleName} not found in request data.`);
-    }
-
-    let moduleString = JSON.stringify(moduleData);
-    // 替换参数
-    Object.keys(params).forEach((key) => {
-        if (moduleString.includes(`[${key}]`)) {
-            // 页码按照偏移量替换
-            if (key === 'pageIndex') {
-                const offsetValue = params[key] * PAGE_SIZE;
-                moduleString = moduleString.replace(new RegExp(`"\\[${key}\\]"`, 'g'), offsetValue.toString() || '');
-            }
-            // 根据数据类型替换参数, 保证类型正确
-            if (typeof params[key] === 'number') {
-                moduleString = moduleString.replace(new RegExp(`"\\[${key}\\]"`, 'g'), params[key].toString() || '');
-            }
-            else {
-                moduleString = moduleString.replace(new RegExp(`\\[${key}\\]`, 'g'), params[key] || '');
-            }
-        }
-    });
-    const moduleParams = moduleString;
-
-    const requestParams: neteaseEncryptedData = getNeteaseEncrypt(moduleParams);
-    const cookieHeader = `MUSIC_U=${cookies.MUSIC_U}`;
-    let userAgent = mobileModuleList.includes(moduleName) ? mobileUA : ncmDesktopUA;
-
-    return proxyRequest(
-        'POST',
-        targetUrl,
-        {
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Cookie': cookieHeader,
-            'User-Agent': userAgent
-        },
-        {
-            'params': requestParams.encText,
-            'encSecKey': requestParams.encSecKey
-        }
-    );
-}
-
-/**
  * 获取网易云用户信息
  * @param cookies (必填, 否则无法获取数据) 用户 Cookie 信息, 含有 `MUSIC_U` 参数
  */
 function getNeteaseAccount(cookies: { MUSIC_U: string }) {
-    const userInfoUrl = 'https://music.163.com/weapi/w/nuser/account/get?csrf_token=';
+    const userInfoUrl = 'https://interfacepc.music.163.com/eapi/w/nuser/account/get';
     const requestData = { csrf_token: '' };
 
-    const requestParams: neteaseEncryptedData = getNeteaseEncrypt(JSON.stringify(requestData));
+    // 加密请求参数
+    const encryptKey = CryptoJS.enc.Utf8.parse('e82ckenh8dichen8');
+    const digest = `nobody/api/w/nuser/account/getuse${JSON.stringify(requestData)}md5forencrypt`;
+    const dataDigest = CryptoJS.MD5(digest).toString(CryptoJS.enc.Hex);
+    const finalParams = `/api/w/nuser/account/get-36cd479b6b5-${JSON.stringify(requestData)}-36cd479b6b5-${dataDigest}`;
+
+    // 使用 PKCS7 填充
+    const encrypted = CryptoJS.AES.encrypt(finalParams, encryptKey, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    });
+
+    // 转换为十六进制字符串并大写
+    const hexParams = encrypted.ciphertext.toString(CryptoJS.enc.Hex).toUpperCase();
+
     const cookieHeader = `MUSIC_U=${cookies.MUSIC_U}`;
 
     return proxyRequest(
@@ -450,8 +365,7 @@ function getNeteaseAccount(cookies: { MUSIC_U: string }) {
             'User-Agent': ncmDesktopUA
         },
         {
-            'params': requestParams.encText,
-            'encSecKey': requestParams.encSecKey
+            'params': hexParams
         }
     );
 }
@@ -487,7 +401,6 @@ function decryptHexParams(hexParams: string): string {
 
 export {
     getNeteaseResult,
-    getNeteaseResult_old,
     getNeteaseSearchTypes,
     getNeteaseAccount,
     decryptHexParams,

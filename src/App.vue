@@ -23,7 +23,7 @@ import { initializeTheme, setControlBarTheme, setWindowBackground, type colorThe
 import { buttonTypes, showPopup } from './assets/notifications/popup.tsx';
 import DownloadItem from './assets/widgets/DownloadItem.vue';
 import { getDownloadQueue } from './assets/player/musicDownloader.ts';
-// import { decryptHexParams } from './assets/scripts/netease/neteaseRequest.ts';
+
 /* 窗口移动功能 */
 let startX = 0;
 let startY = 0;
@@ -514,12 +514,6 @@ onMounted(async () => {
 
     // 关闭窗口时保存偏好数据
     window.addEventListener('close', savePreferences);
-
-    ///// 测试区域 /////
-    // const DEBUG_DECRYPT_HEX = '';
-    // console.log(decryptHexParams(DEBUG_DECRYPT_HEX));
-    // const DEBUG_CACHE_KEY = 'a2h8BsD8cAEbVhLusztVVFM3ZWgd1cYW6sNGl+NLINs=';
-    // console.log(decryptNeteaseCacheKey(DEBUG_CACHE_KEY));
 });
 onUnmounted(() => {
     window.onstorage = null;
