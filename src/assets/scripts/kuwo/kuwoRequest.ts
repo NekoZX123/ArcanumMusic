@@ -38,7 +38,9 @@ const requestUrls: { [type: string]: string } = {
     'rankings': 'https://www.kuwo.cn/api/www/bang/bang/bangMenu',
     'rankingContent': 'https://www.kuwo.cn/api/www/bang/bang/musicList',
     'newSong': 'https://www.kuwo.cn/api/www/bang/bang/musicList',
-    'newAlbum': 'https://www.kuwo.cn/api/www/bang/bang/musicList'
+    'newAlbum': 'https://www.kuwo.cn/api/www/bang/bang/musicList',
+    'userFavourites': '',
+    'userPlaylists': '',
 };
 // 请求数据
 // 搜索数据
