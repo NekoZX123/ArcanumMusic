@@ -1078,8 +1078,8 @@ const platformRequest: Record<string, Record<string, any>> = {
             'rankingContent': { rankingId: '[data]', maxLength: 1000 }
         },
         '@processors': {
-            'songList': (data: { listId: string }) => { return { listId: parseInt(data.listId) }; },
-            'rankingContent': (data: { rankingId: string }) => { return { rankingId: parseInt(data.rankingId), maxLength: 1000 }; }
+            'songList': (data: { listId: string, maxLength: number }) => { return { listId: parseInt(data.listId), maxLength: data.maxLength }; },
+            'rankingContent': (data: { rankingId: string, maxLength: number }) => { return { rankingId: parseInt(data.rankingId), maxLength: data.maxLength }; }
         }
     },
     'kuwo': {
