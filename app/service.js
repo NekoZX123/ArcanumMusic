@@ -24,6 +24,7 @@ const allowedHosts = [
     'c6.y.qq.com',
     'ws6.stream.qqmusic.qq.com',
     'aqqmusic.tc.qq.com',
+    'y.qq.com',
     'kuwo.cn',
     'www.kuwo.cn',
     'searchlist.kuwo.cn',
