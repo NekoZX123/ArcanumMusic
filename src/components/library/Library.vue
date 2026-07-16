@@ -14,6 +14,7 @@ import type { AxiosResponse } from 'axios';
 import { getPlayer } from '../../assets/player/player.ts';
 import { getConfig } from '../../assets/utilities/configLoader.ts';
 import { changePage } from '../../assets/utilities/pageSwitcher.ts';
+import { showNotify } from '../../assets/notifications/Notification.ts';
 
 const platformTabs = [
     {
@@ -84,6 +85,10 @@ function platformChange(widgetInfo: { widgetId: string, current: number }) {
                 // console.log(response.data);
                 if (platform === 'kugou') {
                     console.log(response.data);
+                    if (response.data.error_code !== 0) {
+                        showNotify('errFailed', 'critical', '请求失败', 
+                            `获取酷狗音乐歌单失败 (${response.data.error_code})`);
+                    }
                     return;
                 }
                 const userLists = parseMusicData(response, platform, 'userPlaylists');
@@ -107,6 +112,7 @@ function loadFavPreview(platform: string, cookies: any) {
         return;
     }
     else if (['kuwo', 'kugou'].includes(platform)) {
+        showNotify('errNoApi', 'critical', '接口暂未实现', '我们尚未提取到该平台的收藏接口, 请等待后续更新');
         console.warn(`[Warning] Unsupported platform ${platform}`);
         return;
     }
@@ -152,7 +158,7 @@ function loadRecommendPreview(platform: string, cookies: any) {
         return;
     }
     else if (['kuwo', 'kugou'].includes(platform)) {
-        console.warn(`[Warning] Unsupported platform ${platform}`);
+        showNotify('errNoApi', 'critical', 'API 未实现', `我们未提取到对应模块的 API, 请等待后续更新`);
         return;
     }
 

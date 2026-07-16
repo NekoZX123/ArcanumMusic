@@ -38,6 +38,7 @@ const requestUrls: { [type: string]: string } = {
     'rankingContent': 'https://m.kugou.com/rank/info/[rankingId]',
     'newSong': 'https://m.kugou.com/newsong/index',
     'newAlbum': 'https://m.kugou.com/rank/info/8888',
+    'userFavourites': '[notImplemented]',
     'userPlaylists': 'https://gateway.kugou.com/cloudlist.service/v7/get_all_list'
 };
 
@@ -163,12 +164,11 @@ const requestData: { [type: string]: any } = {
         json: true
     },
     'userPlaylists': {
-        appid: 1004,
+        appid: 1001,
         clienttime: 0,
         clientver: 20132,
         dfid: '-',
         mid: '',
-        plat: 1,
         token: '',
         userid: 0,
         uuid: ''
@@ -180,14 +180,7 @@ const artistApiPostData = {
     page: 1,
     pagesize: 20
 };
-const userPlaylistsData = {
-    "page": 1,
-    "pagesize": 30,
-    "token": "[token]",
-    "total_ver": 979,
-    "type": 2,
-    "userid": "[userid]"
-};
+const userPlaylistsData = `{"userid":"[userId]","token":"[token]","type":2,"support_pub":1,"support_per":0,"page":1,"pagesize":300}`
 
 type KugouMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
     'artistAlbum' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 
@@ -316,14 +309,14 @@ function getKugouResult(moduleName: KugouMusicModule, params: { [type: string]: 
     }
     // 用户歌单 (POST request)
     if (moduleName === 'userPlaylists') {
-        const formData = userPlaylistsData;
+        let formData = userPlaylistsData;
         const userId = getUserId(cookies.KuGoo);
         const token = getToken(cookies.KuGoo);
         moduleParams.clienttime = Math.floor(Date.now() / 1000);
-        moduleParams.userid = parseInt(userId);
+        moduleParams.userid = userId;
         moduleParams.token = token;
-        formData.userid = userId;
-        formData.token = token;
+        formData = formData.replace('[userId]', userId);
+        formData = formData.replace('[token]', token);
 
         const encryptedParams = getAppSign(moduleParams, moduleParams);
         const urlParams = objectToKeyPairs(encryptedParams);
@@ -333,7 +326,8 @@ function getKugouResult(moduleName: KugouMusicModule, params: { [type: string]: 
             'POST',
             `${targetUrl}?${urlParams}`,
             {
-                'Cookie': cookieHeader
+                'Cookie': cookieHeader,
+                'User-Agent': 'KuGou2012-20132-NetworkSuperCall'
             },
             formData
         );

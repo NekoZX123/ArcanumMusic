@@ -1,4 +1,3 @@
-import { Buffer } from 'buffer';
 import * as CryptoJS from 'crypto-js';
 
 import { proxyRequest } from "../../utilities/proxyRequest.ts";
@@ -296,8 +295,7 @@ function getSign(text: string): string {
   const part1 = pickHashByIdx(sha1, PART_1_INDEXES);
   const part2 = pickHashByIdx(sha1, PART_2_INDEXES);
   const part3 = SCRAMBLE_VALUES.map((scramble, i) => scramble ^ parseInt(sha1.slice(i * 2, i * 2 + 2), 16));
-  const b64Part = Buffer.from(part3)
-    .toString('base64')
+  const b64Part = btoa(String.fromCharCode(...part3))
     .replace(/[\\/+=]/g, '');
   return `zzc${part1}${b64Part}${part2}`.toLowerCase();
 }
@@ -428,8 +426,8 @@ function getQQmusicResult(moduleName: QQMusicModule, params: { [type: string]: a
                     let encodedLyrics = resp.data.lyric;
                     let encodedTranslation = resp.data.trans;
 
-                    const decodedLyrics = Buffer.from(encodedLyrics, 'base64').toString('utf-8');
-                    const decodedTranslation = Buffer.from(encodedTranslation, 'base64').toString('utf-8');
+                    const decodedLyrics = new TextDecoder().decode(Uint8Array.from(atob(encodedLyrics), c => c.charCodeAt(0)));
+                    const decodedTranslation = new TextDecoder().decode(Uint8Array.from(atob(encodedTranslation), c => c.charCodeAt(0)));
                     
                     response.data = {
                         'lyrics': decodedLyrics.split('\n'),
