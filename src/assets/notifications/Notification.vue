@@ -53,7 +53,7 @@ onUnmounted(() => {
                 <span class="text small bold">{{ props.title }}</span>
                 <span class="text ultraSmall">{{ props.content }}</span>
             </span>
-            <span class="notifyClose">
+            <span class="notifyClose flex column">
                 <img class="outlineImage" src="/images/windowControl/close.svg" />
             </span>
         </div>

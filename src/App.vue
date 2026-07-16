@@ -23,6 +23,7 @@ import { initializeTheme, setControlBarTheme, setWindowBackground, type colorThe
 import { buttonTypes, showPopup } from './assets/notifications/popup.tsx';
 import DownloadItem from './assets/widgets/DownloadItem.vue';
 import { getDownloadQueue } from './assets/player/musicDownloader.ts';
+// import Notification from './assets/notifications/Notification.vue';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -416,7 +417,7 @@ onMounted(async () => {
     await loadPreference();
 
     // 测试通知
-    setTimeout(() => showNotify('Notify1', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 2000);
+    setTimeout(() => showNotify('startUpNotify', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 3000);
 
     // 歌词面板挂载
     const lyrics = createApp(Lyrics);
@@ -647,7 +648,11 @@ onUnmounted(() => {
         </div>
 
         <!-- 通知区域 -->
-        <div class="notifyArea flex column" id="notifyArea"></div>
+        <div class="notifyArea flex column" id="notifyArea">
+            <!-- <Notification class="show" type="success" id="testNotify" title="测试通知" 
+                content="This is a sample notification, 
+                in order to test whether the application can display it well"></Notification> -->
+        </div>
 
         <!-- 弹出窗口 -->
         <div class="flex column" id="popupArea"></div>
