@@ -41,7 +41,7 @@ const userName = ref('NekoZX');
 const greetings = ref('');
 const greetingsEnd = ref('');
 const greetList = ['欢迎回来! ', 'Welcome back! ', 'お帰りなさい! '];
-const greetSubfix = [' ~', ' ~', ' ちゃん~'];
+const greetSubfix = [' ——', ' 👋', ' ~'];
 
 const platformList = ['netease', 'qqmusic', 'kuwo', 'kugou'];
 const requestFuncs: Record<string, Function> = {
