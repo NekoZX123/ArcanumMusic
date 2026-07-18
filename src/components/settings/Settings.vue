@@ -7,7 +7,7 @@ import { HeadersText, NodeBlock, CheckBox, ColorPicker, Slider, TextInput, Dropb
 import './settingsStyle.css';
 import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
 import { showNotify } from '../../assets/notifications/Notification.ts';
-import {setConfig} from "../../assets/utilities/configLoader.ts";
+import {getConfig, setConfig} from "../../assets/utilities/configLoader.ts";
 import { getThemeConfig, setControlBarTheme, setThemeColor, setWindowBackground, type colorThemeName } from '../../assets/effects/themeControl.ts';
 
 // 设置页面及内容
@@ -75,6 +75,7 @@ const decorationTypes = ['info', 'warning', 'image', 'link', 'label']; // 装饰
 
 // 设置页面初始化
 function setupPage(depth: string[], settingsObject: any) {
+    console.log(settingsObject);
     let optionKeys = Object.keys(settingsObject);
 
     for (let i = 0; i < optionKeys.length; i++) {
@@ -90,6 +91,7 @@ function setupPage(depth: string[], settingsObject: any) {
 
             // 复选框 - 选中状态
             if (element.getAttribute('type') === 'checkbox') {
+                console.log(optionId, optionValue);
                 element.checked = optionValue;
             }
 
@@ -516,6 +518,14 @@ function saveChanges(_: MouseEvent) {
     const modifiedSettings = readSettingsThroughPage(settingsContent);
     settings = modifiedSettings;
     const settingsText =  JSON.stringify(modifiedSettings);
+
+    // 检查音乐平台是否全部禁用
+    const enabledSources: Record<string, boolean> = modifiedSettings.sources.enabledSources;
+    const allDisabled = Object.values(enabledSources).every((value: boolean) => !value);
+    if (allDisabled) {
+        showNotify('noPlatEnabledError', 'critical', '无法保存设置', '至少需要启用一个音乐源');
+        return;
+    }
     
     window.electron.getAppData()
         .then((appDataPath: string) => {
@@ -599,9 +609,16 @@ onMounted(async () => {
     settingsPage = parser.parseFromString(pageStructureString, 'text/xml');
     // console.log(settingsPage);
 
-    // 读取设置内容
-    const settingsText = await window.electron.getAppConfig();
-    settings = JSON.parse(settingsText);
+    // 获取已由 loadConfig() 合并了默认配置与用户配置的设置内容
+    const config = getConfig();
+    if (config) {
+        settings = config;
+    } else {
+        // 容错：直接读取用户设置文件（不应触发，App.vue 已在页面切换前调用 loadConfig）
+        console.warn('[Settings] getConfig() 返回空，直接读取用户设置文件');
+        const settingsText = await window.electron.getAppConfig();
+        settings = JSON.parse(settingsText);
+    }
 
     loadPageTree(settingsPage);
     setupPage([], settings);

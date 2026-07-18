@@ -39,6 +39,17 @@
             }
         }
     },
+    "sources": {
+        "enabledSources": {
+            "netease": true,
+            "qqmusic": true,
+            "kuwo": true,
+            "kugou": true
+        },
+        "preferredPlatform": {
+            "preferredPlatform": 0
+        }
+    },
     "developerOptions": {
         "application": {
             "enableDevtoolsHotkey": false,

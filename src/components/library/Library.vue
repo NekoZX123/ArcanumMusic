@@ -104,7 +104,7 @@ function platformChange(widgetInfo: { widgetId: string, current: number }) {
 }
 
 // 加载收藏歌曲
-const currentFavPlatform = ref('netease');
+const currentFavPlatform = ref('');
 function loadFavPreview(platform: string, cookies: any) {
     const sendRequest = requestFuncs[platform];
     if (!sendRequest) {
@@ -150,7 +150,13 @@ function favouritesLoadHandler(event: any) {
 }
 
 // 加载每日推荐
-const currentRecommendPlatform = ref('netease');
+const currentRecommendPlatform = ref('');
+
+// 读取首选平台设置（在模板渲染前执行，确保 TabWidget 初始标签正确）
+const _config = getConfig();
+const _preferredIndex = _config?.sources?.preferredPlatform?.preferredPlatform;
+const initialPlatformIndex = ref((_preferredIndex === 0 || _preferredIndex === 1) ? _preferredIndex : 0);
+
 function loadRecommendPreview(platform: string, cookies: any) {
     const sendRequest = requestFuncs[platform];
     if (!sendRequest) {
@@ -219,7 +225,6 @@ onMounted(() => {
     userName.value = name;
     userAvatar.value = pic;
 
-    // 加载问候语
     // 问候语启用状态
     const isGrettingsEnabled = config.user.localInfo.greetings.useGreetings;
     // 问候语语言
@@ -230,12 +235,17 @@ onMounted(() => {
     greetings.value = isGrettingsEnabled ? greetList[choice] : '';
     greetingsEnd.value = isGrettingsEnabled ? greetSubfix[choice] : '\'s music';
 
-    loadFavPreview('netease', userData.netease.cookies);
+    // 使用首选平台作为初始平台
+    const initialPlatform = platformList[initialPlatformIndex.value];
+    currentFavPlatform.value = initialPlatform;
+    currentRecommendPlatform.value = initialPlatform;
 
-    loadRecommendPreview('netease', userData.netease.cookies);
+    loadFavPreview(initialPlatform, userData[initialPlatform].cookies);
+
+    loadRecommendPreview(initialPlatform, userData[initialPlatform].cookies);
 
     // 加载初始标签内容
-    platformChange({ widgetId: 'HOMO114514', current: 0 });
+    platformChange({ widgetId: 'HOMO114514', current: initialPlatformIndex.value });
 
     // 监听收藏平台更新事件
     window.addEventListener('load-favourites', favouritesLoadHandler);
@@ -266,7 +276,7 @@ onUnmounted(() => {
             <div class="songlistCard exlarge flex row" id="userFavourites">
                 <span class="flex column cardSide">
                     <span class="cardHeader flex row" id="userFavouritesBackground" 
-                        @contextmenu="(event) => {
+                        @contextmenu="(event: any) => {
                             triggerRightMenu(event, { type: 'userFavourites' }, 'platformSelect');
                         }" 
                         :style="`background-image: url('./images/library/favouritesBackground_${currentFavPlatform}.png')`">
@@ -315,7 +325,7 @@ onUnmounted(() => {
         </div>
 
         <!-- 用户歌单 -->
-        <TabWidget id="userLists" :tabs="platformTabs" :scrollOnClick="true" :onTabSwitch="platformChange">
+        <TabWidget id="userLists" :tabs="platformTabs" :scrollOnClick="true" :onTabSwitch="platformChange" :initialIndex="initialPlatformIndex">
             <template #default>
                 <div class="musicBox songlists userLists" id="playlists_netease"></div>
                 <div class="musicBox songlists userLists" id="playlists_qqmusic"></div>

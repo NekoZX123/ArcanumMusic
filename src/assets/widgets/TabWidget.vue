@@ -11,11 +11,12 @@ interface Props {
     tabs: TabItem[];
     scrollOnClick?: boolean;
     useSmallTabs?: boolean;
+    initialIndex?: number;
     onTabSwitch?: (args: { widgetId: string; current: number }) => void;
 }
 const props = defineProps<Props>();
 
-const currentIndex = ref(0);
+const currentIndex = ref(props.initialIndex ?? 0);
 const slots = useSlots();
 
 // 获取所有标签页内容

@@ -22,14 +22,14 @@
 }
 
 /* 设置页面 */
-.contentPage {
+#settingsContent .contentPage {
     width: 100%;
 
     padding: 1rem;
 
     display: none;
 }
-.contentPage.current {
+#settingsContent .contentPage.current {
     display: block;
 }
 
@@ -477,6 +477,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: center;
 }
 [id='about.links_children'] > * {
     margin: auto 6px;
