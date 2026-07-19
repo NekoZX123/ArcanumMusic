@@ -1405,7 +1405,7 @@ img.outlineImage {
     border-radius: 12px;
     box-shadow: 0 0 10px var(--transparent-grey);
 
-    padding: 1rem 2rem;;
+    padding: 1rem 2rem;
 
     align-items: center;
     justify-content: space-between;
@@ -1477,7 +1477,7 @@ img.outlineImage {
     background: var(--interface-background);
     border-style: solid;
     border-color: var(--theme-color-default);
-    border-width: 3px;
+    border-width: 2px;
     border-radius: 6px;
 
     margin: 0 1rem;

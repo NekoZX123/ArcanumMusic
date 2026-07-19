@@ -10,19 +10,21 @@ function showNotify(id: string, type: NotifyType, title: string, content: string
     const container = document.createElement('div');
     document.getElementById('notifyArea')?.appendChild(container);
 
-    requestAnimationFrame(() => {
-        const notificationApp = createApp(Notification, { type, id, title, content, duration });
-        notificationApp.mount(container);
+    const notificationApp = createApp(Notification, { type, id, title, content, duration });
+    notificationApp.mount(container);
 
-        let notifyBody = container.firstChild as HTMLElement;
-        if (!notifyBody) return;
+    let notifyBody = container.firstChild as HTMLElement;
+    if (!notifyBody) return;
 
-        notifyBody.classList.add('show');
-        
-        // 绑定关闭按钮事件
-        const closeButton = notifyBody.querySelector('.notifyClose') as HTMLElement;
-        closeButton.addEventListener('click', () => closeNotify(id));
-    });
+    setTimeout(() => {
+        requestAnimationFrame(() => {
+            notifyBody.classList.add('show');
+        });
+    }, 0);
+    
+    // 绑定关闭按钮事件
+    const closeButton = notifyBody.querySelector('.notifyClose') as HTMLElement;
+    closeButton.addEventListener('click', () => closeNotify(id));
 
     // 一定时间后隐藏通知
     setTimeout(closeNotify, duration, id);
