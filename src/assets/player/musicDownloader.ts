@@ -1,6 +1,7 @@
 import { reactive } from "vue";
 import { showNotify } from "../notifications/Notification";
 import { getSongLink } from "./songUtils";
+import { fetchCoverAsBase64 } from "../utilities/imageUtils";
 
 type DownloadInfo = {
     fileName: string,
@@ -25,8 +26,18 @@ function getDownloadQueue() {
  * 保存歌曲至本地
  * @param songId 歌曲 ID
  * @param songName 歌曲名称
+ * @param metaData 歌曲元数据
  */
-function saveAudio(songId: string, songName: string) {
+async function saveAudio(songId: string, songName: string, metaData: any) {
+    // 预先获取封面图片并转为 base64 格式
+    const coverUrl = metaData.coverUrl || metaData.songCover || '';
+    const coverBase64 = await fetchCoverAsBase64(coverUrl);
+    const enrichedMetaData = {
+        ...metaData,
+        coverBase64,
+    };
+    enrichedMetaData.authors = enrichedMetaData.authors.split(', ').join('; ');
+
     getSongLink(songId).then((linkInfo: any) => {
         let url = linkInfo.url;
 
@@ -62,7 +73,7 @@ function saveAudio(songId: string, songName: string) {
             }
         });
 
-        window.electron.downloadAudio(url, songName)
+        window.electron.downloadAudio(url, songName, enrichedMetaData)
             .then((filePath: string) => {
                 stopListening();
                 showNotify('downloadSucceed', 'success', '下载完成', `歌曲已保存至 ${filePath}`, 3000);

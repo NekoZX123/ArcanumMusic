@@ -64,8 +64,8 @@ const props = defineProps(
  * @param cookies 用户 Token
  */
 function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
-    // 加载歌手信息及专辑
-    getNeteaseResult('artist', { artistId: parseInt(artistId) }, cookies)
+    // 加载歌手信息及歌曲
+    getNeteaseResult('artist', { artistId: parseInt(artistId), maxLength: 24 }, cookies)
         .then((response) => {
             const data = response.data;
             if (data.code !== 200) {
@@ -76,6 +76,65 @@ function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
             artistMetaData.value.name = data.artist.name;
             artistMetaData.value.cover = data.artist.picUrl;
             artistMetaData.value.description = data.artist.briefDesc;
+
+            // 最新 / 热门 歌曲去重
+            const loadedSongs: string[] = [];
+            // 获取最新歌曲
+            const newSongContainer = document.getElementById('newSongs') as HTMLElement;
+            
+            const songs = data.hotSongs;
+            const sortedSongs = [...songs].sort((a, b) => {
+                const toTime = (t: any) => new Date(t).getTime() || -Infinity;
+                return toTime(b.publishTime) - toTime(a.publishTime);
+            });
+            for (let i = 0; i < 3; i++) {
+                if (i >= sortedSongs.length) break;
+                let songInfo = sortedSongs[i];
+
+                const songId = `music-netease-${songInfo.id}`;
+                const songName = songInfo.name;
+                const songCover = songInfo.al.picUrl;
+                const songAuthors = formatAuthors(songInfo.ar, 'netease');
+                const songDuration = Math.round(songInfo.dt / 1000);
+
+                loadedSongs.push(songName);
+
+                addSongCard(newSongContainer, songId, songName, songCover, songAuthors, songDuration, true);
+            }
+
+            // 获取热门歌曲
+            const hotSongContainer = document.getElementById('hotSongs') as HTMLElement;
+            for (let i = 0; i < 9; i++) {
+                if (i >= songs.length) break;
+                let songInfo = songs[i];
+
+                let skips = 1;
+                if (loadedSongs.includes(songInfo.name)) {
+                    while (loadedSongs.includes(songInfo.name)) {
+                        songInfo = songs[i + skips];
+                        skips ++;
+                    }
+                }
+
+                const songId = `music-netease-${songInfo.id}`;
+                const songName = songInfo.name;
+                const songCover = songInfo.al.picUrl;
+                const songAuthors = formatAuthors(songInfo.ar, 'netease');
+                const songDuration = Math.round(songInfo.dt / 1000);
+                loadedSongs.push(songName);
+
+                addSongCard(hotSongContainer, songId, songName, songCover, songAuthors, songDuration);
+            }
+        });
+    
+    // 加载歌手专辑
+    getNeteaseResult('artistAlbum', { artistId: parseInt(artistId), maxLength: 10 }, cookies)
+        .then((response) => {
+            const data = response.data;
+            // console.log(data);
+            if (data.code !== 200) {
+                console.error(`[Error] Failed to get Netease artist songs (artist id ${artistId}, code ${data.code})`);
+            }
 
             // 最新 / 热门 专辑去重
             const loadedAlbums: string[] = [];
@@ -123,65 +182,6 @@ function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
                 addSonglistCard(hotAlbumsContainer, albumId, albumName, albumCover);
             }
         });
-    
-    // 加载歌手歌曲
-    getNeteaseResult('artistSongs', { artistId: parseInt(artistId) }, cookies)
-        .then((response) => {
-            const data = response.data;
-            // console.log(data);
-            if (data.code !== 200) {
-                console.error(`[Error] Failed to get Netease artist songs (artist id ${artistId}, code ${data.code})`);
-            }
-
-            // 最新 / 热门 歌曲去重
-            const loadedSongs: string[] = [];
-            // 获取最新歌曲
-            const newSongContainer = document.getElementById('newSongs') as HTMLElement;
-            
-            const songs = data.songs;
-            const sortedSongs = [...songs].sort((a, b) => {
-                const toTime = (t: any) => new Date(t).getTime() || -Infinity;
-                return toTime(b.publishTime) - toTime(a.publishTime);
-            });
-            for (let i = 0; i < 3; i++) {
-                if (i >= sortedSongs.length) break;
-                let songInfo = sortedSongs[i];
-
-                const songId = `music-netease-${songInfo.id}`;
-                const songName = songInfo.name;
-                const songCover = songInfo.al.picUrl;
-                const songAuthors = formatAuthors(songInfo.ar, 'netease');
-                const songDuration = Math.round(songInfo.dt / 1000);
-
-                loadedSongs.push(songName);
-
-                addSongCard(newSongContainer, songId, songName, songCover, songAuthors, songDuration, true);
-            }
-
-            // 获取热门歌曲
-            const hotSongContainer = document.getElementById('hotSongs') as HTMLElement;
-            for (let i = 0; i < 9; i++) {
-                if (i >= songs.length) break;
-                let songInfo = songs[i];
-
-                let skips = 1;
-                if (loadedSongs.includes(songInfo.name)) {
-                    while (loadedSongs.includes(songInfo.name)) {
-                        songInfo = songs[i + skips];
-                        skips ++;
-                    }
-                }
-
-                const songId = `music-netease-${songInfo.id}`;
-                const songName = songInfo.name;
-                const songCover = songInfo.al.picUrl;
-                const songAuthors = formatAuthors(songInfo.ar, 'netease');
-                const songDuration = Math.round(songInfo.dt / 1000);
-                loadedSongs.push(songName);
-
-                addSongCard(hotSongContainer, songId, songName, songCover, songAuthors, songDuration);
-            }
-        });
 }
 
 /**
@@ -190,7 +190,7 @@ function loadNeteaseArtist(artistId: string, cookies: { MUSIC_U: string }) {
  * @param cookies 用户 Token
  */
 function loadQQMusicArtist(artistId: string, cookies: { qm_keyst: string, uin: number }) {
-    getQQmusicResult('artist', { artistId: artistId}, cookies)
+    getQQmusicResult('artist', { artistId: artistId, maxLength: 10 }, cookies)
         .then((response) => {
             const data = response.data;
             console.log(data);
@@ -387,7 +387,7 @@ function loadKuwoArtist(artistId: string, cookies: { userid: string }) {
             }
         });
     // 获取最新 / 热门歌曲
-    getKuwoResult('artistSongs', { artistId: artistId }, cookies)
+    getKuwoResult('artistSongs', { artistId: artistId, maxLength: 10 }, cookies)
         .then((response) => {
             const data = response.data;
             if (data.code !== 200) {
@@ -451,7 +451,7 @@ function loadKuwoArtist(artistId: string, cookies: { userid: string }) {
  * @param cookies 用户 Token
  */
 function loadKugouArtist(artistId: string, cookies: { KuGoo: string }) {
-    getKugouResult('artist', { artistId: parseInt(artistId) }, cookies)
+    getKugouResult('artist', { artistId: parseInt(artistId), maxLength: 10 }, cookies)
         .then((response) => {
             const data = response.data;
             if (data.error_code !== 0) {

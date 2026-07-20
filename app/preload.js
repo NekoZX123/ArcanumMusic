@@ -38,7 +38,7 @@ contextBridge.exposeInMainWorld(
         openMusicFolder: (folderPath) => ipcRenderer.invoke('openMusicFolder', folderPath), // 打开音乐文件夹
         selectFolder: () => ipcRenderer.invoke('selectFolder'), // 选择文件夹
 
-        downloadAudio: (url, songName) => ipcRenderer.invoke('downloadAudio', url, songName), // 下载音频到本地
+        downloadAudio: (url, songName, metaData) => ipcRenderer.invoke('downloadAudio', url, songName, metaData), // 下载音频到本地
         onDownloadProgress: (callback) => { // 监听下载进度
             const handler = (_event, progress) => callback(progress);
             ipcRenderer.on('download-progress', handler);

@@ -38,7 +38,8 @@ const requestUrls: { [type: string]: string } = {
     'rankingContent': 'https://m.kugou.com/rank/info/[rankingId]',
     'newSong': 'https://m.kugou.com/newsong/index',
     'newAlbum': 'https://m.kugou.com/rank/info/8888',
-    'userPlaylists': 'https://gateway.kugou.com/v7/get_all_list'
+    'userFavourites': '[notImplemented]',
+    'userPlaylists': 'https://gateway.kugou.com/cloudlist.service/v7/get_all_list'
 };
 
 // 请求数据
@@ -163,12 +164,11 @@ const requestData: { [type: string]: any } = {
         json: true
     },
     'userPlaylists': {
-        appid: 1005,
+        appid: 1001,
         clienttime: 0,
-        clientver: 12569,
+        clientver: 20132,
         dfid: '-',
         mid: '',
-        plat: 1,
         token: '',
         userid: 0,
         uuid: ''
@@ -180,14 +180,7 @@ const artistApiPostData = {
     page: 1,
     pagesize: 20
 };
-const userPlaylistsData = {
-    "userid": "[userid]",
-    "token": "[token]",
-    "total_ver": 979,
-    "type": 2,
-    "page": 1,
-    "pagesize": 30,
-};
+const userPlaylistsData = `{"userid":"[userId]","token":"[token]","type":2,"support_pub":1,"support_per":0,"page":1,"pagesize":300}`
 
 type KugouMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
     'artistAlbum' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 
@@ -316,26 +309,25 @@ function getKugouResult(moduleName: KugouMusicModule, params: { [type: string]: 
     }
     // 用户歌单 (POST request)
     if (moduleName === 'userPlaylists') {
-        const formData = userPlaylistsData;
+        let formData = userPlaylistsData;
         const userId = getUserId(cookies.KuGoo);
         const token = getToken(cookies.KuGoo);
         moduleParams.clienttime = Math.floor(Date.now() / 1000);
-        moduleParams.userid = parseInt(userId);
+        moduleParams.userid = userId;
         moduleParams.token = token;
-        formData.userid = userId;
-        formData.token = token;
+        formData = formData.replace('[userId]', userId);
+        formData = formData.replace('[token]', token);
 
-        const encryptedParams = getAppSign(moduleParams, formData);
+        const encryptedParams = getAppSign(moduleParams, moduleParams);
         const urlParams = objectToKeyPairs(encryptedParams);
-        // console.log(`urlParams = ${urlParams}`);
+        console.log(`urlParams = ${urlParams}`);
         // console.log(`formData = ${JSON.stringify(formData)}`);
         return proxyRequest(
             'POST',
             `${targetUrl}?${urlParams}`,
             {
                 'Cookie': cookieHeader,
-                'User-Agent': 'Android15-1070-11083-46-0-DiscoveryDRADProtocol-wifi',
-                'x-router': 'cloudlist.service.kugou.com'
+                'User-Agent': 'KuGou2012-20132-NetworkSuperCall'
             },
             formData
         );

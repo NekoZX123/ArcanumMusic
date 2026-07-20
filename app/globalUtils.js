@@ -2,7 +2,7 @@ import { app } from 'electron';
 
 // 运行环境
 // const environment = 'dev';
-const environment = 'build-kyrios-internal';
+const environment = 'production';
 
 /**
  * 获取 %AppData%

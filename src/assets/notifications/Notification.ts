@@ -16,9 +16,11 @@ function showNotify(id: string, type: NotifyType, title: string, content: string
     let notifyBody = container.firstChild as HTMLElement;
     if (!notifyBody) return;
 
-    requestAnimationFrame(() => {
-        notifyBody.classList.add('show');
-    });
+    setTimeout(() => {
+        requestAnimationFrame(() => {
+            notifyBody.classList.add('show');
+        });
+    }, 0);
     
     // 绑定关闭按钮事件
     const closeButton = notifyBody.querySelector('.notifyClose') as HTMLElement;
@@ -33,9 +35,8 @@ function closeNotify(id: string) {
     const notify = document.getElementById(id);
     if (notify) {
         notify.classList.remove('show');
-        setTimeout(() => {
-            notify.remove();
-        }, 200);
+        notify.classList.add('closing');
+        notify.addEventListener('transitionend', () => notify.remove(), { once: true });
     }
 }
 

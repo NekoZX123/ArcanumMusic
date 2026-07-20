@@ -13,6 +13,7 @@ import type { AxiosResponse } from 'axios';
 import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
 import { getPlayer } from '../../assets/player/player.ts';
 import { getMainColors } from '../../assets/effects/colorUtils.ts';
+import { getConfig } from '../../assets/utilities/configLoader.ts';
 
 // 默认滑动量
 const BOX_SCROLL_DISTANCE = 330;
@@ -72,11 +73,20 @@ function playNeteaseRadio(_: MouseEvent) {
         });
 }
 
+const SONGLIST_RECOMMEND_LENGTH = 8;
+const SONG_RECOMMEND_LENGTH = 12;
+const ARTIST_RECOMMEND_LENGTH = 8;
 onMounted(() => {
     const userData = getAccountInfo('all');
 
+    // 获取启用的平台
+    const config = getConfig();
+    const enabledPlatforms = Object.keys(config.sources.enabledSources).filter((platform) => {
+        return config.sources.enabledSources[platform];
+    });
+
     // 获取每日推荐封面
-    getNeteaseResult('songList', { listId: '3136952023' }, userData.netease.cookies)
+    getNeteaseResult('songList', { listId: '3136952023', maxLength: 20 }, userData.netease.cookies)
         .then((response) => {
             const data = response.data;
             if (data.code !== 200) {
@@ -117,15 +127,16 @@ onMounted(() => {
     if (!hotListContainer) {
         hotListContainer = document.getElementById('songlistRecommends') as HTMLElement;
     }
-    Object.keys(requestFunc).forEach((platform: string) => {
+    const singlePlatformItems = Math.floor(SONGLIST_RECOMMEND_LENGTH / enabledPlatforms.length);
+    enabledPlatforms.forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
-        sendRequest('hotList', {}, userData[platform].cookies)
+        sendRequest('hotList', { maxLength: 3 }, userData[platform].cookies)
             .then((response: AxiosResponse)=> {
                 // 解析数据
                 const recommendations = parseMusicData(response, platform, 'hotList');
                 // 展示数据
                 const songLists = recommendations.lists;
-                for (let i = 0; i < 2; i++) {
+                for (let i = 0; i < Math.min(singlePlatformItems, songLists.length); i++) {
                     const listDetail = songLists[i];
 
                     const listId = `songlist-${platform}-${listDetail.listId}`;
@@ -142,8 +153,9 @@ onMounted(() => {
     if (!recommendSongContainer) {
         recommendSongContainer = document.getElementById('singleRecommends') as HTMLElement;
     }
+    const singlePlatformSongItems = Math.floor(SONG_RECOMMEND_LENGTH / enabledPlatforms.length);
     const loadedRecommendSongs: string[] = [];
-    Object.keys(requestFunc).forEach((platform: string) => {
+    enabledPlatforms.forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
         sendRequest('recommendSong', {}, userData[platform].cookies)
             .then((response: AxiosResponse) => {
@@ -151,7 +163,7 @@ onMounted(() => {
                 const recommendations = parseMusicData(response, platform, 'recommendSong');
                 // 展示数据
                 const songs = recommendations.songList;
-                for (let i = 0; i < 3; i++) {
+                for (let i = 0; i < Math.min(singlePlatformSongItems, songs.length); i++) {
                     let skips = 0;
                     let songDetail = songs[i];
 
@@ -179,10 +191,11 @@ onMounted(() => {
     if (!recommendArtistContainer) {
         recommendArtistContainer = document.getElementById('artistRecommends') as HTMLElement;
     }
+    const singlePlatformArtistItems = Math.floor(ARTIST_RECOMMEND_LENGTH / enabledPlatforms.length);
     const loadedArtists: string[] = [];
-    Object.keys(requestFunc).forEach((platform: string) => {
+    enabledPlatforms.forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
-        sendRequest('recommendArtist', {}, userData[platform].cookies)
+        sendRequest('recommendArtist', { maxLength: 5 }, userData[platform].cookies)
             .then((response: AxiosResponse) => {
                 // 解析数据
                 const recommendations = parseMusicData(response, platform, 'recommendArtist');
@@ -190,7 +203,7 @@ onMounted(() => {
                 // 展示数据
                 const artistList = recommendations.artistList;
 
-                for (let i = 0; i < 2; i++) {
+                for (let i = 0; i < Math.min(singlePlatformArtistItems, artistList.length); i++) {
                     let artistInfo = artistList[i];
                     let skips = 0;
 
@@ -224,13 +237,21 @@ onMounted(() => {
                 return;
             }
 
-            const rankings = data.list;
+            const rankings = data.data.reduce((acc: any[], category: any) => {
+                return acc.concat(category.list.map((ranking: any) => {
+                    return {
+                        id: ranking.id,
+                        name: ranking.name,
+                        coverUrl: ranking.coverUrl
+                    };
+                }));
+            }, []);
             for (let i = 0; i < 6; i++) {
                 const rankingInfo = rankings[i];
 
                 const rankingId = `ranking-netease-${rankingInfo.id.toString()}`;
                 const rankingName = rankingInfo.name;
-                const rankingCover = rankingInfo.coverImgUrl;
+                const rankingCover = rankingInfo.coverUrl;
 
                 addSonglistCard(rankingsContainer, rankingId, rankingName, rankingCover);
             }
@@ -241,9 +262,10 @@ onMounted(() => {
     if (!newAlbumContainer) {
         newAlbumContainer = document.getElementById('newAlbums') as HTMLElement;
     }
-    ['netease', 'qqmusic'].forEach((platform: string) => {
+    const platforms = ['netease', 'qqmusic'].filter((p) => (typeof enabledPlatforms !== 'undefined' ? enabledPlatforms.includes(p) : true));
+    platforms.forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
-        sendRequest('newAlbum', {}, userData[platform].cookies)
+        sendRequest('newAlbum', { maxLength: 5 }, userData[platform].cookies)
             .then((response: AxiosResponse) => {
                 // 解析数据
                 const recommendations = parseMusicData(response, platform, 'newAlbum');
@@ -268,10 +290,11 @@ onMounted(() => {
     if (!newSinglesContainer) {
         newSinglesContainer = document.getElementById('newSingles') as HTMLElement;
     }
+    const singlePlatformNewSongLength = Math.floor(SONG_RECOMMEND_LENGTH / enabledPlatforms.length);
     const loadedSongs: string[] = [];
-    Object.keys(requestFunc).forEach((platform: string) => {
+    enabledPlatforms.forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
-        sendRequest('newSong', {}, userData[platform].cookies)
+        sendRequest('newSong', { maxLength: 3 }, userData[platform].cookies)
             .then((response: AxiosResponse) => {
                 // 解析数据
                 // console.log(response.data);
@@ -280,7 +303,7 @@ onMounted(() => {
                 // 展示数据
                 const songs = recommendations.songList;
 
-                for (let i = 0; i < 3; i++) {
+                for (let i = 0; i < Math.min(singlePlatformNewSongLength, songs.length); i++) {
                     let songInfo = songs[i];
                     let skips = 0;
                     
@@ -439,7 +462,7 @@ onMounted(() => {
         <!-- 页面底部 -->
         <div class="flex column" id="pageFooter">
             <label class="text small grey" id="footerText">-----&nbsp;已到达页面底部&nbsp;-----</label>
-            <label class="text small grey">Arcanum Music v1.10.2</label>
+            <label class="text small grey">Arcanum Music v1.12.1`</label>
             <label class="text small grey">Made by NekoZX123</label>
             <label class="text ultraSmall grey">Licensed under Apache-2.0 license</label>
             <label class="text ultraSmall grey">仅供学习交流使用, 不得用于商业用途</label>

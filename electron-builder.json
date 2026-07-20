@@ -12,12 +12,6 @@
         "output": "./build/output"
     },
     "win": {
-        "target": [
-            {
-                "target": "nsis",
-                "arch": ["x64"]
-            }
-        ],
         "icon": "./icons/ArcanumMusic.ico"
     },
     "linux": {
@@ -41,11 +35,14 @@
         "category": "Audio",
         "desktop": {
             "entry": {
-                "Icon": "arcanummusic",
                 "Name": "ArcanumMusic",
                 "Comment": "Arcanum Music - A multiplatform music application",
+                "Categories": "Audio",
+                "Keywords": "music;audio;player",
+                "Icon": "arcanummusic",
+                "StartupWMClass": "arcanummusic",
                 "Terminal": false,
-                "Categories": "Audio;Music;"
+                "Type": "Application"
             }
         }
     }

@@ -39,7 +39,7 @@ onMounted(() => {
     const loadedArtists: string[] = [];
     Object.keys(requestFunc).forEach((platform: string) => {
         const sendRequest = requestFunc[platform];
-        sendRequest('recommendArtist', {}, userData[platform].cookies)
+        sendRequest('recommendArtist', { maxLength: 30 }, userData[platform].cookies)
             .then((response: AxiosResponse) => {
                 // 解析数据
                 const recommendations = parseMusicData(response, platform, 'recommendArtist');

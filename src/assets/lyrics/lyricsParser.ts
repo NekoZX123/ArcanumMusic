@@ -11,11 +11,6 @@ type LyricData = {
     metaData: any
 }
 
-function getBracketContent(text: string): string | null {
-  const match = text.match(/\[(.*?)\]/);
-  return match ? match[1] : null;
-}
-
 function formatLyricTime(time: string) {
     const [ hms, ms ] = time.split('.');
     const integerTime = hms.split(':');
@@ -67,8 +62,10 @@ function parseLyricsCommon(lyricsInfo: LyricsInfo) {
     // 添加歌词内容
     for (let i = 0; i < lyricsInfo.lyrics.length; i++) {
         const lyric = lyricsInfo.lyrics[i];
-        const prefix = getBracketContent(lyric) || '';
-        const lyricText = lyric.split(']')[1];
+        const lyricMatch = lyric.match(/^\[([^\]]+)\](.*)/);
+        if (!lyricMatch) continue;
+        const prefix = lyricMatch[1];
+        const lyricText = lyricMatch[2];
 
         const prefixMark = prefix.split(':')[0];
         // 元数据前缀
@@ -90,8 +87,10 @@ function parseLyricsCommon(lyricsInfo: LyricsInfo) {
     if (isTranslationExist) {
         for (let i = 0; i < lyricsInfo.translation.length; i++) {
             const translation = lyricsInfo.translation[i];
-            const prefix = getBracketContent(translation) || '';
-            const transText = translation.split(']')[1];
+            const transMatch = translation.match(/^\[([^\]]+)\](.*)/);
+            if (!transMatch) continue;
+            const prefix = transMatch[1];
+            const transText = transMatch[2];
 
             const prefixMark = prefix.split(':')[0];
             // 元数据前缀

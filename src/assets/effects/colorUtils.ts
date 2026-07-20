@@ -1,3 +1,5 @@
+import { getProxyStreamUrl } from '../utilities/proxyRequest.ts';
+
 /**
  * RGB 转 HSV
  * @param r number - 红色
@@ -271,6 +273,8 @@ class ParticleManager {
     }
 }
 
+const DEFAULT_COLORS = ['rgb(224,195,252)', 'rgb(142,197,252)', 'rgb(94,231,223)'];
+
 const COLOR_STEP = 20;
 /**
  * 获取图片主色
@@ -393,9 +397,12 @@ function getMainColors(imgUrl: string, count: number = 3, useStrict: boolean = f
             resolve(chosen);
         };
 
-        img.onerror = () => reject(new Error('Failed to load image resource'));
+        img.onerror = () => {
+            console.error(`[Error] Failed to load image from ${imgUrl}, falling back to default colors`);
+            resolve(DEFAULT_COLORS);
+        }
 
-        img.src = imgUrl;
+        img.src = imgUrl.startsWith('https://y.qq.com/') ? getProxyStreamUrl(imgUrl) : imgUrl;
     });
 }
 

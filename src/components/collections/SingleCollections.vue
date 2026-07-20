@@ -73,7 +73,7 @@ onMounted(() => {
         const loadedSongs: string[] = [];
         Object.keys(requestFunc).forEach((platform: string) => {
             const sendRequest = requestFunc[platform];
-            sendRequest('newSong', {}, userData[platform].cookies)
+            sendRequest('newSong', { maxLength: 50 }, userData[platform].cookies)
                 .then((response: AxiosResponse) => {
                     // 解析数据
                     // console.log(response.data);
@@ -106,12 +106,12 @@ onMounted(() => {
         const artistId = parsedModule[2];
 
         let reqModule = 'artist';
-        if (['netease', 'kuwo'].includes(platform)) {
+        if (platform === 'kuwo') {
             reqModule = 'artistSongs';
         }
 
         const sendRequest = requestFunc[platform];
-        sendRequest(reqModule, { artistId: artistId }, userData[platform].cookies)
+        sendRequest(reqModule, { artistId: artistId, maxLength: 50 }, userData[platform].cookies)
             .then((response: AxiosResponse) => {
                 // 解析数据
                 // console.log(response.data);

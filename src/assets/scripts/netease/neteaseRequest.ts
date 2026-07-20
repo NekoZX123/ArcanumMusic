@@ -1,107 +1,93 @@
 import { proxyRequest } from '../../utilities/proxyRequest.ts';
 
-import { getNeteaseEncrypt } from './neteaseEncrypt.js';
-
 import CryptoJS from 'crypto-js';
 
-type neteaseEncryptedData = {
-    encText: string,
-    encSecKey: string
-}
-
+// 不同搜索类型 API 地址
+const searchApiTable: { [type: string]: string } = {
+    'singles': 'search/song/list/page',
+    'songlists': 'v1/search/playlist/get',
+    'albums': 'v1/search/album/get',
+    'artists': 'v1/search/artist/get'
+};
 // 请求链接
 const requestUrls: { [type: string]: string } = {
-    // 'songLink': 'https://interfacepc.music.163.com/eapi/song/enhance/download/url/v1',
     'songLink': 'https://interfacepc.music.163.com/eapi/song/enhance/player/url/v1',
-    // 'songLink': 'https://music.163.com/weapi/song/enhance/player/url/v1?csrf_token=',
-    'search': 'https://music.163.com/weapi/cloudsearch/get/web?csrf_token=',
-    'songInfo': 'https://music.163.com/weapi/song/detail',
-    'lyrics': 'https://music.163.com/weapi/song/lyric?csrf_token=',
-    'songList': 'https://music.163.com/weapi/v6/playlist/detail',
-    'album': 'https://music.163.com/weapi/album/[albumId]',
-    'artist': 'https://interface.music.163.com/weapi/artist/albums/[artistId]',
-    'artistSongs': 'https://interface.music.163.com/weapi/artist/top/song',
-    'hotList': 'https://interface.music.163.com/weapi/personalized/playlist/v1',
-    'recommendSong': 'https://interface.music.163.com/weapi/v6/playlist/detail',
-    'recommendArtist': 'https://music.163.com/weapi/artist/top',
-    'rankings': 'https://music.163.com/weapi/toplist',
-    'rankingContent': 'https://music.163.com/weapi/v6/playlist/detail',
-    'newSong': 'https://interface.music.163.com/weapi/personalized/newsong',
-    'newAlbum': 'https://music.163.com/weapi/album/new', 
-    'dailyRecommends': 'https://music.163.com/weapi/v2/discovery/recommend/songs?csrf_token=',
-    'userFavourites': 'https://music.163.com/weapi/v6/playlist/detail',
-    'userPlaylists': 'https://music.163.com/weapi/user/playlist?csrf_token='
+    'search': 'https://interfacepc.music.163.com/eapi/[SEARCH_API_PATH]',
+    'songInfo': 'https://interfacepc.music.163.com/eapi/v3/song/detail',
+    'lyrics': 'https://interfacepc.music.163.com/eapi/song/lyric/v1',
+    'songList': 'https://interfacepc.music.163.com/eapi/v6/playlist/detail',
+    'album': 'https://interfacepc.music.163.com/eapi/album/v3/detail',
+    'artist': 'https://interfacepc.music.163.com/eapi/artist/v3/detail',
+    'artistAlbum': 'https://interfacepc.music.163.com/eapi/artist/albums/[artistId]',
+    'hotList': 'https://interfacepc.music.163.com/eapi/personalized/playlist/v1',
+    'recommendSong': 'https://interfacepc.music.163.com/eapi/v6/playlist/detail',
+    'recommendArtist': 'https://interfacepc.music.163.com/eapi/v1/artist/list',
+    'rankings': 'https://interfacepc.music.163.com/eapi/toplist/detail/v2',
+    'rankingContent': 'https://interfacepc.music.163.com/eapi/v6/playlist/detail',
+    'newSong': 'https://interfacepc.music.163.com/eapi/v2/discovery/new/songs',
+    'newAlbum': 'https://interfacepc.music.163.com/eapi/discovery/new/albums',
+    'dailyRecommends': 'https://interfacepc.music.163.com/eapi/v2/discovery/recommend/songs',
+    'userFavourites': 'https://interfacepc.music.163.com/eapi/v6/playlist/detail',
+    'userPlaylists': 'https://interfacepc.music.163.com/eapi/user/playlist'
 };
 
 // 请求数据
-// 搜索类型 (// 单曲 => 1; 歌单 => 1000; 专辑 => 10; 歌手 => 100)
-const searchTypes: Record<string, number> = {
-    'singles': 1,
-    'songlists': 1000,
-    'albums': 10,
-    'artists': 100
+// 搜索类型
+const searchTypes: Record<string, string> = {
+    'singles': 'singles',
+    'songlists': 'songlists',
+    'albums': 'albums',
+    'artists': 'artists'
 };
 const requestData: { [type: string]: any } = {
     "songLink": {
         "ids": "[[songId]]",
         "level": "hires",
-        "encodeType": "flac",
-        "header": '{"os":"pc","appver":"2.10.12.201849","osver":"Microsoft-Windows-11--build-26100-64bit","deviceId":"pyncm!","requestId":"21474836"}'
+        "encodeType": "flac"
+    },
+    "search-singles": {
+        "keyword": "[keyword]",
+        "limit": "50",
+        "offset": "0",
+        "scene": "NORMAL"
     },
     "search": {
-        "hlpretag": "<span class=\"s-fc7\">",
-        "hlposttag": "</span>",
         "s": "[keyword]",
-        "type": "[type]",
-        "offset": "[pageIndex]",
-        "total": "true",
-        "limit": "30",
-        "csrf_token": ""
+        "limit": "50",
+        "offset": "0",
+        "scene": "NORMAL",
+        "queryCorrect": "true"
     },
     "songInfo": {
-        "id": "[songId]",
-        "ids": "['[songId]']",
-        "limit": 1000,
-        "offset": 0,
-        "csrf_token": ""
+        "c": "[{\"id\":[songId],\"v\":0}]"
     },
     "lyrics": {
         "id": "[songId]", 
-        "lv": -1, // 标准歌词
-        "tv": -1, // 翻译歌词
-        "yv": -1, // 逐字歌词
-        "csrf_token": ""
+        "cp": "false",
+        "lv": "0", // 标准歌词
+        "tv": "0", // 翻译歌词
+        "yv": "0" // 逐字歌词
     },
     "songList": {
         "id": "[listId]",
         "offset": "0",
         "total": "true",
-        "limit": "1000",
-        "n": "1000",
-        "csrf_token": ""
+        "limit": "[maxLength]",
+        "n": "[maxLength]"
     },
-    "album": {
-        "id": "[albumId]",
-        "offset": "0",
-        "total": "true",
-        "limit": "1000",
-        "n": "1000",
-        "csrf_token": ""
+    "album": { // 此处需要稍后填入 `cache_key`
+        "id": "[albumId]"
     },
-    "artist": {
-        "limit": 30,
-        "artistId": "[artistId]",
-        "csrf_token": ""
-    },
-    "artistSongs": {
+    "artist": { // 此处需要稍后填入 `cache_key`
         "id": "[artistId]",
-        "top": 30,
-        "csrf_token": ""
+        "top": "[maxLength]"
+    },
+    "artistAlbum": {
+        "id": "[artistId]",
+        "top": "[maxLength]"
     },
     "hotList": {
-        "order": "hot",
-        "cat": "ALL",
-        "limit": 40,
+        "limit": "[maxLength]",
         "offset": 0
     },
     "recommendSong": {
@@ -110,39 +96,34 @@ const requestData: { [type: string]: any } = {
         "csrf_token": ""
     },
     "recommendArtist": {
-        "offset": "0",
-        "total": "true",
-        "limit": "60",
-        "csrf_token": ""
+        "area":"-1",
+        "type":"-1",
+        "initial":"-1",
+        "offset":"0",
+        "limit":"[maxLength]",
     },
     "rankings": {
-        "csrf_token": "",
-        "cursor": "-1",
-        "offset": "0",
-        "orderType": "1",
-        "pageNo": "1",
-        "pageSize": "60",
-        "rid": "",
-        "threadId": "",
         "total": "true"
     },
     "rankingContent": {
         "id": "[rankingId]",
-        "ids": "['[rankingId]']",
-        "limit": 1000,
-        "offset": 0,
-        "csrf_token": ""
-    },
-    "newSong": {
-        "data": "{\"limit\": 20}",
-        "csrf_token": ""
-    },
-    "newAlbum": {
-        "area": "ALL",
         "offset": "0",
         "total": "true",
-        "limit": "50",
-        "csrf_token": ""
+        "limit": "[maxLength]",
+        "n": "[maxLength]"
+    },
+    "newSong": {
+        "areaId": "0",
+        "limit": "[maxLength]",
+        "offset": "0"
+    },
+    "newAlbum": {
+        "area":"ALL",
+        "year": "[currentYear]",
+        "month": "[currentMonth]",
+        "offset": "0",
+        "limit": "10",
+        "rcmd": "true"
     },
     "dailyRecommends": {
         "offset": "0", 
@@ -153,73 +134,81 @@ const requestData: { [type: string]: any } = {
         "id": "12352057833",
         "offset": "0",
         "total": "true",
-        "limit": "1000",
-        "n": "1000",
+        "limit": "[maxLength]",
+        "n": "[maxLength]",
         "csrf_token": ""
     },
     "userPlaylists": {
-        "offset": "0", 
-        "limit": "1001", 
-        "uid": "[userId]", 
-        "csrf_token": ""
+        "uid": "[userId]",
+        "offset": "0",
+        "limit": "1000"
     }
 };
 
 const PAGE_SIZE = 30;
 
 // User-Agent (两种)
-const mobileUA = 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Mobile Safari/537.36 Edg/139.0.0.0';
 const ncmDesktopUA = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Safari/537.36 Chrome/91.0.4472.164 NeteaseMusicDesktop/3.1.28.205001';
-const mobileModuleList: NeteaseMusicModule[] = ['artist', 'artistSongs', 'hotList', 'recommendSong', 'rankings', 'newSong', 'newAlbum'];
 
 type NeteaseMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
-    'artistSongs' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' 
+    'artistAlbum' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' 
     | 'newSong' | 'newAlbum' | 'dailyRecommends' | 'userFavourites' | 'userPlaylists';
 
 function getNeteaseSearchTypes() {
     return searchTypes;
 }
 
-function getNeteaseSongLink_v2(payload: string, cookies: string) {
-    // const urlApi = requestUrls.songLink;
-    const urlApiPart = `/api/song/enhance/player/url/v1`;
-    // const urlApiPart = `/api/song/enhance/download/url/v1`;
+/**
+ * 获取网易云专辑 / 歌手 API 的 cache_key
+ * @param params 请求参数对象
+ */
+function getNeteaseCacheKey(params: Record<string, any>): string {
+    // 排序参数键名
+    const keys = Object.keys(params).sort((a, b) => a.codePointAt(0)! - b.codePointAt(0)!);
 
-    // 解析 payload 为对象后 JSON 序列化
-    // const payloadObj = JSON.parse(payload);
-    // const payloadJson = JSON.stringify(payloadObj);
+    const record: Record<string, string> = {};
+    for (const k of keys) {
+        record[k] = String(params[k]);
+    }
+    const text = new URLSearchParams(record).toString();
 
-    const encryptKey = CryptoJS.enc.Utf8.parse('e82ckenh8dichen8');
-    const digest = `nobody${urlApiPart}use${payload}md5forencrypt`;
-    const dataDigest = CryptoJS.MD5(digest).toString(CryptoJS.enc.Hex);
-    const params = `${urlApiPart}-36cd479b6b5-${payload}-36cd479b6b5-${dataDigest}`;
-    console.log(`[Debug] Netease API: params = ${params}`);
-
-    // 使用 PKCS7 填充
-    const encrypted = CryptoJS.AES.encrypt(params, encryptKey, {
+    // AES-128-ECB / PKCS7
+    const encryptKey = CryptoJS.enc.Utf8.parse(')(13daqP@ssw0rd~');
+    const encrypted = CryptoJS.AES.encrypt(text, encryptKey, {
         mode: CryptoJS.mode.ECB,
         padding: CryptoJS.pad.Pkcs7
     });
 
-    // 转换为十六进制字符串并大写
-    const finalParams = encrypted.ciphertext.toString(CryptoJS.enc.Hex).toUpperCase();
-
-    return proxyRequest(
-        'POST',
-        requestUrls.songLink,
-        {
-            'Accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Cookie': cookies,
-            'User-Agent': ncmDesktopUA,
-            'Referer': 'https://music.163.com/'
-        },
-        `params=${finalParams}`
-    );
+    return encrypted.ciphertext.toString(CryptoJS.enc.Base64);
 }
 
 /**
- * 通用网易云音乐 API 请求函数
+ * 解密 getNeteaseCacheKey 生成的 cache_key, 还原原始 query string
+ *
+ * @param cacheKey Base64 编码的 cache_key (getNeteaseCacheKey 的返回值)
+ * @returns 解密后的原始 query string
+ */
+function decryptNeteaseCacheKey(cacheKey: string): string {
+    const ciphertext = CryptoJS.enc.Base64.parse(cacheKey);
+
+    const cipherParams = CryptoJS.lib.CipherParams.create({ ciphertext });
+
+    const encryptKey = CryptoJS.enc.Utf8.parse(')(13daqP@ssw0rd~');
+    const decrypted = CryptoJS.AES.decrypt(cipherParams, encryptKey, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    });
+
+    const plaintext = decrypted.toString(CryptoJS.enc.Utf8);
+    if (!plaintext) {
+        throw new Error('解密失败: cache_key 无效或密钥不匹配');
+    }
+
+    return plaintext;
+}
+
+/**
+ * 通用网易云音乐 API 请求函数 (v2, 电脑端 API)
  * 
  * 根据指定的模块名称、参数和用户 Cookie，构建请求数据并发起网易云音乐 API 请求
  * 支持歌曲链接、搜索、歌曲信息等多种模块，参数会自动替换为传入值
@@ -233,33 +222,44 @@ function getNeteaseSongLink_v2(payload: string, cookies: string) {
  * 
  * 附: moduleName 对应的 params 格式
  * - songLink: { songId: string } - 歌曲 ID
- * - search: { keyword: string, type: number, pageIndex: number } - 搜索关键词, 搜索类型, 页码 (从 0 开始)
+ * - search: { keyword: string, type: string, pageIndex: number } - 搜索关键词, 搜索类型, 页码 (从 0 开始)
  * - songInfo: { songId: string } - 歌曲 ID
  * - lyrics: { songId: string } - 歌曲 ID
- * - songList: { listId: string } - 歌单 ID
- * - album: { albumId: string } - 专辑 ID
+ * - songList: { listId: string, maxLength: number } - 歌单 ID, 最大长度
+ * - album: { albumId: string, maxLength: number } - 专辑 ID, 最大长度
  * - artist: { artistId: number } - 歌手 ID
- * - artistSongs: { artistId: number } - 歌手 ID
- * - hotList: {} - 空对象
+ * - artistAlbum: { artistId: number, maxLength: number } - 歌手 ID, 最大长度
+ * - hotList: { maxLength: number } - 最大长度
  * - recommendSong: {} - 空对象
- * - recommendArtist: {} - 空对象
+ * - recommendArtist: { maxLength: number } - 最大长度
  * - rankings: {} - 空对象
- * - rankingContent: { rankingId: string } - 排行榜 ID
- * - newSong: {} - 空对象
+ * - rankingContent: { rankingId: string, maxLength: number } - 排行榜 ID, 最大长度
+ * - newSong: { maxLength: number } - 最大长度
  * - newAlbum: {} - 空对象
  * - dailyRecommends: {} - 空对象
- * - userFavourites: {} - 空对象
+ * - userFavourites: { maxLength: number } - 最大长度
  * - userPlaylists: { userId: string } - 用户 ID
+ * 
  */
 function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: string]: any }, cookies: { MUSIC_U: string }) {
     let targetUrl = requestUrls[moduleName];
+    if (moduleName === 'search') { // 填充搜索类型
+        targetUrl = targetUrl.replace('[SEARCH_API_PATH]', searchApiTable[params.type]);
+    }
     if (moduleName === 'album') { // 专辑信息
         targetUrl = targetUrl.replace('[albumId]', params.albumId);
     }
     if (moduleName === 'artist') { // 歌手信息及专辑
         targetUrl = targetUrl.replace('[artistId]', params.artistId);
     }
-    const moduleData = requestData[moduleName];
+    if (moduleName === 'artistAlbum') { // 歌手专辑
+        targetUrl = targetUrl.replace('[artistId]', params.artistId);
+    }
+    let moduleData = requestData[moduleName];
+    if (moduleName === 'search' && params.type === 'singles') { // 单曲搜索使用不同表单数据
+        moduleData = requestData['search-singles'];
+    }
+
     if (!targetUrl || !moduleData) {
         throw new Error(`Module ${moduleName} not found in request data.`);
     }
@@ -282,18 +282,40 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
             }
         }
     });
+    if (moduleName === 'album' || moduleName === 'artist') { // 生成 cache_key
+        const paramsObject = JSON.parse(moduleString);
+        const cacheKey = getNeteaseCacheKey(paramsObject);
+        console.log(`[Debug] Generated cache_key for module ${moduleName}: ${cacheKey}`);
+        moduleString = JSON.stringify({ ...paramsObject, cache_key: cacheKey });
+    }
+    if (moduleName === 'newAlbum') { // 填入年月
+        moduleString = moduleString.replace("[currentYear]", new Date().getFullYear().toString());
+        moduleString = moduleString.replace("[currentMonth]", (new Date().getMonth() + 1).toString());
+    }
     const moduleParams = moduleString;
 
-    const requestParams: neteaseEncryptedData = getNeteaseEncrypt(moduleParams);
+    // Cookie
     const cookieHeader = `MUSIC_U=${cookies.MUSIC_U}`;
-    let userAgent = mobileModuleList.includes(moduleName) ? mobileUA : ncmDesktopUA;
-    const referer = moduleName === 'songLink' ? 'https://music.163.com/' : 'http://127.0.0.1:5173/';
+    
+    // 加密参数 (API 地址)
+    const urlApiPart = targetUrl.replace('https://interfacepc.music.163.com', '').replace('eapi', 'api');
 
-    // console.log(`[Netease Music]\n URL: ${targetUrl};\n Data: ${moduleParams};`);
-    if (moduleName === 'songLink') {
-        return getNeteaseSongLink_v2(moduleParams, cookieHeader);
-    }
+    // 加密请求参数
+    const encryptKey = CryptoJS.enc.Utf8.parse('e82ckenh8dichen8');
+    const digest = `nobody${urlApiPart}use${moduleParams}md5forencrypt`;
+    const dataDigest = CryptoJS.MD5(digest).toString(CryptoJS.enc.Hex);
+    const finalParams = `${urlApiPart}-36cd479b6b5-${moduleParams}-36cd479b6b5-${dataDigest}`;
 
+    // 使用 PKCS7 填充
+    const encrypted = CryptoJS.AES.encrypt(finalParams, encryptKey, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    });
+
+    // 转换为十六进制字符串并大写
+    const hexParams = encrypted.ciphertext.toString(CryptoJS.enc.Hex).toUpperCase();
+
+    console.log(`[Debug] Original data: ${finalParams} \n Encrypted data: ${hexParams}`);
     return proxyRequest(
         'POST',
         targetUrl,
@@ -301,13 +323,10 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded',
             'Cookie': cookieHeader,
-            'User-Agent': userAgent,
-            'Referer': referer
+            'User-Agent': ncmDesktopUA,
+            'Referer': 'https://music.163.com/'
         },
-        {
-            'params': requestParams.encText,
-            'encSecKey': requestParams.encSecKey
-        }
+        `params=${hexParams}`
     );
 }
 
@@ -316,10 +335,24 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
  * @param cookies (必填, 否则无法获取数据) 用户 Cookie 信息, 含有 `MUSIC_U` 参数
  */
 function getNeteaseAccount(cookies: { MUSIC_U: string }) {
-    const userInfoUrl = 'https://music.163.com/weapi/w/nuser/account/get?csrf_token=';
+    const userInfoUrl = 'https://interfacepc.music.163.com/eapi/w/nuser/account/get';
     const requestData = { csrf_token: '' };
 
-    const requestParams: neteaseEncryptedData = getNeteaseEncrypt(JSON.stringify(requestData));
+    // 加密请求参数
+    const encryptKey = CryptoJS.enc.Utf8.parse('e82ckenh8dichen8');
+    const digest = `nobody/api/w/nuser/account/getuse${JSON.stringify(requestData)}md5forencrypt`;
+    const dataDigest = CryptoJS.MD5(digest).toString(CryptoJS.enc.Hex);
+    const finalParams = `/api/w/nuser/account/get-36cd479b6b5-${JSON.stringify(requestData)}-36cd479b6b5-${dataDigest}`;
+
+    // 使用 PKCS7 填充
+    const encrypted = CryptoJS.AES.encrypt(finalParams, encryptKey, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    });
+
+    // 转换为十六进制字符串并大写
+    const hexParams = encrypted.ciphertext.toString(CryptoJS.enc.Hex).toUpperCase();
+
     const cookieHeader = `MUSIC_U=${cookies.MUSIC_U}`;
 
     return proxyRequest(
@@ -332,10 +365,45 @@ function getNeteaseAccount(cookies: { MUSIC_U: string }) {
             'User-Agent': ncmDesktopUA
         },
         {
-            'params': requestParams.encText,
-            'encSecKey': requestParams.encSecKey
+            'params': hexParams
         }
     );
 }
 
-export { getNeteaseResult, getNeteaseSearchTypes, getNeteaseAccount };
+/**
+ * 解密 getNeteaseResult_v2 加密参数 (解密 `getNeteaseResult_v2` 的 hex 字符串)
+ *
+ * @param hexParams 加密后的十六进制字符串 (如 `getNeteaseResult_v2` 的 hexParams)
+ * @returns 解密后的明文字符串 (即 finalParams)
+ */
+function decryptHexParams(hexParams: string): string {
+    // 1. 将十六进制字符串解析为 CryptoJS WordArray
+    const ciphertext = CryptoJS.enc.Hex.parse(hexParams);
+
+    // 2. 构造 CipherParams 对象供 AES.decrypt 使用
+    const cipherParams = CryptoJS.lib.CipherParams.create({ ciphertext });
+
+    // 3. AES-128-ECB / PKCS7 解密 (与加密参数一致)
+    const encryptKey = CryptoJS.enc.Utf8.parse('e82ckenh8dichen8');
+    const decrypted = CryptoJS.AES.decrypt(cipherParams, encryptKey, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7
+    });
+
+    // 4. 转为 UTF-8 字符串 (即 finalParams)
+    const plaintext = decrypted.toString(CryptoJS.enc.Utf8);
+    if (!plaintext) {
+        throw new Error('解密失败: 明文为空, 请检查 hexParams 是否正确');
+    }
+
+    return plaintext;
+}
+
+export {
+    getNeteaseResult,
+    getNeteaseSearchTypes,
+    getNeteaseAccount,
+    decryptHexParams,
+    getNeteaseCacheKey,
+    decryptNeteaseCacheKey
+};

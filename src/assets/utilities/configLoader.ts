@@ -2,6 +2,23 @@
 let appConfig: any = undefined;
 let userPreference: any = undefined;
 
+// 深合并函数：将默认配置与用户配置合并，用户值优先，默认值补缺
+function deepMerge(defaults: any, overrides: any): any {
+    const result = { ...defaults };
+    for (const key of Object.keys(overrides)) {
+        if (typeof overrides[key] === 'object' && overrides[key] !== null && !Array.isArray(overrides[key])) {
+            if (typeof result[key] === 'object' && result[key] !== null && !Array.isArray(result[key])) {
+                result[key] = deepMerge(result[key], overrides[key]);
+            } else {
+                result[key] = overrides[key];
+            }
+        } else {
+            result[key] = overrides[key];
+        }
+    }
+    return result;
+}
+
 // 设置文件判断 & 创建 / 读取
 function prepareSettings() {
     return new Promise<string>(async (resolve) => {
@@ -18,7 +35,26 @@ function prepareSettings() {
 async function loadConfig() {
     // 设置文件准备
     let configData = await prepareSettings();
-    appConfig = JSON.parse(configData);
+    const userSettings = JSON.parse(configData);
+
+    // 读取默认设置并补全用户设置中缺失的键
+    try {
+        const appEnv = await window.electron.getAppEnvironment();
+        let asarPath = await window.electron.getAsarLocation();
+        if (appEnv === 'dev') {
+            asarPath += '/public';
+        } else {
+            asarPath += '/dist';
+        }
+        const defaultSettingsPath = `${asarPath}/data/settings.json`;
+        const defaultSettingsText = await window.electron.readLocalFile(defaultSettingsPath);
+        const defaultSettings = JSON.parse(defaultSettingsText);
+        appConfig = deepMerge(defaultSettings, userSettings);
+    } catch (error) {
+        console.warn('[ConfigLoader] 无法读取默认设置文件，仅使用用户设置', error);
+        appConfig = userSettings;
+    }
+
     console.log(appConfig);
 
     return appConfig;

@@ -1,9 +1,7 @@
-import { Buffer } from 'buffer';
+import * as CryptoJS from 'crypto-js';
 
 import { proxyRequest } from "../../utilities/proxyRequest.ts";
 
-// @ts-ignore 6133
-import { getSign, getSearchId, validate } from "./qqmusicEncrypt.js";
 import type { AxiosResponse } from 'axios';
 
 // Note: api 包含:
@@ -101,7 +99,7 @@ const requestData: any = {
                 "tag": 1,
                 "orderlist": 1,
                 "song_begin": 0,
-                "song_num": 100,
+                "song_num": "[maxLength]",
                 "onlysonglist": 0,
                 "enc_host_uin": ""
             }
@@ -124,7 +122,7 @@ const requestData: any = {
                 "albumMid": "[albumId]",
                 "albumID": 0,
                 "begin": 0,
-                "num": 10,
+                "num": "[maxLength]",
                 "order": 2
             }
         }
@@ -163,7 +161,7 @@ const requestData: any = {
                 "singerMid": "[artistId]",
                 "order": 1,
                 "begin": 0,
-                "num": 20
+                "num": "[maxLength]"
             },
             "module": "musichall.song_list_server"
         }
@@ -220,7 +218,7 @@ const requestData: any = {
             "param": {
                 "topid": "[rankingId]",
                 "offset": 0,
-                "num": 50,
+                "num": "[maxLength]",
                 "period": ""
             }
         }
@@ -254,7 +252,7 @@ const requestData: any = {
             "method": "uniform_get_Dissinfo",
             "param": {
                 "song_begin": 0,
-                "song_num": 100,
+                "song_num": "[maxLength]",
                 "disstid": 5507561315,
                 "ctx": 1
             }
@@ -280,6 +278,27 @@ const userPlaylistsUrl = 'https://c6.y.qq.com/fav/fcgi-bin/fcg_get_profile_order
 type QQMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
     'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 'newSong' | 'newAlbum' | 
     'userFavourites' | 'userPlaylists';
+
+// `sign` 签名参数获取 (Reference: https://jixun.uk/posts/2024/qqmusic-zzc-sign/)
+function hashText(text: string): string {
+  const sha1 = CryptoJS.SHA1(CryptoJS.enc.Utf8.parse(text));
+  return sha1.toString(CryptoJS.enc.Hex).toUpperCase();
+}
+const PART_1_INDEXES = [23, 14, 6, 36, 16, 40, 7, 19];
+const PART_2_INDEXES = [16, 1, 32, 12, 19, 27, 8, 5];
+const SCRAMBLE_VALUES = [89, 39, 179, 150, 218, 82, 58, 252, 177, 52, 186, 123, 120, 64, 242, 133, 143, 161, 121, 179];
+function pickHashByIdx(hash: string, indexes: number[]) {
+  return indexes.map((idx) => hash[idx]).join('');
+}
+function getSign(text: string): string {
+  const sha1 = hashText(text);
+  const part1 = pickHashByIdx(sha1, PART_1_INDEXES);
+  const part2 = pickHashByIdx(sha1, PART_2_INDEXES);
+  const part3 = SCRAMBLE_VALUES.map((scramble, i) => scramble ^ parseInt(sha1.slice(i * 2, i * 2 + 2), 16));
+  const b64Part = btoa(String.fromCharCode(...part3))
+    .replace(/[\\/+=]/g, '');
+  return `zzc${part1}${b64Part}${part2}`.toLowerCase();
+}
 
 /**
  * 获取 QQ音乐 用户收藏歌单
@@ -322,19 +341,19 @@ function getQQmusicSearchTypes() {
  * 附: moduleName 对应的 params 格式
  * - songLink: { songMid: string } - 歌曲 ID
  * - search: { keyword: string, type: number, pageIndex: number } - 搜索关键词, 搜索类型, 页码 (从 0 开始)
- * - songInfo: { songMid: string } - 歌曲 ID
+ * - songInfo: { songMid: string, maxLength: number } - 歌曲 ID
  * - lyrics: { songMid: string } - 歌曲 ID
- * - songList: { listId: number } - 歌单 ID
- * - album: { albumId: string } - 专辑 ID
- * - artist: { artistId: string } - 歌手 ID
+ * - songList: { listId: number, maxLength: number } - 歌单 ID
+ * - album: { albumId: string, maxLength: number } - 专辑 ID
+ * - artist: { artistId: string, maxLength: number } - 歌手 ID
  * - hotList: {} - 空对象
  * - recommendSong: {} - 空对象
  * - recommendArtist: {} - 空对象
  * - rankings: {} - 空对象
- * - rankingContent: { rankingId: number } - 排行榜 ID
+ * - rankingContent: { rankingId: number, maxLength: number } - 排行榜 ID
  * - newSong: {} - 空对象
  * - newAlbum: {} - 空对象
- * - userFavourites: {} - 空对象
+ * - userFavourites: { maxLength: number } - 空对象
  * - userPlaylists: {} - 空对象
  */
 function getQQmusicResult(moduleName: QQMusicModule, params: { [type: string]: any }, cookies: { uin: number, qm_keyst: string }) {
@@ -407,8 +426,8 @@ function getQQmusicResult(moduleName: QQMusicModule, params: { [type: string]: a
                     let encodedLyrics = resp.data.lyric;
                     let encodedTranslation = resp.data.trans;
 
-                    const decodedLyrics = Buffer.from(encodedLyrics, 'base64').toString('utf-8');
-                    const decodedTranslation = Buffer.from(encodedTranslation, 'base64').toString('utf-8');
+                    const decodedLyrics = new TextDecoder().decode(Uint8Array.from(atob(encodedLyrics), c => c.charCodeAt(0)));
+                    const decodedTranslation = new TextDecoder().decode(Uint8Array.from(atob(encodedTranslation), c => c.charCodeAt(0)));
                     
                     response.data = {
                         'lyrics': decodedLyrics.split('\n'),
