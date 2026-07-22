@@ -700,7 +700,7 @@ img.outlineImage {
     position: relative;
     width: 2rem;
     height: 2rem;
-    left: calc(7rem - 12px);
+    left: calc(7rem - 6px);
     top: calc(-6rem + 6px);
 
     background: transparent;
@@ -733,6 +733,10 @@ img.outlineImage {
     left: -1px;
 }
 .songlistCard.medium .songlistPlatform > img {
+    position: relative;
+    left: -6px;
+    top: -1px;
+
     width: 2rem;
     height: 2rem;
 }
