@@ -32,10 +32,10 @@ Arcanum Music - 简洁美观的多平台音乐软件
 made with TypeScript + Electron + Vue.js
 
 > 感谢 Linux.do 社区对本项目的支持
-
-感谢以下用户对本项目的贡献
-
-![Contributors](https://contrib.rocks/image?repo=NekoZX123/ArcanumMusic&size=50)
+> 
+> 感谢以下用户对本项目的贡献
+> 
+> ![Contributors](https://contrib.rocks/image?repo=NekoZX123/ArcanumMusic&size=50)
 
 ## :memo: Linux 安装与兼容性说明
 
@@ -77,13 +77,17 @@ sudo apt install libarchive-tools
 
 ## :bug: 问题修复
 
-- 修复网易云歌曲链接请求时的 403 错误
+- 修复了部分歌词解析错误的问题
+- 修复登录时探测账户信息有时失败的问题
+- 修复播放QQ音乐歌曲时歌词面板背景透明的问题
+- 修复了通知出现动画有概率不显示的问题
 
 ## :sparkles: 新功能
 
-- 添加历史记录页面
-- 添加本地音乐界面
-- 添加音乐下载功能
+- 更新所有网易云音乐 API 至电脑端 API
+- 添加音乐平台首选项
+- 优化通知样式
+- 更新问候语模板
 
 ## :construction: 内测版本特别提示
 
