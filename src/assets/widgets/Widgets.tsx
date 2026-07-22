@@ -1,5 +1,5 @@
 import { defineComponent } from "vue";
-import { changePage } from "../utilities/pageSwitcher";
+import router from "../../router/index.ts";
 import { getPlayer } from "../player/player";
 import { hideArtistSelect, triggerRightMenu } from "../utilities/elementControl";
 import { sizeFormat } from "../utilities/formatter";
@@ -53,7 +53,7 @@ const SonglistCard = defineComponent({
         const platformIcon = platformIcons[platformName] || '';
         return () => (
             <span class="songlistCard medium" id={props.id} 
-                onClick={(_) => changePage('songlist', true, props.id)} 
+                onClick={(_) => router.push('/songlist/' + props.id)}
                 onContextmenu={(event) => handleSongListRightClick(event, props)}>
                 <span class="flex column">
                     <img class="songCover" src={props.coverUrl} alt="Playlist cover"/>
@@ -84,7 +84,7 @@ const SongCard = defineComponent({
         return () => (
             <span class="songCard flex row" onContextmenu={(event) => handleSongRightClick(event, props)}>
                 <img class="songCover" src={props.coverUrl} 
-                    onClick={() => changePage('single', true, props.id)}></img>
+                    onClick={() => router.push('/single/' + props.id)}></img>
                 <span class="songInfo flex column">
                     <label class="text small bold">{props.name}</label>
                     <label class="text ultraSmall grey">{props.authors}</label>
@@ -177,7 +177,7 @@ const ArtistCard = defineComponent({
     setup(props: { id: string, coverUrl: string, name: string }) {
         return () => (
             <span class="artistCard flex column" 
-            onClick={() => changePage('artist', true, props.id)} 
+            onClick={() => router.push('/artist/' + props.id)}
             onContextmenu={(event) => handleArtistRightClick(event, props)}>
                 <img class="artistCover" src={props.coverUrl}></img>
                 <label class="text small">{props.name}</label>
@@ -197,7 +197,7 @@ const ArtistLine = defineComponent({
             <span class="artistLine flex row" 
             onClick={() => {
                 hideArtistSelect();
-                changePage('artist', true, props.id);
+                router.push('/artist/' + props.id);
             }} 
             onContextmenu={(event) => handleArtistRightClick(event, props)}>
                 <img class="artistCover" src={props.coverUrl}></img>

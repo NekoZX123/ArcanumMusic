@@ -13,6 +13,7 @@ import {
   updatePlaylistIcon
 } from './assets/utilities/pageSwitcher.ts';
 // import { testRequest } from './assets/utilities/requestTests.ts';
+import router from './router/index.ts';
 import {PageButton} from './assets/widgets/pageSwitcher.tsx';
 import {readAccountInfo} from './assets/utilities/accountManager.ts';
 import {hideArtistSelect, hideRightMenu} from './assets/utilities/elementControl.ts';
@@ -51,6 +52,9 @@ async function toggleMaximize() {
 
 // 关闭当前窗口
 const closeButtonSrc = ref('./images/windowControl/close.svg');
+
+// 应用就绪状态（配置加载完成后才渲染路由页面）
+const appReady = ref(false);
 function closeHover() {
     closeButtonSrc.value = './images/windowControl/close.hover.svg';
 }
@@ -291,7 +295,8 @@ async function toggleCaptions(_?: MouseEvent) {
     }
     else {
         desktopLyricsImage.value = './images/player/desktopLyrics.on.svg';
-        const captionWindowUrl = `${window.location.href}?isDesktopLyrics=true`
+        const baseUrl = window.location.href.split('?')[0].split('#')[0];
+        const captionWindowUrl = `${baseUrl}?isDesktopLyrics=true`
         // 启动桌面歌词
         captionWindowId = await window.electron.createWindow(
             'Arcanum Music - Desktop Lyrics',
@@ -416,6 +421,23 @@ onMounted(async () => {
     await loadConfig();
     await loadPreference();
 
+    // 标记应用就绪
+    appReady.value = true;
+
+    // 路由变化时统一更新按钮高亮
+    const pageHighlights = ['home', 'library', 'search', 'settings', 'accounts'];
+    router.afterEach((to) => {
+        // 清除所有高亮
+        document.querySelectorAll('.pageButton.current')?.forEach(el => el.classList.remove('current'));
+        // 为当前路由对应按钮添加高亮
+        const pageId = to.name as string;
+        if (pageId && pageHighlights.includes(pageId)) {
+            const btn = document.getElementById(pageId);
+            if (btn) btn.classList.add('current');
+        }
+        updatePlaylistIcon();
+    });
+
     // 测试通知
     setTimeout(() => showNotify('startUpNotify', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 3000);
 
@@ -431,9 +453,7 @@ onMounted(async () => {
 
     // 加载初始页面
     updatePlaylistIcon();
-    setTimeout(() => {
-        initialize();
-    }, 300);
+    initialize();
 
     // 设置点击 / 滚动时隐藏右键菜单
     window.addEventListener('click', hideRightMenu);
@@ -579,7 +599,7 @@ onUnmounted(() => {
                     <PageButton id="search" icon="./images/pageSwitcher/search.svg" text="搜索"></PageButton>
                 </div>
                 <div id="pageContainer">
-                    <div id="pageContent"></div>
+                    <router-view v-if="appReady" />
                     <div id="bottomBlock"></div>
                 </div>
             </div>

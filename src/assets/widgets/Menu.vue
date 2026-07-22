@@ -1,7 +1,8 @@
 <script setup lang="tsx">
 import { defineComponent, onMounted } from 'vue';
 import { getPlayer } from '../player/player.ts';
-import { changePage, getCurrentPage, togglePlaylist } from '../utilities/pageSwitcher.ts';
+import router from '../../router/index.ts';
+import { getCurrentPage, togglePlaylist } from '../utilities/pageSwitcher.ts';
 import { getSongInfo, getSongLink } from '../player/songUtils.ts';
 import { hideArtistSelect, showArtistSelect, type MenuType } from '../utilities/elementControl.ts';
 import { showNotify } from '../notifications/Notification.ts';
@@ -43,7 +44,7 @@ function jumpToSongInfo(songId: string) {
         togglePlaylist(undefined);
     }
 
-    changePage('single', true, songId);
+    router.push('/single/' + songId);
 }
 
 /**
@@ -62,7 +63,7 @@ function jumpToSongAlbum(songId: string) {
     .then((songInfo: any) => {
         const albumId = `album-${platform}-${songInfo.albumId}`;
 
-        changePage('songlist', true, albumId);
+        router.push('/songlist/' + albumId);
     });
 }
 
@@ -83,7 +84,7 @@ function jumpToSongArtist(songId: string) {
             const artistId = artists[0].id;
 
             hideArtistSelect();
-            changePage('artist', true, artistId);
+            router.push('/artist/' + artistId);
         }
         else {
             showArtistSelect(artists);

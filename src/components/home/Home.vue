@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import './homeStyle.css';
 
-import { changePage } from '../../assets/utilities/pageSwitcher.ts';
+import router from '../../router/index.ts';
 import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
 import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest.ts';
 import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest.ts';
@@ -76,7 +76,7 @@ function playNeteaseRadio(_: MouseEvent) {
 const SONGLIST_RECOMMEND_LENGTH = 8;
 const SONG_RECOMMEND_LENGTH = 12;
 const ARTIST_RECOMMEND_LENGTH = 8;
-onMounted(() => {
+onMounted(async () => {
     const userData = getAccountInfo('all');
 
     // 获取启用的平台
@@ -338,7 +338,7 @@ onMounted(() => {
         <div class="flex row" id="homeRecommends">
             <!-- 今日推荐 -->
             <div class="songlistCard midlarge" id="dailyRecommends" :style="`background: url(${recommendCover})`"
-                @click="changePage('songlist', true, `songlist-netease-${neteaseRecommendListId}`)">
+                @click="router.push(`/songlist/songlist-netease-${neteaseRecommendListId}`)">
                 <span class="cardHeader flex row">
                     <span class="cardInfo flex column">
                         <label class="text extraLarge bold" id="recommendTitle">今&nbsp;日推&nbsp;荐</label>
@@ -369,8 +369,8 @@ onMounted(() => {
         <!-- 推荐歌单 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">推荐歌单</label>
-            <a class="text small viewMore" 
-                @click="changePage('songlistCollections', true, { title: '推荐歌单', module: 'hotList' })">
+            <a class="text small viewMore"
+                @click="router.push({ name: 'songlistCollections', query: { title: '推荐歌单', module: 'hotList' } })">
                 查看更多
             </a>
         </div>
@@ -388,8 +388,8 @@ onMounted(() => {
         <!-- 推荐单曲 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">推荐单曲</label>
-            <a class="text small viewMore" 
-                @click="changePage('singleCollections', true, { title: '推荐单曲', module: 'recommendSong' })">
+            <a class="text small viewMore"
+                @click="router.push({ name: 'singleCollections', query: { title: '推荐单曲', module: 'recommendSong' } })">
                 查看更多
             </a>
         </div>
@@ -398,8 +398,8 @@ onMounted(() => {
         <!-- 推荐歌手 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">推荐歌手</label>
-            <a class="text small viewMore" 
-                @click="changePage('artistCollections', true, { title: '推荐歌手', module: 'recommendArtist' })">
+            <a class="text small viewMore"
+                @click="router.push({ name: 'artistCollections', query: { title: '推荐歌手', module: 'recommendArtist' } })">
                 查看更多
             </a>
         </div>
@@ -416,8 +416,8 @@ onMounted(() => {
         <!-- 排行榜 -->
         <div class="flex row titleWithMore">
             <label class="text large bold">排行榜</label>
-            <a class="text small viewMore" 
-                @click="changePage('songlistCollections', true, { title: '排行榜', module: 'rankings' })">
+            <a class="text small viewMore"
+                @click="router.push({ name: 'songlistCollections', query: { title: '排行榜', module: 'rankings' } })">
                 查看更多
             </a>
         </div>
@@ -435,7 +435,7 @@ onMounted(() => {
         <div class="flex row titleWithMore">
             <label class="text large bold">新专辑</label>
             <a class="text small viewMore" 
-            @click="changePage('songlistCollections', true, { title: '新专辑', module: 'newAlbum' })">
+            @click="router.push({ name: 'songlistCollections', query: { title: '新专辑', module: 'newAlbum' } })">
             查看更多
         </a>
         </div>
@@ -453,7 +453,7 @@ onMounted(() => {
         <div class="flex row titleWithMore">
             <label class="text large bold">新歌速递</label>
             <a class="text small viewMore" 
-            @click="changePage('singleCollections', true, { title: '新歌速递', module: 'newSong' })">
+            @click="router.push({ name: 'singleCollections', query: { title: '新歌速递', module: 'newSong' } })">
             查看更多
         </a>
         </div>
