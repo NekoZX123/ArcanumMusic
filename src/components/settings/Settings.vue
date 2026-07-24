@@ -7,7 +7,7 @@ import { HeadersText, NodeBlock, CheckBox, ColorPicker, Slider, TextInput, Dropb
 import './settingsStyle.css';
 import { buttonTypes, showPopup } from '../../assets/notifications/popup.tsx';
 import { showNotify } from '../../assets/notifications/Notification.ts';
-import {getConfig, setConfig} from "../../assets/utilities/configLoader.ts";
+import {getConfig, setConfig} from "../../assets/user/configLoader.ts";
 import { getThemeConfig, setControlBarTheme, setThemeColor, setWindowBackground, type colorThemeName } from '../../assets/effects/themeControl.ts';
 
 // 设置页面及内容

@@ -2,9 +2,9 @@
 import { defineComponent, onMounted } from 'vue';
 import { getPlayer } from '../player/player.ts';
 import router from '../../router/index.ts';
-import { getCurrentPage, togglePlaylist } from '../utilities/pageSwitcher.ts';
+import { getCurrentPage, togglePlaylist } from '../ui/pageSwitcher.ts';
 import { getSongInfo, getSongLink } from '../player/songUtils.ts';
-import { hideArtistSelect, showArtistSelect, type MenuType } from '../utilities/elementControl.ts';
+import { hideArtistSelect, showArtistSelect, type MenuType } from '../ui/elementControl.ts';
 import { showNotify } from '../notifications/Notification.ts';
 import { saveAudio } from '../player/musicDownloader.ts';
 

@@ -11,13 +11,13 @@ import {
   pageForward,
   togglePlaylist,
   updatePlaylistIcon
-} from './assets/utilities/pageSwitcher.ts';
+} from './assets/ui/pageSwitcher.ts';
 // import { testRequest } from './assets/utilities/requestTests.ts';
 import router from './router/index.ts';
 import {PageButton} from './assets/widgets/pageSwitcher.tsx';
-import {readAccountInfo} from './assets/utilities/accountManager.ts';
-import {hideArtistSelect, hideRightMenu} from './assets/utilities/elementControl.ts';
-import {getConfig, getPreference, loadConfig, loadPreference, writePreference} from './assets/utilities/configLoader.ts';
+import {readAccountInfo} from './assets/user/accountManager.ts';
+import {hideArtistSelect, hideRightMenu} from './assets/ui/elementControl.ts';
+import {getConfig, getPreference, loadConfig, loadPreference, writePreference} from './assets/user/configLoader.ts';
 import {loadProxyPort} from './assets/utilities/proxyRequest.ts';
 import {syncFocusedLyric} from './assets/lyrics/lyricsManager.ts';
 import { initializeTheme, setControlBarTheme, setWindowBackground, type colorThemeName } from './assets/effects/themeControl.ts';

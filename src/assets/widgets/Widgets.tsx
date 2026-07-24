@@ -1,7 +1,7 @@
 import { defineComponent } from "vue";
 import router from "../../router/index.ts";
 import { getPlayer } from "../player/player";
-import { hideArtistSelect, triggerRightMenu } from "../utilities/elementControl";
+import { hideArtistSelect, triggerRightMenu } from "../ui/elementControl.ts";
 import { sizeFormat } from "../utilities/formatter";
 
 // 各平台图标

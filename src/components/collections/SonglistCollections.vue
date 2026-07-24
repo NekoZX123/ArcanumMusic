@@ -8,8 +8,8 @@ import type { AxiosResponse } from 'axios';
 import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest';
 import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest';
 import { parseMusicData } from '../../assets/utilities/dataParsers';
-import { addSonglistCard } from '../../assets/utilities/elementControl';
-import { getAccountInfo } from '../../assets/utilities/accountManager';
+import { addSonglistCard } from '../../assets/ui/elementControl';
+import { getAccountInfo } from '../../assets/user/accountManager';
 
 const props = defineProps({
     title: {

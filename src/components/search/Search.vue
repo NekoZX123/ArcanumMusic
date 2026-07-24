@@ -9,9 +9,9 @@ import { getQQmusicResult, getQQmusicSearchTypes } from '../../assets/scripts/qq
 import { getKuwoResult, getKuwoSearchTypes } from '../../assets/scripts/kuwo/kuwoRequest';
 import { getKugouResult, getKugouSearchTypes } from '../../assets/scripts/kugou/kugouRequest';
 import type { AxiosError, AxiosResponse } from 'axios';
-import { getAccountInfo } from '../../assets/utilities/accountManager';
+import { getAccountInfo } from '../../assets/user/accountManager';
 import { parseMusicData } from '../../assets/utilities/dataParsers';
-import { addArtistCard, addSongCard, addSonglistCard } from '../../assets/utilities/elementControl';
+import { addArtistCard, addSongCard, addSonglistCard } from '../../assets/ui/elementControl.ts';
 
 // 从 sessionStorage 恢复搜索状态（在模板渲染前执行）
 const savedSearchState = (() => {

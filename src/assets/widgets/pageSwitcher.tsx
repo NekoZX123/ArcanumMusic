@@ -1,5 +1,5 @@
 import { defineComponent } from "vue";
-import { changePage, getCurrentPage } from "../utilities/pageSwitcher";
+import { changePage, getCurrentPage } from "../ui/pageSwitcher.ts";
 
 // 页面挂载切换器
 function onTabChange(event: any) {

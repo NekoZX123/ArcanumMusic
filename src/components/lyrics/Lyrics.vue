@@ -11,7 +11,7 @@ import {
     updateCurrentLyrics,
     updateFocusedLyric
 } from '../../assets/lyrics/lyricsManager.ts';
-import {getConfig} from '../../assets/utilities/configLoader.ts';
+import {getConfig} from '../../assets/user/configLoader.ts';
 
 // const songData = ref(getPlayer());
 // 最大偏移回弹距离

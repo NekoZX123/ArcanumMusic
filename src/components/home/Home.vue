@@ -3,17 +3,17 @@ import { onMounted, ref } from 'vue';
 import './homeStyle.css';
 
 import router from '../../router/index.ts';
-import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
+import { getAccountInfo } from '../../assets/user/accountManager.ts';
 import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest.ts';
 import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest.ts';
 import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest.ts';
 import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest.ts';
-import { addSonglistCard, addSongCard, addArtistCard } from '../../assets/utilities/elementControl.ts';
+import { addSonglistCard, addSongCard, addArtistCard } from '../../assets/ui/elementControl.ts';
 import type { AxiosResponse } from 'axios';
 import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
 import { getPlayer } from '../../assets/player/player.ts';
 import { getMainColors } from '../../assets/effects/colorUtils.ts';
-import { getConfig } from '../../assets/utilities/configLoader.ts';
+import { getConfig } from '../../assets/user/configLoader.ts';
 
 // 默认滑动量
 const BOX_SCROLL_DISTANCE = 330;

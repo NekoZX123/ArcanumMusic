@@ -1,5 +1,5 @@
 import type { AxiosResponse, AxiosError } from "axios";
-import { getAccountInfo } from "../utilities/accountManager";
+import { getAccountInfo } from "../user/accountManager";
 import { parseMusicData } from "../utilities/dataParsers";
 import { getKugouResult } from "../scripts/kugou/kugouRequest";
 import { getKuwoResult } from "../scripts/kuwo/kuwoRequest";

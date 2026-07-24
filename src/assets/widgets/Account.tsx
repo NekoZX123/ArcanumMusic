@@ -3,7 +3,7 @@ import { defineComponent, ref, onMounted } from "vue";
 import { closePopup, showPopup } from "../notifications/popup";
 import { showNotify } from "../notifications/Notification";
 
-import { storeAccountInfo, readAccountInfo, cleanAccountInfo, setAccountInfo } from "../utilities/accountManager.ts";
+import { storeAccountInfo, readAccountInfo, cleanAccountInfo, setAccountInfo } from "../user/accountManager.ts";
 import { getQQmusicAccount } from "../scripts/qqmusic/qqmusicRequest.ts";
 import { getNeteaseAccount } from "../scripts/netease/neteaseRequest.ts";
 

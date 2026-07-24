@@ -6,9 +6,9 @@ import { onMounted, ref, type Ref } from 'vue';
 
 import './artistStyle.css';
 import router from '../../router/index.ts';
-import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
+import { getAccountInfo } from '../../assets/user/accountManager.ts';
 import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest.ts';
-import { addSongCard, addSonglistCard } from '../../assets/utilities/elementControl.ts';
+import { addSongCard, addSonglistCard } from '../../assets/ui/elementControl.ts';
 import { formatAuthors } from '../../assets/utilities/dataParsers.ts';
 import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest.ts';
 import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest.ts';

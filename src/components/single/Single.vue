@@ -7,7 +7,7 @@ import { onMounted, ref } from 'vue';
 import './singleStyle.css';
 
 import { SongInfoLine } from '../../assets/widgets/Widgets';
-import { getAccountInfo } from '../../assets/utilities/accountManager';
+import { getAccountInfo } from '../../assets/user/accountManager';
 import { getRequestFormat, parseMusicData } from '../../assets/utilities/dataParsers';
 import type { AxiosResponse } from 'axios';
 

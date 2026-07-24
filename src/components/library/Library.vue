@@ -4,15 +4,15 @@ import './libraryStyle.css';
 
 import TabWidget from '../../assets/widgets/TabWidget.vue';
 import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest.ts';
-import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
+import { getAccountInfo } from '../../assets/user/accountManager.ts';
 import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
-import { addSongCard, addSonglistCard, triggerRightMenu } from '../../assets/utilities/elementControl.ts';
+import { addSongCard, addSonglistCard, triggerRightMenu } from '../../assets/ui/elementControl.ts';
 import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest.ts';
 import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest.ts';
 import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest.ts';
 import type { AxiosResponse } from 'axios';
 import { getPlayer } from '../../assets/player/player.ts';
-import { getConfig } from '../../assets/utilities/configLoader.ts';
+import { getConfig } from '../../assets/user/configLoader.ts';
 import router from '../../router/index.ts';
 import { showNotify } from '../../assets/notifications/Notification.ts';
 

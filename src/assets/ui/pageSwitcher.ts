@@ -1,7 +1,7 @@
 // 应用页面切换器 (vue-router 适配版)
 
 import router from '../../router/index.ts';
-import { getAccountInfo } from "./accountManager";
+import { getAccountInfo } from "../user/accountManager";
 
 /**
  * ### 切换应用页面 (基于 vue-router)
