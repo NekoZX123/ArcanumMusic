@@ -23,12 +23,7 @@ function changePage(pageId: string, pushStack: boolean = true, idParam?: any) {
             routeLocation = '/library';
             break;
         case 'search': {
-            const searchBar = document.getElementById('search') as HTMLInputElement;
-            if (searchBar?.value) {
-                routeLocation = { path: '/search', query: { q: searchBar.value } };
-            } else {
-                routeLocation = '/search';
-            }
+            routeLocation = '/search';
             break;
         }
         case 'settings':
