@@ -15,7 +15,7 @@
 
     margin-top: 0;
 
-    background: var(--interface-transparent-grey);
+    background: var(--interface-transparent);
     border: none;
     border-radius: 1.5rem;
     backdrop-filter: blur(4px);

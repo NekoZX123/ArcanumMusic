@@ -140,7 +140,7 @@ function searchSinglePlatform(platform: string, keyword: string, type: string, i
         return;
     }
     
-    sendRequest('search', { keyword: keyword, type: searchType, pageIndex: pageIndex }, userData[platform].cookies)
+    sendRequest('search', { keyword: keyword, type: searchType, maxLength: 30, pageIndex: pageIndex }, userData[platform].cookies)
         .then((response: AxiosResponse) => {
             // console.log(response.data);
             const result = parseMusicData(response, platform, `search-${type}`);
