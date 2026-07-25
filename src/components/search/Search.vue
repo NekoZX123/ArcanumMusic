@@ -105,6 +105,8 @@ function platformChange(tabInfo: { widgetId: string, current: number }) {
     currentPlatform.value = platform;
     currentType.value = 0;
 
+    scrollToTop();
+
     searchOnTypeChange({ widgetId: tabInfo.widgetId, current: currentType.value });
 }
 
@@ -218,10 +220,15 @@ function searchMultiplatform(type: string) {
 // 搜索类型改变时触发
 function searchOnTypeChange(tabInfo: { widgetId: string, current: number }, isNextPage: boolean = false) {
     currentType.value = tabInfo.current;
-    
+
     // 自动重置页码
-    if (!isNextPage) pageIndex = 0;
-    
+    if (!isNextPage) {
+        pageIndex = 0;
+
+        // 切换标签页（非翻页）后滚回顶部
+        scrollToTop();
+    }
+
     // 综合搜索判断
     if (currentPlatform.value === 'multiplatform') {
         searchMultiplatform(typeArray[tabInfo.current]);
@@ -260,6 +267,14 @@ function loadNextPage(_: MouseEvent) {
     pageIndex ++;
 
     searchOnTypeChange({ widgetId: '', current: currentType.value }, true);
+}
+
+// 切换标签页后自动滚回顶部
+function scrollToTop() {
+    const container = document.getElementById('pageContainer');
+    if (container) {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 }
 
 // 页面离开时保存搜索状态
@@ -316,7 +331,7 @@ onMounted(() => {
         </div>
 
         <!-- 内容 -->
-        <TabWidget id="searchPlatform" :tabs="platformTabs" :scroll-on-click="false" :on-tab-switch="platformChange" :initial-index="initialPlatformIdx">
+        <TabWidget id="searchPlatform" :tabs="platformTabs" :on-tab-switch="platformChange" :initial-index="initialPlatformIdx">
             <template #default>
                 <TabWidget id="searchType_multiplatform" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange" :initial-index="initialTypeIdx">
                     <template #default>
@@ -369,5 +384,7 @@ onMounted(() => {
         <button class="flex row listButton" id="loadMoreButton" @click="loadNextPage">
             <label class="text small bold">查看更多</label>
         </button>
+
+        <div id="bottomBlock"></div>
     </div>
 </template>

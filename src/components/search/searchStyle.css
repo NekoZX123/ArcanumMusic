@@ -1,18 +1,19 @@
 #musicSearch {
-    height: 100%;
-
     align-items: center;
 
     padding: 0 2rem;
 }
-#musicSearch > div {
-    margin-top: 1rem;
-}
 
 /* 搜索框 */
 #searchBarContainer {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+
     width: 100%;
     height: 3rem;
+
+    margin-top: 0;
 
     background: var(--interface-transparent-grey);
     border: none;
@@ -79,12 +80,40 @@
     align-items: center;
 }
 
+#searchPlatform {
+    align-items: center;
+}
+#searchPlatform .tabsContainer {
+    align-items: center;
+}
 #searchPlatform > .tabSwitcher {
+    position: sticky;
+    width: fit-content;
+    top: calc(3rem + 6px);
+    z-index: 29;
+
+    background: var(--interface-transparent);
+    border-radius: calc(1.5rem + 1px);
+
     justify-content: center;
+}
+#searchPlatform > .tabSwitcher > .tabItem {
+    border-radius: 1.5rem;
 }
 
 [id^="searchType_"] > .tabSwitcher {
+    position: sticky;
+    width: fit-content;
+    z-index: 28;
+    top: calc(6rem + 12px);
+
+    background: var(--interface-transparent);
+    border-radius: calc(1rem + 1px);
+
     justify-content: center;
+}
+[id^="searchType_"] > .tabSwitcher > .tabItem {
+    border-radius: 1rem;
 }
 
 .musicBox {
@@ -125,5 +154,9 @@
 
 #loadMoreButton {
     margin-top: 1rem;
-    margin-bottom: 3rem;
+}
+
+#bottomBlock {
+    display: block;
+    height: 5rem;
 }

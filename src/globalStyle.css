@@ -387,6 +387,9 @@ img.outlineImage {
 }
 .tabSwitcher {
     margin: 3px 0;
+    padding: 2px;
+
+    gap: 1rem;
 }
 .tabItem {
     position: relative;
@@ -399,8 +402,6 @@ img.outlineImage {
 
     border: none;
     border-radius: 8px;
-
-    margin: 0 0.5rem;
 
     justify-content: center;
     align-items: center;
