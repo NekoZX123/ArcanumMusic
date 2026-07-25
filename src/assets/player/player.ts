@@ -339,6 +339,17 @@ class Player {
             this.updateProgress(0);
             this.setProgress(0, false);
 
+            // 更新 SMTC 元数据
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: this.name,
+                artist: this.authors,
+                artwork: [{
+                    src: this.coverUrl || './images/player/testAlbum.png',
+                    sizes: '128x128',
+                    type: 'image/png'
+                }]
+            });
+
             // 设置播放链接
             if (!playInfo.url) {
                 showNotify('songUrlNullError', 'critical', `无法播放 ${this.name}`, '获取播放链接失败');
@@ -464,6 +475,7 @@ class Player {
 
         const filePath = songInfo.id.substring(6).replace(/\\/g, '/');
 
+        // 设置歌曲信息
         this.playlist.current = songInfo;
         this.name = songInfo.name || '未知名称';
         this.authors = songInfo.authors || '未知作者';
@@ -472,6 +484,19 @@ class Player {
         this.updateDuration(this.duration);
         this.updateProgress(0);
         this.setProgress(0, false);
+
+        // 更新 SMTC 信息
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: this.name,
+            artist: this.authors,
+            artwork: [
+                {
+                    src: this.coverUrl,
+                    sizes: '128x128',
+                    type: 'image/png'
+                }
+            ]
+        });
 
         // 通过 WebSocket 代理读取本地文件并创建 Blob URL
         const audioChunks: BlobPart[] = [];

@@ -521,6 +521,11 @@ onMounted(async () => {
 
         getPlayer()?.checkNextSong();
     });
+    // 系统 SMTC 绑定
+    navigator.mediaSession.setActionHandler('play', () => getPlayer()?.togglePlayPause());
+    navigator.mediaSession.setActionHandler('pause', () => getPlayer()?.togglePlayPause());
+    navigator.mediaSession.setActionHandler('previoustrack', () => getPlayer()?.previousSong());
+    navigator.mediaSession.setActionHandler('nexttrack', () => getPlayer()?.nextSong());
 
     // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
     // 通过 `onstorage` 赋值以方便从 Electron 主进程调用
