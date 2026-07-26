@@ -50,6 +50,11 @@ async function toggleMaximize() {
     }
 }
 
+/** 处理音频播放结束事件 */
+function handleSongEnd() {
+    getPlayer()?.checkNextSong();
+}
+
 // 关闭当前窗口
 const closeButtonSrc = ref('./images/windowControl/close.svg');
 
@@ -518,9 +523,8 @@ onMounted(async () => {
             postSongProgress(currentTime);
             getPlayer()?.updateProgress(currentTime);
         }
-
-        getPlayer()?.checkNextSong();
     });
+    playerElem.addEventListener('ended', handleSongEnd);
     // 系统 SMTC 绑定
     navigator.mediaSession.setActionHandler('play', () => getPlayer()?.togglePlayPause());
     navigator.mediaSession.setActionHandler('pause', () => getPlayer()?.togglePlayPause());
@@ -541,6 +545,10 @@ onUnmounted(() => {
     window.onstorage = null;
     window.removeEventListener('click', hideRightMenu);
     window.removeEventListener('storage', handleStorageData);
+    const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+    if (playerElem) {
+        playerElem.removeEventListener('ended', handleSongEnd);
+    }
 });
 
 </script>

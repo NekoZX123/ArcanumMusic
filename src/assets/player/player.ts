@@ -89,21 +89,6 @@ class Player {
             history: []
         };
 
-        // 从 localStorage 加载播放历史
-        const storedHistory = window.localStorage.getItem('playHistory');
-        if (storedHistory) {
-            try {
-                const parsed = JSON.parse(storedHistory);
-                if (Array.isArray(parsed)) {
-                    this.playlist.history = parsed;
-                }
-                else this.playlist.history = [];
-            } catch (e) {
-                console.error('[Error] Failed to parse stored play history:', e);
-                this.playlist.history = [];
-            }
-        }
-
         this.name = '未在播放';
         this.authors = '';
         this._coverUrl = './images/player/testAlbum.png';
@@ -593,7 +578,7 @@ class Player {
      */
     previousSong() {
         // 历史记录为空
-        if (this.playlist.history.length === 0 && this.repeatState === 0) {
+        if (this.playlist.history.length <= 1 && this.repeatState === 0) {
             console.warn(`[Warning] No songs in play history, ignoring...`);
             return;
         }
@@ -632,7 +617,7 @@ class Player {
             return;
         }
         // 播放上一首
-        const prevSong = Object.assign({}, this.playlist.history[0]);
+        const prevSong = Object.assign({}, this.playlist.history[1]);
         const current = Object.assign({}, this.playlist.current);
         this.playlist.breakIn.unshift(current); // 将当前播放作为下一首
         this.playlist.history.splice(0, 1);
