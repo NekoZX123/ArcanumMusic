@@ -4,7 +4,7 @@ import { getPlayer } from '../../assets/player/player';
 import { PlaylistSongLine } from '../../assets/widgets/Widgets';
 import './playlistStyle.css';
 
-/** 根据 repeatState / shuffleState 组合需展示的列表项 */
+//  根据 repeatState / shuffleState 组合需展示的列表项
 const mergedPlaylist = computed(() => {
     const player = getPlayer();
     if (!player) return [];
@@ -23,18 +23,23 @@ const mergedPlaylist = computed(() => {
     ];
 });
 
-/** 自动滚动到当前项 (repeatState 0/2 时) */
+// 顺序播放/单曲循环/随机播放时自动滚动到当前项
 watch(
     () => getPlayer()?.playlist.currentIndex,
     () => {
         const player = getPlayer();
         if (!player) return;
-        if (player.repeatState === 0 || player.repeatState === 2) {
-            nextTick(() => {
-                const el = document.querySelector('.playlistLine.currentItem');
-                if (el) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-            });
-        }
+        nextTick(() => {
+            const container = document.querySelector('#pageContainer');
+            const el = document.querySelector('.playlistLine.currentItem') as HTMLElement;
+
+            if (container && el) {
+                container.scrollTo({
+                    top: Math.max(el.offsetTop - 24, 0),
+                    behavior: 'smooth'
+                });
+            }
+        });
     }
 );
 </script>
