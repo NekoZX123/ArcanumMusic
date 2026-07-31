@@ -302,8 +302,9 @@ class Player {
      * @param songInfo 歌曲信息
      * @param addToHistory 是否加入本地历史 (默认为 true)
      * @param autoPlay 音频准备完后是否自动播放 (默认为 true)
+     * @param onReady 音频准备完成后执行的函数 (可选)
      */
-    playAudio(songInfo: any, addToHistory: boolean = true, autoPlay: boolean = true) {
+    playAudio(songInfo: any, addToHistory: boolean = true, autoPlay: boolean = true, onReady?: () => void) {
         console.log(`[Debug] Playing: ${JSON.stringify(songInfo)}`);
         songInfo = Object.assign({}, songInfo);
         songInfo.id = songInfo.id.replace('new_', '').replace('playlist_', '').replace('current_', '');
@@ -416,7 +417,7 @@ class Player {
                 };
             }
 
-            // 设置播放按钮图片
+            // 开始播放
             const startPlaying = () => {
                 const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
                 if (!playerElem) {
@@ -432,8 +433,9 @@ class Player {
             }
             // 音频准备完成后播放
             const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
-            if (playerElem && autoPlay) {
-                playerElem.addEventListener('canplay', startPlaying, { once: true });
+            if (playerElem) {
+                if (onReady) onReady();
+                if (autoPlay) playerElem.addEventListener('canplay', startPlaying, { once: true });
             }
             
             // 更新歌词
@@ -881,8 +883,9 @@ class Player {
 
             const autoStart = getConfig().generic.playOptions.player.autoStart;
 
-            this.playAudio(this.playlist.current, true, autoStart);
-            this.setProgress(sessionInfo.progress);
+            this.playAudio(this.playlist.current, true, autoStart, () => {
+                this.setProgress(sessionInfo.progress);
+            });
         }
         catch(e) {
             console.error(`[Error] Failed to parse session data: ${e}`);

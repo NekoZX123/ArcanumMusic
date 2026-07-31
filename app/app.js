@@ -16,9 +16,11 @@ import { scanLocalMusic, getMusicMetadata, getLocalPaths, writeLocalPaths, openM
 const __dirname = fileURLToPath(import.meta.url);
 
 const environment = getEnvironment();
+
+app.setAppUserModelId('moe.nekozx123.arcanummusic');
+
 let tray;
 let mainWindow = null;
-
 let hideToTray = false;
 
 // 调整应用根目录中的 `\` 为 `/`
@@ -104,6 +106,7 @@ async function createMainWindow() {
         title: 'Arcanum Music',
         icon: loadIcon(),
         webPreferences: {
+            backgroundThrottling: false,
             nodeIntegration: false,
             contextIsolation: true,
             preload: __dirname.replace('app.js', 'preload.js')
