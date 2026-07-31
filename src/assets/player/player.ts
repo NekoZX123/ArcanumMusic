@@ -2,6 +2,7 @@ import { reactive } from "vue";
 import { showNotify } from "../notifications/Notification.ts";
 import { getListContent, getSongInfo, getSongLink } from "./songUtils.ts";
 import { timeFormat } from "../utilities/formatter.ts";
+import { getConfig } from "../user/configLoader.ts";
 
 // const identifier = 'moe.nekozx123.arcanummusic.audioplayer';
 
@@ -299,9 +300,10 @@ class Player {
     /**
      * 播放指定歌曲
      * @param songInfo 歌曲信息
-     * @param addToHistory
+     * @param addToHistory 是否加入本地历史 (默认为 true)
+     * @param autoPlay 音频准备完后是否自动播放 (默认为 true)
      */
-    playAudio(songInfo: any, addToHistory: boolean = true) {
+    playAudio(songInfo: any, addToHistory: boolean = true, autoPlay: boolean = true) {
         console.log(`[Debug] Playing: ${JSON.stringify(songInfo)}`);
         songInfo = Object.assign({}, songInfo);
         songInfo.id = songInfo.id.replace('new_', '').replace('playlist_', '').replace('current_', '');
@@ -430,7 +432,7 @@ class Player {
             }
             // 音频准备完成后播放
             const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
-            if (playerElem) {
+            if (playerElem && autoPlay) {
                 playerElem.addEventListener('canplay', startPlaying, { once: true });
             }
             
@@ -847,6 +849,44 @@ class Player {
         .catch((err) => {
             console.error(`Failed to get list content: ${err}`);
         });
+    }
+
+    /**
+     * 保存当前会话至 LocalStorage
+     */
+    saveSession() {
+        const sessionObject = {
+            ...this.playlist,
+            progress: this.playedTime
+        }
+        const sessionInfo = JSON.stringify(sessionObject);
+
+        window.localStorage.setItem('playerSession', sessionInfo);
+    }
+    /**
+     * 从 LocalStorage 恢复上次播放会话
+     */
+    restoreSession() {
+        const sessionText = window.localStorage.getItem('playerSession') as string;
+        if (!sessionText) console.error('[Error] Unable to get previous session');
+
+        try {
+            const sessionInfo = JSON.parse(sessionText);
+
+            this.playlist = {
+                current: sessionInfo.current,
+                currentIndex: sessionInfo.currentIndex,
+                playList: sessionInfo.playList
+            }
+
+            const autoStart = getConfig().generic.playOptions.player.autoStart;
+
+            this.playAudio(this.playlist.current, true, autoStart);
+            this.setProgress(sessionInfo.progress);
+        }
+        catch(e) {
+            console.error(`[Error] Failed to parse session data: ${e}`);
+        }
     }
 
     syncSongInfo() {

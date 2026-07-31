@@ -3,6 +3,7 @@ import { computed, watch, nextTick } from 'vue';
 import { getPlayer } from '../../assets/player/player';
 import { PlaylistSongLine } from '../../assets/widgets/Widgets';
 import './playlistStyle.css';
+import { getConfig } from '../../assets/user/configLoader';
 
 //  根据 repeatState / shuffleState 组合需展示的列表项
 const mergedPlaylist = computed(() => {
@@ -28,7 +29,8 @@ watch(
     () => getPlayer()?.playlist.currentIndex,
     () => {
         const player = getPlayer();
-        if (!player) return;
+        const autoScroll = getConfig().generic.playOptions.playlist.autoScroll;
+        if (!player || !autoScroll) return;
         nextTick(() => {
             const container = document.querySelector('#pageContainer');
             const el = document.querySelector('.playlistLine.currentItem') as HTMLElement;

@@ -45,6 +45,8 @@ contextBridge.exposeInMainWorld(
             return () => ipcRenderer.removeListener('download-progress', handler);
         },
 
+        onAppQuit: (callback) => ipcRenderer.on('app-quit', callback), // 监听主进程退出信号
+
         openExternal: (url) => ipcRenderer.invoke('openExternal', url), // 打开外部链接
         copyToClipboard: (content) => ipcRenderer.invoke('copyContent', content), // 复制内容至剪贴板
         setAutoLaunch: (isEnabled) => ipcRenderer.invoke('setAutoLaunch', isEnabled), // 设置开机自启

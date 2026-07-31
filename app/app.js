@@ -206,12 +206,17 @@ function setWindowTopState(_, id, flag) {
  * 退出应用
  */
 function quitApp(_) {
+    // 向主窗口发送退出信号，以便保存播放会话
+    if (mainWindow) {
+        mainWindow.webContents.send('app-quit');
+    }
+
     // 先关闭所有非主窗口
     const windowList = BrowserWindow.getAllWindows();
     windowList.forEach((window) => {
         if (window.id !== mainWindow.id) window.close();
     });
-    
+
     // 关闭主窗口
     if (mainWindow) {
         mainWindow.close();

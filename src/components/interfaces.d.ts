@@ -1,12 +1,14 @@
 // Electron API 声明
 
-export interface IElectronAPI {
+export interface ElectronAPI {
     createWindow: (title: String, url: String, options?: any) => Promise<number>,
     minimizeWindow: () => Promise<void>,
     toggleMaximize: () => Promise<boolean>,
     closeWindow: (hideToTrayFlag?: boolean) => Promise<void>,
     setAlwaysOnTop: (id: number, flag: boolean) => Promise<void>,
     closeWindowById: (windowId: Number) => Promise<void>,
+
+    onAppQuit: (callback: () => void) => void,
     
     getWindowRect: () => Promise<{x: number, y: number, width: number, height: number}>,
     moveWindow: (x: Number, y: Number) => Promise<void>,
@@ -46,7 +48,7 @@ export interface IElectronAPI {
 declare global {
     interface Window {
         // __qmfe_sign_check: any,
-        electron: IElectronAPI
+        electron: ElectronAPI
     }
 }
 

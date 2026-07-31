@@ -51,6 +51,15 @@
                 <checkbox id="lyricsGlow" text="启用歌词光效"/>
             </node>
         </page>
+        <page id="playOptions" name="播放设置">
+            <node id="player" title="播放器">
+                <checkbox id="autoStart" text="启动应用后自动开始播放"/>
+            </node>
+            <node id="playlist" title="播放列表">
+                <checkbox id="saveSession" text="保存上次播放内容"/>
+                <checkbox id="autoScroll" text="自动滚动至当前歌曲"/>
+            </node>
+        </page>
     </pagebox>
 
     <pagebox id="user" name="用户">

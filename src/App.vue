@@ -407,6 +407,9 @@ async function savePreferences() {
     preferences.player.volume = getPlayer()?.volume;
 
     writePreference(preferences);
+
+    // 保存播放会话
+    await getPlayer()?.saveSession();
 }
 
 // 复制歌名至剪贴板
@@ -509,6 +512,11 @@ onMounted(async () => {
     if (!localStorage.getItem('playHistory')) {
         localStorage.setItem('playHistory', JSON.stringify([]));
     }
+    
+    // 按配置恢复上次会话
+    if (getConfig().generic.playOptions.playlist.saveSession) {
+        player?.restoreSession();
+    }
 
     // 设置触发器
     // 播放器组件
@@ -538,8 +546,13 @@ onMounted(async () => {
     // 监听播放进度更新 (BroadcastChannel)
     appChannel.addEventListener('message', handleProgressUpdate);
 
-    // 关闭窗口时保存偏好数据
-    window.addEventListener('close', savePreferences);
+    // 关闭窗口时保存偏好数据及播放会话
+    window.addEventListener('close', () => savePreferences());
+
+    // 监听主进程退出信号，保存播放会话
+    window.electron.onAppQuit(() => {
+        getPlayer()?.saveSession();
+    });
 });
 onUnmounted(() => {
     window.onstorage = null;
