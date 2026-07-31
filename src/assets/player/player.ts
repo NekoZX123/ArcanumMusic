@@ -314,12 +314,6 @@ class Player {
             return;
         }
 
-        const current = this.playlist.current;
-
-        if (addToHistory) {
-            this.addToLocalHistory(current);
-        }
-
         // 追加到当前项目后 (若已存在则移动到当前项目后, 避免重复)
         const existingIndex = this.playlist.playList.findIndex((s: any) => s.id === songInfo.id);
         if (this.playlist.currentIndex >= 0 && existingIndex === -1) {
@@ -339,6 +333,9 @@ class Player {
                 ...Object.assign({}, infoObject)
             };
             console.log(`[Debug]>>> Playing: ${JSON.stringify(playInfo)}`);
+            if (addToHistory) {
+                this.addToLocalHistory(songInfo);
+            }
 
             // 设置歌曲信息
             this.name = playInfo.name;

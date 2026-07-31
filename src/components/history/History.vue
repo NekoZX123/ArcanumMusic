@@ -34,12 +34,10 @@ function clearHistory() {
         if (code === buttonTypes.BUTTON_CONFIRM) {
             window.localStorage.removeItem('playHistory');
             history.value = [];
-
-            const player = getPlayer();
-            if (player) {
-               player.playlist.history = [];
-            }
         }
+
+        const player = getPlayer();
+        if (player) player.storedHistory = [];
     });
 }
 

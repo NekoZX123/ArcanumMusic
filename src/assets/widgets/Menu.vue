@@ -160,7 +160,7 @@ onMounted(() => {
                 :on-click="playCurrentContent" 
                 v-if="['collections', 'song', 'localAudio'].includes(props.menuType)"></MenuItem>
             <MenuItem id="playNext" icon="./images/menu/addToList.svg" text="下一首播放" 
-                :on-click="() => {getPlayer()?.playlistAdd(props.targetInfo, true)}" 
+                :on-click="() => {getPlayer()?.playlistAdd(props.targetInfo)}" 
                 v-if="['song', 'localAudio'].includes(props.menuType)"></MenuItem>
         </span>
         <span class="menuPart flex column">
