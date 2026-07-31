@@ -376,8 +376,8 @@ function handleStorageData (updateEvent: StorageEvent) {
         const eventObject = JSON.parse(updateEvent.newValue);
         const eventName = eventObject.eventName;
         console.log(`[Debug] Event triggered: name = ${eventName}; content = ${eventObject.message}; identifier = ${eventObject.identifier}`);
-        if (!allowedIdentifiers.includes(eventObject.message)) {
-            console.error(`[Error] Unidentified identifier ${eventObject.message}`);
+        if (!allowedIdentifiers.includes(eventObject.identifier)) {
+            console.error(`[Error] Unidentified identifier ${eventObject.identifier}`);
             return;
         }
 

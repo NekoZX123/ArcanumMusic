@@ -308,7 +308,7 @@ function sendPlayerSignal(signal) {
     mainWindow.webContents.executeJavaScript(`
     window.onstorage({
         key: 'playerSignal', 
-        newValue: JSON.stringify({eventName: '${signal}', message: 'moe.nekozx123.arcanummusic.contextmenu'})
+        newValue: JSON.stringify({eventName: '${signal}', identifier: 'moe.nekozx123.arcanummusic.contextmenu'})
     });
     `, true);
 }
