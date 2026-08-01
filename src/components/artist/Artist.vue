@@ -5,10 +5,10 @@
 import { onMounted, ref, type Ref } from 'vue';
 
 import './artistStyle.css';
-import { changePage } from '../../assets/utilities/pageSwitcher.ts';
-import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
+import router from '../../router/index.ts';
+import { getAccountInfo } from '../../assets/user/accountManager.ts';
 import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest.ts';
-import { addSongCard, addSonglistCard } from '../../assets/utilities/elementControl.ts';
+import { addSongCard, addSonglistCard } from '../../assets/ui/elementControl.ts';
 import { formatAuthors } from '../../assets/utilities/dataParsers.ts';
 import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest.ts';
 import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest.ts';
@@ -620,8 +620,8 @@ onMounted(() => {
 
             <div class="flex row titleWithMore">
                 <label class="text large bold">热门歌曲</label>
-                <a class="text small viewMore" 
-                    @click="changePage('singleCollections', true, { title: `${artistMetaData.name} 的热门歌曲`, module: `artistSongs-${artistMetaData.id}` })">
+                <a class="text small viewMore"
+                    @click="router.push({ name: 'singleCollections', query: { title: `${artistMetaData.name} 的热门歌曲`, module: `artistSongs-${artistMetaData.id}` } })">
                     查看更多
                 </a>
             </div>
@@ -629,7 +629,7 @@ onMounted(() => {
 
             <div class="flex row titleWithMore">
                 <label class="text large bold">专辑</label>
-                <a class="text small viewMore" @click="changePage('songlistCollections', true, { title: `${artistMetaData.name} 的专辑`, module: `artistAlbum-${artistMetaData.id}` })">查看更多</a>
+                <a class="text small viewMore" @click="router.push({ name: 'songlistCollections', query: { title: `${artistMetaData.name} 的专辑`, module: `artistAlbum-${artistMetaData.id}` } })">查看更多</a>
             </div>
             <div class="flex row" id="albums">
                 <button class="scrollerButton" @click="scrollLeft">

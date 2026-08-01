@@ -1,9 +1,10 @@
 <script setup lang="tsx">
 import { defineComponent, onMounted } from 'vue';
 import { getPlayer } from '../player/player.ts';
-import { changePage, getCurrentPage, togglePlaylist } from '../utilities/pageSwitcher.ts';
+import router from '../../router/index.ts';
+import { getCurrentPage, togglePlaylist } from '../ui/pageSwitcher.ts';
 import { getSongInfo, getSongLink } from '../player/songUtils.ts';
-import { hideArtistSelect, showArtistSelect, type MenuType } from '../utilities/elementControl.ts';
+import { hideArtistSelect, showArtistSelect, type MenuType } from '../ui/elementControl.ts';
 import { showNotify } from '../notifications/Notification.ts';
 import { saveAudio } from '../player/musicDownloader.ts';
 
@@ -43,7 +44,7 @@ function jumpToSongInfo(songId: string) {
         togglePlaylist(undefined);
     }
 
-    changePage('single', true, songId);
+    router.push('/single/' + songId);
 }
 
 /**
@@ -62,7 +63,7 @@ function jumpToSongAlbum(songId: string) {
     .then((songInfo: any) => {
         const albumId = `album-${platform}-${songInfo.albumId}`;
 
-        changePage('songlist', true, albumId);
+        router.push('/songlist/' + albumId);
     });
 }
 
@@ -83,7 +84,7 @@ function jumpToSongArtist(songId: string) {
             const artistId = artists[0].id;
 
             hideArtistSelect();
-            changePage('artist', true, artistId);
+            router.push('/artist/' + artistId);
         }
         else {
             showArtistSelect(artists);
@@ -159,7 +160,7 @@ onMounted(() => {
                 :on-click="playCurrentContent" 
                 v-if="['collections', 'song', 'localAudio'].includes(props.menuType)"></MenuItem>
             <MenuItem id="playNext" icon="./images/menu/addToList.svg" text="下一首播放" 
-                :on-click="() => {getPlayer()?.playlistAdd(props.targetInfo, true)}" 
+                :on-click="() => {getPlayer()?.playlistAdd(props.targetInfo)}" 
                 v-if="['song', 'localAudio'].includes(props.menuType)"></MenuItem>
         </span>
         <span class="menuPart flex column">

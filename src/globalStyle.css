@@ -387,6 +387,9 @@ img.outlineImage {
 }
 .tabSwitcher {
     margin: 3px 0;
+    padding: 2px;
+
+    gap: 1rem;
 }
 .tabItem {
     position: relative;
@@ -399,8 +402,6 @@ img.outlineImage {
 
     border: none;
     border-radius: 8px;
-
-    margin: 0 0.5rem;
 
     justify-content: center;
     align-items: center;
@@ -700,7 +701,7 @@ img.outlineImage {
     position: relative;
     width: 2rem;
     height: 2rem;
-    left: calc(7rem - 12px);
+    left: calc(7rem - 6px);
     top: calc(-6rem + 6px);
 
     background: transparent;
@@ -733,6 +734,10 @@ img.outlineImage {
     left: -1px;
 }
 .songlistCard.medium .songlistPlatform > img {
+    position: relative;
+    left: -6px;
+    top: -1px;
+
     width: 2rem;
     height: 2rem;
 }
@@ -867,6 +872,75 @@ img.outlineImage {
 }
 .songLine.local > .localInfo {
     align-items: flex-end;
+}
+
+/* 播放列表歌曲卡片 */
+.playlistLine {
+    width: calc(100% - 2rem);
+    height: 3rem;
+
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+
+    align-items: center;
+
+    margin: 3px 0;
+    padding: 6px;
+
+    transition: all 200ms ease-in-out;
+}
+/* 正在播放项目指示器 */
+.playlistLine > .playingIndicator { 
+    margin-right: 4px;
+}
+/* 项目拖动按钮 */
+.playlistLine > .dragPoint {
+    width: 2rem;
+    height: 2rem;
+    margin-right: 4px;
+
+    background: transparent;
+    border-radius: 6px;
+    transition: all 200ms ease-in-out;
+}
+.playlistLine > .dragPoint:hover {
+    background: var(--transparent-grey);
+}
+.playlistLine > .dragPoint > img {
+    width: 2rem;
+    height: 2rem;
+}
+.playlistLine > .dragPoint {
+    cursor: grab;
+}
+.playlistLine > .dragPoint:active {
+    cursor: grabbing;
+}
+.playlistLine.dragging {
+    opacity: 0.15;
+}
+/* 历史记录项目降低不透明度 */
+.playlistLine.history {
+    opacity: 0.6;
+}
+/* 单曲循环高亮描边 */
+.playlistLine.repeatSingle {
+    outline: 2px solid var(--theme-color-default);
+    outline-offset: -2px;
+    border-radius: 8px;
+}
+.playlistLine > .songCover {
+    width: calc(3rem - 12px);
+    height: calc(3rem - 12px);
+
+    border: none;
+    border-radius: 6px;
+
+    margin: 0 3px;
+}
+.playlistLine > .songInfo {
+    flex: 1 0;
 }
 
 /* 歌手卡片 */

@@ -1,4 +1,4 @@
-import { decrypt, encrypt } from './crypto.ts';
+import { decrypt, encrypt } from '../utilities/crypto.ts';
 
 let userData: { [type: string]: any } = {
     netease: {

@@ -4,16 +4,16 @@ import './libraryStyle.css';
 
 import TabWidget from '../../assets/widgets/TabWidget.vue';
 import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest.ts';
-import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
+import { getAccountInfo } from '../../assets/user/accountManager.ts';
 import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
-import { addSongCard, addSonglistCard, triggerRightMenu } from '../../assets/utilities/elementControl.ts';
+import { addSongCard, addSonglistCard, triggerRightMenu } from '../../assets/ui/elementControl.ts';
 import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest.ts';
 import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest.ts';
 import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest.ts';
 import type { AxiosResponse } from 'axios';
 import { getPlayer } from '../../assets/player/player.ts';
-import { getConfig } from '../../assets/utilities/configLoader.ts';
-import { changePage } from '../../assets/utilities/pageSwitcher.ts';
+import { getConfig } from '../../assets/user/configLoader.ts';
+import router from '../../router/index.ts';
 import { showNotify } from '../../assets/notifications/Notification.ts';
 
 const platformTabs = [
@@ -282,7 +282,7 @@ onUnmounted(() => {
                         :style="`background-image: url('./images/library/favouritesBackground_${currentFavPlatform}.png')`">
                         <span class="cardInfo flex column">
                             <label class="text medium bold interactiveTitle"
-                                @click="changePage('songlist', true, userFavourites)">我喜欢的音乐</label>
+                                @click="router.push('/songlist/' + userFavourites)">我喜欢的音乐</label>
                             <label class="text ultraSmall">共 {{ favLength }} 首</label>
                         </span>
                         <button class="songlistPlay" id="userFavourites_play" @click="getPlayer()?.playListId(userFavourites)">
@@ -290,11 +290,11 @@ onUnmounted(() => {
                         </button>
                     </span>
                     <span class="flex row" id="libraryToolbar">
-                        <button class="libToolbarButton flex row" @click="changePage('history', true)">
+                        <button class="libToolbarButton flex row" @click="router.push('/history')">
                             <img src="/images/library/history.svg" alt="History"/>
                             <label class="text small">播放历史</label>
                         </button>
-                        <button class="libToolbarButton flex row" @click="changePage('local', true)">
+                        <button class="libToolbarButton flex row" @click="router.push('/local')">
                             <img src="/images/library/downloads.svg" alt="Downloads"/>
                             <label class="text small">本地音乐</label>
                         </button>
@@ -306,7 +306,7 @@ onUnmounted(() => {
             <div class="songlistCard large flex column" id="dailyRecommend">
                 <span class="cardHeader flex column">
                     <label class="text bold medium interactiveTitle"
-                        @click="changePage('songlist', true, dailyRecommends)">每日推荐</label>
+                        @click="router.push('/songlist/' + dailyRecommends)">每日推荐</label>
                     <label class="text light ultraSmall">共 {{ recommendLength }} 首</label>
                 </span>
                 <span class="listContent flex column" id="recommendContainer"></span>

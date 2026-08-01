@@ -2,14 +2,14 @@
 import { onMounted } from 'vue';
 
 import './collectionsStyle.css';
-import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
+import { getAccountInfo } from '../../assets/user/accountManager.ts';
 import type { AxiosResponse } from 'axios';
 import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest.ts';
 import { getKuwoResult } from '../../assets/scripts/kuwo/kuwoRequest.ts';
 import { getNeteaseResult } from '../../assets/scripts/netease/neteaseRequest.ts';
 import { getQQmusicResult } from '../../assets/scripts/qqmusic/qqmusicRequest.ts';
 import { parseMusicData } from '../../assets/utilities/dataParsers.ts';
-import { addSongCard } from '../../assets/utilities/elementControl.ts';
+import { addSongCard } from '../../assets/ui/elementControl.ts';
 
 const props = defineProps({
     title: {

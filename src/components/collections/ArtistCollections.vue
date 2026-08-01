@@ -2,8 +2,8 @@
 import { onMounted } from 'vue';
 
 import './collectionsStyle.css';
-import { getAccountInfo } from '../../assets/utilities/accountManager';
-import { addArtistCard } from '../../assets/utilities/elementControl';
+import { getAccountInfo } from '../../assets/user/accountManager';
+import { addArtistCard } from '../../assets/ui/elementControl';
 import { parseMusicData } from '../../assets/utilities/dataParsers';
 import type { AxiosResponse } from 'axios';
 import { getKugouResult } from '../../assets/scripts/kugou/kugouRequest';

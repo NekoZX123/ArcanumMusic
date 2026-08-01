@@ -25,6 +25,7 @@ build
 *.njsproj
 *.sln
 *.sw?
+.claude
 
 # Test files including personal information
 tests

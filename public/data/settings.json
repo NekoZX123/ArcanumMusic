@@ -25,6 +25,15 @@
                 "lyricsStyle": 0,
                 "lyricsGlow": true
             }
+        },
+        "playOptions": {
+            "player": {
+                "autoStart": false
+            },
+            "playlist": {
+                "saveSession": true,
+                "autoScroll": true
+            }
         }
     },
     "user": {

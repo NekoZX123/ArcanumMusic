@@ -16,9 +16,11 @@ import { scanLocalMusic, getMusicMetadata, getLocalPaths, writeLocalPaths, openM
 const __dirname = fileURLToPath(import.meta.url);
 
 const environment = getEnvironment();
+
+app.setAppUserModelId('moe.nekozx123.arcanummusic');
+
 let tray;
 let mainWindow = null;
-
 let hideToTray = false;
 
 // 调整应用根目录中的 `\` 为 `/`
@@ -104,6 +106,7 @@ async function createMainWindow() {
         title: 'Arcanum Music',
         icon: loadIcon(),
         webPreferences: {
+            backgroundThrottling: false,
             nodeIntegration: false,
             contextIsolation: true,
             preload: __dirname.replace('app.js', 'preload.js')
@@ -206,12 +209,17 @@ function setWindowTopState(_, id, flag) {
  * 退出应用
  */
 function quitApp(_) {
+    // 向主窗口发送退出信号，以便保存播放会话
+    if (mainWindow) {
+        mainWindow.webContents.send('app-quit');
+    }
+
     // 先关闭所有非主窗口
     const windowList = BrowserWindow.getAllWindows();
     windowList.forEach((window) => {
         if (window.id !== mainWindow.id) window.close();
     });
-    
+
     // 关闭主窗口
     if (mainWindow) {
         mainWindow.close();
@@ -300,7 +308,7 @@ function sendPlayerSignal(signal) {
     mainWindow.webContents.executeJavaScript(`
     window.onstorage({
         key: 'playerSignal', 
-        newValue: JSON.stringify({eventName: '${signal}', message: 'moe.nekozx123.arcanummusic.contextmenu'})
+        newValue: JSON.stringify({eventName: '${signal}', identifier: 'moe.nekozx123.arcanummusic.contextmenu'})
     });
     `, true);
 }

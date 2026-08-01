@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { onBeforeRouteLeave } from 'vue-router';
 import './searchStyle.css';
 
 import TabWidget from '../../assets/widgets/TabWidget.vue';
@@ -8,9 +9,20 @@ import { getQQmusicResult, getQQmusicSearchTypes } from '../../assets/scripts/qq
 import { getKuwoResult, getKuwoSearchTypes } from '../../assets/scripts/kuwo/kuwoRequest';
 import { getKugouResult, getKugouSearchTypes } from '../../assets/scripts/kugou/kugouRequest';
 import type { AxiosError, AxiosResponse } from 'axios';
-import { getAccountInfo } from '../../assets/utilities/accountManager';
+import { getAccountInfo } from '../../assets/user/accountManager';
 import { parseMusicData } from '../../assets/utilities/dataParsers';
-import { addArtistCard, addSongCard, addSonglistCard } from '../../assets/utilities/elementControl';
+import { addArtistCard, addSongCard, addSonglistCard } from '../../assets/ui/elementControl.ts';
+
+// 从 sessionStorage 恢复搜索状态（在模板渲染前执行）
+const savedSearchState = (() => {
+    try {
+        const raw = sessionStorage.getItem('presearch');
+        if (raw) return JSON.parse(raw);
+    } catch {}
+    return null;
+})();
+const initialPlatformIdx = savedSearchState?.platformIdx ?? 0;
+const initialTypeIdx = savedSearchState?.typeIdx ?? 0;
 
 const platformTabs = [
     {
@@ -93,6 +105,8 @@ function platformChange(tabInfo: { widgetId: string, current: number }) {
     currentPlatform.value = platform;
     currentType.value = 0;
 
+    scrollToTop();
+
     searchOnTypeChange({ widgetId: tabInfo.widgetId, current: currentType.value });
 }
 
@@ -126,7 +140,7 @@ function searchSinglePlatform(platform: string, keyword: string, type: string, i
         return;
     }
     
-    sendRequest('search', { keyword: keyword, type: searchType, pageIndex: pageIndex }, userData[platform].cookies)
+    sendRequest('search', { keyword: keyword, type: searchType, maxLength: 30, pageIndex: pageIndex }, userData[platform].cookies)
         .then((response: AxiosResponse) => {
             // console.log(response.data);
             const result = parseMusicData(response, platform, `search-${type}`);
@@ -206,10 +220,15 @@ function searchMultiplatform(type: string) {
 // 搜索类型改变时触发
 function searchOnTypeChange(tabInfo: { widgetId: string, current: number }, isNextPage: boolean = false) {
     currentType.value = tabInfo.current;
-    
+
     // 自动重置页码
-    if (!isNextPage) pageIndex = 0;
-    
+    if (!isNextPage) {
+        pageIndex = 0;
+
+        // 切换标签页（非翻页）后滚回顶部
+        scrollToTop();
+    }
+
     // 综合搜索判断
     if (currentPlatform.value === 'multiplatform') {
         searchMultiplatform(typeArray[tabInfo.current]);
@@ -250,6 +269,26 @@ function loadNextPage(_: MouseEvent) {
     searchOnTypeChange({ widgetId: '', current: currentType.value }, true);
 }
 
+// 切换标签页后自动滚回顶部
+function scrollToTop() {
+    const container = document.getElementById('pageContainer');
+    if (container) {
+        container.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+// 页面离开时保存搜索状态
+onBeforeRouteLeave((_to, _from, next) => {
+    const bar = document.getElementById('searchBar') as HTMLInputElement;
+    const state = {
+        q: bar?.value || '',
+        platformIdx: platformArray.indexOf(currentPlatform.value),
+        typeIdx: currentType.value
+    };
+    sessionStorage.setItem('presearch', JSON.stringify(state));
+    next();
+});
+
 onMounted(() => {
     const searchInput = document.getElementById('searchBarContainer') as HTMLElement;
     if (searchInput) {
@@ -258,6 +297,19 @@ onMounted(() => {
                 searchOnTypeChange({ widgetId: '', current: currentType.value });
             }
         });
+    }
+
+    // 恢复搜索状态（从搜索结果返回时）
+    if (savedSearchState) {
+        const { q, platformIdx, typeIdx } = savedSearchState;
+        const bar = document.getElementById('searchBar') as HTMLInputElement;
+        if (bar && q) {
+            bar.value = q;
+            currentPlatform.value = platformArray[platformIdx];
+            currentType.value = typeIdx;
+            searchOnTypeChange({ widgetId: '', current: currentType.value });
+        }
+        sessionStorage.removeItem('presearch');
     }
 
     console.log('Search.vue loaded');
@@ -279,9 +331,9 @@ onMounted(() => {
         </div>
 
         <!-- 内容 -->
-        <TabWidget id="searchPlatform" :tabs="platformTabs" :scroll-on-click="false" :on-tab-switch="platformChange">
+        <TabWidget id="searchPlatform" :tabs="platformTabs" :on-tab-switch="platformChange" :initial-index="initialPlatformIdx">
             <template #default>
-                <TabWidget id="searchType_multiplatform" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange">
+                <TabWidget id="searchType_multiplatform" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange" :initial-index="initialTypeIdx">
                     <template #default>
                         <div class="musicBox singles" id="type-multiplatform-singles"></div>
                         <div class="musicBox songlists" id="type-multiplatform-songlists"></div>
@@ -290,7 +342,7 @@ onMounted(() => {
                     </template>
                 </TabWidget>
 
-                <TabWidget id="searchType_netease" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange">
+                <TabWidget id="searchType_netease" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange" :initial-index="initialTypeIdx">
                     <template #default>
                         <div class="musicBox singles" id="type-netease-singles"></div>
                         <div class="musicBox songlists" id="type-netease-songlists"></div>
@@ -299,7 +351,7 @@ onMounted(() => {
                     </template>
                 </TabWidget>
 
-                <TabWidget id="searchType_qqmusic" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange">
+                <TabWidget id="searchType_qqmusic" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange" :initial-index="initialTypeIdx">
                     <template #default>
                         <div class="musicBox singles" id="type-qqmusic-singles"></div>
                         <div class="musicBox songlists" id="type-qqmusic-songlists"></div>
@@ -308,7 +360,7 @@ onMounted(() => {
                     </template>
                 </TabWidget>
 
-                <TabWidget id="searchType_kuwo" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange">
+                <TabWidget id="searchType_kuwo" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange" :initial-index="initialTypeIdx">
                     <template #default>
                         <div class="musicBox singles" id="type-kuwo-singles"></div>
                         <div class="musicBox songlists" id="type-kuwo-songlists"></div>
@@ -317,7 +369,7 @@ onMounted(() => {
                     </template>
                 </TabWidget>
                 
-                <TabWidget id="searchType_kugou" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange">
+                <TabWidget id="searchType_kugou" :tabs="searchTypeTabs" :use-small-tabs="true" :on-tab-switch="searchOnTypeChange" :initial-index="initialTypeIdx">
                     <template #default>
                         <div class="musicBox singles" id="type-kugou-singles"></div>
                         <div class="musicBox songlists" id="type-kugou-songlists"></div>
@@ -332,5 +384,7 @@ onMounted(() => {
         <button class="flex row listButton" id="loadMoreButton" @click="loadNextPage">
             <label class="text small bold">查看更多</label>
         </button>
+
+        <div id="bottomBlock"></div>
     </div>
 </template>

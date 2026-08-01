@@ -3,6 +3,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import './globalStyle.css';
 import Captions from './components/captions/Captions.vue';
+import router from './router/index.ts';
 
 const urlParams = new URLSearchParams(window.location.search);
 const isDesktopLyrics = urlParams.get('isDesktopLyrics') === 'true';
@@ -12,5 +13,7 @@ if (isDesktopLyrics) {
 }
 else {
     // 挂载应用主面板
-    createApp(App).mount('#app');
+    const app = createApp(App);
+    app.use(router);
+    app.mount('#app');
 }

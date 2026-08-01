@@ -11,12 +11,13 @@ import {
   pageForward,
   togglePlaylist,
   updatePlaylistIcon
-} from './assets/utilities/pageSwitcher.ts';
+} from './assets/ui/pageSwitcher.ts';
 // import { testRequest } from './assets/utilities/requestTests.ts';
+import router from './router/index.ts';
 import {PageButton} from './assets/widgets/pageSwitcher.tsx';
-import {readAccountInfo} from './assets/utilities/accountManager.ts';
-import {hideArtistSelect, hideRightMenu} from './assets/utilities/elementControl.ts';
-import {getConfig, getPreference, loadConfig, loadPreference, writePreference} from './assets/utilities/configLoader.ts';
+import {readAccountInfo} from './assets/user/accountManager.ts';
+import {hideArtistSelect, hideRightMenu} from './assets/ui/elementControl.ts';
+import {getConfig, getPreference, loadConfig, loadPreference, writePreference} from './assets/user/configLoader.ts';
 import {loadProxyPort} from './assets/utilities/proxyRequest.ts';
 import {syncFocusedLyric} from './assets/lyrics/lyricsManager.ts';
 import { initializeTheme, setControlBarTheme, setWindowBackground, type colorThemeName } from './assets/effects/themeControl.ts';
@@ -49,8 +50,16 @@ async function toggleMaximize() {
     }
 }
 
+/** 处理音频播放结束事件 */
+function handleSongEnd() {
+    getPlayer()?.checkNextSong();
+}
+
 // 关闭当前窗口
 const closeButtonSrc = ref('./images/windowControl/close.svg');
+
+// 应用就绪状态（配置加载完成后才渲染路由页面）
+const appReady = ref(false);
 function closeHover() {
     closeButtonSrc.value = './images/windowControl/close.hover.svg';
 }
@@ -291,7 +300,8 @@ async function toggleCaptions(_?: MouseEvent) {
     }
     else {
         desktopLyricsImage.value = './images/player/desktopLyrics.on.svg';
-        const captionWindowUrl = `${window.location.href}?isDesktopLyrics=true`
+        const baseUrl = window.location.href.split('?')[0].split('#')[0];
+        const captionWindowUrl = `${baseUrl}?isDesktopLyrics=true`
         // 启动桌面歌词
         captionWindowId = await window.electron.createWindow(
             'Arcanum Music - Desktop Lyrics',
@@ -397,6 +407,9 @@ async function savePreferences() {
     preferences.player.volume = getPlayer()?.volume;
 
     writePreference(preferences);
+
+    // 保存播放会话
+    await getPlayer()?.saveSession();
 }
 
 // 复制歌名至剪贴板
@@ -416,6 +429,23 @@ onMounted(async () => {
     await loadConfig();
     await loadPreference();
 
+    // 标记应用就绪
+    appReady.value = true;
+
+    // 路由变化时统一更新按钮高亮
+    const pageHighlights = ['home', 'library', 'search', 'settings', 'accounts'];
+    router.afterEach((to) => {
+        // 清除所有高亮
+        document.querySelectorAll('.pageButton.current')?.forEach(el => el.classList.remove('current'));
+        // 为当前路由对应按钮添加高亮
+        const pageId = to.name as string;
+        if (pageId && pageHighlights.includes(pageId)) {
+            const btn = document.getElementById(pageId);
+            if (btn) btn.classList.add('current');
+        }
+        updatePlaylistIcon();
+    });
+
     // 测试通知
     setTimeout(() => showNotify('startUpNotify', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 3000);
 
@@ -431,9 +461,7 @@ onMounted(async () => {
 
     // 加载初始页面
     updatePlaylistIcon();
-    setTimeout(() => {
-        initialize();
-    }, 300);
+    initialize();
 
     // 设置点击 / 滚动时隐藏右键菜单
     window.addEventListener('click', hideRightMenu);
@@ -484,6 +512,11 @@ onMounted(async () => {
     if (!localStorage.getItem('playHistory')) {
         localStorage.setItem('playHistory', JSON.stringify([]));
     }
+    
+    // 按配置恢复上次会话
+    if (getConfig().generic.playOptions.playlist.saveSession) {
+        player?.restoreSession();
+    }
 
     // 设置触发器
     // 播放器组件
@@ -498,9 +531,13 @@ onMounted(async () => {
             postSongProgress(currentTime);
             getPlayer()?.updateProgress(currentTime);
         }
-
-        getPlayer()?.checkNextSong();
     });
+    playerElem.addEventListener('ended', handleSongEnd);
+    // 系统 SMTC 绑定
+    navigator.mediaSession.setActionHandler('play', () => getPlayer()?.togglePlayPause());
+    navigator.mediaSession.setActionHandler('pause', () => getPlayer()?.togglePlayPause());
+    navigator.mediaSession.setActionHandler('previoustrack', () => getPlayer()?.previousSong());
+    navigator.mediaSession.setActionHandler('nexttrack', () => getPlayer()?.nextSong());
 
     // 桌面歌词窗口播放控制 (使用 localStorage 作为中间桥)
     // 通过 `onstorage` 赋值以方便从 Electron 主进程调用
@@ -509,13 +546,22 @@ onMounted(async () => {
     // 监听播放进度更新 (BroadcastChannel)
     appChannel.addEventListener('message', handleProgressUpdate);
 
-    // 关闭窗口时保存偏好数据
-    window.addEventListener('close', savePreferences);
+    // 关闭窗口时保存偏好数据及播放会话
+    window.addEventListener('close', () => savePreferences());
+
+    // 监听主进程退出信号，保存播放会话
+    window.electron.onAppQuit(() => {
+        getPlayer()?.saveSession();
+    });
 });
 onUnmounted(() => {
     window.onstorage = null;
     window.removeEventListener('click', hideRightMenu);
     window.removeEventListener('storage', handleStorageData);
+    const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+    if (playerElem) {
+        playerElem.removeEventListener('ended', handleSongEnd);
+    }
 });
 
 </script>
@@ -579,7 +625,7 @@ onUnmounted(() => {
                     <PageButton id="search" icon="./images/pageSwitcher/search.svg" text="搜索"></PageButton>
                 </div>
                 <div id="pageContainer">
-                    <div id="pageContent"></div>
+                    <router-view v-if="appReady" />
                     <div id="bottomBlock"></div>
                 </div>
             </div>

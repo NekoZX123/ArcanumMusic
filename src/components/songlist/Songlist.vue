@@ -6,8 +6,8 @@ import { onMounted, ref } from 'vue';
 
 import './songlistStyle.css';
 
-import { getAccountInfo } from '../../assets/utilities/accountManager.ts';
-import { addSongLine } from '../../assets/utilities/elementControl.ts';
+import { getAccountInfo } from '../../assets/user/accountManager.ts';
+import { addSongLine } from '../../assets/ui/elementControl.ts';
 import { formatAuthors, getRequestFormat, parseMusicData } from '../../assets/utilities/dataParsers.ts';
 import type { AxiosResponse } from 'axios';
 import { getPlayer } from '../../assets/player/player.ts';

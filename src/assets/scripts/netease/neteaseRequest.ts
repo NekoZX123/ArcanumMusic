@@ -47,14 +47,14 @@ const requestData: { [type: string]: any } = {
     },
     "search-singles": {
         "keyword": "[keyword]",
-        "limit": "50",
-        "offset": "0",
+        "limit": "[maxLength]",
+        "offset": "[pageOffset]",
         "scene": "NORMAL"
     },
     "search": {
         "s": "[keyword]",
-        "limit": "50",
-        "offset": "0",
+        "limit": "[maxLength]",
+        "offset": "[pageOffset]",
         "scene": "NORMAL",
         "queryCorrect": "true"
     },
@@ -282,6 +282,11 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
             }
         }
     });
+
+    if (moduleName === 'search') { // 搜索页码
+        const pageOffset = (params.pageIndex || 0) * (params.maxLength || 30);
+        moduleString = moduleString.replace(new RegExp(`"\\[pageOffset\\]\\"`, 'g'), pageOffset.toString());
+    }
     if (moduleName === 'album' || moduleName === 'artist') { // 生成 cache_key
         const paramsObject = JSON.parse(moduleString);
         const cacheKey = getNeteaseCacheKey(paramsObject);

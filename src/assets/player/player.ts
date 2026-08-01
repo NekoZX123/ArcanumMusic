@@ -2,6 +2,7 @@ import { reactive } from "vue";
 import { showNotify } from "../notifications/Notification.ts";
 import { getListContent, getSongInfo, getSongLink } from "./songUtils.ts";
 import { timeFormat } from "../utilities/formatter.ts";
+import { getConfig } from "../user/configLoader.ts";
 
 // const identifier = 'moe.nekozx123.arcanummusic.audioplayer';
 
@@ -26,10 +27,12 @@ class Player {
     // 播放列表信息
     playlist: {
             current: any,
-            breakIn: any[],
-            waitList: any[],
-            history: any[]
+            currentIndex: number,
+            playList: any[]
         };
+    
+    // 储存的播放历史
+    storedHistory: any[];
 
     // 当前歌曲信息
     name: string;
@@ -84,24 +87,18 @@ class Player {
                 'authors': '',
                 'coverUrl': './images/player/testAlbum.png'
             },
-            breakIn: [],
-            waitList: [],
-            history: []
+            currentIndex: -1,
+            playList: []
         };
 
-        // 从 localStorage 加载播放历史
         const storedHistory = window.localStorage.getItem('playHistory');
-        if (storedHistory) {
-            try {
-                const parsed = JSON.parse(storedHistory);
-                if (Array.isArray(parsed)) {
-                    this.playlist.history = parsed;
-                }
-                else this.playlist.history = [];
-            } catch (e) {
-                console.error('[Error] Failed to parse stored play history:', e);
-                this.playlist.history = [];
-            }
+        if (!storedHistory) this.storedHistory = [];
+        else try {
+            this.storedHistory = JSON.parse(storedHistory);
+        }
+        catch (e) {
+            console.log(e);
+            this.storedHistory = [];
         }
 
         this.name = '未在播放';
@@ -303,21 +300,28 @@ class Player {
     /**
      * 播放指定歌曲
      * @param songInfo 歌曲信息
-     * @param addToHistory
+     * @param addToHistory 是否加入本地历史 (默认为 true)
+     * @param autoPlay 音频准备完后是否自动播放 (默认为 true)
+     * @param onReady 音频准备完成后执行的函数 (可选)
      */
-    playAudio(songInfo: any, addToHistory: boolean = true) {
+    playAudio(songInfo: any, addToHistory: boolean = true, autoPlay: boolean = true, onReady?: () => void) {
         console.log(`[Debug] Playing: ${JSON.stringify(songInfo)}`);
         songInfo = Object.assign({}, songInfo);
-        songInfo.id = songInfo.id.replace('new_', '').replace('playlist_', '')
-            .replace('cutin_', '').replace('current_', '');
+        songInfo.id = songInfo.id.replace('new_', '').replace('playlist_', '').replace('current_', '');
 
         if (songInfo.id.startsWith('local_')) {
             this.playLocalAudio(songInfo, addToHistory);
             return;
         }
 
-        const current = this.playlist.current;
-        if (Object.keys(current).length !== 0 && addToHistory) this.addToHistory(songInfo);
+        // 追加到当前项目后 (若已存在则移动到当前项目后, 避免重复)
+        const existingIndex = this.playlist.playList.findIndex((s: any) => s.id === songInfo.id);
+        if (this.playlist.currentIndex >= 0 && existingIndex === -1) {
+            // 不在列表中: 插入到当前项目后
+            const insertAt = this.playlist.currentIndex + 1;
+            this.playlist.playList.splice(insertAt, 0, songInfo);
+            this.playlist.currentIndex = insertAt;
+        }
 
         this.playlist.current = songInfo;
 
@@ -329,6 +333,9 @@ class Player {
                 ...Object.assign({}, infoObject)
             };
             console.log(`[Debug]>>> Playing: ${JSON.stringify(playInfo)}`);
+            if (addToHistory) {
+                this.addToLocalHistory(songInfo);
+            }
 
             // 设置歌曲信息
             this.name = playInfo.name;
@@ -339,10 +346,21 @@ class Player {
             this.updateProgress(0);
             this.setProgress(0, false);
 
+            // 更新 SMTC 元数据
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: this.name,
+                artist: this.authors,
+                artwork: [{
+                    src: this.coverUrl || './images/player/testAlbum.png',
+                    sizes: '128x128',
+                    type: 'image/png'
+                }]
+            });
+
             // 设置播放链接
             if (!playInfo.url) {
                 showNotify('songUrlNullError', 'critical', `无法播放 ${this.name}`, '获取播放链接失败');
-                if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0) {
+                if (this.playlist.playList.length === 0) {
                     this.togglePlayPause();
                     this.playStateImage = './images/player/play.dark.svg';
                     this.playStateImageTransparent = './images/lyricsPanel/play.svg';
@@ -396,7 +414,7 @@ class Player {
                 };
             }
 
-            // 设置播放按钮图片
+            // 开始播放
             const startPlaying = () => {
                 const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
                 if (!playerElem) {
@@ -413,7 +431,8 @@ class Player {
             // 音频准备完成后播放
             const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
             if (playerElem) {
-                playerElem.addEventListener('canplay', startPlaying, { once: true });
+                if (onReady) onReady();
+                if (autoPlay) playerElem.addEventListener('canplay', startPlaying, { once: true });
             }
             
             // 更新歌词
@@ -430,28 +449,29 @@ class Player {
     }
 
     /**
-     * 将歌曲加入播放历史，自动持久化到 localStorage，上限 300 条
+     * 将歌曲加入本地播放历史，自动持久化到 localStorage，上限 300 条
      * @param songInfo 歌曲信息对象（与 playAudio 传入格式一致）
      */
-    addToHistory(songInfo: any) {
+    addToLocalHistory(songInfo: any) {
         if (!songInfo || !songInfo.id) {
             return;
         }
+        // 储存本地历史
         const dateStr = new Date().toISOString().slice(0, 10);
-        const existingIndex = this.playlist.history.findIndex(item => item.id === songInfo.id);
+        const existingIndex = this.storedHistory.findIndex(item => item.id === songInfo.id);
         if (existingIndex !== -1) {
-            const existing = this.playlist.history.splice(existingIndex, 1)[0];
+            const existing = this.storedHistory.splice(existingIndex, 1)[0];
             Object.assign(existing, { addTime: dateStr });
-            this.playlist.history.unshift(existing);
+            this.storedHistory.unshift(existing);
         }
         else {
             const record = Object.assign({}, songInfo, { addTime: dateStr });
-            this.playlist.history.unshift(record);
-            if (this.playlist.history.length > 300) {
-                this.playlist.history = this.playlist.history.slice(0, 300);
+            this.storedHistory.unshift(record);
+            if (this.storedHistory.length > 300) {
+                this.storedHistory = this.storedHistory.slice(0, 300);
             }
         }
-        window.localStorage.setItem('playHistory', JSON.stringify(this.playlist.history));
+        window.localStorage.setItem('playHistory', JSON.stringify(this.storedHistory));
     }
 
     /**
@@ -460,9 +480,31 @@ class Player {
      */
     playLocalAudio(songInfo: any, addToHistory: boolean = true) {
         const current = this.playlist.current;
-        if (Object.keys(current).length !== 0 && addToHistory) this.addToHistory(songInfo);
+        // 当前歌曲已播放过, 将其计入历史
+        if (Object.keys(current).length !== 0 && addToHistory) this.addToLocalHistory(current);
 
         const filePath = songInfo.id.substring(6).replace(/\\/g, '/');
+
+        // 追加到当前项目后 (若已存在则移动到当前项目后, 避免重复)
+        const existingIndex = this.playlist.playList.findIndex((s: any) => s.id === songInfo.id);
+        if (existingIndex >= 0) {
+            // 已在播放列表中: 移到当前项目后
+            let targetIndex = this.playlist.currentIndex >= 0
+                ? this.playlist.currentIndex + 1
+                : this.playlist.playList.length;
+            if (existingIndex < targetIndex) targetIndex--;
+            this.playlist.playList.splice(existingIndex, 1);
+            this.playlist.playList.splice(targetIndex, 0, songInfo);
+            this.playlist.currentIndex = targetIndex;
+        } else if (this.playlist.currentIndex >= 0) {
+            // 不在列表中: 插入到当前项目后
+            const insertAt = this.playlist.currentIndex + 1;
+            this.playlist.playList.splice(insertAt, 0, songInfo);
+            this.playlist.currentIndex = insertAt;
+        } else {
+            this.playlist.playList.push(songInfo);
+            this.playlist.currentIndex = this.playlist.playList.length - 1;
+        }
 
         this.playlist.current = songInfo;
         this.name = songInfo.name || '未知名称';
@@ -472,6 +514,19 @@ class Player {
         this.updateDuration(this.duration);
         this.updateProgress(0);
         this.setProgress(0, false);
+
+        // 更新 SMTC 信息
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: this.name,
+            artist: this.authors,
+            artwork: [
+                {
+                    src: this.coverUrl,
+                    sizes: '128x128',
+                    type: 'image/png'
+                }
+            ]
+        });
 
         // 通过 WebSocket 代理读取本地文件并创建 Blob URL
         const audioChunks: BlobPart[] = [];
@@ -567,38 +622,7 @@ class Player {
      * 播放上一首
      */
     previousSong() {
-        // 历史记录为空
-        if (this.playlist.history.length === 0 && this.repeatState === 0) {
-            console.warn(`[Warning] No songs in play history, ignoring...`);
-            return;
-        }
-        // 历史记录为空 (列表循环开启)
-        if (this.playlist.history.length <= 1 && this.repeatState === 1) {
-            console.log(`[Debug] List repeat enabled`);
-
-            const current = Object.assign({}, this.playlist.current);
-            this.playlist.breakIn.unshift(current);
-
-            let lastSong;
-            if (this.playlist.waitList.length === 0) {
-                const breakInLength = this.playlist.breakIn.length;
-                if (breakInLength === 0) {
-                    console.log(`[Debug] No songs in list, replaying current song...`);
-                    this.updateProgress(0);
-                    this.setProgress(0);
-                    return;
-                }
-                lastSong = this.playlist.breakIn[breakInLength - 1];
-                this.playlist.breakIn.pop();
-            }
-            else {
-                const index = this.playlist.waitList.length - 1;
-                lastSong = this.playlist.waitList[index];
-                this.playlist.waitList.pop();
-            }
-            this.playAudio(lastSong, false);
-            return;
-        }
+        console.log(Object.assign({}, this.playlist));
         // 单曲循环
         if (this.repeatState === 2) {
             console.log(`[Debug] Single repeat enabled`);
@@ -606,100 +630,97 @@ class Player {
             this.setProgress(0);
             return;
         }
+        // 历史记录不足
+        if (this.playlist.currentIndex === 0) {
+            console.warn(`[Warning] No songs in play history, ignoring...`);
+            return;
+        }
         // 播放上一首
-        const prevSong = Object.assign({}, this.playlist.history[0]);
-        const current = Object.assign({}, this.playlist.current);
-        this.playlist.breakIn.unshift(current); // 将当前播放作为下一首
-        this.playlist.history.splice(0, 1);
-        this.playAudio(prevSong, false);
+        this.playlist.currentIndex --;
+        const prevSong = Object.assign({}, this.playlist.playList[this.playlist.currentIndex]);
+        this.playAudio(prevSong);
     }
     /**
      * 播放下一首
      */
     nextSong() {
-        // 末端曲目播放完成
-        if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0 
-            && this.repeatState === 0 && this.shuffleState === 0) {
-            if (this.isPlaying) {
-                this.togglePlayPause();
-            }
-            console.warn(`[Warning] No songs to play in the list, ignoring...`);
+        console.log(Object.assign(this.playlist));
+
+        // 列表为空
+        if (this.playlist.playList.length === 0) {
+            console.warn(`[Warning] No songs to play in the playlist, ignoring...`);
+            if (this.isPlaying) this.togglePlayPause();
             return;
         }
-        
-        // 单曲循环
-        if (this.repeatState === 2) {
-            console.log(`[Debug] Single repeat enabled`);
-            this.updateProgress(0);
-            this.setProgress(0);
-            return;
-        }
+
         // 随机播放
         if (this.shuffleState === 1) {
             console.log(`[Debug] Shuffle playing enabled`);
-            const listSize = this.playlist.breakIn.length + this.playlist.waitList.length;
-            const songIndex = Math.floor(Math.random() * listSize);
-            let songInfo;
-            if (listSize === 0) { // 列表为空
-                console.log(`[Debug] No songs to play in the list, ignoring...`);
-                this.playAudio(this.playlist.current, false);
+            if (this.playlist.playList.length === 0) {
+                console.warn(`[Warning] No songs to play in the playlist, ignoring...`);
+                if (this.isPlaying) this.togglePlayPause();
                 return;
             }
-            if (songIndex >= this.playlist.breakIn.length) { // 从非插队播放中选取
-                const waitListIndex = songIndex - this.playlist.breakIn.length;
-                songInfo = this.playlist.waitList[waitListIndex];
-            }
-            else { // 从插队播放中选取
-                songInfo = this.playlist.breakIn[songIndex];
-            }
-
-            this.playAudio(songInfo, false);
+            const randomIndex = Math.round(Math.random() * this.playlist.playList.length);
+            this.playlist.currentIndex = randomIndex;
+            this.playAudio(this.playlist.playList[randomIndex], false);
             return;
         }
-        // 继续播放
-        if (this.playlist.breakIn.length !== 0) { // 有插队播放
-            const currentSong = Object.assign({}, this.playlist.current);
-            // 列表循环时将当前歌曲加至队列末
-            if (this.repeatState === 1) this.playlist.waitList.push(currentSong);
 
-            const nextSong = Object.assign({}, this.playlist.breakIn[0]);
-            this.playlist.breakIn.splice(0, 1);
-            this.playAudio(nextSong);
+        // 顺序播放
+        if (this.repeatState === 0) {
+            this.playlist.currentIndex ++;
+            if (this.playlist.currentIndex >= this.playlist.playList.length) {
+                console.warn(`[Notice] No more songs to play, stopping...`);
+                if (this.isPlaying) this.togglePlayPause();
+            }
+
+            this.playAudio(this.playlist.playList[this.playlist.currentIndex]);
+            return;
         }
-        else { // 无插队播放
-            const currentSong = Object.assign({}, this.playlist.current);
-            // 列表循环时将当前歌曲加至队列末
-            if (this.repeatState === 1) this.playlist.waitList.push(currentSong);
 
-            const nextSong = Object.assign({}, this.playlist.waitList[0]);
-            this.playlist.waitList.splice(0, 1);
-            this.playAudio(nextSong);
+        // 列表循环
+        if (this.repeatState === 1) {
+            this.playlist.currentIndex ++;
+            if (this.playlist.currentIndex >= this.playlist.playList.length) {
+                this.playlist.currentIndex = 0;
+            }
+
+            this.playAudio(this.playlist.playList[this.playlist.currentIndex]);
+            return;
+        }
+
+        // 单曲循环
+        if (this.repeatState === 2) {
+            this.updateProgress(0);
+            this.setProgress(0);
+            return;
         }
     }
 
     /**
      * 添加音频到播放列表
      * @param songInfo 歌曲信息
-     * @param isBreakIn 是否插队播放
      */
-    playlistAdd(songInfo: any, isBreakIn: boolean = true) {
+    playlistAdd(songInfo: any) {
         // 当前无播放时直接播放
-        if (this.playlist.breakIn.length === 0 && this.playlist.waitList.length === 0 
+        if (this.playlist.playList.length === 0
             && Object.keys(this.playlist.current).length === 0) {
             this.playAudio(songInfo);
             return;
         }
-        if (isBreakIn) {
-            this.playlist.breakIn.push(songInfo);
-        }
-        else {
-            this.playlist.waitList.push(songInfo);
+        // 插入到当前播放项之后
+        const insertIndex = this.playlist.currentIndex + 1;
+        this.playlist.playList.splice(insertIndex, 0, songInfo);
+        // 插入位置在当前项之前或同一位置, 调整 currentIndex
+        if (this.playlist.currentIndex >= insertIndex) {
+            this.playlist.currentIndex ++;
         }
     }
 
     /**
      * 从播放列表删除
-     * @param targetId 
+     * @param targetId
      */
     playlistRemove(targetId: any) {
         console.log(`[Debug] Remove from playlist: targetId = ${targetId}`);
@@ -710,26 +731,19 @@ class Player {
         }
 
         const pureId = targetId.replace('new_', '').replace('playlist_', '')
-            .replace('cutin_', '').replace('current_', '');
-        
-        // 插队歌曲内匹配
-        if (targetId.includes('cutin_')) {
-            for (let i = 0; i < this.playlist.breakIn.length; i++) {
-                const songInfo = this.playlist.breakIn[i];
-                if (songInfo.id === pureId) {
-                    this.playlist.breakIn.splice(i, 1);
-                    break;
-                }
-            }
-            return;
-        }
+            .replace('current_', '');
 
-        // 普通队列内匹配
-        this.playlist.waitList.forEach((songInfo, index) => {
-            if (songInfo.id === pureId) {
-                this.playlist.waitList.splice(index, 1);
+        // 在统一播放列表中匹配
+        const index = this.playlist.playList.findIndex((s: any) => s.id === pureId);
+        if (index !== -1) {
+            this.playlist.playList.splice(index, 1);
+            // 维护 currentIndex
+            if (this.playlist.currentIndex > index) {
+                this.playlist.currentIndex--;
+            } else if (this.playlist.currentIndex === index) {
+                this.playlist.currentIndex = -1;
             }
-        });
+        }
     }
 
     /**
@@ -740,8 +754,8 @@ class Player {
     async playByList(list: any[], hasDetail: boolean = false) {
         // 清除当前列表
         this.playlist.current = {};
-        this.playlist.breakIn = [];
-        this.playlist.waitList = [];
+        this.playlist.playList = [];
+        this.playlist.currentIndex = -1;
 
         // 播放传入的列表
         let detailFlag = hasDetail;
@@ -750,7 +764,7 @@ class Player {
         if (detailFlag) {
             list = Object.assign([], list);
             list.forEach((songInfo) => {
-                this.playlistAdd(Object.assign({}, songInfo), false);
+                this.playlist.playList.push(Object.assign({}, songInfo));
             });
         }
         else {
@@ -766,7 +780,42 @@ class Player {
                     authors: songInfo.songAuthors,
                     duration: songInfo.songDuration
                 };
-                this.playlistAdd(infoObject, false);
+                this.playlist.playList.push(infoObject);
+            }
+        }
+
+        // 播放第一首
+        if (this.playlist.playList.length > 0) {
+            this.playlist.currentIndex = 0;
+            this.playAudio(this.playlist.playList[0]);
+        }
+    }
+
+    /**
+     * 调整播放列表顺序
+     * @param fromIndex 原位置
+     * @param toIndex 目标位置
+     */
+    reorderPlaylist(fromIndex: number, toIndex: number) {
+        if (fromIndex < 0 || fromIndex >= this.playlist.playList.length ||
+            toIndex < 0 || toIndex >= this.playlist.playList.length ||
+            fromIndex === toIndex) {
+            return;
+        }
+
+        const [movedItem] = this.playlist.playList.splice(fromIndex, 1);
+        this.playlist.playList.splice(toIndex, 0, movedItem);
+
+        // 维护 currentIndex
+        if (this.playlist.currentIndex === fromIndex) {
+            this.playlist.currentIndex = toIndex;
+        } else if (fromIndex < toIndex) {
+            if (this.playlist.currentIndex > fromIndex && this.playlist.currentIndex <= toIndex) {
+                this.playlist.currentIndex--;
+            }
+        } else {
+            if (this.playlist.currentIndex >= toIndex && this.playlist.currentIndex < fromIndex) {
+                this.playlist.currentIndex++;
             }
         }
     }
@@ -799,6 +848,45 @@ class Player {
         .catch((err) => {
             console.error(`Failed to get list content: ${err}`);
         });
+    }
+
+    /**
+     * 保存当前会话至 LocalStorage
+     */
+    saveSession() {
+        const sessionObject = {
+            ...this.playlist,
+            progress: this.playedTime
+        }
+        const sessionInfo = JSON.stringify(sessionObject);
+
+        window.localStorage.setItem('playerSession', sessionInfo);
+    }
+    /**
+     * 从 LocalStorage 恢复上次播放会话
+     */
+    restoreSession() {
+        const sessionText = window.localStorage.getItem('playerSession') as string;
+        if (!sessionText) console.error('[Error] Unable to get previous session');
+
+        try {
+            const sessionInfo = JSON.parse(sessionText);
+
+            this.playlist = {
+                current: sessionInfo.current,
+                currentIndex: sessionInfo.currentIndex,
+                playList: sessionInfo.playList
+            }
+
+            const autoStart = getConfig().generic.playOptions.player.autoStart;
+
+            this.playAudio(this.playlist.current, true, autoStart, () => {
+                this.setProgress(sessionInfo.progress);
+            });
+        }
+        catch(e) {
+            console.error(`[Error] Failed to parse session data: ${e}`);
+        }
     }
 
     syncSongInfo() {

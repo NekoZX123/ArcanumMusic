@@ -11,7 +11,7 @@ import {
     updateCurrentLyrics,
     updateFocusedLyric
 } from '../../assets/lyrics/lyricsManager.ts';
-import {getConfig} from '../../assets/utilities/configLoader.ts';
+import {getConfig} from '../../assets/user/configLoader.ts';
 
 // const songData = ref(getPlayer());
 // 最大偏移回弹距离
@@ -331,13 +331,6 @@ onMounted(() => {
     playerElem.addEventListener('timeupdate', () => {
         updateFocusedLyric(playerElem.currentTime);
     });
-    // 进度条更新 & 检测下一首
-    playerElem.addEventListener('timeupdate', () => {
-        if (!playTimeAdjustFlag.value) getPlayer()?.updateProgress(Math.floor(playerElem.currentTime));
-
-        getPlayer()?.checkNextSong();
-    });
-
     // 监听歌曲文件变化
     observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
