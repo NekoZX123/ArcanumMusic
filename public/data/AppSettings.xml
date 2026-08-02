@@ -15,6 +15,11 @@
             <node id="window" title="窗口">
                 <checkbox id="rememberSize" text="记住上次窗口大小"/>
                 <checkbox id="useSystemFrame" text="使用系统窗口边框"/>
+                <dropbox id="initialPage" text="应用启动时页面">
+                    <item id="0">首页</item>
+                    <item id="1">音乐库</item>
+                    <item id="2">搜索</item>
+                </dropbox>
             </node>
             <node id="colors" title="应用配色">
                 <dropbox id="darkMode" text="深色模式">

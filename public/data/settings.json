@@ -12,7 +12,8 @@
         "appearance": {
             "window": {
                 "rememberSize": true,
-                "useSystemFrame": false
+                "useSystemFrame": false,
+                "initialPage": 0
             },
             "colors": {
                 "darkMode": 0,
