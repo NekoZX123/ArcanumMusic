@@ -30,6 +30,7 @@ class Player {
             currentIndex: number,
             playList: any[]
         };
+    private _listFailureCount: number;
     
     // 储存的播放历史
     storedHistory: any[];
@@ -90,6 +91,7 @@ class Player {
             currentIndex: -1,
             playList: []
         };
+        this._listFailureCount = 0;
 
         const storedHistory = window.localStorage.getItem('playHistory');
         if (!storedHistory) this.storedHistory = [];
@@ -314,17 +316,6 @@ class Player {
             return;
         }
 
-        // 追加到当前项目后 (若已存在则移动到当前项目后, 避免重复)
-        const existingIndex = this.playlist.playList.findIndex((s: any) => s.id === songInfo.id);
-        if (this.playlist.currentIndex >= 0 && existingIndex === -1) {
-            // 不在列表中: 插入到当前项目后
-            const insertAt = this.playlist.currentIndex + 1;
-            this.playlist.playList.splice(insertAt, 0, songInfo);
-            this.playlist.currentIndex = insertAt;
-        }
-
-        this.playlist.current = songInfo;
-
         // 获取歌曲链接
         getSongLink(songInfo.id)
         .then((infoObject) => {
@@ -336,6 +327,40 @@ class Player {
             if (addToHistory) {
                 this.addToLocalHistory(songInfo);
             }
+
+            // 检查是否获取到播放链接
+            if (!playInfo.url) {
+                showNotify('songUrlNullError', 'critical', `无法播放 ${songInfo.name}`, '获取播放链接失败');
+                if (this.playlist.playList.length === 0 
+                    || this._listFailureCount >= this.playlist.playList.length
+                    || this.repeatState === 2) {
+                    this.togglePlayPause();
+                    this.playStateImage = './images/player/play.dark.svg';
+                    this.playStateImageTransparent = './images/lyricsPanel/play.svg';
+                    return;
+                }
+
+                const existingIndex = this.playlist.playList.findIndex((s: any) => s.id === songInfo.id);
+                if (existingIndex !== -1) {
+                    this.nextSong();
+                    this._listFailureCount ++;
+                }
+                return;
+            }
+            // 成功时重置失败计数
+            this._listFailureCount = 0;
+
+            // 追加到当前项目后 (若已存在则移动到当前项目后, 避免重复)
+            const existingIndex = this.playlist.playList.findIndex((s: any) => s.id === songInfo.id);
+            if (this.playlist.currentIndex >= 0 && existingIndex === -1) {
+                // 不在列表中: 插入到当前项目后
+                const insertAt = this.playlist.currentIndex + 1;
+                this.playlist.playList.splice(insertAt, 0, songInfo);
+                this.playlist.currentIndex = insertAt;
+            }
+
+            // 设置当前播放项
+            this.playlist.current = songInfo;
 
             // 设置歌曲信息
             this.name = playInfo.name;
@@ -356,19 +381,6 @@ class Player {
                     type: 'image/png'
                 }]
             });
-
-            // 设置播放链接
-            if (!playInfo.url) {
-                showNotify('songUrlNullError', 'critical', `无法播放 ${this.name}`, '获取播放链接失败');
-                if (this.playlist.playList.length === 0) {
-                    this.togglePlayPause();
-                    this.playStateImage = './images/player/play.dark.svg';
-                    this.playStateImageTransparent = './images/lyricsPanel/play.svg';
-                    return;
-                }
-                this.nextSong();
-                return;
-            }
 
             // 删除网易云 CDN 链接中的查询参数, 防止 403
             const neteaseCdnPostfix = 'music.126.net';

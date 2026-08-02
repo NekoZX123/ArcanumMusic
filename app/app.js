@@ -17,6 +17,7 @@ const __dirname = fileURLToPath(import.meta.url);
 
 const environment = getEnvironment();
 
+app.setDesktopName('Arcanum Music');
 app.setAppUserModelId('moe.nekozx123.arcanummusic');
 
 let tray;
@@ -106,7 +107,7 @@ async function createMainWindow() {
         title: 'Arcanum Music',
         icon: loadIcon(),
         webPreferences: {
-            backgroundThrottling: false,
+            backgroundThrottling: false, // 保证应用处于后台时可正常更新 SMTC 数据
             nodeIntegration: false,
             contextIsolation: true,
             preload: __dirname.replace('app.js', 'preload.js')
