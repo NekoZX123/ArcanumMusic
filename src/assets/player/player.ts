@@ -28,9 +28,15 @@ class Player {
     playlist: {
             current: any,
             currentIndex: number,
-            playList: any[]
+            playList: any[],
+            // 懒加载数据源 (hasDetail 为 false 时使用)
+            sourceList: any[],
+            loadedCount: number,
+            hasMore: boolean
         };
     private _listFailureCount: number;
+    // 懒加载进行中标记, 防止并发重复请求
+    private _lazyLoading: boolean;
     
     // 储存的播放历史
     storedHistory: any[];
@@ -89,9 +95,13 @@ class Player {
                 'coverUrl': './images/player/testAlbum.png'
             },
             currentIndex: -1,
-            playList: []
+            playList: [],
+            sourceList: [],
+            loadedCount: 0,
+            hasMore: false
         };
         this._listFailureCount = 0;
+        this._lazyLoading = false;
 
         const storedHistory = window.localStorage.getItem('playHistory');
         if (!storedHistory) this.storedHistory = [];
@@ -768,6 +778,10 @@ class Player {
         this.playlist.current = {};
         this.playlist.playList = [];
         this.playlist.currentIndex = -1;
+        // 重置懒加载状态
+        this.playlist.sourceList = [];
+        this.playlist.loadedCount = 0;
+        this.playlist.hasMore = false;
 
         // 播放传入的列表
         let detailFlag = hasDetail;
@@ -780,26 +794,52 @@ class Player {
             });
         }
         else {
-            let requestCount = list.length;
-            if (requestCount > 10) requestCount = 10;
-
-            for (let i = 0; i < requestCount; i++) {
-                const songInfo: any = await getSongInfo(list[i]);
-                const infoObject = {
-                    id: list[i],
-                    name: songInfo.songName,
-                    coverUrl: songInfo.songCover,
-                    authors: songInfo.songAuthors,
-                    duration: songInfo.songDuration
-                };
-                this.playlist.playList.push(infoObject);
-            }
+            // 无详细信息: 保存完整 ID 列表, 采用懒加载, 每次最多加载 15 首
+            this.playlist.sourceList = Object.assign([], list);
+            this.playlist.hasMore = this.playlist.sourceList.length > 0;
+            await this.loadMoreSongs(15);
         }
 
         // 播放第一首
         if (this.playlist.playList.length > 0) {
             this.playlist.currentIndex = 0;
             this.playAudio(this.playlist.playList[0]);
+        }
+    }
+
+    /**
+     * 懒加载播放列表: 从数据源加载下一批歌曲信息
+     * @param count 本次加载数量 (默认 15)
+     */
+    async loadMoreSongs(count: number = 15) {
+        if (this._lazyLoading || !this.playlist.hasMore) return;
+        this._lazyLoading = true;
+        try {
+            const sourceList = this.playlist.sourceList;
+            const start = this.playlist.loadedCount;
+            const end = Math.min(start + count, sourceList.length);
+
+            for (let i = start; i < end; i++) {
+                try {
+                    const songInfo: any = await getSongInfo(sourceList[i]);
+                    const infoObject = {
+                        id: sourceList[i],
+                        name: songInfo.songName,
+                        coverUrl: songInfo.songCover,
+                        authors: songInfo.songAuthors,
+                        duration: songInfo.songDuration
+                    };
+                    this.playlist.playList.push(infoObject);
+                }
+                catch (e) {
+                    console.error(`[ArcanumMusic - player] Failed to get song info for ${sourceList[i]}: ${e}`);
+                }
+            }
+            this.playlist.loadedCount = end;
+            this.playlist.hasMore = end < sourceList.length;
+        }
+        finally {
+            this._lazyLoading = false;
         }
     }
 
@@ -866,8 +906,11 @@ class Player {
      * 保存当前会话至 LocalStorage
      */
     saveSession() {
+        // 懒加载数据源不持久化 (仅保存已加载的部分)
         const sessionObject = {
-            ...this.playlist,
+            current: this.playlist.current,
+            currentIndex: this.playlist.currentIndex,
+            playList: this.playlist.playList,
             progress: this.playedTime
         }
         const sessionInfo = JSON.stringify(sessionObject);
@@ -887,7 +930,10 @@ class Player {
             this.playlist = {
                 current: sessionInfo.current,
                 currentIndex: sessionInfo.currentIndex,
-                playList: sessionInfo.playList
+                playList: sessionInfo.playList,
+                sourceList: [],
+                loadedCount: 0,
+                hasMore: false
             }
 
             const autoStart = getConfig().generic.playOptions.player.autoStart;
