@@ -163,6 +163,7 @@ function updateStorageData(updateEvent: StorageEvent) {
     }
 }
 
+// 窗口置顶
 let isCaptionsOn = false;
 const alwaysOnTopImage = ref('./images/windowControl/alwaysTop.svg');
 function toggleWindowTop(_?: any) {
@@ -188,6 +189,35 @@ function toggleWindowTop(_?: any) {
         window.electron.setAlwaysOnTop(captionsWindowId, true);
     }
     isCaptionsOn = !isCaptionsOn;
+}
+
+// 频谱图切换
+let chartMode = 1; // 0 = 隐藏, 1 = 水平, 2 = 垂直
+const chartToggleRotate = ref(0);
+const chartImage = ref('./images/lyricsPanel/chart.on.svg');
+function toggleChart() {
+    const visualizerCanvas = document.getElementById('visualizerCanvas') as HTMLCanvasElement;
+    if (!visualizerCanvas) {
+        console.error(`[Error] Failed to get element #visualizerCanvas`);
+        return;
+    }
+
+    chartMode++;
+    chartMode %= 3;
+    if (chartMode === 0) {
+        chartImage.value = './images/lyricsPanel/chart.svg';
+        visualizerCanvas.classList.remove('show');
+    }
+    if (chartMode === 1) {
+        chartImage.value = './images/lyricsPanel/chart.on.svg';
+        visualizerCanvas.classList.add('show');
+    }
+    if (chartMode === 2) {
+        chartImage.value = './images/lyricsPanel/chart.on.svg';
+        chartToggleRotate.value = 90;
+    } else {
+        chartToggleRotate.value = 0;
+    }
 }
 
 // 应用内通信频道
@@ -382,14 +412,14 @@ async function updateGradientFromImage(imageUrl: string) {
 }
 function updateVisualizerChart(data: Uint8Array | number[]) {
     let processedData = Array.from(data);
-    
+
     // 丢弃前 5% 和后 10% 数据
     const skipStart = Math.floor(processedData.length * 0.05);
     const skipEnd = Math.floor(processedData.length * 0.1);
     processedData = processedData.slice(skipStart, processedData.length - skipEnd);
-    
-    // 降采样至 32 个数据点
-    const targetLength = 32;
+
+    // 水平柱状图仅保留 24 个数据点，竖直柱状图保留 32 个
+    const targetLength = chartMode === 2 ? 24 : 32;
     const sampledData: number[] = [];
     const chunkSize = processedData.length / targetLength;
     for (let i = 0; i < targetLength; i++) {
@@ -399,20 +429,34 @@ function updateVisualizerChart(data: Uint8Array | number[]) {
         const average = chunk.reduce((a, b) => a + b, 0) / chunk.length;
         sampledData.push(average);
     }
-    
+
     const barHeightPercentages: number[] = sampledData.map(v => (v || 0) / 255 * 100);
 
-    if (!visualizerCanvas || !visualizerContext) return;    
+    if (!visualizerCanvas || !visualizerContext) return;
 
     // 清空画布
     visualizerContext.clearRect(0, 0, visualizerCanvas.width, visualizerCanvas.height);
 
     // 绘制柱状图
     const barWidth = visualizerCanvas.width / barHeightPercentages.length;
-    for (let i = 0; i < barHeightPercentages.length; i++) {
-        const barHeight = barHeightPercentages[i] * 0.01 * visualizerCanvas.height;
-        visualizerContext.fillStyle = gradient || `rgb(255, 255, 255)`;
-        visualizerContext.fillRect(i * barWidth, visualizerCanvas.height - barHeight, barWidth - 1, barHeight);
+    const barHeight = visualizerCanvas.height / barHeightPercentages.length;
+
+    if (chartMode === 1) {
+        // 竖直柱状图：从底部向上，低频在左侧
+        for (let i = 0; i < barHeightPercentages.length; i++) {
+            const height = barHeightPercentages[i] * 0.01 * visualizerCanvas.height;
+            visualizerContext.fillStyle = gradient || `rgb(255, 255, 255)`;
+            visualizerContext.fillRect(i * barWidth, visualizerCanvas.height - height, barWidth - 1, height);
+        }
+    } else if (chartMode === 2) {
+        // 水平柱状图：从右侧向左，低频在下方
+        for (let i = 0; i < barHeightPercentages.length; i++) {
+            const width = barHeightPercentages[i] * 0.01 * visualizerCanvas.width;
+            visualizerContext.fillStyle = gradient || `rgb(255, 255, 255)`;
+            // 低频率在下方：i=0 绘制在底部，所以 y = visualizerCanvas.height - (i + 1) * barHeight
+            // 从右侧绘制，所以 x = visualizerCanvas.width - width
+            visualizerContext.fillRect(visualizerCanvas.width - width, visualizerCanvas.height - (i + 1) * barHeight, width, barHeight - 1);
+        }
     }
 }
 
@@ -612,11 +656,14 @@ onUnmounted(() => {
                         <button class="playControl small" id="toggleTopOnControl" title="窗口置顶" @click="toggleWindowTop">
                             <img :src="alwaysOnTopImage"/>
                         </button>
+                        <button class="playControl small" id="toggleChart" title="频谱图" @click="toggleChart">
+                            <img :src="chartImage" :style="`transform: ${chartToggleRotate}deg`"/>
+                        </button>
                     </div>
                 </div>
             </div>
             <div id="audioVisualizer">
-                <canvas id="visualizerCanvas"></canvas>
+                <canvas id="visualizerCanvas" class="show"></canvas>
             </div>
         </div>
 
