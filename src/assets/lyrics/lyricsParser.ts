@@ -112,9 +112,22 @@ function parseLyricsCommon(lyricsInfo: LyricsInfo) {
     
     // 检查并添加逐字歌词
     if (lyricsInfo.yrc) {
-        for (let i = 0; i < lyricsInfo.yrc.length; i++) {
-            const yrcLine = lyricsInfo.yrc[i];
-            parsedLyrics.lyrics[i].yrc = yrcLine;
+        for (const yrcLine of lyricsInfo.yrc) {
+            if (!yrcLine || !yrcLine.startsWith('[')) continue;
+
+            // 解析 YRC 行的起始时间: 格式为 [start(ms),duration(ms)]...
+            const yrcMatch = yrcLine.match(/^\[(\d+),(\d+)\]/);
+            if (!yrcMatch) continue;
+            const yrcStartTime = parseInt(yrcMatch[1]); // 毫秒
+
+            // 以起始时间为指标匹配对应的歌词行
+            for (const lyric of parsedLyrics.lyrics) {
+                // parsedLyrics.lyrics[i].time 是秒，转换为毫秒比较
+                if (Math.round(lyric.time * 1000) === yrcStartTime) {
+                    lyric.yrc = yrcLine;
+                    break;
+                }
+            }
         }
     }
 
