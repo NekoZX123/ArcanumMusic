@@ -23,8 +23,11 @@ const props = defineProps({
         default: 'recommendSongs'
     }
 });
+let currentPage = 0;
+// 记录已加载的歌曲ID，用于去重
+const loadedSongIds = new Set<string>();
 
-onMounted(() => {
+function loadContent() {
     const userData = getAccountInfo('all');
 
     const parsedModule = props.module.split('-');
@@ -42,26 +45,25 @@ onMounted(() => {
 
     // 推荐单曲
     if (moduleName === 'recommendSong') {
-        const loadedRecommendSongs: string[] = [];
         Object.keys(requestFunc).forEach((platform: string) => {
             const sendRequest = requestFunc[platform];
-            sendRequest('recommendSong', {}, userData[platform].cookies)
+            sendRequest('recommendSong', { pageIndex: currentPage }, userData[platform].cookies)
                 .then((response: AxiosResponse)=> {
                     // 解析数据
                     const recommendations = parseMusicData(response, platform, 'recommendSong');
                     // 展示数据
                     const songs = recommendations.songList;
                     songs.forEach((songDetail: any) => {
-                        if (loadedRecommendSongs.includes(songDetail.songName)) {
+                        const songId = `songlist-${platform}-${songDetail.songId}`;
+                        // 检查是否已加载过
+                        if (loadedSongIds.has(songId)) {
                             return;
                         }
-
-                        const songId = `songlist-${platform}-${songDetail.songId}`;
                         const songName = songDetail.songName;
                         const songCover = songDetail.songCover;
                         const songAuthors = songDetail.songAuthors;
                         const songDuration = songDetail.songDuration;
-                        loadedRecommendSongs.push(songName);
+                        loadedSongIds.add(songId);
 
                         addSongCard(container, songId, songName, songCover, songAuthors, songDuration);
                     });
@@ -70,10 +72,9 @@ onMounted(() => {
     }
     // 新歌曲
     if (moduleName === 'newSong') {
-        const loadedSongs: string[] = [];
         Object.keys(requestFunc).forEach((platform: string) => {
             const sendRequest = requestFunc[platform];
-            sendRequest('newSong', { maxLength: 50 }, userData[platform].cookies)
+            sendRequest('newSong', { maxLength: 20, pageIndex: currentPage }, userData[platform].cookies)
                 .then((response: AxiosResponse) => {
                     // 解析数据
                     // console.log(response.data);
@@ -83,17 +84,18 @@ onMounted(() => {
                     const songs = recommendations.songList;
 
                     songs.forEach((songInfo: any) => {
-                        if (loadedSongs.includes(songInfo.songName)) {
+                        const songId = `music-${platform}-${songInfo.songId}`;
+                        // 检查是否已加载过
+                        if (loadedSongIds.has(songId)) {
                             return;
                         }
 
-                        const songId = `music-${platform}-${songInfo.songId}`;
                         const songName = songInfo.songName;
                         const songCover = songInfo.songCover;
                         const songAuthors = songInfo.songAuthors;
                         const songDuration = songInfo.songDuration;
 
-                        loadedSongs.push(songName);
+                        loadedSongIds.add(songId);
 
                         addSongCard(container, songId, songName, songCover, songAuthors, songDuration);
                     });
@@ -111,7 +113,11 @@ onMounted(() => {
         }
 
         const sendRequest = requestFunc[platform];
-        sendRequest(reqModule, { artistId: artistId, maxLength: 50 }, userData[platform].cookies)
+        sendRequest(
+            reqModule,
+            { artistId: artistId, maxLength: 20, pageIndex: currentPage },
+            userData[platform].cookies
+        )
             .then((response: AxiosResponse) => {
                 // 解析数据
                 // console.log(response.data);
@@ -123,15 +129,30 @@ onMounted(() => {
                 for (let i = 0; i < songs.length; i++) {
                     let songInfo = songs[i];
                     const songId = `music-${platform}-${songInfo.songId}`;
+                    // 检查是否已加载过
+                    if (loadedSongIds.has(songId)) {
+                        continue;
+                    }
                     const songName = songInfo.songName;
                     const songCover = songInfo.songCover;
                     const songAuthors = songInfo.songAuthors;
                     const songDuration = songInfo.songDuration;
 
+                    loadedSongIds.add(songId);
+
                     addSongCard(container, songId, songName, songCover, songAuthors, songDuration);
                 }
             });
     }
+}
+
+function loadNextPage() {
+    currentPage++;
+    loadContent();
+}
+
+onMounted(() => {
+    loadContent();
 
     console.log(`SingleCollections.vue loaded with params ${JSON.stringify(props)}`);;
 });
@@ -140,5 +161,10 @@ onMounted(() => {
     <div class="flex column" id="collectionsPage">
         <label class="text large bold" id="collectionsTitle">{{ props.title }}</label>
         <div :class="`flex row collectionsContent single`" id="collections"></div>
+
+        <!-- 查看更多 (下一页) 按钮 -->
+        <button class="flex row listButton" id="loadMoreButton" @click="loadNextPage">
+            <label class="text small bold">查看更多</label>
+        </button>
     </div>
 </template>

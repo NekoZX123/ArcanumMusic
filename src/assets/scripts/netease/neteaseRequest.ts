@@ -88,18 +88,19 @@ const requestData: { [type: string]: any } = {
     },
     "hotList": {
         "limit": "[maxLength]",
-        "offset": 0
+        "offset": "[pageOffset]"
     },
     "recommendSong": {
         "id": 3778678,
         "n": 30,
+        "offset": "[pageOffset]",
         "csrf_token": ""
     },
     "recommendArtist": {
         "area":"-1",
         "type":"-1",
         "initial":"-1",
-        "offset":"0",
+        "offset":"[pageOffset]",
         "limit":"[maxLength]",
     },
     "rankings": {
@@ -107,7 +108,7 @@ const requestData: { [type: string]: any } = {
     },
     "rankingContent": {
         "id": "[rankingId]",
-        "offset": "0",
+        "offset": "[pageOffset]",
         "total": "true",
         "limit": "[maxLength]",
         "n": "[maxLength]"
@@ -115,18 +116,18 @@ const requestData: { [type: string]: any } = {
     "newSong": {
         "areaId": "0",
         "limit": "[maxLength]",
-        "offset": "0"
+        "offset": "[pageOffset]"
     },
     "newAlbum": {
         "area":"ALL",
         "year": "[currentYear]",
         "month": "[currentMonth]",
-        "offset": "0",
-        "limit": "10",
+        "offset": "[pageOffset]",
+        "limit": "[maxLength]",
         "rcmd": "true"
     },
     "dailyRecommends": {
-        "offset": "0", 
+        "offset": "[pageOffset]", 
         "total": "true",
         "csrf_token": ""
     },
@@ -265,14 +266,15 @@ function getNeteaseResult(moduleName: NeteaseMusicModule, params: { [type: strin
     }
 
     let moduleString = JSON.stringify(moduleData);
+    if (!Object.keys(params).includes('pageIndex')) params.pageIndex = 0; // 默认页码为 0
     // 替换参数
     Object.keys(params).forEach((key) => {
+        // 页码按照偏移量替换
+        if (key === 'pageIndex') {
+            const offsetValue = params[key] * (params.maxLength || PAGE_SIZE);
+            moduleString = moduleString.replaceAll(`[pageOffset]`, offsetValue.toString() || '');
+        }
         if (moduleString.includes(`[${key}]`)) {
-            // 页码按照偏移量替换
-            if (key === 'pageIndex') {
-                const offsetValue = params[key] * PAGE_SIZE;
-                moduleString = moduleString.replace(new RegExp(`"\\[${key}\\]"`, 'g'), offsetValue.toString() || '');
-            }
             // 根据数据类型替换参数, 保证类型正确
             if (typeof params[key] === 'number') {
                 moduleString = moduleString.replace(new RegExp(`"\\[${key}\\]"`, 'g'), params[key].toString() || '');

@@ -58,16 +58,17 @@ const requestData: { [type: string]: string } = {
     'songList': 'pid=[listId]&pn=1&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'album': 'stype=albuminfo&albumid=[albumId]&show_copyright_off=1&alflac=1&vipver=1&sortby=1&newver=1&mobi=1',
     'artist': 'artistid=[artistId]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'artistSongs': 'artistid=[artistId]&pn=1&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'artistAlbum': 'artistid=[artistId]&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'hotList': 'pn=1&rn=20&order=hot&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'recommendSong': 'pid=1082685104&pn=1&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'recommendArtist': 'category=0&prefix=&pn=1&rn=60&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'artistSongs': 'artistid=[artistId]&pn=[pageIndex]&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'artistAlbum': 'artistid=[artistId]&pn=[pageIndex]&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'hotList': 'pn=[pageIndex]&rn=[maxLength]&order=hot&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'recommendSong': 'pid=1082685104&pn=[pageIndex]&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'recommendArtist': 'category=0&prefix=&pn=[pageIndex]&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
     'rankings': 'httpsStatus=1&reqId=[uuid]&plat=web_www',
-    'rankingContent': 'bangId=[rankingId]&pn=1&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'newSong': 'bangId=17&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
-    'newAlbum': 'bangId=17&pn=1&rn=20&httpsStatus=1&reqId=[uuid]&plat=web_www&from='
+    'rankingContent': 'bangId=[rankingId]&pn=1&rn=50&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'newSong': 'bangId=17&pn=[pageIndex]&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from=',
+    'newAlbum': 'bangId=17&pn=[pageIndex]&rn=[maxLength]&httpsStatus=1&reqId=[uuid]&plat=web_www&from='
 };
+const PAGE_SIZE = 30; // 默认每页请求数量
 
 type KuwoMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
     'artistAlbum' | 'artistSongs' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 
@@ -148,7 +149,13 @@ function getKuwoResult(moduleName: KuwoMusicModule, params: { [type: string]: an
     }
 
     // 替换数据参数
+    if (!Object.keys(params).includes('pageIndex')) params.pageIndex = 0; // 默认页码为 0
     Object.keys(params).forEach((key) => {
+        // 页码按照偏移量替换
+        if (key === 'pageIndex') {
+            const offsetValue = (params[key] + 1) * (params.maxLength || PAGE_SIZE);
+            moduleData = moduleData.replaceAll(`[pageOffset]`, offsetValue.toString() || '');
+        }
         if (moduleData.includes(`[${key}]`)) {
             moduleData = moduleData.replace(new RegExp(`\\[${key}\\]`, 'g'), params[key] || '');
         }
