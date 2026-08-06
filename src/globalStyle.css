@@ -1174,19 +1174,6 @@ img.outlineImage {
     animation: longTextScroll 6s linear infinite;
     animation-play-state: paused;
 }
-#songNameContainer:hover #currentSongName.autoScroll,
-#songNameContainer:focus #currentSongName.autoScroll,
-#currentSongName.autoScroll:focus {
-    animation-play-state: running;
-}
-@keyframes longTextScroll {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(calc(-100% + 15rem));
-    }
-}
 #currentSongAuthors {
     width: 18rem;
     height: 14pt;
@@ -1843,4 +1830,23 @@ img.outlineImage {
 }
 .downloadProgress.failed > .downloadCompleted {
     background: var(--color-red-default);
+}
+
+/* Slideshow 滚屏效果 */
+.slideshow {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.slideshow .auto-scroll {
+    display: inline-block;
+    animation: slideshowScroll 8s linear infinite;
+    animation-play-state: paused;
+}
+
+.slideshow:hover .auto-scroll,
+.slideshow:focus .auto-scroll,
+.slideshow .auto-scroll:focus {
+    animation-play-state: running;
 }

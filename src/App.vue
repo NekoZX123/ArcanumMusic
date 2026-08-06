@@ -24,6 +24,7 @@ import { initializeTheme, setControlBarTheme, setWindowBackground, type colorThe
 import { buttonTypes, showPopup } from './assets/notifications/popup.tsx';
 import DownloadItem from './assets/widgets/DownloadItem.vue';
 import { getDownloadQueue } from './assets/player/musicDownloader.ts';
+import { TextSlideShow } from './assets/widgets/Slideshow.tsx';
 // import Notification from './assets/notifications/Notification.vue';
 
 /* 窗口移动功能 */
@@ -323,21 +324,6 @@ async function toggleCaptions(_?: MouseEvent) {
     }
 
     isCaptionsOn = !isCaptionsOn;
-}
-
-// 长歌曲名称焦点滚动
-function checkScrollAnimation(_: MouseEvent) {
-    const nameContainer = document.getElementById('songNameContainer') as HTMLElement;
-    const nameContent = document.getElementById('currentSongName') as HTMLElement;
-    
-    if (nameContainer.scrollWidth > nameContainer.offsetWidth && !nameContent.classList.contains('autoScroll')) {
-        nameContent.classList.add(`autoScroll`);
-    }
-}
-// 重置滚动动画
-function resetScroll(_: MouseEvent) {
-    const nameContent = document.getElementById('currentSongName') as HTMLElement;
-    nameContent.classList.remove('autoScroll');
 }
 
 // 限制歌手文字长度
@@ -643,9 +629,7 @@ onUnmounted(() => {
                 <div class="flex row" id="currentSong">
                     <img class="currentSongCover" :src="getPlayer()?.coverUrl" alt="Song cover"/>
                     <span class="flex column">
-                        <span id="songNameContainer" @mouseenter="checkScrollAnimation" @mouseleave="resetScroll">
-                            <label class="text small bold" id="currentSongName" @click="copySongName">{{ getPlayer()?.name }}</label>
-                        </span>
+                        <TextSlideShow outerId="songNameContainer" innerId="currentSongName" class="text small bold" :content="getPlayer()?.name || ''" @click="copySongName"></textSlideShow>
                         <label class="text ultraSmall" id="currentSongAuthors">{{ limitAuthorsTextLength(getPlayer()?.authors || '') }}</label>
                     </span>
                 </div>

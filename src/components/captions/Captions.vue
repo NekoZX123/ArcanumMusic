@@ -5,6 +5,7 @@ import '../../globalStyle.css';
 import { timeFormat } from '../../assets/utilities/formatter.ts';
 import { getMainColors } from '../../assets/effects/colorUtils.ts';
 import { getProxyStreamUrl, loadProxyPort } from '../../assets/utilities/proxyRequest.ts';
+import { TextSlideShow } from '../../assets/widgets/Slideshow.tsx';
 
 /* 窗口移动功能 */
 let startX = 0;
@@ -613,7 +614,7 @@ onUnmounted(() => {
         <div :class="`flex row ${controlShow ? 'expanded' : ''}`" id="captionsControl">
             <img :src="currentSongInfo.coverUrl" alt="Current Song Cover" id="captionsSongCover"/>
             <div class="flex column" id="captionsSongInfo">
-                <span class="text medium bold" id="desktopSongName">{{ currentSongInfo.name }}</span>
+                <TextSlideShow outerId="desktopSongName" innerId="" className="text medium bold" :content="currentSongInfo.name"></TextSlideShow>
                 <span class="text small" id="desktopSongAuthors">{{ currentSongInfo.authors }}</span>
                 
                 <div class="flex row" id="progressDesktopLyrics">
