@@ -348,3 +348,44 @@
 .lyricsBox.lite > ul {
     text-align: center;
 }
+
+/* 逐字歌词 (YRC) */
+.lyricsBox > ul.yrc {
+    white-space: pre-wrap;
+}
+/* 底层文本容器(相对定位, 供遮罩层对齐) */
+.lyricsBox > ul.yrc > .yrcText {
+    position: relative;
+    display: inline-block;
+    white-space: pre-wrap;
+}
+/* 单个字符: 保持字距; 上抬量由 JS 每帧写入内联 transform (满上抬 + 后方衰减)。
+   transition 平滑逐字推进、拖动进度条、切行时字符位移的跳变, 呈现柔顺的追赶效果 */
+.lyricsBox > ul.yrc .yrcChar {
+    display: inline-block;
+    white-space: pre;
+    transition: transform 180ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+/* 焦点行未唱部分保持非高亮样式 */
+.lyricsBox.focused > ul.yrc > .yrcText > .yrcChar {
+    color: var(--transparent-grey);
+}
+.lyricsBox.glow > ul.yrc > .yrcText > .yrcChar {
+    text-shadow: 0 0 2px var(--transparent-grey);
+}
+.lyricsBox.appleMusic.focused > ul.yrc > .yrcText > .yrcChar {
+    color: var(--default-white);
+    opacity: 0.6;
+}
+/* 遮罩层 - 复制元素, 裁切到已唱部分 */
+.lyricsBox.focused > ul.yrc > .yrcText > .yrcSweep {
+    position: absolute;
+    left: 0;
+    top: 0;
+    white-space: pre-wrap;
+    pointer-events: none;
+}
+/* 发光模式 行高亮参照 .lyricsBox.glow.focused > ul */
+.lyricsBox.glow.focused > ul.yrc > .yrcText > .yrcSweep > .yrcChar {
+    text-shadow: 0 0 3px var(--default-white);
+}

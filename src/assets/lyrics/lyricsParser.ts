@@ -31,6 +31,8 @@ function formatLyricTime(time: string) {
     return resultTime;
 }
 
+const YRC_MATCH_DIFF = 400; // 逐字歌词匹配时间差
+
 type LyricsInfo = { lyrics: string[], translation: string[], yrc?: string };
 /**
  * 格式化网易云音乐/QQ音乐/酷我音乐歌词
@@ -115,15 +117,16 @@ function parseLyricsCommon(lyricsInfo: LyricsInfo) {
         for (const yrcLine of lyricsInfo.yrc) {
             if (!yrcLine || !yrcLine.startsWith('[')) continue;
 
-            // 解析 YRC 行的起始时间: 格式为 [start(ms),duration(ms)]...
-            const yrcMatch = yrcLine.match(/^\[(\d+),(\d+)\]/);
+            // 解析 YRC 行的起始时间: 格式为 [start(ms),duration(ms)] 或 [start(ms),duration(ms),...]
+            const yrcMatch = yrcLine.match(/^\[(\d+),(\d+)(?:,([^\]]+))?\]/);
             if (!yrcMatch) continue;
-            const yrcStartTime = parseInt(yrcMatch[1]); // 毫秒
+            const yrcStartTime = parseInt(yrcMatch[1]);
 
             // 以起始时间为指标匹配对应的歌词行
             for (const lyric of parsedLyrics.lyrics) {
                 // parsedLyrics.lyrics[i].time 是秒，转换为毫秒比较
-                if (Math.round(lyric.time * 1000) === yrcStartTime) {
+                // 允许最多 300ms 误差来匹配逐字歌词行
+                if (Math.abs(Math.round(lyric.time * 1000) - yrcStartTime) <= YRC_MATCH_DIFF) {
                     lyric.yrc = yrcLine;
                     break;
                 }
@@ -131,6 +134,7 @@ function parseLyricsCommon(lyricsInfo: LyricsInfo) {
         }
     }
 
+    console.log(parsedLyrics);
     return parsedLyrics;
 }
 
