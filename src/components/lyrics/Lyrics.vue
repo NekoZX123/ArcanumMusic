@@ -344,6 +344,7 @@ onMounted(() => {
 
     // 监听歌词事件
     window.addEventListener('update-lyrics', updateCurrentLyrics);
+    window.addEventListener('lyrics-launch', updateCurrentLyrics);
 
     // 歌词元素
     setContainerId('lyricsContent');
@@ -372,6 +373,7 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('update-lyrics', updateCurrentLyrics);
     window.removeEventListener('lyrics-launch', updateBackground);
+    window.removeEventListener('lyrics-launch', updateCurrentLyrics);
     window.removeEventListener('config-change', updateBackground);
     window.removeEventListener('config-change', handleConfigChange);
 
