@@ -31,7 +31,7 @@ function formatLyricTime(time: string) {
     return resultTime;
 }
 
-const YRC_MATCH_DIFF = 400; // 逐字歌词匹配时间差
+const YRC_MATCH_DIFF = 600; // 逐字歌词匹配时间差 (ms)
 
 type LyricsInfo = { lyrics: string[], translation: string[], yrc?: string };
 /**
@@ -125,7 +125,7 @@ function parseLyricsCommon(lyricsInfo: LyricsInfo) {
             // 以起始时间为指标匹配对应的歌词行
             for (const lyric of parsedLyrics.lyrics) {
                 // parsedLyrics.lyrics[i].time 是秒，转换为毫秒比较
-                // 允许最多 300ms 误差来匹配逐字歌词行
+                // 允许误差匹配逐字歌词行
                 if (Math.abs(Math.round(lyric.time * 1000) - yrcStartTime) <= YRC_MATCH_DIFF) {
                     lyric.yrc = yrcLine;
                     break;

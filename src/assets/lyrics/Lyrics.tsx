@@ -171,7 +171,6 @@ const LyricsLine = defineComponent({
             const effectMode = effectClassList[props.lyricsMode];
             const mainLineFontSize = props.lyricsMode === 2 ? 'medium' : 'large';
             const transLineFontSize = props.lyricsMode === 2 ? 'small' : 'medium';
-            const lyricsFontWeight = props.lyricsMode === 0 ? 'bold' : '';
 
             // 有 yrc 时渲染逐字字符 + 发光遮罩层, 否则渲染普通文本
             const data = yrcData.value;
@@ -179,8 +178,10 @@ const LyricsLine = defineComponent({
             const focused = activeCount >= 0;
             // 连续字符位置 (驱动遮罩滑动与后方衰减上抬)
             const charPos = focused ? sweepProgress.value * (data?.chars.length ?? 0) : 0;
-            // 单字符上抬样式: 焦点行才生效 (已唱/当前字符满上抬, 后方字符随距离衰减)
-            const charStyle = (index: number) => focused
+            // 简约模式不启用字符上抬
+            const enableLift = props.lyricsMode !== 2;
+            // 单字符上抬样式
+            const charStyle = (index: number) => (focused && enableLift)
                 ? { transform: `translateY(${liftOffset(index, charPos).toFixed(2)}px)` }
                 : {};
             // 遮罩层逐字符裁切: 依相对位置 rel = index - charPos
@@ -198,7 +199,7 @@ const LyricsLine = defineComponent({
             };
             const mainContent = data
                 ? (
-                    <ul class={`text ${mainLineFontSize} ${lyricsFontWeight} yrc`}>
+                    <ul class={`text ${mainLineFontSize} yrc`}>
                         <span class="yrcText">
                             {data.chars.map((c, index) => (
                                 <span class="yrcChar" style={charStyle(index)}>{c.char}</span>
@@ -214,13 +215,13 @@ const LyricsLine = defineComponent({
                     </ul>
                 )
                 : (
-                    <ul class={`text ${mainLineFontSize} ${lyricsFontWeight}`}>{props.lyricsObject.content}</ul>
+                    <ul class={`text ${mainLineFontSize}`}>{props.lyricsObject.content}</ul>
                 );
 
             return (
                 <span ref={rootElement} class={`lyricsBox ${props.glowEffect ? 'glow' : ''} ${effectMode}`} onClick={() => getPlayer()?.setProgress(props.lyricsObject.time)}>
                     {mainContent}
-                    <ul class={`text ${transLineFontSize} ${lyricsFontWeight}`}>{props.lyricsObject.translation}</ul>
+                    <ul class={`text ${transLineFontSize}`}>{props.lyricsObject.translation}</ul>
                 </span>
             );
         };
