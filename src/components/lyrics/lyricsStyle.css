@@ -389,3 +389,13 @@
 .lyricsBox.glow.focused > ul.yrc > .yrcText > .yrcSweep > .yrcChar {
     text-shadow: 0 0 3px var(--default-white);
 }
+
+/* 歌词信息显示 */
+#lyricsAvailablity {
+    position: absolute;
+    left: 0;
+    bottom: 3rem;
+    
+    white-space: pre-line;
+    color: white;
+}

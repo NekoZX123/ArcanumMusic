@@ -1850,3 +1850,15 @@ img.outlineImage {
 .slideshow .auto-scroll:focus {
     animation-play-state: running;
 }
+
+/* 调试信息窗口 */
+#pageUrl {
+    position: absolute;
+
+    bottom: 0;
+    left: 0;
+
+    opacity: 0.7;
+
+    z-index: 200;
+}

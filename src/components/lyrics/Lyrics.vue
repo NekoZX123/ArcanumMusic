@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref} from 'vue';
+import {onMounted, onUnmounted, ref, watch} from 'vue';
 import './lyricsStyle.css';
 import {LyricsLine} from '../../assets/lyrics/Lyrics.tsx';
 import {getPlayer} from '../../assets/player/player.ts';
+import {timeFormat} from '../../assets/utilities/formatter.ts';
 import {getMainColors, ParticleManager} from '../../assets/effects/colorUtils.ts';
 import {
     getLyricsData,
@@ -315,6 +316,65 @@ function handleConfigChange() {
     updateLyricsStyle(parseInt(lyricsOptions.lyricsStyle));
 }
 
+// 歌词信息显示 (仅当开发者选项开启时显示)
+const showLyricsAvailablity = ref(false);
+const lrcInfo = ref(`Song ID: -\nTranslation: ❌ | Yrc: ❌\nCurrent match: -`);
+/**
+ * 更新歌词信息显示
+ * 根据当前歌曲 ID、歌词类型 (翻译 / 逐字歌词) 及当前匹配的歌词行时间动态生成
+ */
+function updateLyricsInfo() {
+    // 开发者选项未开启时不执行
+    if (!showLyricsAvailablity.value) return;
+
+    const songId = getPlayer()?.playlist.current.id;
+    const lyrics = getLyricsData().lyrics;
+
+    // 检测歌词类型: 是否存在翻译 / 逐字歌词 (YRC)
+    let hasTranslation = false;
+    let hasYrc = false;
+    for (const lyric of lyrics) {
+        if (lyric.translation) hasTranslation = true;
+        if (lyric.yrc) hasYrc = true;
+        if (hasTranslation && hasYrc) break;
+    }
+
+    // 当前匹配的歌词行时间 (播放时间落在的最后一行)
+    const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+    const currentTime = playerElem?.currentTime ?? 0;
+    let matchTime = -1;
+    for (let i = lyrics.length - 1; i >= 0; i--) {
+        if (lyrics[i].time <= currentTime) {
+            matchTime = lyrics[i].time;
+            break;
+        }
+    }
+
+    const infoText = [
+        `Song ID: ${songId || '-'}`,
+        `Translation: ${hasTranslation ? '✅' : '❌'} | Yrc: ${hasYrc ? '✅' : '❌'}`,
+        `Current match: ${matchTime >= 0 ? timeFormat(matchTime) : '-'}`
+    ].join('\n');
+
+    // 仅在内容变化时更新, 避免无效刷新
+    if (lrcInfo.value !== infoText) {
+        lrcInfo.value = infoText;
+    }
+}
+
+// 歌词内容更新时同步刷新歌词信息 (歌词异步加载完成后触发)
+watch(() => getLyricsData().lyrics, updateLyricsInfo);
+
+// 更新歌词信息显示开关 (配置变化时同步; getConfig 需在 loadConfig 之后调用)
+function updateLyricsInfoVisibility() {
+    const config = getConfig();
+    if (!config) return;
+    showLyricsAvailablity.value = config.developerOptions.info.showLyricsAvailablity;
+
+    // 开启时立即刷新一次歌词信息
+    if (showLyricsAvailablity.value) updateLyricsInfo();
+}
+
 // 歌词光效及样式
 const lyricsGlow = ref(true);
 const lyricsEffectMode = ref(0);
@@ -327,9 +387,10 @@ onMounted(() => {
         console.error('[Error] Player element not found');
         return;
     }
-    // 歌词自动滚动
+    // 歌词自动滚动 & 歌词信息显示
     playerElem.addEventListener('timeupdate', () => {
         updateFocusedLyric(playerElem.currentTime);
+        updateLyricsInfo();
     });
     // 监听歌曲文件变化
     observer = new MutationObserver((mutations) => {
@@ -368,6 +429,10 @@ onMounted(() => {
     // 同步设置变化
     window.addEventListener('config-change', handleConfigChange);
 
+    // 初始化歌词信息显示开关 (配置变化时同步)
+    updateLyricsInfoVisibility();
+    window.addEventListener('config-change', updateLyricsInfoVisibility);
+
     console.log('Lyrics.vue loaded');
 });
 onUnmounted(() => {
@@ -376,6 +441,7 @@ onUnmounted(() => {
     window.removeEventListener('lyrics-launch', updateCurrentLyrics);
     window.removeEventListener('config-change', updateBackground);
     window.removeEventListener('config-change', handleConfigChange);
+    window.removeEventListener('config-change', updateLyricsInfoVisibility);
 
     if (observer) observer.disconnect();
 });
@@ -459,5 +525,6 @@ onUnmounted(() => {
                 />
             </div>
         </div>
+        <div v-if="showLyricsAvailablity" id="lyricsAvailablity" class="text ultraSmall">{{ lrcInfo }}</div>
     </div>
 </template>

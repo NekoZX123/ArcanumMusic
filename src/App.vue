@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {createApp, onMounted, onUnmounted, ref} from 'vue';
+import {computed, createApp, onMounted, onUnmounted, ref} from 'vue';
 import Lyrics from './components/lyrics/Lyrics.vue';
 
 import {showNotify} from './assets/notifications/Notification.ts';
@@ -284,6 +284,8 @@ let captionWindowId = -1;
 let isCaptionsOn: boolean = false;
 const desktopLyricsImage = ref('./images/player/desktopLyrics.svg');
 const showDownloadWindow = ref(false);
+// 当前页面地址（调试信息，模板无法直接访问 window/globalThis）
+const currentPageUrl = computed(() => router.currentRoute.value.fullPath);
 // 桌面歌词窗口关闭处理
 function handleCaptionsClose() {
     desktopLyricsImage.value = './images/player/desktopLyrics.svg';
@@ -405,6 +407,15 @@ function copySongName() {
 
     window.electron.copyToClipboard(songName);
     showNotify('copySucceed', 'success', '复制成功', '歌曲名称已复制至剪贴板', 1000);
+}
+
+const showUrlInfo = ref(false);
+// 更新调试信息显示开关
+function updateShowUrlInfo() {
+    const config = getConfig();
+    if (!config) return;
+    showUrlInfo.value = config.developerOptions.info.showPageInfo;
+    console.log(`[Debug] Show page info: ${showUrlInfo.value}`);
 }
 
 onMounted(async () => {
@@ -539,10 +550,15 @@ onMounted(async () => {
     window.electron.onAppQuit(() => {
         getPlayer()?.saveSession();
     });
+
+    // 调试信息窗口
+    updateShowUrlInfo();
+    window.addEventListener('config-change', updateShowUrlInfo);
 });
 onUnmounted(() => {
     window.onstorage = null;
     window.removeEventListener('click', hideRightMenu);
+    window.removeEventListener('config-change', updateShowUrlInfo);
     window.removeEventListener('storage', handleStorageData);
     const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
     if (playerElem) {
@@ -728,5 +744,8 @@ onUnmounted(() => {
 
         <!-- 右键菜单 -->
         <div id="rightClickMenuContainer"></div>
+
+        <!-- 调试信息窗口 -->
+        <div v-if="showUrlInfo" id="pageUrl" class="text grey ultraSmall">{{ currentPageUrl }}</div>
     </div>
 </template>

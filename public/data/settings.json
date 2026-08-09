@@ -23,7 +23,7 @@
             },
             "lyrics": {
                 "lyricsBackground": 1,
-                "lyricsStyle": 0,
+                "lyricsStyle": 1,
                 "lyricsGlow": true
             }
         },
@@ -64,6 +64,10 @@
         "application": {
             "enableDevtoolsHotkey": false,
             "devtoolsOnLaunched": false
+        },
+        "info": {
+            "showPageInfo": false,
+            "showLyricsAvailablity": false
         }
     }
 }

@@ -120,6 +120,10 @@
             <checkbox id="enableDevtoolsHotkey" text="启用开发者工具快捷键 Ctrl+Shift+I"/>
             <checkbox id="devtoolsOnLaunched" text="应用启动时打开开发者工具"/>
         </node>
+        <node id="info" title="信息">
+            <checkbox id="showPageInfo" text="在页脚显示当前页面位置"/>
+            <checkbox id="showLyricsAvailablity" text="在歌词面板显示歌词可用性信息"/>
+        </node>
     </page>
 
     <page id="about" name="关于此应用">
