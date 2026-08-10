@@ -5,12 +5,12 @@ import Lyrics from './components/lyrics/Lyrics.vue';
 import {showNotify} from './assets/notifications/Notification.ts';
 import {createPlayer, getPlayer} from './assets/player/player.ts';
 import {
-  changePage,
-  initialize,
-  pageBack,
-  pageForward,
-  togglePlaylist,
-  updatePlaylistIcon
+    changePage,
+    initialize,
+    pageBack,
+    pageForward,
+    togglePlaylist,
+    updatePlaylistIcon
 } from './assets/ui/pageSwitcher.ts';
 // import { testRequest } from './assets/utilities/requestTests.ts';
 import router from './router/index.ts';

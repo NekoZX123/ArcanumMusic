@@ -362,7 +362,16 @@ class Player {
 
             // 追加到当前项目后 (若已存在则移动到当前项目后, 避免重复)
             const existingIndex = this.playlist.playList.findIndex((s: any) => s.id === songInfo.id);
-            if (this.playlist.currentIndex >= 0 && existingIndex === -1) {
+            if (existingIndex >= 0) {
+                // 已在播放列表中: 移到当前项目后
+                let targetIndex = this.playlist.currentIndex >= 0
+                    ? this.playlist.currentIndex + 1
+                    : this.playlist.playList.length;
+                if (existingIndex < targetIndex) targetIndex--;
+                this.playlist.playList.splice(existingIndex, 1);
+                this.playlist.playList.splice(targetIndex, 0, songInfo);
+                this.playlist.currentIndex = targetIndex;
+            } else if (this.playlist.currentIndex >= 0) {
                 // 不在列表中: 插入到当前项目后
                 const insertAt = this.playlist.currentIndex + 1;
                 this.playlist.playList.splice(insertAt, 0, songInfo);
