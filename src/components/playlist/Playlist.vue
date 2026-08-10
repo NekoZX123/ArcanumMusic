@@ -4,6 +4,7 @@ import { getPlayer } from '../../assets/player/player';
 import { PlaylistSongLine } from '../../assets/widgets/Widgets';
 import './playlistStyle.css';
 import { getConfig } from '../../assets/user/configLoader';
+import { buttonTypes, showPopup } from '../../assets/notifications/popup';
 
 // 懒加载配置
 const LAZY_LOAD_COUNT = 15;       // 每次加载数量
@@ -55,6 +56,41 @@ onMounted(() => {
     fillContainer();
 });
 
+// 清空播放列表
+function clearPlaylist() {
+    showPopup('warning', 'confirm', '清空播放列表', '确定要清空当前播放列表吗？', ['', 'red'], (code: number) => {
+        if (code !== buttonTypes.BUTTON_CONFIRM) return;
+
+        const player = getPlayer();
+        if (!player) return;
+
+        // 停止当前播放
+        if (player.isPlaying) {
+            player.togglePlayPause();
+        }
+        player.url = '';
+        player.playStateImage = './images/player/play.dark.svg';
+        player.playStateImageTransparent = './images/lyricsPanel/play.svg';
+        player.syncPlayStateImage();
+
+        // 重置歌曲信息为默认占位
+        player.name = '未在播放';
+        player.authors = '';
+        player.coverUrl = './images/player/testAlbum.png';
+        player.updateDuration(1);
+        player.updateProgress(0);
+        player.syncSongInfo();
+
+        // 清空播放列表
+        player.playlist.current = { 'name': '未在播放', 'authors': '', 'coverUrl': './images/player/testAlbum.png' };
+        player.playlist.currentIndex = -1;
+        player.playlist.playList = [];
+        player.playlist.sourceList = [];
+        player.playlist.loadedCount = 0;
+        player.playlist.hasMore = false;
+    });
+}
+
 onBeforeUnmount(() => {
     scrollContainer?.removeEventListener('scroll', onPlaylistScroll);
     scrollContainer = null;
@@ -103,7 +139,16 @@ watch(
 <template>
     <div class="flex column" id="playlistPage">
         <div class="playlistPart flex column" id="songsPlaylist">
-            <label class="text large bold playlistSubtitle">播放列表</label>
+            <div class="flex row" id="playlistHeader">
+                <div class="flex row" id="playlistInfo">
+                    <label class="text large bold playlistSubtitle">播放列表</label>
+                    <label class="text small grey">共 {{ mergedPlaylist.length }} 首</label>
+                </div>
+
+                <button id="clearPlaylist" @click="clearPlaylist">
+                    <img class="outlineImage" src="/images/player/clear.svg"/>
+                </button>
+            </div>
             <PlaylistSongLine
                 v-for="(item) in mergedPlaylist"
                 :key="`playlist_${item.id}_${item._isHistory ? 'history' : 'list'}`"
