@@ -190,6 +190,9 @@
 #toggleChart {
     transition: all 200ms ease-in-out;
 }
+#toggleChart > img {
+    transition: all 200ms ease-in-out;
+}
 #audioVisualizer {
     width: 12rem;
     height: 100%;

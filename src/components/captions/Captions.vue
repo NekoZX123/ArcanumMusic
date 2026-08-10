@@ -658,7 +658,7 @@ onUnmounted(() => {
                             <img :src="alwaysOnTopImage"/>
                         </button>
                         <button class="playControl small" id="toggleChart" title="频谱图" @click="toggleChart">
-                            <img :src="chartImage" :style="`transform: ${chartToggleRotate}deg`"/>
+                            <img :src="chartImage" :style="`transform: rotate(${chartToggleRotate}deg);`"/>
                         </button>
                     </div>
                 </div>
