@@ -2,6 +2,7 @@
 
 import router from '../../router/index.ts';
 import { getAccountInfo } from "../user/accountManager";
+import { getConfig } from "../user/configLoader";
 
 /**
  * ### 切换应用页面 (基于 vue-router)
@@ -146,6 +147,9 @@ function updatePlaylistIcon() {
     return playlistEnabled;
 }
 
+/** 与 AppSettings.xml dropbox 的 item id 对应的路由路径映射 */
+const INITIAL_PAGE_ROUTES = ['/', '/library', '/search'];
+
 // 初始化
 function initialize() {
     const platformList = ['netease', 'qqmusic', 'kuwo', 'kugou'];
@@ -157,10 +161,15 @@ function initialize() {
 
     if (loginedCount === 0) {
         router.push('/accounts');
+        return;
     }
-    else {
-        router.push('/');
-    }
+
+    // 根据 initialPage 设置项决定启动页面
+    const config = getConfig();
+    const initialPage: number = parseInt(config.generic.appearance.window.initialPage) || 0;
+    const targetRoute = INITIAL_PAGE_ROUTES[initialPage] || '/';
+    console.log(`Initializing appliation at page ${targetRoute}`);
+    router.push(targetRoute);
 }
 
 export {

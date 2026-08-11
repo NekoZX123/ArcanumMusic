@@ -105,7 +105,7 @@ const requestData: { [type: string]: any } = {
     },
     'album': {
         type: 1,
-        page: 1,
+        page: '[pageIndex]',
         albumid: '[albumId]',
         srcappid: 2919,
         clientver: 20000,
@@ -135,8 +135,8 @@ const requestData: { [type: string]: any } = {
         version: 1000,
         area_code: 1,
         category: 1,
-        page: 1,
-        pagesize: 20,
+        page: '[pageIndex]',
+        pagesize: '[maxLength]',
         plat: 0,
         show_album_tag: 0,
         singerid: "[artistId]",
@@ -181,6 +181,7 @@ const artistApiPostData = {
     pagesize: 20
 };
 const userPlaylistsData = `{"userid":"[userId]","token":"[token]","type":2,"support_pub":1,"support_per":0,"page":1,"pagesize":300}`
+const PAGE_SIZE = 30; // 默认每页请求数量
 
 type KugouMusicModule = 'songLink' | 'search' | 'songInfo' | 'lyrics' | 'songList' | 'album' | 'artist' | 
     'artistAlbum' | 'hotList' | 'recommendSong' | 'recommendArtist' | 'rankings' | 'rankingContent' | 
@@ -273,7 +274,13 @@ function getKugouResult(moduleName: KugouMusicModule, params: { [type: string]: 
 
     let moduleString = JSON.stringify(moduleData);
     // 替换参数
+    if (!Object.keys(params).includes('pageIndex')) params.pageIndex = 0; // 默认页码为 0
     Object.keys(params).forEach((key) => {
+        // 页码按照偏移量替换
+        if (key === 'pageIndex') {
+            const offsetValue = (params[key] + 1) * (params.maxLength || PAGE_SIZE);
+            moduleString = moduleString.replaceAll(`[pageOffset]`, offsetValue.toString() || '');
+        }
         if (moduleString.includes(`[${key}]`)) {
             // 根据数据类型替换参数, 保证类型正确
             if (typeof params[key] === 'number') {

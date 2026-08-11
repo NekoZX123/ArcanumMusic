@@ -24,7 +24,11 @@ const props = defineProps({
     }
 });
 
-onMounted(() => {
+let currentPage = 0;
+// 记录已加载的歌单/专辑/榜单ID，用于去重
+const loadedListIds = new Set<string>();
+
+function loadContent() {
     const userData = getAccountInfo('all');
 
     const parsedModule = props.module.split('-');
@@ -44,7 +48,7 @@ onMounted(() => {
     if (moduleName === 'hotList') {
         Object.keys(requestFunc).forEach((platform: string) => {
             const sendRequest = requestFunc[platform];
-            sendRequest('hotList', { maxLength: 30 }, userData[platform].cookies)
+            sendRequest('hotList', { maxLength: 20, pageIndex: currentPage }, userData[platform].cookies)
                 .then((response: AxiosResponse)=> {
                     // 解析数据
                     const recommendations = parseMusicData(response, platform, 'hotList');
@@ -54,8 +58,14 @@ onMounted(() => {
                         const listDetail = songLists[i];
 
                         const listId = `songlist-${platform}-${listDetail.listId}`;
+                        // 检查是否已加载过
+                        if (loadedListIds.has(listId)) {
+                            continue;
+                        }
                         const listName = listDetail.listName;
                         const listCover = listDetail.listCover;
+
+                        loadedListIds.add(listId);
 
                         addSonglistCard(container, listId, listName, listCover);
                     }
@@ -88,8 +98,14 @@ onMounted(() => {
 
                     rankingList.forEach((rankingInfo: any) => {
                         const rankingId = `ranking-${platform}-${rankingInfo.rankingId.toString()}`;
+                        // 检查是否已加载过
+                        if (loadedListIds.has(rankingId)) {
+                            return;
+                        }
                         const rankingName = rankingInfo.rankingName;
                         const rankingCover = rankingInfo.rankingCover;
+
+                        loadedListIds.add(rankingId);
 
                         addSonglistCard(container, rankingId, rankingName, rankingCover);
                     });
@@ -100,7 +116,7 @@ onMounted(() => {
     if (moduleName === 'newAlbum') {
         Object.keys(requestFunc).forEach((platform: string) => {
             const sendRequest = requestFunc[platform];
-            sendRequest('newAlbum', { maxLength: 20 }, userData[platform].cookies)
+            sendRequest('newAlbum', { maxLength: 20, pageIndex: currentPage }, userData[platform].cookies)
                 .then((response: AxiosResponse) => {
                     // console.log(response.data);
                     const albums = parseMusicData(response, platform, 'newAlbum');
@@ -108,8 +124,14 @@ onMounted(() => {
 
                     albumList.forEach((albumInfo: any) => {
                         const albumId = `album-${platform}-${albumInfo.albumId}`;
+                        // 检查是否已加载过
+                        if (loadedListIds.has(albumId)) {
+                            return;
+                        }
                         const albumName = albumInfo.albumName;
                         const albumCover = albumInfo.albumCover;
+
+                        loadedListIds.add(albumId);
 
                         addSonglistCard(container, albumId, albumName, albumCover);
                     });
@@ -127,7 +149,7 @@ onMounted(() => {
             reqModule = 'artistAlbum';
         }
 
-        sendRequest(reqModule, { artistId: artistId, maxLength: 50 }, userData[platform].cookies)
+        sendRequest(reqModule, { artistId: artistId, maxLength: 20, pageIndex: currentPage }, userData[platform].cookies)
             .then((response: AxiosResponse) => {
                 console.log(response.data);
                 const albums = parseMusicData(response, platform, 'artistAlbum');
@@ -136,13 +158,28 @@ onMounted(() => {
 
                 albumList.forEach((albumInfo: any) => {
                     const albumId = `album-${platform}-${albumInfo.albumId}`;
+                    // 检查是否已加载过
+                    if (loadedListIds.has(albumId)) {
+                        return;
+                    }
                     const albumName = albumInfo.albumName;
                     const albumCover = albumInfo.albumCover;
+
+                    loadedListIds.add(albumId);
 
                     addSonglistCard(container, albumId, albumName, albumCover);
                 });
             });
     }
+}
+
+function loadNextPage() {
+    currentPage++;
+    loadContent();
+}
+
+onMounted(() => {
+    loadContent();
 
     console.log(`SonglistCollections.vue loaded with params ${JSON.stringify(props)}`);
 });
@@ -151,5 +188,10 @@ onMounted(() => {
     <div class="flex column" id="collectionsPage">
         <label class="text large bold" id="collectionsTitle">{{ props.title }}</label>
         <div :class="`flex row collectionsContent songlist`" id="collections"></div>
+
+        <!-- 查看更多 (下一页) 按钮 -->
+        <button class="flex row listButton" id="loadMoreButton" @click="loadNextPage">
+            <label class="text small bold">查看更多</label>
+        </button>
     </div>
 </template>

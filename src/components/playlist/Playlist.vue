@@ -1,9 +1,100 @@
 <script setup lang="ts">
-import { computed, watch, nextTick } from 'vue';
+import { computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
 import { getPlayer } from '../../assets/player/player';
 import { PlaylistSongLine } from '../../assets/widgets/Widgets';
 import './playlistStyle.css';
 import { getConfig } from '../../assets/user/configLoader';
+import { buttonTypes, showPopup } from '../../assets/notifications/popup';
+
+// 懒加载配置
+const LAZY_LOAD_COUNT = 15;       // 每次加载数量
+const SCROLL_LOAD_THRESHOLD = 200; // 距容器底部多少 px 时触发加载
+const PLAY_LOAD_BUFFER = 5;       // 播放到距已加载末尾还剩几首时触发加载
+
+// 懒加载下一批歌曲
+function loadMoreSongs() {
+    return getPlayer()?.loadMoreSongs(LAZY_LOAD_COUNT);
+}
+
+// 播放列表滚动到底部时自动加载
+let scrollContainer: HTMLElement | null = null;
+function onPlaylistScroll() {
+    if (!scrollContainer) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+    if (scrollHeight - scrollTop - clientHeight <= SCROLL_LOAD_THRESHOLD) {
+        loadMoreSongs();
+    }
+}
+
+// 播放到已加载内容末尾时自动加载
+watch(
+    () => getPlayer()?.playlist.currentIndex,
+    (index) => {
+        const player = getPlayer();
+        if (index === undefined || !player || !player.playlist.hasMore) return;
+        if (index >= player.playlist.playList.length - PLAY_LOAD_BUFFER) {
+            loadMoreSongs();
+        }
+    }
+);
+
+// 首屏未填满容器时持续补载
+async function fillContainer() {
+    if (!scrollContainer) return;
+    const player = getPlayer();
+    if (!player || !player.playlist.hasMore) return;
+    if (scrollContainer.scrollHeight <= scrollContainer.clientHeight + SCROLL_LOAD_THRESHOLD) {
+        await loadMoreSongs();
+        await nextTick();
+        await fillContainer();
+    }
+}
+
+onMounted(() => {
+    scrollContainer = document.getElementById('pageContainer');
+    scrollContainer?.addEventListener('scroll', onPlaylistScroll);
+    fillContainer();
+});
+
+// 清空播放列表
+function clearPlaylist() {
+    showPopup('warning', 'confirm', '清空播放列表', '确定要清空当前播放列表吗？', ['', 'red'], (code: number) => {
+        if (code !== buttonTypes.BUTTON_CONFIRM) return;
+
+        const player = getPlayer();
+        if (!player) return;
+
+        // 停止当前播放
+        if (player.isPlaying) {
+            player.togglePlayPause();
+        }
+        player.url = '';
+        player.playStateImage = './images/player/play.dark.svg';
+        player.playStateImageTransparent = './images/lyricsPanel/play.svg';
+        player.syncPlayStateImage();
+
+        // 重置歌曲信息为默认占位
+        player.name = '未在播放';
+        player.authors = '';
+        player.coverUrl = './images/player/testAlbum.png';
+        player.updateDuration(1);
+        player.updateProgress(0);
+        player.syncSongInfo();
+
+        // 清空播放列表
+        player.playlist.current = { 'name': '未在播放', 'authors': '', 'coverUrl': './images/player/testAlbum.png' };
+        player.playlist.currentIndex = -1;
+        player.playlist.playList = [];
+        player.playlist.sourceList = [];
+        player.playlist.loadedCount = 0;
+        player.playlist.hasMore = false;
+    });
+}
+
+onBeforeUnmount(() => {
+    scrollContainer?.removeEventListener('scroll', onPlaylistScroll);
+    scrollContainer = null;
+});
 
 //  根据 repeatState / shuffleState 组合需展示的列表项
 const mergedPlaylist = computed(() => {
@@ -48,7 +139,16 @@ watch(
 <template>
     <div class="flex column" id="playlistPage">
         <div class="playlistPart flex column" id="songsPlaylist">
-            <label class="text large bold playlistSubtitle">播放列表</label>
+            <div class="flex row" id="playlistHeader">
+                <div class="flex row" id="playlistInfo">
+                    <label class="text large bold playlistSubtitle">播放列表</label>
+                    <label class="text small grey">共 {{ mergedPlaylist.length }} 首</label>
+                </div>
+
+                <button id="clearPlaylist" @click="clearPlaylist">
+                    <img class="outlineImage" src="/images/player/clear.svg"/>
+                </button>
+            </div>
             <PlaylistSongLine
                 v-for="(item) in mergedPlaylist"
                 :key="`playlist_${item.id}_${item._isHistory ? 'history' : 'list'}`"

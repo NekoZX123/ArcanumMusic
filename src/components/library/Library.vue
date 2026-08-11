@@ -37,7 +37,7 @@ const platformTabs = [
 
 // 问候语
 const userAvatar = ref('./images/library/defaultAvatar.svg');
-const userName = ref('NekoZX');
+const userName = ref('default');
 const greetings = ref('');
 const greetingsEnd = ref('');
 const greetList = ['欢迎回来! ', 'Welcome back! ', 'お帰りなさい! '];

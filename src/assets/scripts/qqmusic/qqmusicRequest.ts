@@ -148,7 +148,7 @@ const requestData: any = {
             "param": {
                 "singerMid": "[artistId]",
                 "order": 0,
-                "begin": 0,
+                "begin": "[pageOffset]",
                 "num": 30,
                 "songNumTag": 0,
                 "singerID": 0
@@ -160,7 +160,7 @@ const requestData: any = {
             "param": {
                 "singerMid": "[artistId]",
                 "order": 1,
-                "begin": 0,
+                "begin": "[pageOffset]",
                 "num": "[maxLength]"
             },
             "module": "musichall.song_list_server"
@@ -172,8 +172,8 @@ const requestData: any = {
             "method": "GetRecommendFeed",
             "module": "music.playlist.PlaylistSquare",
             "param": {
-                "From": 0,
-                "Size": 50
+                "From": "[pageOffset]",
+                "Size": "[maxLength]",
             }
         }
     ],
@@ -198,7 +198,7 @@ const requestData: any = {
                 "genre": -100,
                 "index": -100,
                 "sin": 0,
-                "cur_page": 1
+                "cur_page": "[pageIndex]",
             }
         }
     ],
@@ -241,7 +241,7 @@ const requestData: any = {
             "param": {
                 "area": 1,
                 "sin": 0,
-                "num": 50
+                "num": "[maxLength]"
             }
         }
     ],
@@ -270,6 +270,7 @@ const userInfoData = {
         ]
     }
 };
+const PAGE_SIZE = 30;
 // 请求链接
 const universalUrl = 'https://u6.y.qq.com/cgi-bin/musics.fcg';
 // 收藏歌单链接
@@ -376,8 +377,14 @@ function getQQmusicResult(moduleName: QQMusicModule, params: { [type: string]: a
 
     let moduleString = JSON.stringify(moduleData);
     moduleString = moduleString.replaceAll('[QQMUSIC_UIN]', cookies.uin.toString());
+    if (!Object.keys(params).includes('pageIndex')) params.pageIndex = 0; // 默认页码为 0
     // 替换参数
     Object.keys(params).forEach((key) => {
+        // 页码按照偏移量替换
+        if (key === 'pageIndex') {
+            const offsetValue = params[key] * (params.maxLength || PAGE_SIZE);
+            moduleString = moduleString.replaceAll(`"[pageOffset]"`, offsetValue.toString() || '');
+        }
         if (moduleString.includes(`[${key}]`)) {
             // 根据数据类型替换参数, 保证类型正确
             if (typeof params[key] === 'number') {

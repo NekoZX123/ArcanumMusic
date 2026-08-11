@@ -187,6 +187,12 @@
     border-radius: 8px;
 }
 
+#toggleChart {
+    transition: all 200ms ease-in-out;
+}
+#toggleChart > img {
+    transition: all 200ms ease-in-out;
+}
 #audioVisualizer {
     width: 12rem;
     height: 100%;
@@ -197,6 +203,12 @@
 #visualizerCanvas {
     width: 100%;
     height: 100%;
+
+    opacity: 0;
+    transition: all 300ms ease-in-out;
+}
+#visualizerCanvas.show {
+    opacity: 1;
 }
 
 #captionsMain {

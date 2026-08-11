@@ -9,7 +9,7 @@
     "homepage": "https://github.com/NekoZX123/ArcanumMusic",
     "license": "Apache-2.0",
     "private": true,
-    "version": "1.14.3",
+    "version": "1.15.0",
     "type": "module",
     "main": "app/app.js",
     "devtron": true,
@@ -29,25 +29,25 @@
         "node-fetch": "^3.3.2",
         "node-id3": "^0.2.9",
         "vue-router": "^5.2.0",
-        "ws": "^8.21.1"
+        "ws": "^8.21.3"
     },
     "devDependencies": {
         "@types/crypto-js": "^4.2.2",
-        "@types/node": "^26.1.1",
+        "@types/node": "^26.2.0",
         "@vitejs/plugin-vue": "^6.0.8",
         "@vitejs/plugin-vue-jsx": "^5.1.6",
         "@vue/tsconfig": "^0.9.1",
-        "concurrently": "^10.0.3",
+        "concurrently": "^10.0.4",
         "cookie": "^2.0.1",
         "crypto": "^1.0.1",
         "crypto-js": "^4.2.0",
         "cryptojs": "^2.5.3",
-        "electron": "^43.2.0",
+        "electron": "^43.3.0",
         "electron-builder": "^26.15.3",
         "typescript": "~6.0.3",
         "uuid": "^14.0.1",
-        "vite": "^8.2.0",
-        "vue-tsc": "^3.3.7",
+        "vite": "^8.2.1",
+        "vue-tsc": "^3.3.9",
         "websocket": "^1.0.35"
     }
 }

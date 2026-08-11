@@ -28,8 +28,15 @@ class Player {
     playlist: {
             current: any,
             currentIndex: number,
-            playList: any[]
+            playList: any[],
+            // 懒加载数据源 (hasDetail 为 false 时使用)
+            sourceList: any[],
+            loadedCount: number,
+            hasMore: boolean
         };
+    private _listFailureCount: number;
+    // 懒加载进行中标记, 防止并发重复请求
+    private _lazyLoading: boolean;
     
     // 储存的播放历史
     storedHistory: any[];
@@ -88,8 +95,13 @@ class Player {
                 'coverUrl': './images/player/testAlbum.png'
             },
             currentIndex: -1,
-            playList: []
+            playList: [],
+            sourceList: [],
+            loadedCount: 0,
+            hasMore: false
         };
+        this._listFailureCount = 0;
+        this._lazyLoading = false;
 
         const storedHistory = window.localStorage.getItem('playHistory');
         if (!storedHistory) this.storedHistory = [];
@@ -314,17 +326,6 @@ class Player {
             return;
         }
 
-        // 追加到当前项目后 (若已存在则移动到当前项目后, 避免重复)
-        const existingIndex = this.playlist.playList.findIndex((s: any) => s.id === songInfo.id);
-        if (this.playlist.currentIndex >= 0 && existingIndex === -1) {
-            // 不在列表中: 插入到当前项目后
-            const insertAt = this.playlist.currentIndex + 1;
-            this.playlist.playList.splice(insertAt, 0, songInfo);
-            this.playlist.currentIndex = insertAt;
-        }
-
-        this.playlist.current = songInfo;
-
         // 获取歌曲链接
         getSongLink(songInfo.id)
         .then((infoObject) => {
@@ -336,6 +337,49 @@ class Player {
             if (addToHistory) {
                 this.addToLocalHistory(songInfo);
             }
+
+            // 检查是否获取到播放链接
+            if (!playInfo.url) {
+                showNotify('songUrlNullError', 'critical', `无法播放 ${songInfo.name}`, '获取播放链接失败');
+                if (this.playlist.playList.length === 0 
+                    || this._listFailureCount >= this.playlist.playList.length
+                    || this.repeatState === 2) {
+                    this.togglePlayPause();
+                    this.playStateImage = './images/player/play.dark.svg';
+                    this.playStateImageTransparent = './images/lyricsPanel/play.svg';
+                    return;
+                }
+
+                const existingIndex = this.playlist.playList.findIndex((s: any) => s.id === songInfo.id);
+                if (existingIndex !== -1) {
+                    this.nextSong();
+                    this._listFailureCount ++;
+                }
+                return;
+            }
+            // 成功时重置失败计数
+            this._listFailureCount = 0;
+
+            // 追加到当前项目后 (若已存在则移动到当前项目后, 避免重复)
+            const existingIndex = this.playlist.playList.findIndex((s: any) => s.id === songInfo.id);
+            if (existingIndex >= 0) {
+                // 已在播放列表中: 移到当前项目后
+                let targetIndex = this.playlist.currentIndex >= 0
+                    ? this.playlist.currentIndex + 1
+                    : this.playlist.playList.length;
+                if (existingIndex < targetIndex) targetIndex--;
+                this.playlist.playList.splice(existingIndex, 1);
+                this.playlist.playList.splice(targetIndex, 0, songInfo);
+                this.playlist.currentIndex = targetIndex;
+            } else if (this.playlist.currentIndex >= 0) {
+                // 不在列表中: 插入到当前项目后
+                const insertAt = this.playlist.currentIndex + 1;
+                this.playlist.playList.splice(insertAt, 0, songInfo);
+                this.playlist.currentIndex = insertAt;
+            }
+
+            // 设置当前播放项
+            this.playlist.current = songInfo;
 
             // 设置歌曲信息
             this.name = playInfo.name;
@@ -356,19 +400,6 @@ class Player {
                     type: 'image/png'
                 }]
             });
-
-            // 设置播放链接
-            if (!playInfo.url) {
-                showNotify('songUrlNullError', 'critical', `无法播放 ${this.name}`, '获取播放链接失败');
-                if (this.playlist.playList.length === 0) {
-                    this.togglePlayPause();
-                    this.playStateImage = './images/player/play.dark.svg';
-                    this.playStateImageTransparent = './images/lyricsPanel/play.svg';
-                    return;
-                }
-                this.nextSong();
-                return;
-            }
 
             // 删除网易云 CDN 链接中的查询参数, 防止 403
             const neteaseCdnPostfix = 'music.126.net';
@@ -756,6 +787,10 @@ class Player {
         this.playlist.current = {};
         this.playlist.playList = [];
         this.playlist.currentIndex = -1;
+        // 重置懒加载状态
+        this.playlist.sourceList = [];
+        this.playlist.loadedCount = 0;
+        this.playlist.hasMore = false;
 
         // 播放传入的列表
         let detailFlag = hasDetail;
@@ -768,26 +803,52 @@ class Player {
             });
         }
         else {
-            let requestCount = list.length;
-            if (requestCount > 10) requestCount = 10;
-
-            for (let i = 0; i < requestCount; i++) {
-                const songInfo: any = await getSongInfo(list[i]);
-                const infoObject = {
-                    id: list[i],
-                    name: songInfo.songName,
-                    coverUrl: songInfo.songCover,
-                    authors: songInfo.songAuthors,
-                    duration: songInfo.songDuration
-                };
-                this.playlist.playList.push(infoObject);
-            }
+            // 无详细信息: 保存完整 ID 列表, 采用懒加载, 每次最多加载 15 首
+            this.playlist.sourceList = Object.assign([], list);
+            this.playlist.hasMore = this.playlist.sourceList.length > 0;
+            await this.loadMoreSongs(15);
         }
 
         // 播放第一首
         if (this.playlist.playList.length > 0) {
             this.playlist.currentIndex = 0;
             this.playAudio(this.playlist.playList[0]);
+        }
+    }
+
+    /**
+     * 懒加载播放列表: 从数据源加载下一批歌曲信息
+     * @param count 本次加载数量 (默认 15)
+     */
+    async loadMoreSongs(count: number = 15) {
+        if (this._lazyLoading || !this.playlist.hasMore) return;
+        this._lazyLoading = true;
+        try {
+            const sourceList = this.playlist.sourceList;
+            const start = this.playlist.loadedCount;
+            const end = Math.min(start + count, sourceList.length);
+
+            for (let i = start; i < end; i++) {
+                try {
+                    const songInfo: any = await getSongInfo(sourceList[i]);
+                    const infoObject = {
+                        id: sourceList[i],
+                        name: songInfo.songName,
+                        coverUrl: songInfo.songCover,
+                        authors: songInfo.songAuthors,
+                        duration: songInfo.songDuration
+                    };
+                    this.playlist.playList.push(infoObject);
+                }
+                catch (e) {
+                    console.error(`[ArcanumMusic - player] Failed to get song info for ${sourceList[i]}: ${e}`);
+                }
+            }
+            this.playlist.loadedCount = end;
+            this.playlist.hasMore = end < sourceList.length;
+        }
+        finally {
+            this._lazyLoading = false;
         }
     }
 
@@ -854,8 +915,11 @@ class Player {
      * 保存当前会话至 LocalStorage
      */
     saveSession() {
+        // 懒加载数据源不持久化 (仅保存已加载的部分)
         const sessionObject = {
-            ...this.playlist,
+            current: this.playlist.current,
+            currentIndex: this.playlist.currentIndex,
+            playList: this.playlist.playList,
             progress: this.playedTime
         }
         const sessionInfo = JSON.stringify(sessionObject);
@@ -875,7 +939,10 @@ class Player {
             this.playlist = {
                 current: sessionInfo.current,
                 currentIndex: sessionInfo.currentIndex,
-                playList: sessionInfo.playList
+                playList: sessionInfo.playList,
+                sourceList: [],
+                loadedCount: 0,
+                hasMore: false
             }
 
             const autoStart = getConfig().generic.playOptions.player.autoStart;

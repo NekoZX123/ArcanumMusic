@@ -4,12 +4,53 @@
     padding: 2rem;
 }
 
+/* 列表标题 */
+#playlistHeader {
+    width: 100%;
+
+    justify-content: space-between;
+    align-items: center;
+}
+
+#playlistInfo {
+    gap: 1rem;
+    align-items: center;
+}
+
+#clearPlaylist {
+    appearance: none;
+    width: 2rem;
+    height: 2rem;
+
+    background: transparent;
+    border:none;
+    border-radius: 4px;
+    padding: 0;
+    
+    transition: all 200ms ease-in-out;
+}
+#clearPlaylist:hover {
+    background: var(--interface-transparent-grey);
+}
+#clearPlaylist > img {
+    width: 2rem;
+    height: 2rem;
+}
+
 /* 播放列表分块 */
 .playlistPart {
     align-items: center;
 }
-.playlistSubtitle {
-    width: 100%;
+.playlistSubtitle::after {
+    content: '';
+    display: inline-block;
+    position: relative;
+
+    width: 2px;
+    height: 2rem;
+    top: 4px;
+    left: 0.5rem;
     
-    margin-bottom: 0.5rem;
+    background: var(--interface-foreground-grey);
+    border-radius: 1px;
 }

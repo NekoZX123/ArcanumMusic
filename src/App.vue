@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import {createApp, onMounted, onUnmounted, ref} from 'vue';
+import {computed, createApp, onMounted, onUnmounted, ref} from 'vue';
 import Lyrics from './components/lyrics/Lyrics.vue';
 
 import {showNotify} from './assets/notifications/Notification.ts';
 import {createPlayer, getPlayer} from './assets/player/player.ts';
 import {
-  changePage,
-  initialize,
-  pageBack,
-  pageForward,
-  togglePlaylist,
-  updatePlaylistIcon
+    changePage,
+    initialize,
+    pageBack,
+    pageForward,
+    togglePlaylist,
+    updatePlaylistIcon
 } from './assets/ui/pageSwitcher.ts';
 // import { testRequest } from './assets/utilities/requestTests.ts';
 import router from './router/index.ts';
@@ -24,6 +24,7 @@ import { initializeTheme, setControlBarTheme, setWindowBackground, type colorThe
 import { buttonTypes, showPopup } from './assets/notifications/popup.tsx';
 import DownloadItem from './assets/widgets/DownloadItem.vue';
 import { getDownloadQueue } from './assets/player/musicDownloader.ts';
+import { TextSlideShow } from './assets/widgets/Slideshow.tsx';
 // import Notification from './assets/notifications/Notification.vue';
 
 /* 窗口移动功能 */
@@ -283,6 +284,8 @@ let captionWindowId = -1;
 let isCaptionsOn: boolean = false;
 const desktopLyricsImage = ref('./images/player/desktopLyrics.svg');
 const showDownloadWindow = ref(false);
+// 当前页面地址（调试信息，模板无法直接访问 window/globalThis）
+const currentPageUrl = computed(() => router.currentRoute.value.fullPath);
 // 桌面歌词窗口关闭处理
 function handleCaptionsClose() {
     desktopLyricsImage.value = './images/player/desktopLyrics.svg';
@@ -323,21 +326,6 @@ async function toggleCaptions(_?: MouseEvent) {
     }
 
     isCaptionsOn = !isCaptionsOn;
-}
-
-// 长歌曲名称焦点滚动
-function checkScrollAnimation(_: MouseEvent) {
-    const nameContainer = document.getElementById('songNameContainer') as HTMLElement;
-    const nameContent = document.getElementById('currentSongName') as HTMLElement;
-    
-    if (nameContainer.scrollWidth > nameContainer.offsetWidth && !nameContent.classList.contains('autoScroll')) {
-        nameContent.classList.add(`autoScroll`);
-    }
-}
-// 重置滚动动画
-function resetScroll(_: MouseEvent) {
-    const nameContent = document.getElementById('currentSongName') as HTMLElement;
-    nameContent.classList.remove('autoScroll');
 }
 
 // 限制歌手文字长度
@@ -419,6 +407,15 @@ function copySongName() {
 
     window.electron.copyToClipboard(songName);
     showNotify('copySucceed', 'success', '复制成功', '歌曲名称已复制至剪贴板', 1000);
+}
+
+const showUrlInfo = ref(false);
+// 更新调试信息显示开关
+function updateShowUrlInfo() {
+    const config = getConfig();
+    if (!config) return;
+    showUrlInfo.value = config.developerOptions.info.showPageInfo;
+    console.log(`[Debug] Show page info: ${showUrlInfo.value}`);
 }
 
 onMounted(async () => {
@@ -553,10 +550,15 @@ onMounted(async () => {
     window.electron.onAppQuit(() => {
         getPlayer()?.saveSession();
     });
+
+    // 调试信息窗口
+    updateShowUrlInfo();
+    window.addEventListener('config-change', updateShowUrlInfo);
 });
 onUnmounted(() => {
     window.onstorage = null;
     window.removeEventListener('click', hideRightMenu);
+    window.removeEventListener('config-change', updateShowUrlInfo);
     window.removeEventListener('storage', handleStorageData);
     const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
     if (playerElem) {
@@ -643,9 +645,7 @@ onUnmounted(() => {
                 <div class="flex row" id="currentSong">
                     <img class="currentSongCover" :src="getPlayer()?.coverUrl" alt="Song cover"/>
                     <span class="flex column">
-                        <span id="songNameContainer" @mouseenter="checkScrollAnimation" @mouseleave="resetScroll">
-                            <label class="text small bold" id="currentSongName" @click="copySongName">{{ getPlayer()?.name }}</label>
-                        </span>
+                        <TextSlideShow outerId="songNameContainer" innerId="currentSongName" class="text small bold" :content="getPlayer()?.name || ''" @click="copySongName"></textSlideShow>
                         <label class="text ultraSmall" id="currentSongAuthors">{{ limitAuthorsTextLength(getPlayer()?.authors || '') }}</label>
                     </span>
                 </div>
@@ -744,5 +744,8 @@ onUnmounted(() => {
 
         <!-- 右键菜单 -->
         <div id="rightClickMenuContainer"></div>
+
+        <!-- 调试信息窗口 -->
+        <div v-if="showUrlInfo" id="pageUrl" class="text grey ultraSmall">{{ currentPageUrl }}</div>
     </div>
 </template>
