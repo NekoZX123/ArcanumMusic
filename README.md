@@ -37,60 +37,41 @@ made with TypeScript + Electron + Vue.js
 > 
 > ![Contributors](https://contrib.rocks/image?repo=NekoZX123/ArcanumMusic&size=50)
 
-## :memo: Linux 安装与兼容性说明
+## :memo: 本地打包安装注意事项
 
+当前所有安装包面向 `x64 / amd64` 架构的 Windows / Linux 系统，不支持 MacOS 及 ARM 设备
 当前 Release 提供以下 Linux 安装包:
 
 - `.deb` 安装包
 - `AppImage` 便携包
 - `pacman` 安装包
 
-### 架构
+若需要 Release 中未包含的打包类型, 可克隆仓库自助打包
 
-当前 Linux 安装包面向 `x64 / amd64` 架构，不支持 ARM 设备。
-
-### Ubuntu / Debian 安装方法
+### 克隆仓库及安装依赖
 
 ```bash
-sudo apt install ./arcanummusic_<version>_amd64.deb
+git clone https://github.com/NekoZX123/ArcanumMusic.git --depth=1
+npm install
 ```
 
-例如:
+### 修改打包配置及打包
+
+修改仓库文件夹下的 `electron-builder.json`, 添加对应平台的配置, 之后执行
 
 ```bash
-sudo apt install ./arcanummusic_1.8.0_amd64.deb
+npm run electron:build
 ```
 
-### Linux 打包注意事项
+注: Windows 系统下可能需要以管理员权限运行此命令
 
-`pacman` 打包依赖 `bsdtar`。在 Debian / Ubuntu / Kubuntu 上通常需要先执行
+运行完成后即可在对应目录下看到打包后的应用
 
-```bash
-sudo apt install libarchive-tools
-```
+## :construction: 关于部分 API 尚未完成的提示
 
-### 安装及运行注意事项
+我们尚未收集到以下 API
 
-如果当前发行版上的 `.deb` 安装包存在兼容性问题，建议优先尝试同版本的 `AppImage` 安装包。
-
-如果您在 Ubuntu / Debian 或其他 Linux 发行版上遇到安装或运行问题，欢迎在 GitHub 提交 Issue 并附上系统版本、架构和报错信息。
-
-## :bug: 问题修复
-
-- 修复歌单/专辑卡片的音乐平台指示图标偏移的问题
-- 修复搜索页面最下方元素被播放控件遮盖的问题
-- 修复搜索页面 查看更多 按钮有时失效的问题
-- 修复播放顺序处理中存在的问题
-- 修复窗口右键菜单失效的问题
-
-## :sparkles: 新功能
-
-- 添加基于 Vue-Router 的页面管理系统
-- 添加进入搜索详情时保留搜索结果功能
-- 添加系统播放控件绑定
-- 为播放列表添加列表内历史、拖动重排功能并优化播放器逻辑
-- 添加自动播放、会话保存、播放列表自动滚动功能
-
-## :construction: 内测版本特别提示
-
-当前应用为内测版本, 可能存在部分问题. 当出现问题影响使用时, 可使用 Ctrl + R 刷新应用
+- 酷我音乐: 用户歌单, 用户收藏, 每日推荐
+- 酷狗音乐: 用户歌单, 用户收藏, 每日推荐
+  
+若您有可用的 API 愿意提供, 或对本应用有使用问题或改进建议, 欢迎提出 Issue / PR, 我们欢迎每位贡献者的加入
