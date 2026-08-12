@@ -1,8 +1,8 @@
 import { app } from 'electron';
 
 // 运行环境
-// const environment = 'dev';
-const environment = 'production';
+const environment = 'dev';
+// const environment = 'production';
 
 /**
  * 获取 %AppData%

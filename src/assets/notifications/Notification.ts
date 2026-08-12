@@ -5,7 +5,27 @@ import { createApp } from "vue";
 
 type NotifyType = 'success' | 'info' | 'warning' | 'critical';
 
-// 创建通知
+// 主窗口通知同步到桌面歌词窗口 (通过 localStorage 传输)
+const SYNCED_NOTIFY_STORAGE_KEY = 'syncedNotify';
+
+/**
+ * 将主窗口通知同步到桌面歌词窗口
+ * 先清空再写入, 确保相同内容的通知也能触发 storage 事件
+ */
+function syncNotifyToCaptions(id: string, type: NotifyType, title: string, content: string, duration: number) {
+    const notifyData = JSON.stringify({ id, type, title, content, duration });
+    window.localStorage.setItem(SYNCED_NOTIFY_STORAGE_KEY, '');
+    window.localStorage.setItem(SYNCED_NOTIFY_STORAGE_KEY, notifyData);
+}
+
+/**
+ * 显示通知
+ * @param id 通知 ID
+ * @param type 类型 (success, info, warning, critical)
+ * @param title 通知标题
+ * @param content 通知内容
+ * @param duration 显示时长 (默认 3000 ms)
+ */
 function showNotify(id: string, type: NotifyType, title: string, content: string, duration: number = 3000) {
     const container = document.createElement('div');
     document.getElementById('notifyArea')?.appendChild(container);
@@ -28,6 +48,9 @@ function showNotify(id: string, type: NotifyType, title: string, content: string
 
     // 一定时间后隐藏通知
     setTimeout(closeNotify, duration, id);
+
+    // 同步通知到桌面歌词窗口 (通过 localStorage 传输)
+    syncNotifyToCaptions(id, type, title, content, duration);
 }
 
 // 关闭通知

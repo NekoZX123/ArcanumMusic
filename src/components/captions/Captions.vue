@@ -104,6 +104,13 @@ const currentLyrics = ref({
     content: 'Arcanum Music',
     translation: 'made by NekoZX123'
 });
+// 主窗口通知同步
+const syncedNotifyData = ref<{ id: string; type: string; title: string; content: string; duration: number } | null>(null);
+const syncedNotifyVisible = ref(false);
+let syncedNotifyTimer: ReturnType<typeof setTimeout> | undefined;
+const SYNCED_NOTIFY_DURATION = 3000; // 展示时限固定 3000ms
+
+// 监听 localStorage 更新数据
 function updateStorageData(updateEvent: StorageEvent) {
     if (updateEvent.key === 'currentSongInfo' && updateEvent.newValue) { // 更新歌曲元数据
         const songInfoStr = updateEvent.newValue;
@@ -161,6 +168,16 @@ function updateStorageData(updateEvent: StorageEvent) {
     }
     if (updateEvent.key === 'shuffleState' && updateEvent.newValue) {
         shuffleStateImage.value = updateEvent.newValue;
+    }
+    if (updateEvent.key === 'syncedNotify' && updateEvent.newValue) { // 同步主窗口通知
+        syncedNotifyData.value = JSON.parse(updateEvent.newValue);
+        syncedNotifyVisible.value = true;
+
+        // 仅展示最新一条通知: 清除之前的计时器并重新计时
+        clearTimeout(syncedNotifyTimer);
+        syncedNotifyTimer = setTimeout(() => {
+            syncedNotifyVisible.value = false;
+        }, SYNCED_NOTIFY_DURATION);
     }
 }
 
@@ -571,6 +588,9 @@ onUnmounted(() => {
     window.removeEventListener('storage', updateStorageData);
     window.removeEventListener('resize', adjustFontSize);
     appChannel.removeEventListener('message', updateSongProgress);
+
+    // 清理通知同步计时器
+    clearTimeout(syncedNotifyTimer);
     
     // 清理 Web Audio API 资源
     if (animationFrameId !== null) {
@@ -678,6 +698,15 @@ onUnmounted(() => {
                 <ul class="text large bold">{{ currentLyrics.content }}</ul>
                 <ul class="text medium bold">{{ currentLyrics.translation }}</ul>
             </span>
+        </div>
+
+        <!-- 通知同步 -->
+        <div class="flex row" id="syncedNotify" :class="{ show: syncedNotifyVisible }">
+            <img :src="`/images/notification/${syncedNotifyData?.type || 'info'}.svg`"/>
+            <div class="flex column" id="syncedNotifyContent">
+                <label class="text small bold">{{ syncedNotifyData?.title }}</label>
+                <label class="text ultraSmall">{{ syncedNotifyData?.content }}</label>
+            </div>
         </div>
 
         <audio id="desktoplrc-frequencychart" crossorigin="anonymous" />

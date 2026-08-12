@@ -297,3 +297,48 @@
 #currentLyricsBox > ul {
     margin: 0;
 }
+
+/* 通知同步 */
+#syncedNotify {
+    position: absolute;
+    height: 3rem;
+    bottom: 4px;
+    right: 4px;
+    padding-right: 8px;
+
+    background: rgba(245, 245, 245, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 0 8px rgba(60, 60, 60, 0.2);
+
+    align-items: center;
+    justify-content: flex-start;
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+
+    transition: all 400ms ease-in-out;
+}
+#syncedNotify.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+#syncedNotify > img {
+    width: 2.5rem;
+    height: 2.5rem;
+
+    margin-right: 4px;
+}
+#syncedNotifyContent {
+    max-width: calc(100% - 4rem);
+
+    align-items: flex-start;
+}
+#syncedNotifyContent > label {
+    max-width: 100%;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
