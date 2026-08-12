@@ -124,6 +124,10 @@
             <checkbox id="showPageInfo" text="在页脚显示当前页面位置"/>
             <checkbox id="showLyricsAvailablity" text="在歌词面板显示歌词可用性信息"/>
         </node>
+        <node id="notification" title="通知">
+            <checkbox id="showWelcomeMessage" text="启动时显示欢迎消息"/>
+            <slider id="debugNotifyCount" text="启动时显示调试通知" min="0" max="10" value="0" unit="条"/>
+        </node>
     </page>
 
     <page id="about" name="关于此应用">

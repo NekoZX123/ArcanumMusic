@@ -1,4 +1,4 @@
-import { defineComponent } from "vue";
+import { defineComponent, ref, watch } from "vue";
 
 const NodeBlock = defineComponent({
     props: {
@@ -104,14 +104,36 @@ const Slider = defineComponent({
         value: Number
     },
     setup(props: { name: string, id: string, min: number, max: number, unit: string, value: number }) {
-        let afInputId = `${props.id}_text`;
+        const afInputId = `${props.id}_text`;
+        const currentValue = ref(props.value);
+
+        watch(() => props.value, (newValue) => {
+            currentValue.value = newValue;
+        }, { immediate: true });
+
+        const handleSliderInput = (event: Event) => {
+            const target = event.target as HTMLInputElement;
+            currentValue.value = Number(target.value);
+        };
+
+        const handleTextInput = (event: Event) => {
+            const target = event.target as HTMLInputElement;
+            const nextValue = Number(target.value);
+            if (Number.isNaN(nextValue)) return;
+
+            const clampedValue = Math.min(Math.max(nextValue, props.min), props.max);
+            currentValue.value = clampedValue;
+            target.value = String(clampedValue);
+        };
+
         return () => (
             <span class="sliderElement optionBox" id={`${props.id}_container`}>
                 <label class="optionName" for={props.id}>{props.name}</label>
-                <input name="slider" class="slider" type="range" id={props.id} 
-                    min={props.min} max={props.max} step="1" value={props.value}/>
+                <input name="slider" class="slider" type="range" id={props.id}
+                    min={props.min} max={props.max} step="1" value={currentValue.value}
+                    onInput={handleSliderInput} />
                 <input name="slider_text" class="textinput affiliated" type="text" id={afInputId}
-                    value={props.value}/>
+                    value={currentValue.value} onInput={handleTextInput} />
                 <label class="optionUnit">{props.unit}</label>
             </span>
         );

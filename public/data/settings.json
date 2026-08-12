@@ -68,6 +68,10 @@
         "info": {
             "showPageInfo": false,
             "showLyricsAvailablity": false
+        },
+        "notification": {
+            "showWelcomeMessage": false,
+            "debugNotifyCount": 0
         }
     }
 }

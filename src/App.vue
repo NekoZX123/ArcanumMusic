@@ -93,7 +93,7 @@ async function closeWindow() {
                 await window.electron.writeLocalFile(targetFile, settingsText);
 
                 // 储存 .notfirstrun 文件
-                await window.electron.writeLocalFile(firstRunCheckPath, 'Not first run! Let me pass!');
+                await window.electron.writeLocalFile(firstRunCheckPath, 'homo114514');
 
                 // 保存用户配置并关闭窗口
                 await savePreferences();
@@ -443,9 +443,6 @@ onMounted(async () => {
         updatePlaylistIcon();
     });
 
-    // 测试通知
-    setTimeout(() => showNotify('startUpNotify', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 3000);
-
     // 歌词面板挂载
     const lyrics = createApp(Lyrics);
     lyrics.mount('#lyricsArea');
@@ -490,6 +487,19 @@ onMounted(async () => {
     // 窗口标题栏显示主题色
     const showColorInBorders = config.generic.appearance.colors.showColorInBorders;
     setControlBarTheme(showColorInBorders);
+
+    // 启动欢迎消息
+    if (config.developerOptions.notification.showWelcomeMessage) {
+        setTimeout(() => showNotify('startUpNotify', 'success', 'Welcome!', 'Welcome to Arcanum Music!'), 1000);
+    }
+    // 测试通知
+    if (config.developerOptions.notification.debugNotifyCount > 0) {
+        setTimeout(() => {
+            for (let i = 0; i < config.developerOptions.notification.debugNotifyCount; i++) {
+                showNotify(`debugNotify${i}`, 'info', `Debug Notify ${i + 1}`, `This is a debug notification for testing purposes.`);
+            }
+        }, 5000);
+    }
 
     // 加载用户配置
     const userPreference = getPreference();
