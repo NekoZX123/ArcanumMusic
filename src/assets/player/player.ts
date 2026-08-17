@@ -37,7 +37,12 @@ class Player {
     private _listFailureCount: number;
     // 懒加载进行中标记, 防止并发重复请求
     private _lazyLoading: boolean;
-    
+
+    // 本地音乐信息 (初始化时自动扫描)
+    localSongInfo: any[];
+    // 本地音乐扫描进行中标记
+    localScanning: boolean;
+
     // 储存的播放历史
     storedHistory: any[];
 
@@ -102,6 +107,8 @@ class Player {
         };
         this._listFailureCount = 0;
         this._lazyLoading = false;
+        this.localSongInfo = [];
+        this.localScanning = false;
 
         const storedHistory = window.localStorage.getItem('playHistory');
         if (!storedHistory) this.storedHistory = [];
@@ -503,6 +510,46 @@ class Player {
             }
         }
         window.localStorage.setItem('playHistory', JSON.stringify(this.storedHistory));
+    }
+
+    /**
+     * 扫描本地音乐并更新 localSongInfo
+     * 在播放器初始化时自动调用, 也可在扫描路径变更后手动调用
+     */
+    async refreshLocalMusic() {
+        if (this.localScanning) return;
+        this.localScanning = true;
+        try {
+            const dirs = await window.electron.scanLocalMusic();
+            console.log(dirs);
+            const results: any[] = [];
+
+            for (const { path: dir, files } of dirs) {
+                const metadataPromises = files.map((file: string) =>
+                    window.electron.getMusicMetadata(`${dir}/${file}`).then(meta => ({
+                        id: `local_${dir}/${file}`,
+                        path: `${dir}/${file}`,
+                        name: meta.name,
+                        coverUrl: meta.songCover ? meta.songCover : './images/player/testAlbum.png',
+                        authors: meta.author,
+                        duration: meta.duration,
+                        ext: meta.ext,
+                        sizeBytes: meta.size
+                    })).catch(() => null)
+                );
+                const entries = await Promise.all(metadataPromises);
+                results.push(...entries.filter(e => e !== null));
+            }
+
+            this.localSongInfo = results;
+            console.log(results);
+        }
+        catch (e) {
+            console.error('[Error] Failed to scan local music:', e);
+        }
+        finally {
+            this.localScanning = false;
+        }
     }
 
     /**
@@ -1002,6 +1049,9 @@ function createPlayer(volumeBarIds?: string[]) {
     player = new Player(volumeBarIds);
 
     playerReactive = reactive(player);
+
+    // 初始化时扫描本地音乐
+    playerReactive.refreshLocalMusic();
 
     return playerReactive;
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, type Ref } from 'vue';
+import { computed, onMounted, ref, type Ref } from 'vue';
 
 import '../../globalStyle.css';
 import { showNotify } from '../../assets/notifications/Notification.ts';
@@ -8,7 +8,8 @@ import { LocalSongLine } from '../../assets/widgets/Widgets';
 import { getPlayer } from '../../assets/player/player.ts';
 
 const scanPaths: Ref<string[]> = ref([]);
-const localMusic: Ref<any[]> = ref([]);
+// 本地歌曲信息由播放器初始化时扫描并维护
+const localMusic = computed(() => getPlayer()?.localSongInfo ?? []);
 
 const showScanPathManager = ref(false);
 const manageBtnRef = ref<HTMLElement | null>(null);
@@ -44,6 +45,8 @@ async function removeScanPath(folderPath: string) {
 
     const pathList = Object.assign([], scanPaths.value);
     await window.electron.writeLocalPaths(pathList);
+    // 重新扫描本地音乐
+    getPlayer()?.refreshLocalMusic();
 }
 
 async function addScanPath() {
@@ -60,39 +63,13 @@ async function addScanPath() {
 
     const pathList = Object.assign([], scanPaths.value);
     await window.electron.writeLocalPaths(pathList);
+    // 重新扫描本地音乐
+    getPlayer()?.refreshLocalMusic();
 }
 
 onMounted(async () => {
     const paths = await window.electron.getLocalPaths();
     scanPaths.value = paths.map(p => p.toString());
-
-    try {
-        const dirs = await window.electron.scanLocalMusic();
-        console.log(dirs);
-        const results: any[] = [];
-
-        for (const { path: dir, files } of dirs) {
-            const metadataPromises = files.map((file: string) =>
-                window.electron.getMusicMetadata(`${dir}/${file}`).then(meta => ({
-                    id: `local_${dir}/${file}`,
-                    path: `${dir}/${file}`,
-                    name: meta.name,
-                    coverUrl: meta.songCover ? meta.songCover : './images/player/testAlbum.png',
-                    authors: meta.author,
-                    duration: meta.duration,
-                    ext: meta.ext,
-                    sizeBytes: meta.size
-                })).catch(() => null)
-            );
-            const entries = await Promise.all(metadataPromises);
-            results.push(...entries.filter(e => e !== null));
-        }
-
-        localMusic.value = results;
-        console.log(results);
-    } catch (e) {
-        console.error('[Error] Failed to load local music:', e);
-    }
 
     console.log('Local.vue loaded');
 });
