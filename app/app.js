@@ -12,6 +12,7 @@ import { deleteCookies, validateCookieExpiration, listenForCookie, prepareAccoun
 import { getAppData, getEnvironment } from './globalUtils.js';
 import { getAppConfig, getUserPreferences, writeUserPreferences } from "./configHelper.js";
 import { scanLocalMusic, getMusicMetadata, getLocalPaths, writeLocalPaths, openMusicFolder, downloadAudio } from './localMusicHelper.js';
+import { registerProtocol, setupProtocol } from './protocol.js';
 
 const __dirname = fileURLToPath(import.meta.url);
 
@@ -23,6 +24,8 @@ app.setAppUserModelId('moe.nekozx123.arcanummusic');
 let tray;
 let mainWindow = null;
 let hideToTray = false;
+
+registerProtocol();
 
 // 调整应用根目录中的 `\` 为 `/`
 function resolveAppRootPath() {
@@ -228,7 +231,7 @@ function quitApp(_) {
 
     // 停止服务并退出
     stopService();
-    stopWebSocket();
+    //stopWebSocket();
     app.quit();
 }
 
@@ -370,7 +373,8 @@ app.whenReady().then(() => {
 
     // 启动服务
     startService(environment);
-    startWebSocket();
+    //startWebSocket();
+    setupProtocol();
 
     // 创建应用主窗口
     createMainWindow();

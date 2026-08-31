@@ -423,33 +423,8 @@ class Player {
                 this.syncSongInfo();
             }
             else{
-                // 使用 WebSocket 接收音频数据并播放
-                const audioChunks: BlobPart[] = [];
-                const ws =  new WebSocket('ws://127.0.0.1:3030/');
-                ws.onmessage = (event) => {
-                    audioChunks.push(event.data);
-                };
-                ws.onclose = (_) => {
-                    if (audioChunks.length === 0) {
-                        console.warn('[Warning] No audio data received from proxy');
-                        showNotify('audioStreamError', 'critical', `${this.name}`, '未收到音频数据');
-                        return;
-                    }
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    console.log(`[Debug] Origin URL: ${playInfo.url} => Local URL: ${audioUrl}`);
-                    this.url = audioUrl;
-                    
-                    this.syncSongInfo();
-                };
-                ws.onerror = (error) => {
-                    console.error(`[Error] WebSocket error while fetching audio:`, error);
-                    ws.close();
-                };
-
-                ws.onopen = () => {
-                    ws.send(playInfo.url);
-                };
+                this.url = `arcanum://remote/${playInfo.url}`;
+                this.syncSongInfo();
             }
 
             // 开始播放
@@ -606,60 +581,19 @@ class Player {
             ]
         });
 
-        // 通过 WebSocket 代理读取本地文件并创建 Blob URL
-        const audioChunks: BlobPart[] = [];
-        const ws = new WebSocket('ws://127.0.0.1:3030/');
-
-        ws.onmessage = (event) => {
-            audioChunks.push(event.data);
-        };
-
-        ws.onclose = (_) => {
-            if (audioChunks.length === 0) {
-                console.warn('[Warning] No audio data received from local file proxy');
-                showNotify('localFileError', 'critical', `${this.name}`, '本地文件读取失败');
-                return;
-            }
-            const ext = filePath.substring(filePath.lastIndexOf('.')).toLowerCase();
-            const mimeType = MIME_MAP[ext] || 'audio/mpeg';
-            const audioBlob = new Blob(audioChunks, { type: mimeType });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            console.log(`[Debug] Local file => Blob URL: ${audioUrl}`);
-
-            this.url = audioUrl;
-
-            const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
-            if (!playerElem) {
-                console.error('[Error] Player element not found');
-                return;
-            }
-
-            playerElem.src = audioUrl;
-
-            // music-metadata 无法获取时长时, 从 <audio> 元素获取
-            if (this.duration === -1 || this.duration === undefined) {
-                const updateDurationFromElem = () => {
-                    if (playerElem.duration && isFinite(playerElem.duration)) {
-                        this.duration = playerElem.duration;
-                        this.updateDuration(this.duration);
-                    }
-                };
-                playerElem.addEventListener('loadedmetadata', updateDurationFromElem, { once: true });
-                playerElem.addEventListener('canplay', updateDurationFromElem, { once: true });
-            }
-
-            this.syncSongInfo();
-        };
-        ws.onerror = (error) => {
-            console.error(`[Error] WebSocket error while reading local file:`, error);
-            ws.close();
-        };
-
-        ws.onopen = () => {
-            ws.send(`file:///${filePath}`);
-        };
-
         const playerElem = document.getElementById('arcanummusic-playcontrol') as HTMLAudioElement;
+        playerElem.src = `arcanum://file/${filePath}`;
+        this.url = `arcanum://file/${filePath}`;
+        const updateDurationFromElem = () => {
+            if (playerElem.duration && isFinite(playerElem.duration)) {
+                this.duration = playerElem.duration;
+                this.updateDuration(this.duration);
+            }
+        };
+        playerElem.addEventListener('loadedmetadata', updateDurationFromElem, { once: true });
+        playerElem.addEventListener('canplay', updateDurationFromElem, { once: true });
+        this.syncSongInfo();
+
         if (!playerElem) {
             console.error('[Error] Player element not found');
             return;
