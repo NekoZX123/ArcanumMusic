@@ -78,6 +78,7 @@ function isSafeRemoteUrl(rawUrl) {
 
 /**
  * 根据文件扩展名获取 MIME 类型
+ * @param {string} filePath 
  */
 function getMimeType(filePath) {
 	const ext = path.extname(filePath).toLowerCase();
@@ -96,11 +97,12 @@ function getMimeType(filePath) {
 
 /**
  * 处理本地文件请求
+ * @param {Request} req 
  */
 async function handleFileRequest(req) {
 	const filePath = decodeURIComponent(new URL(req.url).pathname.slice(1));
 	let roots = await getLocalMusicPaths();
-	if (!isWithinRoots(filePath, roots)) {
+	if (!AUDIO_EXTENSIONS.has(path.extname(filePath))||!isWithinRoots(filePath, roots)) {
 		return new Response("Bad request", {
 			status: 400,
 			headers: { "content-type": "text/html" },
@@ -156,10 +158,11 @@ async function handleFileRequest(req) {
 
 /**
  * 处理远程代理请求
+ * @param {Request} req 
  */
 async function handleRemoteRequest(req) {
-	const reqUrl = new URL(req.url);
-	let targetUrl = decodeURIComponent(reqUrl.pathname.slice(1));
+	let targetUrl = decodeURIComponent(req.url.slice("arcanum://remote/".length));
+	
 	if (!isSafeRemoteUrl(targetUrl)) {
 		console.error(`[Protocol] Rejected unsafe remote URL: ${targetUrl}`);
 		return new Response("Unsafe remote URL", {
@@ -172,11 +175,12 @@ async function handleRemoteRequest(req) {
 		"User-Agent": NETEASE_DESKTOP_UA,
 	};
 	const rangeHeader = req.headers.get("Range");
+	
 	if (rangeHeader) {
 		headers["Range"] = rangeHeader;
 	}
 
-	const response = await net.fetch(targetUrl, { headers });
+	const response = await fetch(targetUrl,{headers});
 	return response;
 }
 

@@ -424,6 +424,7 @@ class Player {
             }
             else{
                 this.url = `arcanum://remote/${playInfo.url}`;
+                console.log(this.url)
                 this.syncSongInfo();
             }
 
