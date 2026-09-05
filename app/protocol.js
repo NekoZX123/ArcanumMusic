@@ -96,11 +96,26 @@ function getMimeType(filePath) {
 }
 
 /**
+ * 将 URL 路径（Unix 风格，以 / 开头）转换为本地文件系统路径
+ * @param {string} webPath 路径
+ * @returns {string} 本地路径
+ */
+function toLocalFilePath(webPath) {
+    if (process.platform === 'win32') {
+        return webPath.slice(1);
+    } else {
+        // 类unix直接使用原路径
+        return webPath;
+    }
+}
+
+/**
  * 处理本地文件请求
  * @param {Request} req 
  */
 async function handleFileRequest(req) {
-	const filePath = decodeURIComponent(new URL(req.url).pathname.slice(1));
+	const filePath = toLocalFilePath(decodeURIComponent(new URL(req.url).pathname));
+	console.log(filePath);
 	let roots = await getLocalMusicPaths();
 	if (!AUDIO_EXTENSIONS.has(path.extname(filePath))||!isWithinRoots(filePath, roots)) {
 		return new Response("Bad request", {
